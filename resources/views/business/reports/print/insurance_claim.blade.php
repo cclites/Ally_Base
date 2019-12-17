@@ -79,7 +79,7 @@
         <div class="page" id="summary">
             <div class="row print-header">
                 <div class="header-left">
-                    @include('layouts.partials.print_logo')
+                    @include('layouts.partials.print_logo', ['override_ally_logo' => $business->logo])
                     <div class="h4">Associated Provider: {{ $business->name }}</div>
                     <br>
                     <div>{{ $business->address1 }}</div>

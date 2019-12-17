@@ -20,6 +20,7 @@ class CreateClaimsController extends BaseController
     {
         if ($request->wantsReportData()) {
             $invoiceQuery->with(['client', 'clientPayer.payer', 'claimInvoices'])
+                ->paidInFull()
                 ->forRequestedBusinesses()
                 ->whereNotNull('client_payer_id') // hides adjustment invoices
                 ->forDateRange($request->filterDateRange())
@@ -40,12 +41,6 @@ class CreateClaimsController extends BaseController
                 });
 
             switch ($request->invoice_type) {
-                case 'paid':
-                    $invoiceQuery->paidInFull();
-                    break;
-                case 'unpaid':
-                    $invoiceQuery->notPaidInFull();
-                    break;
                 case 'has_claim':
                     $invoiceQuery->hasClaim(false);
                     break;

@@ -50,7 +50,7 @@ class CreateClaimAdjustmentRequest extends FormRequest
         return [
             'adjustments.required' => 'You have not selected an amount to Adjust.',
             'adjustments.*.amount_applied.*' => 'Amount to Adjust field is required for all selected items.',
-            'adjustments.*.adjustment_type.*d' => 'Adjustment type field is required for all selected items.',
+            'adjustments.*.adjustment_type.*' => 'Adjustment type field is required for all selected items.',
             'adjustments.*.claim_invoice_item_id.*' => 'Invalid claim item, please refresh the page and try again.',
         ];
     }

@@ -76,6 +76,7 @@ class BusinessSettingsResource extends Resource
             'ot_behavior',
             'hol_multiplier',
             'hol_behavior',
+            'logo',
         ];
 
         return Arr::only($this->resource->toArray(), $settings);

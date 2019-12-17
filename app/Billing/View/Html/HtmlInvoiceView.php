@@ -23,10 +23,11 @@ class HtmlInvoiceView implements InvoiceViewStrategy
         ContactableInterface $sender,
         ContactableInterface $recipient,
         ContactableInterface $subject,
-        Collection $payments
+        Collection $payments,
+        string $override_ally_logo = null
     ) {
         $itemGroups = $invoice->getItemGroups();
         $render = 'html';
-        return response(view($this->view, compact('invoice', 'sender', 'recipient', 'subject', 'payments', 'itemGroups', 'render')));
+        return response(view($this->view, compact('invoice', 'sender', 'recipient', 'subject', 'payments', 'itemGroups', 'render', 'override_ally_logo')));
     }
 }

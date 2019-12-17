@@ -73,7 +73,7 @@ class ClientReferralServiceAgreement extends BaseModel
     public function createPdf()
     {
         $this->load('client.business');
-        $pdf = PDF::loadView('business.clients.service_referral_agreement_doc', ['rsa' => $this]);
+        $pdf = PDF::loadView('business.clients.service_referral_agreement_doc', ['rsa' => $this, 'override_ally_logo' => $this->client->business->logo]);
         $dir = storage_path('app/documents/');
         if (!File::exists($dir)) {
             File::makeDirectory($dir, 493, true);

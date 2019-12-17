@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Requests;
 
-use App\Rules\Avatar;
+use App\Rules\ImageCropperUpload;
 use App\Rules\ValidSSN;
 use App\StatusAlias;
 use Illuminate\Foundation\Http\FormRequest;
@@ -41,7 +41,7 @@ class UpdateCaregiverRequest extends FormRequest
             'gender' => 'nullable|in:M,F',
             'avatar' => [
                 'nullable',
-                new Avatar()
+                new ImageCropperUpload()
             ],
             'application_date' => 'nullable|date',
             'orientation_date' => 'nullable|date',

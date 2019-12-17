@@ -29,14 +29,18 @@ class ClaimTransmissionController extends BaseController
         $this->authorize('update', $claim);
 
         // If no transmission set, attempt to get it from the request.
-        if (!$service = $claim->getTransmissionMethod()) {
+        if (! $service = $claim->getTransmissionMethod()) {
             if ($method = $request->input('method', null)) {
                 $service = ClaimService::$method();
             }
         }
 
         if (empty($service)) {
-            return new ErrorResponse(500, 'Error transmitting invoice: No transmission method selected.');
+            // It is possible that the method was changed to null in another tab
+            // and the user was never prompted to select the service.  We should
+            // return a response to trigger that select service modal be shown.
+            $data = ['invoice' => new ManageClaimsResource($claim->fresh())];
+            return new ErrorResponse(501, 'Error transmitting invoice: No transmission method selected.', $data);
         }
 
         try {

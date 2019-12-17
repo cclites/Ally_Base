@@ -1,4 +1,5 @@
 <?php
+
 namespace App;
 
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
@@ -157,12 +158,12 @@ class ClientOnboarding extends BaseModel
     public function createIntakePdf()
     {
         $this->load('client', 'signature', 'activities');
-        $pdf = PDF::loadView('business.clients.onboarding_doc', ['onboarding' => $this]);
+        $pdf = PDF::loadView('business.clients.onboarding_doc', ['onboarding' => $this, 'override_ally_logo' => $this->client->business->logo]);
         $dir = storage_path('app/documents/');
-        if (!File::exists($dir)) {
+        if (! File::exists($dir)) {
             File::makeDirectory($dir, 493, true);
         }
-        $filename = str_slug($this->client->id . ' ' . $this->client->name.' Intake').'.pdf';
+        $filename = str_slug($this->client->id . ' ' . $this->client->name . ' Intake') . '.pdf';
         $filePath = $dir . '/' . $filename;
         if (config('app.env') == 'local') {
             if (File::exists($filePath)) {
@@ -172,7 +173,7 @@ class ClientOnboarding extends BaseModel
         $response = $pdf->save($filePath);
 
         if ($response) {
-            DB::transaction(function() use ($response, $filePath) {
+            DB::transaction(function () use ($response, $filePath) {
                 $this->update(['intake_pdf' => str_after($filePath, 'storage/')]);
                 $this->client->documents()->create([
                     'filename' => File::basename($filePath),

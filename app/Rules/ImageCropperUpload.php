@@ -4,7 +4,7 @@ namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 
-class Avatar implements Rule
+class ImageCropperUpload implements Rule
 {
     /**
      * Create a new rule instance.
@@ -25,7 +25,8 @@ class Avatar implements Rule
      */
     public function passes($attribute, $value)
     {
-        if (str_contains($value, '/storage/avatars') || $value == '/images/default-avatar.png') {
+        if (str_contains($value, '/storage/') ||
+            in_array($value, [config('ally.logo.invoice'), config('ally.avatar.default')])) {
             return true;
         }
 

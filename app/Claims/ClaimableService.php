@@ -2,13 +2,18 @@
 
 namespace App\Claims;
 
+use App\Activity;
+use App\Business;
 use App\Claims\Contracts\ClaimableInterface;
+use App\Shifts\DurationCalculator;
+use App\Signature;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\ScrubsForSeeding;
 use App\Billing\Service;
 use App\AuditableModel;
 use Carbon\Carbon;
 use App\Shift;
+use Packages\GMaps\GeocodeCoordinates;
 
 /**
  * App\Claims\ClaimableService
@@ -125,6 +130,26 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
         return $this->belongsTo(Service::class);
     }
 
+    /**
+     * Get the related client signature.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function clientSignature()
+    {
+        return $this->hasOne(Signature::class, 'id', 'client_signature_id');
+    }
+
+    /**
+     * Get the related caregiver signature.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function caregiverSignature()
+    {
+        return $this->hasOne(Signature::class, 'id', 'caregiver_signature_id');
+    }
+
     // **********************************************************
     // ACCESSORS
     // **********************************************************
@@ -208,6 +233,75 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
     public function getHasEvv(): bool
     {
         return $this->has_evv == 1 ? true : false;
+    }
+
+    /**
+     * Get collection of Activity objects from the comma
+     * separated values stored on the service.
+     *
+     * @return iterable
+     */
+    public function getActivities() : iterable
+    {
+        if (empty($this->activities)) {
+            return collect();
+        }
+
+        return Activity::whereIn('code', collect(explode(',', $this->activities)))
+            ->get();
+    }
+
+    /**
+     * Get the distance from the checked in location to the service address.
+     *
+     * @return float
+     */
+    public function getCheckedInDistance() : float
+    {
+        try {
+            $checkInLocation = new GeocodeCoordinates($this->checked_in_latitude, $this->checked_in_longitude);
+            $distance = $checkInLocation->distanceTo($this->latitude, $this->longitude);
+
+            if (! $distance) {
+                return (float) 0;
+            }
+            return (float) $distance;
+        } catch (\Exception $ex) {
+            app('sentry')->captureException($ex);
+            return (float) 0;
+        }
+    }
+
+    /**
+     * Get the distance from the checked out location to the service address.
+     *
+     * @return float
+     */
+    public function getCheckedOutDistance() : float
+    {
+        try {
+            $checkOutLocation = new GeocodeCoordinates($this->checked_out_latitude, $this->checked_out_longitude);
+            $distance = $checkOutLocation->distanceTo($this->latitude, $this->longitude);
+
+            if (! $distance) {
+                return (float) 0;
+            }
+            return (float) $distance;
+        } catch (\Exception $ex) {
+            app('sentry')->captureException($ex);
+            return (float) 0;
+        }
+    }
+
+    /**
+     * Return the number of hours for the service.  Requires
+     * the related business in order to get the correct rounding method.
+     *
+     * @return float
+     */
+    public function getDuration() : float
+    {
+        return app(DurationCalculator::class)->getDurationForClaimableService($this);
     }
 
     // **********************************************************

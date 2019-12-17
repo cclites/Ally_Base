@@ -3,16 +3,15 @@
 namespace App\Http\Controllers\Business\Claims;
 
 use App\Claims\Exceptions\CannotDeleteClaimInvoiceException;
-use App\Claims\Requests\GetClaimInvoicesRequest;
-use App\Http\Controllers\Business\BaseController;
 use App\Claims\Requests\UpdateClaimInvoiceRequest;
+use App\Http\Controllers\Business\BaseController;
+use App\Claims\Requests\GetClaimInvoicesRequest;
 use App\Claims\Resources\ClaimInvoiceResource;
 use App\Claims\Resources\ClaimCreatorResource;
 use App\Claims\Factories\ClaimInvoiceFactory;
 use App\Claims\Queries\ClaimInvoiceQuery;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
-use App\Claims\ClaimInvoiceType;
 use App\Billing\ClientInvoice;
 use App\Billing\ClaimStatus;
 use App\Claims\ClaimInvoice;
@@ -169,49 +168,4 @@ class ClaimInvoiceController extends BaseController
         }
     }
 
-    /**
-     * Print a ClaimInvoice.
-     *
-     * @param ClaimInvoice $claim
-     * @param Request $request
-     * @return \Illuminate\Http\Response
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     * @throws \Throwable
-     */
-    public function print(ClaimInvoice $claim, Request $request)
-    {
-        $this->authorize('read', $claim);
-
-        $groups = $claim->items->groupBy('type');
-        if (!isset($groups['Expense'])) {
-            $groups['Expense'] = [];
-        }
-        if (!isset($groups['Service'])) {
-            $groups['Service'] = [];
-        }
-
-        $client = null;
-        if ($claim->getType() != ClaimInvoiceType::PAYER()) {
-            $client = $claim->client ? $claim->client : $service->client;
-        }
-
-        $view = view('claims.claim_invoice', [
-            'claim' => $claim,
-            'sender' => $claim->business,
-            'recipient' => $claim->payer,
-            'client' => $client,
-            'itemGroups' => $groups,
-            'render' => 'html',
-            'notes' => $claim->getInvoiceNotesData(),
-            'clientData' => $claim->getInvoiceClientData(),
-        ]);
-
-        if ($request->filled('download')) {
-            $pdfWrapper = app('snappy.pdf.wrapper');
-            $pdfWrapper->loadHTML($view->render());
-            return $pdfWrapper->download('Claim-Invoice-' . snake_case($claim->name) . '.pdf');
-        }
-
-        return $view;
-    }
 }

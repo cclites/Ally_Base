@@ -1,7 +1,13 @@
 <!-- ============================================================== -->
 <!-- Logo -->
 <!-- ============================================================== -->
-<div class="logo"><img src="{{ asset('images/AllyLogo-new-light.png') }}" /></div>
+<div class="logo">
+    @if(isset($override_ally_logo))
+        <img src="{{ asset($override_ally_logo) }}" />
+    @else
+        <img src="{{ asset('images/AllyLogo-new-light.png') }}" />
+    @endif
+</div>
 <!-- ============================================================== -->
 <!-- End Logo -->
 <!-- ============================================================== -->

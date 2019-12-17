@@ -1,5 +1,5 @@
 <template>
-    <div id="avatar-box" class="avatar" :style="styles">
+    <div class="avatar circle" :style="{ width: size+'px!important', height: size+'px!important' }">
         <img :src="src" :title="title" alt="" />
     </div>
 </template>
@@ -18,12 +18,6 @@
             size: {
                 type: String,
                 default: '150',
-            },
-        },
-
-        computed: {
-            styles() {
-                return `width: ${this.size}px !important; height: ${this.size}px !important;`
             },
         },
 
