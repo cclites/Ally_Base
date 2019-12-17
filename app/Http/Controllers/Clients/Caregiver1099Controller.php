@@ -39,7 +39,7 @@ class Caregiver1099Controller extends Controller
     public function downloadPdf(Caregiver1099 $caregiver1099)
     {
         $caregiver1099->load("client");
-        $pdf = new Pdf('../resources/pdf_forms/caregiver1099s/' . $caregiver1099->year . '/CopyC_1099msc.pdf');
+        $pdf = new Pdf('../resources/pdf_forms/caregiver1099s/' . $caregiver1099->year . '/1099-misc-copy-c.pdf');
 
         $payerTin = $caregiver1099->client_ssn ? decrypt($caregiver1099->client_ssn) : '';
         $payerName = $clientName = $caregiver1099->client_fname . " " . $caregiver1099->client_lname;
