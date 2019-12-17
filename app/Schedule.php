@@ -141,15 +141,27 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
                 $originalCg = Caregiver::find( $original[ 'caregiver_id' ] );
 
                 // this is apparently more efficient than $model->relationship->contains in eloquent
-                $request = DB::table( 'caregiver_schedule_requests' )
+                $oldRequest = DB::table( 'caregiver_schedule_requests' )
                     ->where( 'caregiver_id', $originalCg->id )
                     ->where( 'schedule_id', $schedule->id )
                     ->first();
 
-                if( $request ){
+                if( $oldRequest ){
 
-                    $request->status = CaregiverScheduleRequest::REQUEST_DENIED;
-                    $request->save();
+                    $oldRequest->status = CaregiverScheduleRequest::REQUEST_DENIED;
+                    $oldRequest->save();
+                }
+
+                // check the new cg for the same
+                $newRequest = DB::table( 'caregiver_schedule_requests' )
+                    ->where( 'caregiver_id', $original[ 'caregiver_id' ] )
+                    ->where( 'schedule_id', $schedule->id )
+                    ->first();
+
+                if( $newRequest ){
+
+                    $newRequest->status = CaregiverScheduleRequest::REQUEST_APPROVED;
+                    $newRequest->save();
                 }
             }
         });
