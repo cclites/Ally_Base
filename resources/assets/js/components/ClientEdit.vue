@@ -36,6 +36,7 @@
                             v-model="form.client_type"
                         />
                         <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
+                        <b-form-text class="">NOTE: Changing the client type will change the 1099 settings.</b-form-text>
                     </b-form-group>
                     <b-form-group label="Client Services Coordinator" label-for="case_manager">
                         <b-form-select
@@ -219,16 +220,37 @@
                             <input-help :form="form" field="receive_summary_email" text="An example of this email can be found under Settings > General > Shift Confirmations" class="ml-4"></input-help>
                         </div>
                     </b-form-group>
-
-                    <b-form-group label="Send 1099">
-                        <b-form-select v-model="form.caregiver_1099" :disabled="authRole != 'admin' && form.caregiver_1099 == 'ally'">
-                            <option value="">No</option>
-                            <option value="client">On Client's Behalf</option>
-                            <option value="ally" v-if="authRole == 'admin' || form.caregiver_1099 == 'ally'">On Ally’s Behalf</option>
+                </b-col>
+            </b-row>
+            <!------------------------------------->
+            <b-row >
+                <b-col lg="3" v-if="authRole === 'admin' || client.lock_1099 === 1">
+                    <b-form-group label="Caregiver 1099" :label-class="required">
+                        <b-form-select v-model="form.send_1099" :required="required">
+                            <option value="choose">Select an Option</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
                         </b-form-select>
-                        <input-help :form="form" field="caregiver_1099"></input-help>
                     </b-form-group>
                 </b-col>
+                <!--b-col lg="3" v-if="authRole === 'admin' || client.lock_1099 === 1">
+                    <b-form-group label="Payer">
+                        <b-radio-group v-model="form.caregiver_1099" stacked :required="required">
+                            <b-radio value="client">Send on Client's Behalf</b-radio>
+                            <b-radio value="ally">Send on Ally's Behalf</b-radio>
+                        </b-radio-group>
+                    </b-form-group>
+                </b-col-->
+                <b-col lg="6" v-if="authRole !== 'admin' || client.lock_1099 === 0">
+                    <b-form-group label="Caregiver 1099">
+                        <label>
+                            1099s are being sent on behalf of {{ payerLabel }}. Contact Ally if you wish to change this.
+                        </label>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <!------------------------------------->
+            <b-row>
                 <b-col lg="6">
                     <b-form-group label="Service Start Date">
                         <date-picker id="service_start_date" v-model="form.service_start_date"></date-picker>
@@ -487,7 +509,7 @@
                     case_manager_id: this.client.case_manager_id,
                     hic: this.client.hic,
                     travel_directions: this.client.travel_directions,
-                    caregiver_1099: this.client.caregiver_1099 ? this.client.caregiver_1099 : '',
+                    caregiver_1099: this.client.caregiver_1099,
                     disaster_code_plan: this.client.disaster_code_plan,
                     disaster_planning: this.client.disaster_planning,
                     created_by: this.client.creator && this.client.creator.nameLastFirst,
@@ -497,6 +519,7 @@
                     receive_summary_email: this.client.receive_summary_email,
                     sales_person_id: this.client.sales_person_id,
                     status_alias_id: this.client.status_alias_id || '',
+                    send_1099: this.client.send_1099,
                 }),
                 passwordModal: false,
                 active: this.client.active,
@@ -511,6 +534,8 @@
                 loading: false,
                 sendingTrainingEmail: false,
                 sendingWelcomeEmail: false,
+                errors1099: '',
+                required: (this.client_send == 'choose') ? 'required' : false,
             }
         },
 
@@ -531,12 +556,12 @@
 
                 window.open( `/business/clients/discharge-letter/${this.client.id}` );
             },
+
             canSendEmails() {
                 if (! this.form.email || this.isEmptyEmail(this.form.email)) {
                     alert('You cannot send any emails to this user because there is no email associated with their account.');
                     return false;
                 }
-
                 return true;
             },
 
@@ -639,6 +664,12 @@
             },
 
             async saveProfile() {
+
+                if(this.show1099Warning){
+                    let message = "This Client is set to receive a year end 1099 but is missing some required information. Please check their Name, SSN, and Address Fields.";
+                    if (! confirm(message)) { return ; }
+                }
+
                 await this.form.patch('/business/clients/' + this.client.id)
                     .then( ({ data }) => {
                         this.form.avatar = data.data.avatar;
@@ -693,6 +724,14 @@
         },
 
         computed: {
+            payerLabel(){
+                if(this.form.caregiver_1099 === 'ally' || this.form.caregiver_1099 === 'ally_locked') {
+                    return 'Ally';
+                }
+
+                return 'Client';
+            },
+
             business() {
                 return this.client.business_id ? this.$store.getters.getBusiness(this.client.business_id) : {};
             },
@@ -740,7 +779,21 @@
             disasterCodes() {
                 return ['1A', '1B', '1C', '1D', '1E', '1H', '1S', '2A', '2B', '2C', '2D', '2E', '2H', '2S', '3A', '3B', '3C', '3D', '3E', '3H', '3S', '4A', '4B', '4C', '4D', '4E', '4H', '4S'];
             },
+
+            show1099Warning()
+            {
+                if( this.form.send_1099 === 'yes'){
+                    let address = this.client.addresses[0];
+
+                    if(address.address1 && address.city && address.state && address.zip && this.client.ssn){
+                        return false;
+                    }
+                }
+                return true;
+            },
         },
+        watch: {
+        }
     }
 </script>
 

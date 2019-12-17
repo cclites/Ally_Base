@@ -111,7 +111,7 @@
             </div>
         </div>
         <div class="tab-pane" id="addresses" role="tabpanel">
-            <business-client-addresses-tab :addresses="{{ $client->addresses }}" client-id="{{ $client->id }}"></business-client-addresses-tab>
+            <business-client-addresses-tab :addresses="{{ $client->addresses }}" client-id="{{ $client->id }}" :addresses="{{ $client->addresses->where('type', 'billing')->first() ?? '{}' }}"></business-client-addresses-tab>
         </div>
         <div class="tab-pane" id="phones" role="tabpanel">
             <business-client-phone-numbers-tab :user="{{ $client }}"></business-client-phone-numbers-tab>

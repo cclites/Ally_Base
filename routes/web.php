@@ -95,6 +95,10 @@ Route::group([
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('client.payments.show');
     Route::get('client/invoices', 'Clients\InvoiceController@index')->name('client.invoices');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('client.invoices.show');
+
+    /* Caregiver 1099s */
+    Route::get('client/client-1099/{client}', 'Clients\Caregiver1099Controller@index')->name('client-caregiver-1099');
+    Route::get('client/client-1099/download/{caregiver1099}', 'Clients\Caregiver1099Controller@downloadPdf')->name('client-1099-download');
 });
 
 Route::group([
@@ -142,6 +146,9 @@ Route::group([
     Route::get('tasks', 'Caregivers\TasksController@index')->name('caregivers.tasks');
     Route::get('tasks/{task}', 'Caregivers\TasksController@show');
     Route::patch('tasks/{task}', 'Caregivers\TasksController@update');
+
+    Route::get('caregiver/caregiver-1099/{caregiver}', 'Caregivers\Caregiver1099Controller@index')->name('caregiver-1099-view');
+    Route::get('caregiver/caregiver-1099/download/{caregiver1099}', 'Caregivers\Caregiver1099Controller@downloadPdf')->name('caregivers-1099-download');
 });
 
 Route::group([
@@ -533,6 +540,10 @@ Route::group([
     /* Offline Invoice AR */
     Route::get('offline-invoice-ar', 'Business\OfflineInvoiceArController@index')->name('offline-invoice-ar');
     Route::post('offline-invoice-ar/{invoice}/pay', 'Business\OfflineInvoiceArController@pay')->name('offline-invoice-ar.pay');
+
+    /* Caregiver 1099s */
+    Route::get('caregiver-1099/{caregiver}', 'Business\Caregiver1099Controller@index')->name('business-1099');
+    Route::get('business-1099/download/{caregiver1099}', 'Business\Caregiver1099Controller@downloadPdf')->name('business-caregivers-1099-download');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['admin', 'office_user']], function () {
@@ -621,7 +632,32 @@ Route::group([
     Route::get('reports/active-clients', 'Admin\ReportsController@activeClients')->name('reports.active_clients');
 
     Route::get('reports/paid-billed-audit-report', 'Admin\Report\PaidBilledAuditReportController@index')->name('reports.paid_billed_audit_report');
-    Route::get('reports/bad-ssn-report', 'Admin\Reports\AdminBadSsnReportController@index')->name('reports.bad_ssn_report');
+    Route::get('reports/bad-ssn-report/{type}', 'Admin\Reports\AdminBadSsnReportController@index')->name('reports.bad_ssn_report');
+    Route::get('reports/bad-1099-report', 'Admin\Reports\AdminBad1099ReportController@index')->name('reports.bad_1099_report');
+
+
+    /* Caregiver 1099 preview related */
+    Route::get('admin-1099-actions', 'Admin\Admin1099Controller@index')->name('admin-1099-actions');
+
+    Route::get('registry-email-list', 'Admin\Admin1099Controller@RegistryEmailList')->name('registry-email-list');
+    Route::get('preview-1099-report', 'Admin\Reports\Admin1099PreviewReportController@index')->name('preview-1099-report');
+    Route::get('ally-preview-1099-report', 'Admin\Reports\Ally1099PayerReportController@index')->name('ally-1099-report');
+
+    /* Caregiver 1099s */
+    Route::get('business-1099', 'Admin\Caregiver1099Controller@index')->name('business-1099');
+    Route::get('business-1099/edit/{caregiver1099}', 'Admin\Caregiver1099Controller@edit')->name('business-1099-edit');
+    Route::get('business-1099/download/{caregiver1099}', 'Admin\Caregiver1099Controller@downloadPdf')->name('business-1099-download');
+    Route::post('business-1099/create', 'Admin\Caregiver1099Controller@store')->name('business-1099-create');
+    Route::patch('business-1099/{caregiver1099}', 'Admin\Caregiver1099Controller@update')->name('business-1099-update');
+
+    Route::get('/business-1099/userEmails/{year}/{role}', 'Admin\Admin1099Controller@UserEmailsList')->name('business-1099-transmit');
+    Route::get('business-1099/transmit/{year}', 'Admin\Caregiver1099Controller@transmit')->name('business-1099-transmit');
+    Route::get('admin-1099', 'Admin\Caregiver1099Controller@admin')->name('admin-1099');
+    Route::patch('business-1099-settings/{business}', 'Business\SettingController@updateBusiness1099Settings')->name('business-1099-settings');
+    Route::patch('chain-1099-settings/{chainClientTypeSettings}', 'Admin\ChainSettingsController@update')->name('chain-settings');
+    //
+    Route::get('admin-contact-info', 'Admin\SystemSettingsController@show')->name('admin-contact-info');
+    Route::patch('admin-contact-info', 'Admin\SystemSettingsController@update')->name('admin-contact-info-update');
 
     // notes import
     Route::get('note-import', 'Admin\NoteImportController@view')->name('note-import');

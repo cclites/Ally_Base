@@ -146,9 +146,22 @@ Vue.component('business-sms-settings', require('./components/admin/BusinessSmsSe
 Vue.component('paid-billed-audit-report', require('./components/admin/reports/PaidBilledAuditReport.vue'));
 Vue.component('total-charges-report', require('./components/admin/reports/TotalChargesReport.vue'));
 Vue.component('total-deposits-report', require('./components/admin/reports/TotalDepositsReport.vue'));
-Vue.component('bad-ssn-report', require('./components/admin/reports/BadSsnReport.vue'));
 Vue.component('charges-vs-deposits-report', require('./components/admin/reports/ChargesVsDepositsReport.vue'));
 
+Vue.component('bad-ssn-report', require('./components/admin/reports/BadSsnReport.vue'));
+Vue.component('bad-1099-report', require('./components/admin/reports/Bad1099Report.vue'));
+Vue.component('admin-registry-emails', require('./components/admin/AdminRegistryEmails.vue'));
+Vue.component('admin-1099-preview', require('./components/admin/reports/Admin1099PreviewReport'));
+Vue.component('ally-1099-preview', require('./components/admin/reports/Ally1099PayersPreviewReport'));
+Vue.component('caregiver-1099-edit-modal', require('./components/admin/taxes/Caregiver1099Edit'));
+Vue.component('admin-1099-actions', require('./components/admin/taxes/Admin1099.vue'));
+Vue.component('caregiver-1099-admin', require('./components/admin/taxes/Caregiver1099Admin.vue'));
+Vue.component('caregiver-1099s-tab', require('./components/caregivers/Caregiver1099sTab'));
+Vue.component('client-1099s-tab', require('./components/clients/Client1099sTab'));
+Vue.component('business-1099s-tab', require('./components/business/caregivers/Caregiver1099sTab'));
+Vue.component('admin-system-settings', require('./components/admin/AdminSystemSettings'));
+Vue.component('business-1099-settings', require('./components/business/settings/Business1099Settings'));
+Vue.component('chain-1099-settings', require('./components/admin/settings/Chain1099Settings'));
 
 // Office User
 Vue.component('business-overtime-settings', require('./components/business/settings/OvertimeSettings'));

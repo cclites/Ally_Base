@@ -27,6 +27,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#sms_settings" role="tab">Text Message Settings</a>
         </li>
+        <!--li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#business_1099_settings" role="tab">1099 Settings</a>
+        </li-->
     </ul>
 
     <div class="tab-content">
@@ -60,6 +63,14 @@
             <div class="row">
                 <div class="col-lg-12">
                     <business-sms-settings :business="{{ $business OR '{}' }}" />
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane" id="business_1099_settings" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-12">
+                    <business-1099-settings :business="{{ $business OR '{}' }}" />
                 </div>
             </div>
         </div>

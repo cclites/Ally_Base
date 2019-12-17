@@ -68,6 +68,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#restrictions" role="tab">Restrictions</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#tax_documents" role="tab">Tax Documents</a>
+        </li>
     </ul>
 
     <!-- Smaller device tabs -->
@@ -94,6 +97,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#misc" role="tab">Misc.</a>
                 <a class="dropdown-item" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
                 <a class="dropdown-item" data-toggle="tab" href="#restrictions" role="tab">Restrictions</a>
+                <a class="dropdown-item" data-toggle="tab" href="#tax_documents" role="tab">Tax Documents</a>
             </div>
         </li>
     </ul>
@@ -103,7 +107,7 @@
         <div class="tab-pane active" id="profile" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <caregiver-edit :caregiver="{{ $caregiver }}"></caregiver-edit>
+                    <caregiver-edit :caregiver="{{ $caregiver }}" :address="{{ $caregiver->addresses->where('type', 'home')->first() ?? '{}' }}"></caregiver-edit>
                 </div>
             </div>
         </div>
@@ -193,6 +197,9 @@
         </div>
         <div class="tab-pane" id="restrictions" role="tabpanel">
             <business-caregiver-restrictions-tab :caregiver="{{ $caregiver }}"></business-caregiver-restrictions-tab>
+        </div>
+        <div class="tab-pane" id="tax_documents" role="tabpanel">
+            <business-1099s-tab :caregiver="{{ $caregiver->id }}"></business-1099s-tab>
         </div>
     </div>
 @endsection

@@ -142,6 +142,7 @@ class ClientController extends BaseController
             }
         }
         $data['created_by'] = auth()->id();
+        $data['caregiver_1099'] = $request->getBusiness()->payer_1099_default;
 
         $paymentMethod = $request->provider_pay ? $request->getBusiness() : null;
 
@@ -292,6 +293,12 @@ class ClientController extends BaseController
 
             // All client notes should move with the client.
             $client->notes()->update(['business_id' => $business->id]);
+        }
+
+        //update 1099 options
+        if( $request->client_type !== $client->client_type ){
+            $options = $this->update1099Options($client);
+            $data = array_merge($data, $options);
         }
 
         if ($client->update($data)) {
@@ -558,5 +565,31 @@ class ClientController extends BaseController
 
         $filePath = $client->id . '-' . 'deactivation-details-' . Carbon::now()->format( 'm-d-Y' );
         return $pdf->stream( $filePath . '.pdf' );
+    }
+
+    public function update1099Options($client){
+
+        $settings = $this->businessChain()->chainClientTypeSettings;
+
+        if($client->client_type === 'medicaid' || $client->client_type === 'private_pay'){
+            $caregiver1099 = $settings[ $client->client_type . "_1099_from"]; //ally or client
+            $lock1099 = $settings[ $client->client_type . "_1099_edit"]; //can edit
+            $send1099 = $settings[ $client->client_type . "_1099_default"]; //send by default
+        }else{
+            $caregiver1099 = $settings["other_1099_from"];
+            $lock1099 = $settings["other_1099_edit"];
+            $send1099 = $settings[ "other_1099_default"];
+        }
+
+        $data = [
+            'caregiver_1099'=>$caregiver1099,
+            'lock_1099' => $lock1099,
+            'send_1099' => $send1099
+        ];
+
+
+
+        return $data;
+
     }
 }

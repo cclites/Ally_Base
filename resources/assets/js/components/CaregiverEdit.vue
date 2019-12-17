@@ -481,6 +481,10 @@
                     this.form.username = '';
                 }
             },
+
+            validate1099(){
+
+            }
         }
     }
 </script>

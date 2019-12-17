@@ -53,6 +53,8 @@ class UpdateClientRequest extends BusinessRequest
             'receive_summary_email' => 'boolean',
             'sales_person_id' => 'nullable|int',
             'status_alias_id' => 'nullable|in:' . join(',', $aliases),
+            'send_1099' => 'required|string|in:yes,no',
+            'lock_1099' => 'boolean'
         ];
     }
 
@@ -61,6 +63,7 @@ class UpdateClientRequest extends BusinessRequest
         return [
             'email.required_unless' => 'The email is required unless you check the "No Email" box.',
             'username.unique' => 'This username is taken. Please use a different one.',
+            'send_1099.in' => 'You must explicitly opt in or out of sending 1099s.',
         ];
     }
 

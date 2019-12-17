@@ -6,6 +6,7 @@ use App\Billing\Deposit;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
+use App\Caregiver1099;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Contracts\BelongsToChainsInterface;
@@ -370,6 +371,15 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
     public function restrictions()
     {
         return $this->hasMany(CaregiverRestriction::class);
+    }
+
+    /**
+     * Get the caregiver1099 relations
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function caregiver1099s(){
+        return $this->hasMany(Caregiver1099::class);
     }
 
     ///////////////////////////////////////////

@@ -58,6 +58,21 @@ class BusinessChain extends AuditableModel
         'enable_schedule_groups' => 'bool',
     ];
 
+    //Registry level 1099 defaults
+    protected $chain1099Settings = [
+        'medicaid_1099_default',
+        'private_pay_1099_default',
+        'other_1099_default',
+
+        'medicaid_1099_send',
+        'private_pay_1099_send',
+        'other_1099_send',
+
+        'medicaid_1099_from',
+        'private_pay_1099_from',
+        'other_1099_from',
+    ];
+
     ////////////////////////////////////
     //// Static Methods
     ////////////////////////////////////
@@ -153,6 +168,10 @@ class BusinessChain extends AuditableModel
     public function expirationTypes()
     {
         return $this->hasMany(ExpirationType::class, 'chain_id');
+    }
+
+    public function chainClientTypeSettings(){
+        return $this->hasOne(ChainClientTypeSettings::class);
     }
 
     ///////////////////////////////////////////

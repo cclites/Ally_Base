@@ -17,6 +17,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#users" role="tab">Users</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#chain_1099_settings" role="tab">1099 Settings</a>
+        </li>
     </ul>
 
     <div class="tab-content">
@@ -34,6 +37,10 @@
                     <business-office-user-list :chain="{{ $chain }}" :businesses="{{ $chain->businesses OR '[]' }}"></business-office-user-list>
                 </div>
             </div>
+        </div>
+
+        <div class="tab-pane" id="chain_1099_settings" role="tabpanel">
+            <chain-1099-settings :chain="{{ $chain }}" :settings="{{ $settings->first() }}"></chain-1099-settings>
         </div>
     </div>
 @endsection

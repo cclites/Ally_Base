@@ -15,7 +15,11 @@ class ClientController extends Controller
      */
     public function index(Request $request)
     {
-        $clients = Client::active()->orderByName();
+        if(filled($request->active)){
+            $clients = Client::orderByName();
+        }else{
+            $clients = Client::active()->orderByName();
+        }
 
         if(filled($request->id)){
             $clients->forRequestedBusinesses([$request->id]);

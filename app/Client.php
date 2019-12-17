@@ -316,6 +316,8 @@ class Client extends AuditableModel implements
         'sales_person_id',
         'agreement_status',
         'quickbooks_customer_id',
+        'send_1099',
+        'lock_1099',
     ];
 
     ///////////////////////////////////////////
@@ -594,6 +596,15 @@ class Client extends AuditableModel implements
 
     public function salesperson(){
         return $this->hasOne(SalesPerson::class, 'id', 'sales_person_id', $this->sales_person_id);
+    }
+
+    /**
+     * Get the caregiver1099 relations
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function caregiver1099s(){
+        return $this->hasMany(Caregiver1099::class);
     }
 
     ///////////////////////////////////////////

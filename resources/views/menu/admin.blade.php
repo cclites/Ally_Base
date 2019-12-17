@@ -69,3 +69,6 @@
         <li><a href="{{ route('admin.control-file') }}">Control File</a></li>
     </ul>
 </li>
+<li>
+    <a href="{{ route('admin.admin-1099-actions') }}" ><i class="fa fa-folder-open"></i><span class="hide-menu">1099</span></a>
+</li>
