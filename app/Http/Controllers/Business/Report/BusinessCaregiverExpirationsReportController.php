@@ -21,8 +21,8 @@ class BusinessCaregiverExpirationsReportController extends BaseController
      */
     public function index(Request $request, CertificationExpirationReport $report)
     {
-
         $expirationTypes = ExpirationType::where( 'chain_id', $this->businessChain()->id )
+            ->orWhereNull('chain_id')
             ->orderBy( 'type' )
             ->get()
             ->values();
