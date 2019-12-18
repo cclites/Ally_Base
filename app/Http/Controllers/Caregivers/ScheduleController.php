@@ -61,6 +61,7 @@ class ScheduleController extends BaseController
 
             $query = Schedule::forRequestedBusinesses()
                 ->with([ 'client' ])
+                ->inTheNextMonth( $business->timezone )
                 ->whereOpen()
                 ->ordered();
 
@@ -73,8 +74,7 @@ class ScheduleController extends BaseController
                 });
             }
 
-            $schedules = $query->inTheNextMonth( $business->timezone )
-                ->get()
+            $schedules = $query->get()
                 ->map( function( Schedule $schedule ) {
 
                 return [

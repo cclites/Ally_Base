@@ -4,7 +4,7 @@
 
     <b-card :title=" active_business ? active_business.name : '' ">
 
-        <p class="mt-3 mb-4">
+        <p class="mt-3 mb-4" v-if=" role_type == 'office_user' ">
             Caregivers can see all of these open shifts
             - anytime within the Ally app
             - that do not overlap any of their scheduled shifts.
@@ -159,14 +159,19 @@
 
                 this.isBusy = true;
 
-                axios.post( `/schedule/requests/${schedule.id}`, { status : status } )
+                let form = new Form({
+
+                    status : status
+                });
+
+                form.post( `/schedule/requests/${schedule.id}` )
                     .then( res => {
 
                         schedule.request_status = res.data.data.status;
                     })
                     .catch( e => {
 
-                        alert( 'error requesting shift, please refresh or contact support' );
+                        alert( 'error requesting shift, it may have just been taken, please refresh or contact support' );
                         const index = this.events.findIndex( e => e.id == schedule.id );
                         this.events.splice( index, 1 );
                     })
@@ -182,7 +187,7 @@
                 axios.get( this.eventsUrl )
                     .then( ({ data }) => {
 
-                        console.log( 'returned schedules: ', data );
+                        console.log( data );
 
                         this.requests = data.requests;
                         this.events   = data.events.map( e => {
@@ -195,15 +200,15 @@
                                     break;
                                 }
                             }
+
                             return e;
-                        });
+                        }).filter( e => e.request_status != 'denied' );
 
                         this.eventsLoaded = true;
                     })
                     .catch( e => {
 
-                        console.error( 'error getting events:' );
-                        console.error( e );
+                        console.error( 'error getting events:', e );
                     })
                     .finally( () => {
 
