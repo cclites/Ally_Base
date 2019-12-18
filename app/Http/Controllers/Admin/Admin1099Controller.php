@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Business;
 use App\Caregiver1099;
-use App\Reports\Admin1099PreviewReport;
 use App\Http\Controllers\Business\BaseController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;

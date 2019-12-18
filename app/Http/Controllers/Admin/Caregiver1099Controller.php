@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Admin\Queries\Caregiver1099Query;
 use App\Caregiver1099;
 use App\Caregiver;
 use App\Client;
@@ -100,41 +99,41 @@ class Caregiver1099Controller extends Controller
 
     public function store(StoreCaregiver1099Request $request)
     {
-        $query = new Caregiver1099Query();
-        $records = $query->generateReport($request->validated());
-
-        foreach($records as $record)
-        {
-            $record = (array)$record;
-            $data = [
-                'year'=>$request->year,
-                'created_by'=>auth()->user()->nameLastFirst(),
-                'payment_total'=>floatval($record['payment_total']),
-                'client_id'=>$record['client_id'],
-                'client_fname'=>$record['client_fname'],
-                'client_lname'=>$record['client_lname'],
-                'client_address1'=>$record['client_address1'],
-                'client_address2'=>$record['client_address2'],
-                'client_city'=>$record['client_city'],
-                'client_state'=>$record['client_state'],
-                'client_zip'=>$record['client_zip'],
-                'client_ssn'=>$record['client_ssn'],
-                'caregiver_id'=>$record['caregiver_id'],
-                'caregiver_fname'=>$record['caregiver_fname'],
-                'caregiver_lname'=>$record['caregiver_lname'],
-                'caregiver_address1'=>$record['caregiver_address1'],
-                'caregiver_address2'=>$record['caregiver_address2'],
-                'caregiver_city'=>$record['caregiver_city'],
-                'caregiver_state'=>$record['caregiver_state'],
-                'caregiver_zip'=>$record['caregiver_zip'],
-                'caregiver_ssn'=>$record['caregiver_ssn'],
-            ];
-
-            $caregiver1099 = new Caregiver1099($data);
-            $caregiver1099->save();
-        }
-
-        return new SuccessResponse("Caregiver 1099 has been created");
+//        $query = new Caregiver1099Query();
+//        $records = $query->generateReport($request->validated());
+//
+//        foreach($records as $record)
+//        {
+//            $record = (array)$record;
+//            $data = [
+//                'year'=>$request->year,
+//                'created_by'=>auth()->user()->nameLastFirst(),
+//                'payment_total'=>floatval($record['payment_total']),
+//                'client_id'=>$record['client_id'],
+//                'client_fname'=>$record['client_fname'],
+//                'client_lname'=>$record['client_lname'],
+//                'client_address1'=>$record['client_address1'],
+//                'client_address2'=>$record['client_address2'],
+//                'client_city'=>$record['client_city'],
+//                'client_state'=>$record['client_state'],
+//                'client_zip'=>$record['client_zip'],
+//                'client_ssn'=>$record['client_ssn'],
+//                'caregiver_id'=>$record['caregiver_id'],
+//                'caregiver_fname'=>$record['caregiver_fname'],
+//                'caregiver_lname'=>$record['caregiver_lname'],
+//                'caregiver_address1'=>$record['caregiver_address1'],
+//                'caregiver_address2'=>$record['caregiver_address2'],
+//                'caregiver_city'=>$record['caregiver_city'],
+//                'caregiver_state'=>$record['caregiver_state'],
+//                'caregiver_zip'=>$record['caregiver_zip'],
+//                'caregiver_ssn'=>$record['caregiver_ssn'],
+//            ];
+//
+//            $caregiver1099 = new Caregiver1099($data);
+//            $caregiver1099->save();
+//        }
+//
+//        return new SuccessResponse("Caregiver 1099 has been created");
     }
 
     /**

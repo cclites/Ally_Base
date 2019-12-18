@@ -2,29 +2,44 @@
 
 namespace App\Http\Controllers\Admin\Reports;
 
-use App\Reports\Bad1099Report;
+use App\Reports\Caregiver1099PreviewReport;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 class AdminBad1099ReportController extends Controller
 {
-    public function index(Bad1099Report $report, Request $request){
-
-        if($request->json){
-
+    /**
+     * Get Bad 1099 Report.
+     *
+     * @param Request $request
+     * @param Caregiver1099PreviewReport $report
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\JsonResponse|\Illuminate\View\View
+     */
+    public function index(Request $request, Caregiver1099PreviewReport $report)
+    {
+        if ($request->json == 1) {
             $request->validate([
-                'year'=> 'required',
-                'business_id' => 'required',
+                'year' => 'required|numeric',
+                'business_id' => 'required|numeric',
             ]);
 
-            //NOTE: These are not actual caregiver1099s, they are representations of what should
-            //      be in a 1099.
-            $caregiver1099s = $report->applyFilters([
-                'year'=>$request->year,
-                'business_id'=>$request->business_id,
-            ]);
+            $report->applyFilters($request->year, null, null, $request->business_id);
 
-            return response()->json($caregiver1099s);
+            $results = $report->rows()->map(function ($item) {
+                return [
+                    'caregiver' => $item['caregiver_lname'] . ", " . $item['caregiver_fname'],
+                    'client' => $item['client_lname'] . ", " . $item['client_fname'],
+                    'caregiver_id' => $item['caregiver_id'],
+                    'client_id' => $item['client_id'],
+                    'location' => $item['business_name'],
+                    'errors' => $item['errors'] ? implode(", ", $item['errors']) : false,
+                ];
+            })
+            ->filter(function ($item) {
+                return $item['errors'] !== false;
+            });
+
+            return response()->json($results->values());
         }
 
         return view_component(

@@ -2,20 +2,22 @@
 
 namespace App\Http\Controllers\Admin\Reports;
 
-use App\Caregiver1099;
-use App\Admin\Queries\Caregiver1099Query;
-use App\Reports\Admin1099PreviewReport;
-use App\Reports\Caregiver1099Report;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Reports\Caregiver1099PreviewReport;
+use Illuminate\Http\Request;
 
 class Admin1099PreviewReportController extends Controller
 {
-    public function index(Request $request, Caregiver1099Report $report)
+    /**
+     * Get the admin 1099 preview report.
+     *
+     * @param Request $request
+     * @param Caregiver1099PreviewReport $report
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\JsonResponse|\Illuminate\View\View
+     */
+    public function index(Request $request, Caregiver1099PreviewReport $report)
     {
         if (filled($request->json)) {
-            \DB::enableQueryLog();
-
             $request->validate([
                 'year' => 'required',
                 'business_id' => 'required|numeric',
@@ -40,8 +42,6 @@ class Admin1099PreviewReportController extends Controller
             );
 
             $results = $report->rows();
-
-            \Log::info(\DB::getQueryLog());
 
             return response()->json($results);
         }

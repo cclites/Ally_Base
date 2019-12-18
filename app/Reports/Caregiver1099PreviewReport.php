@@ -6,7 +6,7 @@ use App\CaregiverYearlyEarnings;
 use App\Caregiver1099Payer;
 use App\Caregiver1099;
 
-class Caregiver1099Report extends BaseReport
+class Caregiver1099PreviewReport extends BaseReport
 {
     /**
      * constructor.

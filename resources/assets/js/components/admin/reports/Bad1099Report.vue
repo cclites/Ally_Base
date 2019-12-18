@@ -13,7 +13,8 @@
             />
 
             <b-form-group label="Year" label-for="year" class="mr-2">
-                <b-form-select id="year" v-model="form.year" :options="years" class="mb-2">
+                <b-form-select id="year" v-model="form.year" class="mb-2">
+                    <option value="2019">2019</option>
                 </b-form-select>
             </b-form-group>
 
@@ -95,8 +96,6 @@
           return {
               items: [],
               totalRows: '',
-              start_date: 2019, //arbitrary start year
-              end_date: moment().year(),
               perPage: 100,
               currentPage: 1,
               sortBy: 'caregiver',
@@ -105,10 +104,9 @@
               emptyText: "No records to display",
               selected: '',
               form: new Form({
-                  'year': '',
+                  'year': '2019',
                   'business_id': '',
                   'json': 1,
-                  'all': true
               }),
               fields: [
                   {key: 'location', label: 'Location', sortable: true,},
@@ -119,17 +117,6 @@
           }
         },
         computed: {
-            years(){
-                let x = [];
-                let i = this.start_date;
-                while( i <= this.end_date){
-                    x.push(i++);
-                };
-
-                this.form.year = this.start_date;
-                return x;
-            },
-
             disableGenerate(){
                 if(this.form.business_id !== ""){
                     return false;
