@@ -11,7 +11,7 @@
             <b-row class="mt-3">
 
                 <b-col lg="4">
-                    <b-form-group label="First Name*">
+                    <b-form-group label="First Name" label-class="required">
                         <b-form-input v-model="form.first_name" autofocus></b-form-input>
                         <input-help :form="form" field="first_name" text=""></input-help>
                     </b-form-group>
@@ -25,7 +25,7 @@
                 </b-col>
 
                 <b-col lg="4">
-                    <b-form-group label="Last Name*">
+                    <b-form-group label="Last Name" label-class="required">
                         <b-form-input v-model="form.last_name"></b-form-input>
                         <input-help :form="form" field="last_name" text=""></input-help>
                     </b-form-group>
@@ -49,7 +49,7 @@
                 </b-col>
 
                 <b-col lg="4">
-                    <b-form-group label="Email*">
+                    <b-form-group label="Email" label-class="required">
                         <b-form-input v-model="form.email"></b-form-input>
                         <input-help :form="form" field="email" text=""></input-help>
                     </b-form-group>
@@ -59,7 +59,7 @@
 
             <b-row>
                 <b-col lg="6">
-                    <b-form-group label="Address*">
+                    <b-form-group label="Address" label-class="required">
                         <b-form-input v-model="form.address"></b-form-input>
                         <input-help :form="form" field="address" text=""></input-help>
                     </b-form-group>
@@ -75,21 +75,21 @@
 
             <b-row>
                 <b-col lg="4">
-                    <b-form-group label="City*">
+                    <b-form-group label="City" label-class="required">
                         <b-form-input v-model="form.city"></b-form-input>
                         <input-help :form="form" field="city" text=""></input-help>
                     </b-form-group>
                 </b-col>
 
                 <b-col lg="4">
-                    <b-form-group label="State*" label-for="state">
+                    <b-form-group label="State" label-class="required">
                         <b-form-select name="state" :options="states.getOptions()" v-model="form.state" />
                         <input-help :form="form" field="state" text=""></input-help>
                     </b-form-group>
                 </b-col>
 
                 <b-col lg="4">
-                    <b-form-group label="Zip*">
+                    <b-form-group label="Zip" label-class="required">
                         <b-form-input v-model="form.zip"></b-form-input>
                         <input-help :form="form" field="zip" text=""></input-help>
                     </b-form-group>
@@ -220,7 +220,7 @@
             <b-row>
                 <b-col>
                     <div class="h5">Driving History</div>
-                    <em>As part of the background screening process, a check of your driving record may be request by a family seeking your services.  Failure to disclose tickets or an accident will cause your application to be immediately rejected.</em>
+                    <em>As part of the background screening process, a check of your driving record may be requested by a family seeking your services.  Failure to disclose tickets or an accident will cause your application to be immediately rejected.</em>
                 </b-col>
             </b-row>
             <hr>
@@ -602,8 +602,8 @@
            </b-row>
             <hr>
             <b-row>
-                <b-col>
-                    <strong>Applicant Signature</strong>
+                <b-col class="mb-1">
+                    <strong>Applicant Signature <span class="text-danger">*</span></strong>
                 </b-col>
                 <b-col cols="12" class="d-flex mb-2 flex-wrap align-content-stretch">
                     <signature-pad
@@ -645,6 +645,8 @@
                 travelRadius: [5, 10, 15, 20, 30, 40],
                 heardAbout: ['Friend', 'Online Ad', 'TV', 'GN Website', 'Job Fair', 'Other'],
                 states: new States(),
+                displayLeavePageWarning: true,
+                leavePageMessage: 'Are you sure? This will lose all form progress.',
                 form: new Form({
                     first_name: '',
                     middle_initial: '',
@@ -741,20 +743,27 @@
 
         methods: {
             saveApp() {
-                this.form.post('/'+this.businessChain.slug+'/apply');
+
+                window.removeEventListener('beforeunload', this.showLeavePageWarning);
+
+                this.form.post('/'+this.businessChain.slug+'/apply')
+                    .then(response => {
+                    })
+                    .catch( e => {
+                        window.addEventListener('beforeunload', this.showLeavePageWarning);
+                    })
+                    .finally(() => {
+                    });
+            },
+
+            showLeavePageWarning(e){
+                e.returnValue = this.leavePageMessage;
+                return;
             }
         },
 
-        computed: {
-
-        },
-
         created() {
-
-            $( window ).on( "beforeunload", function() {
-
-                return "Are you sure? This will lose all form progress.";
-            });
+            window.addEventListener('beforeunload', this.showLeavePageWarning);
         }
     }
 </script>
