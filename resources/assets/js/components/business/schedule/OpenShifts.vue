@@ -22,6 +22,11 @@
 
                     {{ ( data.item ? formatDateFromUTC( data.item.start ) + ' ' : '' ) + ( data.item ? data.item.start_time + '-' : '' ) + ( data.item ? data.item.end_time : '' ) }}
                 </template>
+                <template slot="client" scope="data">
+
+                    <a v-if=" role_type == 'office_user' " :href=" '/business/clients/' + data.item.client_id " target="_blank">{{ data.item.client }}</a>
+                    <p v-else>{{ data.item.client }}</p>
+                </template>
                 <template slot="actions" scope="data">
 
                     <transition mode="out-in" name="slide-fade">
