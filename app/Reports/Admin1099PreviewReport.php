@@ -18,9 +18,8 @@ class Admin1099PreviewReport
         $query = new Caregiver1099Query();
         $caregiver1099s = $query->generateReport($filters);
 
-        return collect($caregiver1099s)->map(function($caregiver1099){
-
-            return[
+        return collect($caregiver1099s)->map(function ($caregiver1099) {
+            return [
                 'client_fname' => $caregiver1099->client_fname,
                 'client_lname' => $caregiver1099->client_lname,
                 'caregiver_fname' => $caregiver1099->caregiver_fname,
@@ -34,9 +33,7 @@ class Admin1099PreviewReport
                 'client_id' => $caregiver1099->client_id,
                 'errors' => Caregiver1099::getErrors($caregiver1099),
             ];
-
         });
-
     }
 
     /**
@@ -47,5 +44,4 @@ class Admin1099PreviewReport
     protected function results(): iterable
     {
     }
-
 }

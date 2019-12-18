@@ -5,34 +5,45 @@ namespace App\Http\Controllers\Admin\Reports;
 use App\Caregiver1099;
 use App\Admin\Queries\Caregiver1099Query;
 use App\Reports\Admin1099PreviewReport;
+use App\Reports\Caregiver1099Report;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 class Admin1099PreviewReportController extends Controller
 {
-    public function index(Admin1099PreviewReport $report, Request $request){
-
-        if($request->json){
+    public function index(Request $request, Caregiver1099Report $report)
+    {
+        if (filled($request->json)) {
+            \DB::enableQueryLog();
 
             $request->validate([
-                'year'=> 'required',
-                'business_id' => 'required',
+                'year' => 'required',
+                'business_id' => 'required|numeric',
+                'payer' => 'nullable|in:ally,client',
+                'client_id' => 'nullable|numeric',
+                'caregiver_id' => 'nullable|numeric',
+                'created' => 'nullable|in:1,0',
             ]);
 
-            //NOTE: These are not actual caregiver1099s, they are representations of what should
-            //      be in a 1099.
-            $caregiver1099s = $report->applyFilters([
-                                'year'=>$request->year,
-                                'business_id'=>$request->business_id,
-                                'client_id'=>$request->client_id,
-                                'caregiver_id'=>$request->caregiver_id,
-                                'caregiver_1099'=>$request->caregiver_1099,
-                                'status'=>$request->status,
-                                'transmission'=>$request->transmission,
-                                'caregiver_1099_id'=>$request->caregiver_1099_id
-                            ]);
+            $createdStatus = $request->created == '1' ? true : false;
+            if (empty($request->created)) {
+                $createdStatus = null;
+            }
 
-            return response()->json($caregiver1099s);
+            $report->applyFilters(
+                $request->year,
+                $request->caregiver_id,
+                $request->client_id,
+                $request->business_id,
+                $request->payer,
+                $createdStatus
+            );
+
+            $results = $report->rows();
+
+            \Log::info(\DB::getQueryLog());
+
+            return response()->json($results);
         }
 
         return view_component(
@@ -44,7 +55,5 @@ class Admin1099PreviewReportController extends Controller
                 '1099' => route('admin.admin-1099-actions')
             ]
         );
-
     }
-
 }

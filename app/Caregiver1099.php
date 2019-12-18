@@ -11,6 +11,11 @@ use mikehaertl\pdftk\Pdf;
 
 class Caregiver1099 extends BaseModel
 {
+    /**
+     * 1099 Earnings threshold
+     */
+    const THRESHOLD = 600;
+
     protected $table = 'caregiver_1099s';
     protected $guarded = [];
 

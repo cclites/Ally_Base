@@ -9,7 +9,7 @@
                 <b-form-select id="year"
                                v-model="form.year"
                 >
-                    <option v-for="year in years" :value="year">{{ year }}</option>
+                    <option value="2019">2019</option>
                 </b-form-select>
             </b-form-group>
 
@@ -42,12 +42,12 @@
                 </b-form-select>
             </b-form-group>
 
-            <b-form-group label="Caregiver 1099" label-for="caregiver_1099" class="mr-2">
-                <b-form-select id="caregiver_1099"
-                               v-model="form.caregiver_1099"
+            <b-form-group label="Payer" label-for="payer" class="mr-2">
+                <b-form-select id="payer"
+                               v-model="form.payer"
                 >
                     <option value="">All</option>
-                    <option value="no">No</option>
+<!--                    <option value="no">No</option>-->
                     <option value="client">Client</option>
                     <option value="ally">Ally</option>
 
@@ -55,9 +55,7 @@
             </b-form-group>
 
             <b-form-group label="1099 Status" label-for="created_status" class="mr-2">
-                <b-form-select id="created_status"
-                               v-model="form.created"
-                >
+                <b-form-select id="created_status" v-model="form.created">
                     <option value="">Any</option>
                     <option value="1">Created</option>
                     <option value="0">Not Yet Created</option>
@@ -70,27 +68,20 @@
 
         </b-row>
 
-        <div class="d-flex justify-content-center" v-if="busy">
-            <div class="my-5">
-                <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
-            </div>
-        </div>
+        <loading-card v-if="form.busy"></loading-card>
         <div v-else>
             <b-row>
                 <b-col>
                     <b-table
-                            class="admin-1099-report"
-                            :items="items"
-                            :fields="fields"
-                            :sort-by="sortBy"
-                            :empty-text="emptyText"
-                            :busy="busy"
-                            :current-page="currentPage"
-                            :per-page="perPage"
-                            ref="table"
+                        :items="items"
+                        :fields="fields"
+                        :sort-by="sortBy"
+                        :empty-text="emptyText"
+                        :busy="busy"
+                        :current-page="currentPage"
+                        :per-page="perPage"
                     >
                         <template slot="actions" scope="row">
-
                             <b-btn @click="create(row)"
                                    class="btn btn-secondary"
                                    title="Create 1099"
@@ -168,8 +159,6 @@
             <br>
             <a :href="'/business/caregivers/' + selected.caregiver_id">Edit Caregiver</a>
         </b-modal>
-
-
     </b-card>
 </template>
 
@@ -186,14 +175,12 @@
         props: {},
         data() {
             return {
-                start_date: 2019, //arbitrary start year
-                end_date: moment().year(),
                 form: new Form({
                         business_id: '',
                         client_id: '',
                         caregiver_id: '',
-                        year: '',
-                        caregiver_1099: '',
+                        year: '2019',
+                        payer: '',
                         created: '',
                         transmitted: '',
                         json: 1,
@@ -220,8 +207,8 @@
                     {key: 'client_lname', label: 'Client Last Name', sortable: true,},
                     {key: 'caregiver_fname', label: 'Caregiver First Name', sortable: true,},
                     {key: 'caregiver_lname', label: 'Caregiver Last Name', sortable: true,},
-                    {key: 'caregiver_1099', label: 'Caregiver 1099', sortable: true, formatter: x => { return _.startCase(x) }},
-                    {key: 'business_name', label: 'Location', sortable: true,},
+                    {key: 'caregiver_1099', label: 'Payer', sortable: true, formatter: x => { return _.startCase(x) }},
+                    {key: 'business_name', label: 'Office Location', sortable: true,},
                     {key: 'payment_total', label: 'Total Year Amount', sortable: true, formatter: x => { return this.moneyFormat(x) }},
                     'actions',
                 ],
@@ -339,17 +326,6 @@
             },
         },
         computed: {
-            years(){
-                let x = [];
-                let i = this.start_date;
-                while( i <= this.end_date){
-                    x.push(i++);
-                };
-
-                this.form.year = this.start_date;
-                return x;
-            },
-
             disableGenerate(){
                 if(this.caregivers.length){
                     return false;
