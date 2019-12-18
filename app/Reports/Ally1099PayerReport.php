@@ -21,7 +21,7 @@ class Ally1099PayerReport
 //
 //            return[
 //                'caregiver_first_name' => $caregiver1099->caregiver_first_name,
-//                'caregiver_lname' => $caregiver1099->caregiver_lname,
+//                'caregiver_last_name' => $caregiver1099->caregiver_last_name,
 //                'business_name' => $caregiver1099->business_name,
 //                'payment_total' => $caregiver1099->caregiver_1099_amount ? $caregiver1099->caregiver_1099_amount : $caregiver1099->payment_total,
 //                'caregiver_id' => $caregiver1099->caregiver_id,

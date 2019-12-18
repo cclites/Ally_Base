@@ -11,11 +11,11 @@
             <b-col>
                 <b-form-group
                         label="Client First Name"
-                        label-for="client_fname"
+                        label-for="client_first_name"
                 >
                     <b-form-input
-                            id="client_fname"
-                            v-model="caregiver1099.client_fname"
+                            id="client_first_name"
+                            v-model="caregiver1099.client_first_name"
                             required
                             placeholder="First Name"
                     ></b-form-input>
@@ -24,11 +24,11 @@
             <b-col>
                 <b-form-group
                         label="Client Last Name"
-                        label-for="client_lname"
+                        label-for="client_last_name"
                 >
                     <b-form-input
-                            id="client_lname"
-                            v-model="caregiver1099.client_lname"
+                            id="client_last_name"
+                            v-model="caregiver1099.client_last_name"
                             required
                             placeholder="Last Name"
                     ></b-form-input>
@@ -123,11 +123,11 @@
             <b-col>
                 <b-form-group
                         label="Caregiver First Name"
-                        label-for="caregiver_fname"
+                        label-for="caregiver_first_name"
                 >
                     <b-form-input
-                            id="caregiver_fname"
-                            v-model="caregiver1099.caregiver_fname"
+                            id="caregiver_first_name"
+                            v-model="caregiver1099.caregiver_first_name"
                             required
                             placeholder="First Name"
                     ></b-form-input>
@@ -137,11 +137,11 @@
             <b-col>
                 <b-form-group
                         label="Caregiver Last Name"
-                        label-for="caregiver_lname"
+                        label-for="caregiver_last_name"
                 >
                     <b-form-input
-                            id="caregiver_lname"
-                            v-model="caregiver1099.caregiver_lname"
+                            id="caregiver_last_name"
+                            v-model="caregiver1099.caregiver_last_name"
                             required
                             placeholder="Last Name"
                     ></b-form-input>

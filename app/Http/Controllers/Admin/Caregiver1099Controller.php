@@ -71,7 +71,7 @@ class Caregiver1099Controller extends Controller
         $caregiver_1099s = $caregiver->caregiver1099s->map(function($caregiver_1099){
             return [
                 'year'=> $caregiver_1099->year,
-                'name' => $caregiver_1099->client_fname . " " . $caregiver_1099->client_lname,
+                'name' => $caregiver_1099->client_first_name . " " . $caregiver_1099->client_last_name,
                 'id' => $caregiver_1099->id
             ];
         })
@@ -110,8 +110,8 @@ class Caregiver1099Controller extends Controller
 //                'created_by'=>auth()->user()->nameLastFirst(),
 //                'payment_total'=>floatval($record['payment_total']),
 //                'client_id'=>$record['client_id'],
-//                'client_fname'=>$record['client_fname'],
-//                'client_lname'=>$record['client_lname'],
+//                'client_first_name'=>$record['client_first_name'],
+//                'client_last_name'=>$record['client_last_name'],
 //                'client_address1'=>$record['client_address1'],
 //                'client_address2'=>$record['client_address2'],
 //                'client_city'=>$record['client_city'],
@@ -119,8 +119,8 @@ class Caregiver1099Controller extends Controller
 //                'client_zip'=>$record['client_zip'],
 //                'client_ssn'=>$record['client_ssn'],
 //                'caregiver_id'=>$record['caregiver_id'],
-//                'caregiver_fname'=>$record['caregiver_fname'],
-//                'caregiver_lname'=>$record['caregiver_lname'],
+//                'caregiver_first_name'=>$record['caregiver_first_name'],
+//                'caregiver_last_name'=>$record['caregiver_last_name'],
 //                'caregiver_address1'=>$record['caregiver_address1'],
 //                'caregiver_address2'=>$record['caregiver_address2'],
 //                'caregiver_city'=>$record['caregiver_city'],
@@ -230,7 +230,7 @@ class Caregiver1099Controller extends Controller
                                 //$cg1099->update(['transmitted_at'=>\Carbon\Carbon::now(),'transmitted_by'=> auth()->user()->id]);
 
                                 $payerTin = $cg1099->client_ssn ? decrypt($cg1099->client_ssn) : '';
-                                $payerName = $cg1099->client_fname . " " . $cg1099->client_lname;
+                                $payerName = $cg1099->client_first_name . " " . $cg1099->client_last_name;
                                 $payerAddress = $cg1099->client_address1 . ($cg1099->client_address2 ? ", " . $cg1099->client_address2 : '');
                                 $payerCity = $cg1099->client_city;
                                 $payerState = $cg1099->client_state;
@@ -262,7 +262,7 @@ class Caregiver1099Controller extends Controller
                                     'payer_phone' => $payerPhone,
                                     'payer_tin' => $payerTin,
                                     'recipient_tin' => $caregiverTin,
-                                    'recipient_name' => $cg1099->caregiver_fname . " " . $cg1099->caregiver_lname,
+                                    'recipient_name' => $cg1099->caregiver_first_name . " " . $cg1099->caregiver_last_name,
                                     'recipient_address' => $cg1099->caregiver_address1 . "\n" . filled($cg1099->caregiver_address2),
                                     'recipient_city' => $cg1099->caregiver_city,
                                     'recipient_state' => $cg1099->caregiver_state,
@@ -356,7 +356,7 @@ class Caregiver1099Controller extends Controller
     {
         // TODO: Unmask payer and caregiver SSN
         $pdf = $caregiver1099->getFilledCaregiverPdf(true, true);
-        $fileName = $caregiver1099->client_fname . " " . $caregiver1099->client_lname . '_' . $caregiver1099->caregiver_fname . "_" . $caregiver1099->caregiver_lname . '1099.pdf';
+        $fileName = $caregiver1099->client_first_name . " " . $caregiver1099->client_last_name . '_' . $caregiver1099->caregiver_first_name . "_" . $caregiver1099->caregiver_last_name . '1099.pdf';
         $pdf->send($fileName);
     }
 

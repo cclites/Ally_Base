@@ -43,11 +43,11 @@ class Caregiver1099 extends BaseModel
     public static function getErrors($cg1099){
         $errors = [];
 
-        if(! $cg1099->client_fname){
+        if(! $cg1099->client_first_name){
             $errors[] = "Client First Name";
         }
 
-        if(! $cg1099->client_lname){
+        if(! $cg1099->client_last_name){
             $errors[] = "Client Last Name";
         }
 
@@ -79,11 +79,11 @@ class Caregiver1099 extends BaseModel
             return $errors;
         }
 
-        if(! $cg1099->caregiver_fname){
+        if(! $cg1099->caregiver_first_name){
             $errors[] = "Caregiver First Name";
         }
 
-        if(! $cg1099->caregiver_lname){
+        if(! $cg1099->caregiver_last_name){
             $errors[] = "Caregiver Last Name";
         }
 
@@ -125,7 +125,7 @@ class Caregiver1099 extends BaseModel
         $pdf = new Pdf('../resources/pdf_forms/caregiver1099s/' . $this->year . '/1099-misc-full.pdf');
 
         $payerTin = $this->client_ssn ? decrypt($this->client_ssn) : '';
-        $payerName = $this->client_fname . " " . $this->client_lname;
+        $payerName = $this->client_first_name . " " . $this->client_last_name;
         $clAddress2 = $this->client_address2 ? $this->client_address2 . "\n" : '';
         $caAddress2 = $this->caregiver_address2 ? ", " . $this->caregiver_address2 : '';
         $payerAddress = $payerName . "\n" . $this->client_address1 . "\n" . $clAddress2 . $this->client_address3();
@@ -158,7 +158,7 @@ class Caregiver1099 extends BaseModel
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_1[0]' => $payerAddress,
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_3[0]' => $caregiverTin, //recipient tin
-            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_4[0]' => $this->caregiver_fname . " " . $this->caregiver_lname, //recipient name
+            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_4[0]' => $this->caregiver_first_name . " " . $this->caregiver_last_name, //recipient name
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_5[0]' => $this->caregiver_address1 . $caAddress2, //recipient street address
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_6[0]' => $this->caregiver_address3(), //recipient city, state, zip
             'topmostSubform[0].CopyB[0].RightCol[0].f2_14[0]' => $paymentTotal,
@@ -167,7 +167,7 @@ class Caregiver1099 extends BaseModel
             'topmostSubform[0].Copy1[0].LeftColumn[0].f2_1[0]' => $payerAddress,
             'topmostSubform[0].Copy1[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
             'topmostSubform[0].Copy1[0].LeftColumn[0].f2_3[0]' => $caregiverTin, //recipient tin
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_4[0]' => $this->caregiver_fname . " " . $this->caregiver_lname, //recipient name
+            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_4[0]' => $this->caregiver_first_name . " " . $this->caregiver_last_name, //recipient name
             'topmostSubform[0].Copy1[0].LeftColumn[0].f2_5[0]' => $this->caregiver_address1 . $caAddress2, //recipient street address
             'topmostSubform[0].Copy1[0].LeftColumn[0].f2_6[0]' => $this->caregiver_address3(), //recipient city, state, zip
             'topmostSubform[0].Copy1[0].RightCol[0].f2_14[0]' => $paymentTotal,
@@ -176,7 +176,7 @@ class Caregiver1099 extends BaseModel
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_1[0]' => $payerAddress,
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_3[0]' => $caregiverTin, //recipient tin
-            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_4[0]' => $this->caregiver_fname . " " . $this->caregiver_lname, //recipient name
+            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_4[0]' => $this->caregiver_first_name . " " . $this->caregiver_last_name, //recipient name
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_5[0]' => $this->caregiver_address1 . $caAddress2, //recipient street address
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_6[0]' => $this->caregiver_address3(), //recipient city, state, zip
             'topmostSubform[0].Copy2[0].RightColumn[0].f2_14[0]' => $paymentTotal,
@@ -201,16 +201,16 @@ class Caregiver1099 extends BaseModel
     public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
     {
         return [
-            'client_fname' => $faker->firstName,
-            'client_lname' => $faker->lastName,
+            'client_first_name' => $faker->firstName,
+            'client_last_name' => $faker->lastName,
             //'client_ssn' => '', This will get set via cleanEncrypted1099Data() function
             'client_address1' => $faker->streetAddress,
             'client_address2' => '',
             'client_city' => $faker->city,
             'client_state' => $faker->stateAbbr,
             'client_zip' => $faker->postcode,
-            'caregiver_fname' => $faker->firstName,
-            'caregiver_lname' => $faker->lastName,
+            'caregiver_first_name' => $faker->firstName,
+            'caregiver_last_name' => $faker->lastName,
             //'caregiver_ssn' => '', This will get set via cleanEncrypted1099Data() function
             'caregiver_address1' => $faker->streetAddress,
             'caregiver_address2' => '',

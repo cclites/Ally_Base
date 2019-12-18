@@ -27,8 +27,8 @@ class AdminBad1099ReportController extends Controller
 
             $results = $report->rows()->map(function ($item) {
                 return [
-                    'caregiver' => $item['caregiver_lname'] . ", " . $item['caregiver_fname'],
-                    'client' => $item['client_lname'] . ", " . $item['client_fname'],
+                    'caregiver' => $item['caregiver_last_name'] . ", " . $item['caregiver_first_name'],
+                    'client' => $item['client_last_name'] . ", " . $item['client_first_name'],
                     'caregiver_id' => $item['caregiver_id'],
                     'client_id' => $item['client_id'],
                     'location' => $item['business_name'],

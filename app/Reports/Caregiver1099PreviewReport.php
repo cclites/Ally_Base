@@ -78,11 +78,11 @@ class Caregiver1099PreviewReport extends BaseReport
             ->map(function (CaregiverYearlyEarnings $earnings) {
                 return [
                     'client_id' => $earnings->client_id,
-                    'client_fname' => $earnings->client->first_name,
-                    'client_lname' => $earnings->client->last_name,
+                    'client_first_name' => $earnings->client->first_name,
+                    'client_last_name' => $earnings->client->last_name,
                     'caregiver_id' => $earnings->caregiver_id,
-                    'caregiver_fname' => $earnings->caregiver->first_name,
-                    'caregiver_lname' => $earnings->caregiver->last_name,
+                    'caregiver_first_name' => $earnings->caregiver->first_name,
+                    'caregiver_last_name' => $earnings->caregiver->last_name,
                     'business_name' => $earnings->business->name,
                     'payment_total' => $earnings->earnings,
                     'caregiver_1099' => $earnings->client->caregiver_1099,

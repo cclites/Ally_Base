@@ -21,16 +21,16 @@ class CreateTable1099s extends Migration
             $table->integer('client_id')->unsigned()->nullable();
             $table->integer('business_id')->unsigned()->nullable();
 
-            $table->string('client_fname', 45)->nullable();
-            $table->string('client_lname', 45)->nullable();
+            $table->string('client_first_name', 45)->nullable();
+            $table->string('client_last_name', 45)->nullable();
             $table->binary('client_ssn')->nullable();
             $table->string('client_address1')->nullable();
             $table->string('client_address2')->nullable();
             $table->string('client_city')->nullable();
             $table->string('client_state')->nullable();
             $table->string('client_zip')->nullable();
-            $table->string('caregiver_fname', 45)->nullable();
-            $table->string('caregiver_lname', 45)->nullable();
+            $table->string('caregiver_first_name', 45)->nullable();
+            $table->string('caregiver_last_name', 45)->nullable();
             $table->binary('caregiver_ssn')->nullable();
             $table->string('caregiver_address1')->nullable();
             $table->string('caregiver_address2')->nullable();
