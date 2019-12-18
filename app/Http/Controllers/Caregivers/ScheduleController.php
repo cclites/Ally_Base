@@ -74,18 +74,55 @@ class ScheduleController extends BaseController
                 });
             }
 
+            // get all of the caregver's existing schedules in the same time frame
+            $caregivers_schedule = Schedule::forRequestedBusinesses()
+                ->forCaregiver( $caregiver )
+                ->inTheNextMonth( $business->timezone )
+                ->ordered()
+                ->get();
+
+            // foreach fucking schedule that comes back from the query, i need to run it against every schedule that the caregiver has to ensure it owont overlap.. BUT
+            // if I am on some mark zuckerburg shit, I'll know how to make the query not need to match for all of them.. what is this algorithm
+
             $schedules = $query->get()
+                ->filter( function( Schedule $schedule ) use( $caregivers_schedule ){
+
+                    $schedule_start = $schedule->starts_at;
+                    $schedule_end   = $schedule->getEndDateTime();
+                    foreach( $caregivers_schedule as $cgs ){
+
+                        $pass      = true;
+                        $cgs_start = $cgs->starts_at;
+                        $cgs_end   = $cgs->getEndDateTime();
+
+                        // no need to keep checking, they aren't chronologically near eachother
+                        if( $cgs_start > $schedule_end ){
+
+                            $pass = true;
+                            break;
+                        }
+
+                        // if the schedules conflict, break
+                        if( $schedule_start >= $cgs_start && $schedule_start <= $cgs_end || $schedule_end >= $cgs_start && $schedule_end <= $cgs_end ){
+
+                            $pass = false;
+                            break;
+                        }
+                    }
+
+                    if( $pass ) return $schedule;
+                })
                 ->map( function( Schedule $schedule ) {
 
-                return [
+                    return [
 
-                    'id'         => $schedule->id,
-                    'start'      => $schedule->starts_at->copy()->format( \DateTime::ISO8601 ),
-                    'client'     => $schedule->client->nameLastFirst(),
-                    'client_id'  => $schedule->client->id,
-                    'start_time' => $schedule->starts_at->copy()->format('g:i A'),
-                    'end_time'   => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A')
-                ];
+                        'id'         => $schedule->id,
+                        'start'      => $schedule->starts_at->copy()->format( \DateTime::ISO8601 ),
+                        'client'     => $schedule->client->nameLastFirst(),
+                        'client_id'  => $schedule->client->id,
+                        'start_time' => $schedule->starts_at->copy()->format('g:i A'),
+                        'end_time'   => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A')
+                    ];
             });
 
             return [ 'events' => $schedules, 'requests' => $caregiver->mapped_schedule_requests ];

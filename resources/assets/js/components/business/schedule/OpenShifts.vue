@@ -33,8 +33,8 @@
 
                         <div v-if=" !hasRequest( data.item.request_status ) " class="d-flex" key="first-block">
 
-                            <b-button variant="default" size="sm" class="f-1" @click=" requestShift( data.item, 'uninterested' ) " key="request">Not Interested</b-button>
-                            <b-button variant="success" size="sm" class="f-1" @click=" requestShift( data.item, 'pending' ) " key="request">Request Shift</b-button>
+                            <b-button variant="success" size="sm" class="f-1 mr-1" @click=" requestShift( data.item, 'uninterested' ) " key="request">Not Interested</b-button>
+                            <b-button variant="primary" size="sm" class="f-1 ml-1" @click=" requestShift( data.item, 'pending' ) " key="request">Request Shift</b-button>
                         </div>
 
                         <div v-if=" hasRequest( data.item.request_status ) " class="" key="second-block">
@@ -200,8 +200,9 @@
                 axios.get( this.eventsUrl )
                     .then( ({ data }) => {
 
+                        console.log( data );
                         this.requests = data.requests;
-                        this.events   = data.events.map( e => {
+                        this.events   = Object.values( data.events ).map( e => {
 
                             for( let i = 0; i < this.requests.length; i++ ){
 
