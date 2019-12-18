@@ -136,7 +136,7 @@ class CalculateYearlyEarnings extends Command
     {
         $year = $this->argument('year');
 
-        if ($year < 2015 || $year > Carbon::now()->formate('Y') || strlen($year) != 4 || !is_numeric($year)) {
+        if ($year < 2015 || $year > Carbon::now()->format('Y') || strlen($year) != 4 || !is_numeric($year)) {
             return null;
         }
 
