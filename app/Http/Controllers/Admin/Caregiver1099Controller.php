@@ -100,8 +100,6 @@ class Caregiver1099Controller extends Controller
 
     public function store(StoreCaregiver1099Request $request)
     {
-        return new ErrorResponse('This feature is not available yet.');
-        
         $query = new Caregiver1099Query();
         $records = $query->generateReport($request->validated());
 
