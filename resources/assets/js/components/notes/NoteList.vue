@@ -46,8 +46,8 @@
                 </b-col>
                 <b-col lg="3">
                     <b-form-select v-model="searchForm.user" class="mb-2">
-                        <option :value="null">-- User --</option>
-                        <option :value="user.id" v-for="user in users" :key="user.id">{{ user.nameLastFirst }}</option>
+                        <option :value="null">-- Sent By --</option>
+                        <option :value="user.id" v-for="user in users" :key="user.id">{{ user.name }}</option>
                     </b-form-select>
                 </b-col>
                 <b-col lg="3">
@@ -220,6 +220,7 @@
             this.loadCaregivers();
             this.loadProspects();
             this.loadReferralSources();
+            this.loadUsers();
             this.filter();
         },
 
@@ -252,6 +253,11 @@
             async loadReferralSources() {
                 const response = await axios.get('/business/referral-sources?json=1');
                 this.referral_sources = response.data;
+            },
+
+            async loadUsers(){
+                const response = await axios.get('/business/notes/creator?businesses='+ this.searchForm.businesses +'&json=1');
+                this.users = response.data;
             },
 
             onFiltered(filteredItems) {

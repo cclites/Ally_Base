@@ -553,6 +553,7 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['admin', 'office_us
     Route::resource('note-templates', 'NoteTemplateController');
     Route::resource('note-templates', 'NoteTemplateController');
     Route::get('/business/office-users', 'Business\OfficeUserController@index');
+    Route::get('/business/notes/creator', 'NoteController@creators');
 });
 
 Route::group([
