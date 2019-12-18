@@ -19,6 +19,8 @@ export default {
         }),
         requestResponded( data ){
 
+            console.log( data );
+
             const status = data.status;
             let schedule = this.events.find( e => e.id === data.request.pivot.schedule_id );
 
@@ -43,7 +45,7 @@ export default {
             }
 
             // remove the entire row
-            const index = this.events.findIndex( e => e.id === data.schedule_id );
+            const index = this.events.findIndex( e => e.id === data.request.pivot.schedule_id );
             this.events.splice( index, 1 );
 
             // close the modal

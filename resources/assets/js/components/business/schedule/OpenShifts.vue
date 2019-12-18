@@ -4,36 +4,44 @@
 
     <b-card :title=" active_business ? active_business.name : '' ">
 
-      <loading-card v-show=" loading " />
+        <p class="mt-3 mb-4">
+            Caregivers can see all of these open shifts
+            - anytime within the Ally app
+            - that do not overlap any of their scheduled shifts.
+            You do not have to send out text messages for every open shifts.
+            Instead, maybe send a reminder once a week that all caregivers should check the available open shifts within the Ally App
+        </p>
 
-      <div v-show="! loading" class="table-responsive">
+        <loading-card v-show=" loading " />
 
-          <ally-table id="open-shifts" :columns=" fields " :items=" events " sort-by="start" :perPage=" 1000 " :isBusy=" isBusy ">
+        <div v-show="! loading" class="table-responsive">
 
-            <template slot="start" scope="data">
+            <ally-table id="open-shifts" :columns=" fields " :items=" events " sort-by="start" :perPage=" 1000 " :isBusy=" isBusy ">
 
-                {{ ( data.item ? formatDateFromUTC( data.item.start ) + ' ' : '' ) + ( data.item ? data.item.start_time + '-' : '' ) + ( data.item ? data.item.end_time : '' ) }}
-            </template>
-            <template slot="actions" scope="data">
+                <template slot="start" scope="data">
 
-                <transition mode="out-in" name="slide-fade">
+                    {{ ( data.item ? formatDateFromUTC( data.item.start ) + ' ' : '' ) + ( data.item ? data.item.start_time + '-' : '' ) + ( data.item ? data.item.end_time : '' ) }}
+                </template>
+                <template slot="actions" scope="data">
 
-                    <b-button variant="success" size="sm" class="btn-block" v-if=" !hasRequest( data.item.request_status ) " @click=" requestShift( data.item, 'pending' ) " key="request">Request Shift</b-button>
-                    <b-button variant="default" size="sm" class="btn-block" v-if=" hasRequest( data.item.request_status ) " @click=" requestShift( data.item, 'cancelled' ) " key="rescind">Cancel Request</b-button>
-                </transition>
-            </template>
-            <template slot="requests_count" scope="data">
+                    <transition mode="out-in" name="slide-fade">
 
-                <div class="text-center">
+                        <b-button variant="success" size="sm" class="btn-block" v-if=" !hasRequest( data.item.request_status ) " @click=" requestShift( data.item, 'pending' ) " key="request">Request Shift</b-button>
+                        <b-button variant="default" size="sm" class="btn-block" v-if=" hasRequest( data.item.request_status ) " @click=" requestShift( data.item, 'cancelled' ) " key="rescind">Cancel Request</b-button>
+                    </transition>
+                </template>
+                <template slot="requests_count" scope="data">
 
-                    <a href="#" @click.prevent=" showRequestModal( data.item.id ) " v-if=" data.item.requests_count > 0 " class="w-100 text-center">{{ data.item.requests_count }}</a>
-                    <span v-else>0</span>
-                </div>
-            </template>
+                    <div class="text-center">
 
-            <template slot="status" scope="data">Open</template>
-          </ally-table>
-      </div>
+                        <a href="#" @click.prevent=" showRequestModal( data.item.id ) " v-if=" data.item.requests_count > 0 " class="w-100 text-center">{{ data.item.requests_count }}</a>
+                        <span v-else>0</span>
+                    </div>
+                </template>
+
+                <template slot="status" scope="data">Open</template>
+            </ally-table>
+        </div>
     </b-card>
 
     <schedule-request-modal v-model=" requestsModal " :selected-schedule-id=" selectedScheduleId " @request-response=" requestResponded "></schedule-request-modal>
