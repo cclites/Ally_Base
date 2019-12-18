@@ -162,7 +162,7 @@
                 let form = new Form({
 
                     status : status
-                });
+                }, false );
 
                 form.post( `/schedule/requests/${schedule.id}` )
                     .then( res => {
@@ -171,7 +171,6 @@
                     })
                     .catch( e => {
 
-                        alert( 'error requesting shift, it may have just been taken, please refresh or contact support' );
                         const index = this.events.findIndex( e => e.id == schedule.id );
                         this.events.splice( index, 1 );
                     })
@@ -186,8 +185,6 @@
 
                 axios.get( this.eventsUrl )
                     .then( ({ data }) => {
-
-                        console.log( data );
 
                         this.requests = data.requests;
                         this.events   = data.events.map( e => {
