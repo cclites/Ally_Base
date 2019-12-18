@@ -29,7 +29,7 @@ class CaregiverScheduleRequestController extends BaseController
             $business = Business::findOrFail( $request->business_id );
 
             $count = CaregiverScheduleRequest::forOpenSchedules()
-                ->wherePending()
+                ->whereActive()
                 ->forSchedulesInTheNextMonth( $business->timezone )
                 ->where( 'business_id', $business->id )
                 ->count();
@@ -39,7 +39,7 @@ class CaregiverScheduleRequestController extends BaseController
 
         $schedule = Schedule::with([ 'services', 'client', 'schedule_requests' => function( $q ){
 
-            return $q->where( 'status', 'pending' );
+            return $q->whereIn( 'status', [ 'pending', 'uninterested' ]);
         }])->findOrFail( $request->schedule );
         $this->authorize( 'read', $schedule );
 

@@ -26,7 +26,7 @@
                 <div class="f-1">{{ request.pivot.status }}</div>
                 <div class="f-1" style="min-width: 300px">
 
-                    <transition name="slide-fade" mode="out-in">
+                    <transition name="slide-fade" mode="out-in" v-if=" request.pivot.status == 'pending' ">
 
                         <div v-if=" !chosenRequest || request.pivot.id != chosenRequest.pivot.id " key="first">
 

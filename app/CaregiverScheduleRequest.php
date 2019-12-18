@@ -89,6 +89,28 @@ class CaregiverScheduleRequest extends Pivot
     }
 
     /**
+     * Could probably be named better..
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return void
+     */
+    public function scopeWhereActive( $query )
+    {
+        $query->whereIn( 'status', [ self::REQUEST_UNINTERESTED, self::REQUEST_PENDING ] );
+    }
+
+    /**
+     * Get only requests that are 'Uninterested'
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return void
+     */
+    public function scopeWhereUninterested( $query )
+    {
+        $query->where( 'status', self::REQUEST_UNINTERESTED );
+    }
+
+    /**
      * Get only requests that are 'pending'
      *
      * @param \Illuminate\Database\Eloquent\Builder $query

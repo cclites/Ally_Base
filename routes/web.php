@@ -428,10 +428,8 @@ Route::group([
     Route::patch('authorization/{auth}', 'Business\ClientAuthController@update');
     Route::delete('authorization/{auth}', 'Business\ClientAuthController@destroy');
 
-    Route::get('schedule/requests/{schedule}', 'Business\CaregiverScheduleRequestController@index' )->name( 'schedule.requests.index' );
+    Route::get('schedule/requests/{schedule?}', 'Business\CaregiverScheduleRequestController@index' )->name( 'schedule.requests.index' );
     Route::patch('schedule/requests/{caregiverScheduleRequest}', 'Business\CaregiverScheduleRequestController@update' )->name( 'schedule.requests.update' );
-
-    Route::get( 'schedule/requests', 'Business\CaregiverScheduleRequestController@index' )->name( 'schedule.requests.index' );
 
     Route::get('schedule/open-shifts', 'Business\ScheduleController@openShifts')->name('schedule.open-shifts');
     Route::post('schedule/warnings', 'Business\ScheduleController@warnings')->name('schedule.warnings');
