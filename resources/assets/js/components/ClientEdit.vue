@@ -225,9 +225,8 @@
             <!------------------------------------->
             <b-row >
                 <b-col lg="3" v-if="canEdit1099">
-                    <b-form-group label="Caregiver 1099" :label-class="this.client.send_1099 == 'choose' ? 'required' : null">
+                    <b-form-group label="Caregiver 1099" label-class="required">
                         <b-form-select v-model="form.send_1099">
-                            <option value="choose">Select an Option</option>
                             <option value="yes">Yes</option>
                             <option value="no">No</option>
                         </b-form-select>

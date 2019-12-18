@@ -20,7 +20,6 @@
                     <b-form-select v-model="form.medicaid_1099_default">
                         <option value="no">No</option>
                         <option value="yes">Yes</option>
-                        <option value="choose">No Default (Must Choose)</option>
                     </b-form-select>
                 </td>
                 <td>
@@ -42,7 +41,6 @@
                     <b-form-select v-model="form.private_pay_1099_default">
                         <option value="no">No</option>
                         <option value="yes">Yes</option>
-                        <option value="choose">No Default (Must Choose)</option>
                     </b-form-select>
                 </td>
                 <td>
@@ -64,7 +62,6 @@
                     <b-form-select v-model="form.other_1099_default">
                         <option value="no">No</option>
                         <option value="yes">Yes</option>
-                        <option value="choose">No Default (Must Choose)</option>
                     </b-form-select>
                 </td>
                 <td>
