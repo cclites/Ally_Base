@@ -45,8 +45,7 @@ export default {
             }
 
             // remove the entire row
-            const index = this.events.findIndex( e => e.id === data.request.pivot.schedule_id );
-            this.events.splice( index, 1 );
+            this.removeScheduleEvent( data.request.pivot.schedule_id );
 
             // close the modal
             this.requestsModal = false;
@@ -68,7 +67,7 @@ export default {
                 this.updateEvent( this.selectedEvent.id, this.selectedEvent );
             }
         },
-        removeScheduleEntry( schedule_id ){
+        removeScheduleEvent( schedule_id ){
 
             const index = this.events.findIndex( e => e.id == schedule_id );
             this.events.splice( index, 1 );

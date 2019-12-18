@@ -177,11 +177,11 @@
                     .then( res => {
 
                         schedule.request_status = res.data.data.status;
-                        if( schedule.request_status == 'uninterested' ) this.removeScheduleEntry( schedule.id );
+                        if( schedule.request_status == 'uninterested' ) this.removeScheduleEvent( schedule.id );
                     })
                     .catch( e => {
 
-                        this.removeScheduleEntry( schedule.id );
+                        this.removeScheduleEvent( schedule.id );
                     })
                     .finally( () => {
 
