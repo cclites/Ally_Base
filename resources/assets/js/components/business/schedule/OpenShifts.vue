@@ -26,8 +26,16 @@
 
                     <transition mode="out-in" name="slide-fade">
 
-                        <b-button variant="success" size="sm" class="btn-block" v-if=" !hasRequest( data.item.request_status ) " @click=" requestShift( data.item, 'pending' ) " key="request">Request Shift</b-button>
-                        <b-button variant="default" size="sm" class="btn-block" v-if=" hasRequest( data.item.request_status ) " @click=" requestShift( data.item, 'cancelled' ) " key="rescind">Cancel Request</b-button>
+                        <div v-if=" !hasRequest( data.item.request_status ) " class="d-flex" key="first-block">
+
+                            <b-button variant="default" size="sm" class="f-1" @click=" requestShift( data.item, 'uninterested' ) " key="request">Not Interested</b-button>
+                            <b-button variant="success" size="sm" class="f-1" @click=" requestShift( data.item, 'pending' ) " key="request">Request Shift</b-button>
+                        </div>
+
+                        <div v-if=" hasRequest( data.item.request_status ) " class="" key="second-block">
+
+                            <b-button variant="default" size="sm" class="btn-block" @click=" requestShift( data.item, 'cancelled' ) " key="rescind">Cancel Request</b-button>
+                        </div>
                     </transition>
                 </template>
                 <template slot="requests_count" scope="data">
@@ -148,6 +156,7 @@
                     case 'pending':
                     case 'denied':
                     case 'approved':
+                    case 'uninterested':
 
                         return true;
                         break;
@@ -168,11 +177,11 @@
                     .then( res => {
 
                         schedule.request_status = res.data.data.status;
+                        if( schedule.request_status == 'uninterested' ) this.removeScheduleEntry( schedule.id );
                     })
                     .catch( e => {
 
-                        const index = this.events.findIndex( e => e.id == schedule.id );
-                        this.events.splice( index, 1 );
+                        this.removeScheduleEntry( schedule.id );
                     })
                     .finally( () => {
 
@@ -199,7 +208,7 @@
                             }
 
                             return e;
-                        }).filter( e => e.request_status != 'denied' );
+                        }).filter( e => ![ 'denied', 'uninterested' ].includes( e.request_status ) );
 
                         this.eventsLoaded = true;
                     })

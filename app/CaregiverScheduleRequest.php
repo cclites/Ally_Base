@@ -31,10 +31,11 @@ class CaregiverScheduleRequest extends Pivot
      */
     protected $appends = [];
 
-    const REQUEST_APPROVED  = 'approved';
-    const REQUEST_DENIED    = 'denied';
-    const REQUEST_PENDING   = 'pending';
-    const REQUEST_CANCELLED = 'cancelled';
+    const REQUEST_APPROVED     = 'approved';
+    const REQUEST_DENIED       = 'denied';
+    const REQUEST_PENDING      = 'pending';
+    const REQUEST_CANCELLED    = 'cancelled';
+    const REQUEST_UNINTERESTED = 'uninterested';
 
     // misc error code constants
     const ERROR_SCHEDULE_TAKEN_RACE_CONDITION = 501;
@@ -147,7 +148,8 @@ class CaregiverScheduleRequest extends Pivot
             self::REQUEST_APPROVED,
             self::REQUEST_DENIED,
             self::REQUEST_PENDING,
-            self::REQUEST_CANCELLED
+            self::REQUEST_CANCELLED,
+            self::REQUEST_UNINTERESTED,
         ]);
     }
 }

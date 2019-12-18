@@ -68,5 +68,10 @@ export default {
                 this.updateEvent( this.selectedEvent.id, this.selectedEvent );
             }
         },
+        removeScheduleEntry( schedule_id ){
+
+            const index = this.events.findIndex( e => e.id == schedule_id );
+            this.events.splice( index, 1 );
+        }
     }
 }
