@@ -35,7 +35,7 @@ class Caregiver1099Controller extends Controller
     {
         // TODO: Unmask payer and caregiver SSN
         $pdf = $caregiver1099->getFilledCaregiverPdf(true, true);
-        $fileName = $clientName . '_' . $caregiver1099-> . "_" . $caregiver1099->caregiver_last_name . '1099.pdf';
+        $fileName = $clientName . '_' . $caregiver1099->caregiver_first_name . "_" . $caregiver1099->caregiver_last_name . '1099.pdf';
         $pdf->send($fileName);
     }
 }
