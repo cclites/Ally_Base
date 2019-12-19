@@ -83,7 +83,11 @@ class ClaimInvoiceController extends BaseController
 
         $this->authorize('read', $clientInvoice);
 
-        list($claim, $warnings) = $factory->createFromClientInvoice($clientInvoice);
+        try {
+            list($claim, $warnings) = $factory->createFromClientInvoice($clientInvoice);
+        } catch (\InvalidArgumentException $ex) {
+            return new ErrorResponse(500, 'Error creating claim: ' . $ex->getMessage());
+        }
 
         $message = 'Claim has been created.';
         if ($warnings->count() > 0) {
