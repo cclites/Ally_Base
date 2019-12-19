@@ -19,6 +19,8 @@ class Caregiver1099Controller extends Controller
      */
     public function index(Client $client)
     {
+        return response()->json([]);
+
         if($client->caregiver_1099 === 'ally'){
             return response()->json([]);
         }
