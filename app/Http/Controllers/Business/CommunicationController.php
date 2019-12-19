@@ -171,12 +171,12 @@ class CommunicationController extends Controller
      */
     public function threadIndex(Request $request)
     {
-        $threads = SmsThread::forRequestedBusinesses()
-            ->betweenDates($request->start_date, $request->end_date)
-            ->withReplies($request->reply_only == 1 ? true : false)
-            ->withCount(['recipients', 'replies'])
-            ->latest()
-            ->get();
+        $threads = SmsThread::forRequestedBusinesses([$request->business_id])
+                    ->betweenDates($request->start_date, $request->end_date)
+                    ->withReplies($request->reply_only == 1 ? true : false)
+                    ->withCount(['recipients', 'replies'])
+                    ->latest()
+                    ->get();
 
         if (request()->filled('json') && request()->wantsJson()) {
             return response()->json($threads);
