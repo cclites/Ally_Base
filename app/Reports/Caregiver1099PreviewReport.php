@@ -83,10 +83,12 @@ class Caregiver1099PreviewReport extends BaseReport
                     'caregiver_id' => $earnings->caregiver_id,
                     'caregiver_first_name' => $earnings->caregiver->first_name,
                     'caregiver_last_name' => $earnings->caregiver->last_name,
+                    'business_id' => $earnings->business->id,
                     'business_name' => $earnings->business->name,
                     'payment_total' => $earnings->earnings,
                     'caregiver_1099' => $earnings->client->caregiver_1099,
                     'caregiver_1099_id' => $earnings->caregiver_1099_id,
+                    'year' => $earnings->year,
                     'errors' => $earnings->getMissing1099Errors(),
                 ];
             });

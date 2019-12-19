@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Caregiver1099;
 use App\Caregiver;
+use App\CaregiverYearlyEarnings;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Rules\ValidSSN;
@@ -78,46 +79,31 @@ class Caregiver1099Controller extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
-     * @return Response
+     * @param StoreCaregiver1099Request $request
+     * @return ErrorResponse|SuccessResponse
      */
-
     public function store(StoreCaregiver1099Request $request)
     {
-        $query = new Caregiver1099Query();
-        $records = $query->generateReport($request->validated());
+        /** @var \App\CaregiverYearlyEarnings $earnings */
+        $earnings = CaregiverYearlyEarnings::where('business_id', $request->business_id)
+            ->where('client_id', $request->client_id)
+            ->where('caregiver_id', $request->caregiver_id)
+            ->where('year', $request->year)
+            ->first();
 
-        foreach ($records as $record) {
-            $record = (array)$record;
-            $data = [
-                'year' => $request->year,
-                'created_by' => auth()->user()->nameLastFirst(),
-                'payment_total' => floatval($record['payment_total']),
-                'client_id' => $record['client_id'],
-                'client_first_name' => $record['client_first_name'],
-                'client_last_name' => $record['client_last_name'],
-                'client_address1' => $record['client_address1'],
-                'client_address2' => $record['client_address2'],
-                'client_city' => $record['client_city'],
-                'client_state' => $record['client_state'],
-                'client_zip' => $record['client_zip'],
-                'client_ssn' => $record['client_ssn'],
-                'caregiver_id' => $record['caregiver_id'],
-                'caregiver_first_name' => $record['caregiver_first_name'],
-                'caregiver_last_name' => $record['caregiver_last_name'],
-                'caregiver_address1' => $record['caregiver_address1'],
-                'caregiver_address2' => $record['caregiver_address2'],
-                'caregiver_city' => $record['caregiver_city'],
-                'caregiver_state' => $record['caregiver_state'],
-                'caregiver_zip' => $record['caregiver_zip'],
-                'caregiver_ssn' => $record['caregiver_ssn'],
-            ];
-
-            $caregiver1099 = new Caregiver1099($data);
-            $caregiver1099->save();
+        if (empty($earnings)) {
+            return new ErrorResponse(500, 'Could not find earnings data for this caregiver and client.');
         }
 
-        return new SuccessResponse("Caregiver 1099 has been created");
+        if ($errors = $earnings->getMissing1099Errors()) {
+            $errors = implode(',', $errors);
+            return new ErrorResponse(500, "Could not create 1099 because of missing data.  Please fix the following: $errors.");
+        }
+
+        $record = $earnings->make1099Record();
+        $record->save();
+
+        return new SuccessResponse('Caregiver 1099 created successfully.');
     }
 
     /**

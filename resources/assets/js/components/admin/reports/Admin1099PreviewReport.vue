@@ -82,7 +82,7 @@
                         :per-page="perPage"
                     >
                         <template slot="actions" scope="row">
-                            <b-btn @click="create(row)"
+                            <b-btn @click="create(row.item)"
                                    class="btn btn-secondary"
                                    title="Create 1099"
                                    v-if="! row.item.caregiver_1099_id && ! row.item.errors.length"
@@ -231,16 +231,12 @@
                     })
             },
 
-            create(record){
-
-                let index = record.index;
-
+            create(item){
                 let data = new Form({
-                    'year': this.form.year,
-                    'business_id': this.form.business_id,
-                    'client_id' : record.item.client_id,
-                    'caregiver_id' : record.item.caregiver_id,
-                    'payment_total' : record.item.payment_total,
+                    'year': item.year,
+                    'business_id': item.business_id,
+                    'client_id' : item.client_id,
+                    'caregiver_id' : item.caregiver_id,
                 });
 
                 data.post('/admin/business-1099/create')

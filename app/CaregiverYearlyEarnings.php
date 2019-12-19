@@ -99,9 +99,9 @@ class CaregiverYearlyEarnings extends BaseModel
      * Returns a list of errors that must be fixed before this
      * earnings report can be converted into a 1099.
      *
-     * @return array|null
+     * @return array
      */
-    public function getMissing1099Errors() : ?array
+    public function getMissing1099Errors() : array
     {
         $errors = [];
 
@@ -179,5 +179,38 @@ class CaregiverYearlyEarnings extends BaseModel
         }
 
         return $errors;
+    }
+
+    /**
+     * Convert yearly earnings record into a Caregiver1099 object.
+     *
+     * @return Caregiver1099
+     */
+    public function make1099Record() : Caregiver1099
+    {
+        return Caregiver1099::make([
+            'year' => $this->year,
+            'business_id' => $this->business_id,
+            'payment_total' => $this->earnings,
+            'client_id' => $this->client_id,
+            'client_first_name' => $this->client->first_name,
+            'client_last_name' => $this->client->last_name,
+            'client_address1' => $this->client->address->address1,
+            'client_address2' => $this->client->address->address2,
+            'client_city' => $this->client->address->city,
+            'client_state' => $this->client->address->state,
+            'client_zip' => $this->client->address->zip,
+            'client_ssn' => encrypt($this->client->ssn),
+            'caregiver_id' => $this->caregiver_id,
+            'caregiver_first_name' => $this->caregiver->first_name,
+            'caregiver_last_name' => $this->caregiver->last_name,
+            'caregiver_address1' => $this->caregiver->address->address1,
+            'caregiver_address2' => $this->caregiver->address->address2,
+            'caregiver_city' => $this->caregiver->address->city,
+            'caregiver_state' => $this->caregiver->address->state,
+            'caregiver_zip' => $this->caregiver->address->zip,
+            'caregiver_ssn' => encrypt($this->caregiver->ssn),
+            'created_by' => auth()->user()->nameLastFirst(),
+        ]);
     }
 }
