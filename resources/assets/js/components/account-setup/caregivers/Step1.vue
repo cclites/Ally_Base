@@ -51,7 +51,7 @@
                         </b-form-group>
                         <b-form-group label="Social Security Number" label-for="ssn" label-class="required">
                             <mask-input v-model="form.ssn" id="ssn" name="ssn" type="ssn" :disabled="busy"></mask-input>
-                            <input-help :form="form" field="ssn" text="Enter the client's social security number."></input-help>
+                            <input-help :form="form" field="ssn" text="Enter the caregiver's social security number."></input-help>
                         </b-form-group>
                         <b-form-group label="Phone Number" label-for="phone_number" label-class="required">
                             <mask-input v-model="form.phone_number" id="phone_number" type="phone" :disabled="busy"></mask-input>
