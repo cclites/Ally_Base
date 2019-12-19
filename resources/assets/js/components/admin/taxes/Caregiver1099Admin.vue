@@ -84,7 +84,7 @@
             },
 
             getEmails(year, role){
-                let url = '/admin/business-1099/userEmails/' + year + '/' + role;
+                let url = '/admin/business-1099/user-emails/' + year + '/' + role;
                 this.emailModal = true;
                 this.modalTitle = _.capitalize(role) + " emails for " + year;
 

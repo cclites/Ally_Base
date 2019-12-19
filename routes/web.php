@@ -650,7 +650,7 @@ Route::group([
     Route::post('business-1099/create', 'Admin\Caregiver1099Controller@store')->name('business-1099-create');
     Route::patch('business-1099/{caregiver1099}', 'Admin\Caregiver1099Controller@update')->name('business-1099-update');
 
-    Route::get('/business-1099/userEmails/{year}/{role}', 'Admin\Admin1099Controller@UserEmailsList')->name('business-1099-transmit');
+    Route::get('/business-1099/user-emails/{year}/{role}', 'Admin\Admin1099Controller@UserEmailsList')->name('business-1099-transmit');
     Route::get('business-1099/transmit/{year}', 'Admin\Caregiver1099Controller@transmit')->name('business-1099-transmit');
     Route::get('admin-1099', 'Admin\Caregiver1099Controller@admin')->name('admin-1099');
     Route::patch('business-1099-settings/{business}', 'Business\SettingController@updateBusiness1099Settings')->name('business-1099-settings');
