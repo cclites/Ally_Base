@@ -47,11 +47,6 @@ class ChainSettingsController extends Controller
                     'can_edit_send_1099' => $chainClientTypeSettings->other_1099_edit, //can edit
                     'send_1099' => $chainClientTypeSettings->other_1099_default, //send by default
                 ]);
-
-            $business->clients()->where('send_1099', 'choose')
-                ->update([
-                    'can_edit_send_1099' => 1,
-                ]);
         });
 
         \DB::commit();

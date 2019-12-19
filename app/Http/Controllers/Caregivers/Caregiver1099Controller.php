@@ -19,10 +19,12 @@ class Caregiver1099Controller extends Controller
      */
     public function index(Caregiver $caregiver)
     {
+        return response()->json([]);
+
         $caregiver_1099s = $caregiver->caregiver1099s->map(function($caregiver_1099){
             return [
                 'year'=> $caregiver_1099->year,
-                'name' => $caregiver_1099->client_fname . " " . $caregiver_1099->client_lname,
+                'name' => $caregiver_1099->client_first_name . " " . $caregiver_1099->client_last_name,
                 'id' => $caregiver_1099->id
             ];
         })
@@ -35,7 +37,7 @@ class Caregiver1099Controller extends Controller
     {
         // TODO: Unmask payer and caregiver SSN
         $pdf = $caregiver1099->getFilledCaregiverPdf(true, true);
-        $fileName = $clientName . '_' . $caregiver1099->caregiver_fname . "_" . $caregiver1099->caregiver_lname . '1099.pdf';
+        $fileName = $clientName . '_' . $caregiver1099->caregiver_first_name . "_" . $caregiver1099->caregiver_last_name . '1099.pdf';
         $pdf->send($fileName);
     }
 }

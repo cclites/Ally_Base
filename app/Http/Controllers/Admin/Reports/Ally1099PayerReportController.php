@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Admin\Reports;
 
-use App\Caregiver1099;
-use App\Admin\Queries\Caregiver1099Query;
 use App\Reports\Ally1099PayerReport;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;

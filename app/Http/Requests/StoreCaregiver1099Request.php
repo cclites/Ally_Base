@@ -13,11 +13,7 @@ class StoreCaregiver1099Request extends FormRequest
      */
     public function authorize()
     {
-        if(auth()->user()->role_type === 'admin'){
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     /**
@@ -32,7 +28,6 @@ class StoreCaregiver1099Request extends FormRequest
             'business_id' => 'required|integer',
             'client_id' => 'required|integer',
             'caregiver_id' => 'required|integer',
-            'payment_total' => 'required|numeric'
         ];
     }
 }

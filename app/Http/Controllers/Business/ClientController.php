@@ -256,7 +256,7 @@ class ClientController extends BaseController
             ];
         });
 
-        $chainClientTypeSettings = $this->businessChain()->clientTypeSettings;
+        $chainClientTypeSettings = $client->business->chain->clientTypeSettings;
 
         return view('business.clients.show', compact('client', 'lastStatusDate', 'business', 'salesPeople', 'payers', 'services', 'auths', 'invoices', 'notifications', 'chainClientTypeSettings'));
     }
