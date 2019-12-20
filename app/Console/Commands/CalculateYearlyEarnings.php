@@ -185,9 +185,9 @@ class CalculateYearlyEarnings extends Command
                     foreach ($invoice->items->whereIn('invoiceable_type', ['shifts', 'shift_services']) as $item) {
                         /** @var \App\Shift $shift */
                         $shift = null;
-                        if ($item->shift != null) {
+                        if ($item->invoiceable_type == 'shifts' && $item->shift != null) {
                             $shift = $item->shift;
-                        } else if ($item->shiftService != null) {
+                        } else if ($item->invoiceable_type == 'shift_services' && $item->shiftService != null) {
                             $shift = $item->shiftService->shift;
 
                             if (empty($shift)) {
@@ -204,6 +204,11 @@ class CalculateYearlyEarnings extends Command
 
                         if (in_array($shift->id, $shifts)) {
                             // Already counted this shift and all of its services.
+                            continue;
+                        }
+
+                        if ($shift->client_id != $clientId) {
+                            $this->log("Shift does not match client! - Shift ID: #{$shift->id} - Client ID: #{$clientId}", null);
                             continue;
                         }
 
