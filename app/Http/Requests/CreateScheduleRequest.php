@@ -23,6 +23,7 @@ class CreateScheduleRequest extends BusinessClientRequest
 //            'provider_fee' => 'nullable|numeric|min:0|max:999.99',
             'caregiver_rate_id' => 'nullable|exists:rate_codes,id',
             'client_rate_id' => 'nullable|exists:rate_codes,id',
+            'cgMode' => 'nullable|string|in:client,all',
             'notes' => 'nullable|string|max:1024',
             'hours_type' => 'required|in:default,overtime,holiday',
 //            'overtime_duration' => 'nullable|numeric|min:0|max:' . (int) $this->input('duration'),

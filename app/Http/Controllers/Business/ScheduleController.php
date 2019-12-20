@@ -197,6 +197,8 @@ class ScheduleController extends BaseController
         $this->authorize('update', $schedule);
         $this->authorize('read', $business);
 
+        unset($request['cgMode']);
+
         if (!$this->validateAgainstNegativeRates($request)) {
             return new ErrorResponse(400, 'The provider fee cannot be a negative number.');
         }
@@ -629,10 +631,20 @@ class ScheduleController extends BaseController
     public function ensureCaregiverAssignmentAndCreateDefaultRates(CreateScheduleRequest $request) : bool
     {
         $client = Client::findOrFail($request->client_id);
+
+        $allServices = $request->getServices();
+
         if ($request->caregiver_id && ! $client->hasCaregiver($request->caregiver_id)) {
+
             if (filled($request->service_id)) { // hourly or fixed rate
+
                 if ($request->hours_type != Shift::HOURS_DEFAULT) {
+
                     throw new AutomaticCaregiverAssignmentException('Cannot create caregiver assignment because you are using HOL/OT rates.  If this is correct, you must assign the Caregiver manually from the Client\'s Caregivers & Rates tab.');
+                }
+
+                if( count($allServices) === 0 && $request->cgMode === 'all'){
+                    $request->service_id = null;
                 }
 
                 // Create default rates based on the rates in the request
@@ -649,11 +661,20 @@ class ScheduleController extends BaseController
                 ]);
 
             } else { // service breakout
+
+                \Log::info("Step 4");
+
                 // Create default rates for each *UNIQUE* service entry
-                foreach ($request->getServices() as $service) {
+                foreach ($allServices as $service) {
+
+                    \Log::info("Processing services");
+                    \Log::info("Step 5");
+
                     if (app(RateFactory::class)->matchingRateExists($client, Carbon::parse($request->starts_at)->toDateString(), $service['service_id'], $service['payer_id'], $request->caregiver_id)) {
                         throw new AutomaticCaregiverAssignmentException('Cannot create caregiver assignment because you have different rates for the same service/payer.  If this is correct, you must assign the Caregiver manually from the Client\'s Caregivers & Rates tab.');
                     }
+
+                    \Log::info("Step 6");
 
                     if ($service['hours_type'] != Shift::HOURS_DEFAULT) {
                         throw new AutomaticCaregiverAssignmentException('Cannot create caregiver assignment because you are using HOL/OT rates.  If this is correct, you must assign the Caregiver manually from the Client\'s Caregivers & Rates tab.');
