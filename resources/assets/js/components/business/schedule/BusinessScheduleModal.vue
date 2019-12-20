@@ -529,6 +529,7 @@
                 loadingQuickbooksConfig: false,
                 auditLogItems: [],
                 emptyText: 'No results',
+                'cgMode': '',
             }
         },
 
@@ -548,7 +549,7 @@
             }),
 
             caregiverAssignmentMode() {
-                return this.form.cgMode == 'all' && this.clientCaregiversLoaded && this.form.caregiver_id && ! this.selectedCaregiver.id;
+                return this.cgMode == 'all' && this.clientCaregiversLoaded && this.form.caregiver_id && ! this.selectedCaregiver.id;
             },
 
             selectedCaregiver() {
@@ -604,7 +605,7 @@
             },
 
             caregivers() {
-                if (! this.form.client_id || this.form.cgMode === 'all') {
+                if (! this.form.client_id || this.cgMode === 'all') {
                     return this.passCaregivers || this.allCaregivers;
                 }
                 return this.clientCaregivers;
@@ -615,7 +616,7 @@
             },
 
             toggleCaregiversLabel() {
-                if (this.form.cgMode === 'all') {
+                if (this.cgMode === 'all') {
                     return "Show only Client's"
                 }
                 return 'Show All';
@@ -759,7 +760,7 @@
             },
 
             selectCaregiver(id) {
-                this.form.cgMode = 'all';
+                this.cgMode = 'all';
                 this.form.caregiver_id = id;
                 this.activeTab = 0;
             },
@@ -814,7 +815,6 @@
                             'ally_fee': null,
                         },
                         'quickbooks_service_id': schedule.quickbooks_service_id || '',
-                        'cgMode': '',
                     });
                     this.recalculateRates(this.form, this.form.client_rate, this.form.caregiver_rate);
                     this.initServicesFromObject(schedule);
@@ -1032,7 +1032,7 @@
             },
 
             toggleCaregivers() {
-                this.form.cgMode = this.form.cgMode === 'all' ? 'client' : 'all';
+                this.cgMode = this.cgMode === 'all' ? 'client' : 'all';
             },
 
             onChangeServiceHoursType(newVal, oldVal, serviceIndex) {
@@ -1101,9 +1101,9 @@
 
                 // Use cg all mode if an caregiver is pre-selected
                 if (this.schedule.caregiver_id) {
-                    this.form.cgMode = 'all';
+                    this.cgMode = 'all';
                 } else {
-                    this.form.cgMode = 'client';
+                    this.cgMode = 'client';
                 }
 
                 if(this.selectedSchedule.id){
