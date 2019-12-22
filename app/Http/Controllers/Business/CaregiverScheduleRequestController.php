@@ -11,6 +11,7 @@ use App\Responses\SuccessResponse;
 use App\Schedule;
 use App\Scheduling\OpenShiftStatus;
 use App\Scheduling\ScheduleAggregator;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -65,10 +66,8 @@ class CaregiverScheduleRequestController extends BaseController
      * @param  \App\CaregiverScheduleRequest  $caregiverScheduleRequest
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, CaregiverScheduleRequest $caregiverScheduleRequest, Schedule $schedule, ScheduleAggregator $aggregator)
+    public function update( Request $request, CaregiverScheduleRequest $caregiverScheduleRequest, Schedule $schedule )
     {
-        // $schedule = Schedule::findOrFail( $request->schedule_id );
-
         $this->authorize( 'update', $schedule );
 
         $action = $request->status;
@@ -76,7 +75,7 @@ class CaregiverScheduleRequestController extends BaseController
         DB::beginTransaction();
         switch( $action ){
 
-            case OpenShiftStatus::REQUEST_APPROVED:
+            case OpenShiftStatus::REQUEST_APPROVED():
 
                 if( !$caregiverScheduleRequest->update([ 'status' => $action ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
 
@@ -105,7 +104,7 @@ class CaregiverScheduleRequestController extends BaseController
                 }
 
                 // Verify we are not going above hours
-                $totalHours    = $aggregator->getTotalScheduledHoursForWeekOf( $schedule->starts_at, $schedule->client_id );
+                $totalHours    = $this->getTotalScheduledHoursForWeekOf( $schedule->starts_at, $schedule->client_id );
                 $newTotalHours = $totalHours - ($schedule->duration / 60);
                 if ( $newTotalHours > $client->max_weekly_hours ) {
 
@@ -122,7 +121,7 @@ class CaregiverScheduleRequestController extends BaseController
 
                 // ERIK TODO => text them? notification? Ask Jason
                 break;
-            case OpenShiftStatus::REQUEST_DENIED:
+            case OpenShiftStatus::REQUEST_DENIED():
 
                 if( !$caregiverScheduleRequest->update([ 'status' => $action ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
 
@@ -146,5 +145,16 @@ class CaregiverScheduleRequestController extends BaseController
         DB::commit();
 
         return new SuccessResponse( 'Successfully updated schedule request!', $action );
+    }
+
+    private function getTotalScheduledHoursForWeekOf( Carbon $date, $client_id )
+    {
+        $weekStart = $date->copy()->startOfWeek();
+        $weekEnd = $date->copy()->endOfWeek();
+        $schedules = $this->fresh()
+            ->where('client_id', $client_id)
+            ->getSchedulesStartingBetween($weekStart, $weekEnd);
+
+        return $schedules->sum('duration') / 60;
     }
 }

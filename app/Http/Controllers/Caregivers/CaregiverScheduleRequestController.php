@@ -31,7 +31,7 @@ class CaregiverScheduleRequestController extends BaseController
 
         $outstanding_request = $schedule->latestRequestFor( $caregiver->id );
 
-        if( optional( $outstanding_request )->status == OpenShiftStatus::REQUEST_DENIED ) return new ErrorResponse( 500, 'Schedule is no longer open, please contact support or refresh your page.', [ 'code' => CaregiverScheduleRequest::ERROR_REQUEST_DENIED_AND_CAREGIVER_TRIED_AGAIN ] );
+        if( optional( $outstanding_request )->status == OpenShiftStatus::REQUEST_DENIED() ) return new ErrorResponse( 500, 'Schedule is no longer open, please contact support or refresh your page.', [ 'code' => CaregiverScheduleRequest::ERROR_REQUEST_DENIED_AND_CAREGIVER_TRIED_AGAIN ] );
 
         if( empty( $outstanding_request ) ){
             // no existing relationship, create one
