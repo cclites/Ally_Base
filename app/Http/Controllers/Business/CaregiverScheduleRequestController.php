@@ -9,6 +9,7 @@ use App\Client;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Schedule;
+use App\Scheduling\OpenShiftStatus;
 use App\Scheduling\ScheduleAggregator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -49,7 +50,7 @@ class CaregiverScheduleRequestController extends BaseController
 
         $requests = $schedule->schedule_requests->map( function( $r ){
 
-            $r[ 'caregiver_client_relationship_exists' ] = $r->caregiver_client_relationship_exists();
+            $r[ 'caregiverClientRelationshipExists' ] = $r->caregiverClientRelationshipExists();
             $r[ 'nameLastFirst' ] = $r->caregiver->nameLastFirst;
             return $r;
         });
@@ -75,10 +76,9 @@ class CaregiverScheduleRequestController extends BaseController
         DB::beginTransaction();
         switch( $action ){
 
-            case 'approved':
+            case OpenShiftStatus::REQUEST_APPROVED:
 
-                $newStatus = CaregiverScheduleRequest::REQUEST_APPROVED;
-                if( !$caregiverScheduleRequest->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
+                if( !$caregiverScheduleRequest->update([ 'status' => $action ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
 
                 $client = Client::find( $schedule->client_id );
 
@@ -122,10 +122,9 @@ class CaregiverScheduleRequestController extends BaseController
 
                 // ERIK TODO => text them? notification? Ask Jason
                 break;
-            case 'denied':
+            case OpenShiftStatus::REQUEST_DENIED:
 
-                $newStatus = CaregiverScheduleRequest::REQUEST_DENIED;
-                if( !$caregiverScheduleRequest->update([ 'status' => $newStatus ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
+                if( !$caregiverScheduleRequest->update([ 'status' => $action ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
 
                 // Update the schedule
                 if( !empty( $schedule->caregiver_id ) ){
@@ -146,6 +145,6 @@ class CaregiverScheduleRequestController extends BaseController
 
         DB::commit();
 
-        return new SuccessResponse( 'Successfully updated schedule request!', $newStatus );
+        return new SuccessResponse( 'Successfully updated schedule request!', $action );
     }
 }

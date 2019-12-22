@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Billing\ClientRate;
+use App\Scheduling\OpenShiftStatus;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class CaregiverScheduleRequest extends Pivot
@@ -30,12 +31,6 @@ class CaregiverScheduleRequest extends Pivot
      * @var array
      */
     protected $appends = [];
-
-    const REQUEST_APPROVED     = 'approved';
-    const REQUEST_DENIED       = 'denied';
-    const REQUEST_PENDING      = 'pending';
-    const REQUEST_CANCELLED    = 'cancelled';
-    const REQUEST_UNINTERESTED = 'uninterested';
 
     // misc error code constants
     const ERROR_SCHEDULE_TAKEN_RACE_CONDITION = 501;
@@ -96,7 +91,7 @@ class CaregiverScheduleRequest extends Pivot
      */
     public function scopeWhereActive( $query )
     {
-        $query->whereIn( 'status', [ self::REQUEST_UNINTERESTED, self::REQUEST_PENDING ] );
+        $query->whereIn( 'status', [ OpenShiftStatus::REQUEST_UNINTERESTED, OpenShiftStatus::REQUEST_PENDING ] );
     }
 
     /**
@@ -107,7 +102,7 @@ class CaregiverScheduleRequest extends Pivot
      */
     public function scopeWhereUninterested( $query )
     {
-        $query->where( 'status', self::REQUEST_UNINTERESTED );
+        $query->where( 'status', OpenShiftStatus::REQUEST_UNINTERESTED );
     }
 
     /**
@@ -118,7 +113,7 @@ class CaregiverScheduleRequest extends Pivot
      */
     public function scopeWherePending( $query )
     {
-        $query->where( 'status', self::REQUEST_PENDING );
+        $query->where( 'status', OpenShiftStatus::REQUEST_PENDING );
     }
 
     /**
@@ -143,7 +138,7 @@ class CaregiverScheduleRequest extends Pivot
     /**
      * finds a related ClientRate between the caregiver and client associated with the Schedule Request
      */
-    public function caregiver_client_relationship_exists()
+    public function caregiverClientRelationshipExists()
     {
         return ClientRate::where( 'client_id', $this->client_id )->where( 'caregiver_id', $this->caregiver_id )->exists();
     }
@@ -160,18 +155,5 @@ class CaregiverScheduleRequest extends Pivot
         if( is_office_user() ) return '/business' . $url;
 
         return ''; // maybe this can be something else..
-    }
-
-    public static function is_acceptable_status( $status )
-    {
-        // could probably change this to return the array itself and then call it using if( in_array() ) to extend the usefullness of this..
-        return in_array( $status, [
-
-            self::REQUEST_APPROVED,
-            self::REQUEST_DENIED,
-            self::REQUEST_PENDING,
-            self::REQUEST_CANCELLED,
-            self::REQUEST_UNINTERESTED,
-        ]);
     }
 }

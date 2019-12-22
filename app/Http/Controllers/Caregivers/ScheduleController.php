@@ -2,16 +2,10 @@
 
 namespace App\Http\Controllers\Caregivers;
 
-use App\Business;
-use App\CaregiverScheduleRequest;
-use App\Responses\ErrorResponse;
-use App\Schedule;
 use App\Scheduling\ScheduleAggregator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
-use App\Responses\Resources\Schedule as ScheduleResponse;
-use App\Responses\SuccessResponse;
 
 class ScheduleController extends BaseController
 {

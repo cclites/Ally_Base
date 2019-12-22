@@ -7,6 +7,7 @@ use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Exceptions\MissingTimezoneException;
 use App\Data\ScheduledRates;
+use App\Scheduling\OpenShiftStatus;
 use App\Scheduling\RuleParser;
 use App\Shifts\RateFactory;
 use App\Shifts\ScheduleConverter;
@@ -141,7 +142,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
                 DB::table( 'caregiver_schedule_requests' )
                     ->where( 'caregiver_id', $original[ 'caregiver_id' ] )
                     ->where( 'schedule_id', $schedule->id )
-                    ->update([ 'status' => CaregiverScheduleRequest::REQUEST_DENIED ]);
+                    ->update([ 'status' => OpenShiftStatus::REQUEST_DENIED ]);
 
                 // if theres a new cg, update their request if exists
                 if( !empty( $dirty[ 'caregiver_id' ] ) ){
@@ -149,7 +150,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
                     DB::table( 'caregiver_schedule_requests' )
                         ->where( 'caregiver_id', $dirty[ 'caregiver_id' ] )
                         ->where( 'schedule_id', $schedule->id )
-                        ->update([ 'status' => CaregiverScheduleRequest::REQUEST_APPROVED ]);
+                        ->update([ 'status' => OpenShiftStatus::REQUEST_APPROVED ]);
                 }
             }
         });
@@ -261,7 +262,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     /**
      * gets the latest shift request for a given caregiver, or null if there is none
      */
-    public function latest_request_for( $caregiver_id )
+    public function latestRequestFor( $caregiver_id )
     {
         return optional( $this->schedule_requests()->where( 'caregiver_id', $caregiver_id )->first() )->pivot;
     }

@@ -4,20 +4,14 @@ namespace App\Http\Controllers\Business;
 
 use App\Billing\ClientRate;
 use App\Billing\ScheduleService;
-use App\Business;
-use App\Caregiver;
-use App\CaregiverLicense;
-use App\CaregiverScheduleRequest;
 use App\Exceptions\AutomaticCaregiverAssignmentException;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
 use App\Http\Requests\BulkDestroyScheduleRequest;
 use App\Http\Requests\BulkUpdateScheduleRequest;
-use App\Http\Requests\BusinessRequest;
 use App\Http\Requests\CreateScheduleRequest;
 use App\Http\Requests\PrintableScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
-use App\Notifications\Caregiver\CertificationExpiring;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -35,7 +29,6 @@ use App\Shifts\RateFactory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Client;
-use Illuminate\Support\Facades\DB;
 
 class ScheduleController extends BaseController
 {

@@ -6,6 +6,7 @@ use App\CaregiverScheduleRequest;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Schedule;
+use App\Scheduling\OpenShiftStatus;
 use Illuminate\Http\Request;
 
 class CaregiverScheduleRequestController extends BaseController
@@ -21,16 +22,16 @@ class CaregiverScheduleRequestController extends BaseController
         if( !is_caregiver() ) abort( 403 );
 
         // white list acceptable values
-        if( !CaregiverScheduleRequest::is_acceptable_status( $request->status ) ) new ErrorResponse( 500, 'Unable to request shift at this time, please contact support' );
+        if( !OpenShiftStatus::isAcceptableStatus( $request->status ) ) new ErrorResponse( 500, 'Unable to request shift at this time, please contact support' );
 
         // if the schedule is not open anymore, dont allow the request to go through
         if( !$schedule->is_open ) new ErrorResponse( 500, 'Schedule is no longer open, please contact support or refresh your page.', [ 'code' => CaregiverScheduleRequest::ERROR_SCHEDULE_TAKEN_RACE_CONDITION ] );
 
         $caregiver = auth()->user()->role;
 
-        $outstanding_request = $schedule->latest_request_for( $caregiver->id );
+        $outstanding_request = $schedule->latestRequestFor( $caregiver->id );
 
-        if( optional( $outstanding_request )->status == CaregiverScheduleRequest::REQUEST_DENIED ) return new ErrorResponse( 500, 'Schedule is no longer open, please contact support or refresh your page.', [ 'code' => CaregiverScheduleRequest::ERROR_REQUEST_DENIED_AND_CAREGIVER_TRIED_AGAIN ] );
+        if( optional( $outstanding_request )->status == OpenShiftStatus::REQUEST_DENIED ) return new ErrorResponse( 500, 'Schedule is no longer open, please contact support or refresh your page.', [ 'code' => CaregiverScheduleRequest::ERROR_REQUEST_DENIED_AND_CAREGIVER_TRIED_AGAIN ] );
 
         if( empty( $outstanding_request ) ){
             // no existing relationship, create one

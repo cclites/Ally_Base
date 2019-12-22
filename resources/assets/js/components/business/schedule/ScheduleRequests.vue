@@ -22,7 +22,7 @@
 
                 <div class="f-1">{{ request.nameLastFirst }}</div>
                 <div class="f-1">{{ formatDateFromUTC( request.created_at ) }}</div>
-                <div class="f-1">{{ request.caregiver_client_relationship_exists ? 'yes' : 'no' }}</div>
+                <div class="f-1">{{ request.caregiverClientRelationshipExists ? 'yes' : 'no' }}</div>
                 <div class="f-1">{{ request.status }}</div>
                 <div class="f-1" style="min-width: 300px">
 
