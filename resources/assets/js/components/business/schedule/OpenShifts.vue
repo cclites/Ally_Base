@@ -16,7 +16,7 @@
 
         <div v-show="! loading" class="table-responsive">
 
-            <ally-table id="open-shifts" :columns=" fields " :items=" events " sort-by="start" :perPage=" 1000 " :isBusy=" isBusy ">
+            <ally-table id="open-shifts" :columns=" fields " :items=" events " sort-by="start" :perPage=" 1000 " :isBusy=" form.busy ">
 
                 <template slot="start" scope="data">
 
@@ -81,8 +81,8 @@
                 events           : [],
                 eventsLoaded     : false,
                 active_business  : null,
-                isBusy           : false,
                 requests         : [],
+                form             : new Form({ status : null }, false ),
                 fields : [
 
                     {
@@ -172,14 +172,9 @@
 
                 if( this.role_type != 'caregiver' ) return false;
 
-                this.isBusy = true;
+                this.form.status = status;
 
-                let form = new Form({
-
-                    status : status
-                }, false );
-
-                form.post( `/schedule/requests/${schedule.id}` )
+                this.form.post( `/schedule/requests/${schedule.id}` )
                     .then( res => {
 
                         schedule.request_status = res.data.data.status;
@@ -188,10 +183,6 @@
                     .catch( e => {
 
                         this.removeScheduleEvent( schedule.id );
-                    })
-                    .finally( () => {
-
-                        this.isBusy = false;
                     });
             },
             fetchEvents( savePosition = false ) {
