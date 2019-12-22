@@ -133,8 +133,6 @@ class CaregiverScheduleRequestController extends BaseController
                         'caregiver_id' => null
                     ]);
                 }
-
-                // ERIK TODO => text them? notification? Ask Jason
                 break;
             default:
 
