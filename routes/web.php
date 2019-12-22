@@ -431,7 +431,7 @@ Route::group([
     Route::get('schedule/requests/{schedule?}', 'Business\CaregiverScheduleRequestController@index' )->name( 'schedule.requests.index' );
     Route::patch('schedule/requests/{caregiverScheduleRequest}', 'Business\CaregiverScheduleRequestController@update' )->name( 'schedule.requests.update' );
 
-    Route::get('schedule/open-shifts', 'Business\ScheduleController@openShifts')->name('schedule.open-shifts');
+    Route::get('schedule/open-shifts', 'Business\OpenShiftsController@index')->name('schedule.open-shifts');
     Route::post('schedule/warnings', 'Business\ScheduleController@warnings')->name('schedule.warnings');
     Route::post('schedule/print', 'Business\ScheduleController@print')->name('printable.schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');

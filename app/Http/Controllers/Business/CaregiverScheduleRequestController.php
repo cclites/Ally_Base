@@ -58,49 +58,6 @@ class CaregiverScheduleRequestController extends BaseController
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\CaregiverScheduleRequest  $caregiverScheduleRequest
-     * @return \Illuminate\Http\Response
-     */
-    public function show(CaregiverScheduleRequest $caregiverScheduleRequest)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\CaregiverScheduleRequest  $caregiverScheduleRequest
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(CaregiverScheduleRequest $caregiverScheduleRequest)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -192,17 +149,5 @@ class CaregiverScheduleRequestController extends BaseController
         DB::commit();
 
         return new SuccessResponse( 'Successfully updated schedule request!', $newStatus );
-    }
-
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\CaregiverScheduleRequest  $caregiverScheduleRequest
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(CaregiverScheduleRequest $caregiverScheduleRequest)
-    {
-        //
     }
 }

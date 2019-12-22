@@ -93,6 +93,12 @@ class OpenShiftsController extends BaseController
             return [ 'events' => $schedules, 'requests' => $caregiver->mapped_schedule_requests ];
         }
 
-        return view( 'open_shifts', [ 'businesses' => $caregiver->businesses, 'role_type' => auth()->user()->role_type ]);
+        return view_component( 'open-shifts',
+            'Open Shifts',
+            [ 'businesses' => $caregiver->businesses, 'role_type' => auth()->user()->role_type ],
+            [
+                'Home' => route('home')
+            ]
+        );
     }
 }
