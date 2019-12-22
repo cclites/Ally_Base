@@ -16,10 +16,10 @@ class CreateTableCaregiverScheduleRequests extends Migration
         Schema::create( 'caregiver_schedule_requests', function ( Blueprint $table ) {
 
             $table->increments( 'id' );
-            $table->unsignedInteger( 'business_id' )->index();
-            $table->unsignedInteger( 'client_id' )->index();
-            $table->unsignedInteger( 'caregiver_id' )->index();
-            $table->unsignedInteger( 'schedule_id' )->index();
+            $table->unsignedInteger( 'business_id' );
+            $table->unsignedInteger( 'client_id' );
+            $table->unsignedInteger( 'caregiver_id' );
+            $table->unsignedInteger( 'schedule_id' );
             $table->string( 'status', 50 )->default( 'pending' )->index();
             $table->timestamps();
 

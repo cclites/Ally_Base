@@ -129,7 +129,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
             $builder->has('client');
         });
 
-        static::saving( function( $schedule ){
+        static::updating( function( $schedule ){
 
             $original = $schedule->getOriginal();
             $dirty = $schedule->getDirty();
