@@ -33,13 +33,13 @@
 
                         <div v-if=" !hasRequest( data.item.request_status ) " class="d-flex" key="first-block">
 
-                            <b-button variant="success" size="sm" class="f-1 mr-1" @click=" requestShift( data.item, 'uninterested' ) " key="request">Not Interested</b-button>
-                            <b-button variant="primary" size="sm" class="f-1 ml-1" @click=" requestShift( data.item, 'pending' ) " key="request">Request Shift</b-button>
+                            <b-button variant="success" size="sm" class="f-1 mr-1" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.UNINTERESTED ) " key="request">Not Interested</b-button>
+                            <b-button variant="primary" size="sm" class="f-1 ml-1" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.PENDING ) " key="request">Request Shift</b-button>
                         </div>
 
                         <div v-if=" hasRequest( data.item.request_status ) " class="" key="second-block">
 
-                            <b-button variant="default" size="sm" class="btn-block" @click=" requestShift( data.item, 'cancelled' ) " key="rescind">Cancel Request</b-button>
+                            <b-button variant="default" size="sm" class="btn-block" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.CANCELLED ) " key="rescind">Cancel Request</b-button>
                         </div>
                     </transition>
                 </template>
@@ -67,6 +67,7 @@
     import AuthUser from '../../../mixins/AuthUser';
     import HasOpenShiftsModal from '../../../mixins/HasOpenShiftsModal';
     import ScheduleRequestModal from "../../modals/ScheduleRequestModal";
+    import Constants from '../../../mixins/Constants';
 
     export default {
 
@@ -154,14 +155,14 @@
                 switch( status ){
 
                     case null:
-                    case 'cancelled':
+                    case this.OPEN_SHIFTS_STATUS.CANCELLED:
 
                         return false;
                         break;
-                    case 'pending':
-                    case 'denied':
-                    case 'approved':
-                    case 'uninterested':
+                    case this.OPEN_SHIFTS_STATUS.PENDING:
+                    case this.OPEN_SHIFTS_STATUS.DENIED:
+                    case this.OPEN_SHIFTS_STATUS.APPROVED:
+                    case this.OPEN_SHIFTS_STATUS.UNINTERESTED:
 
                         return true;
                         break;
@@ -182,7 +183,7 @@
                     .then( res => {
 
                         schedule.request_status = res.data.data.status;
-                        if( schedule.request_status == 'uninterested' ) this.removeScheduleEvent( schedule.id );
+                        if( schedule.request_status == this.OPEN_SHIFTS_STATUS.UNINTERESTED ) this.removeScheduleEvent( schedule.id );
                     })
                     .catch( e => {
 
@@ -214,7 +215,7 @@
                             }
 
                             return e;
-                        }).filter( e => ![ 'denied', 'uninterested' ].includes( e.request_status ) );
+                        }).filter( e => ![ this.OPEN_SHIFTS_STATUS.DENIED, this.OPEN_SHIFTS_STATUS.UNINTERESTED ].includes( e.request_status ) );
 
                         this.eventsLoaded = true;
                     })
@@ -233,7 +234,8 @@
 
             FormatsDates,
             AuthUser,
-            HasOpenShiftsModal
+            HasOpenShiftsModal,
+            Constants
         ],
 
         components: {
