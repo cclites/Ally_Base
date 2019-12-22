@@ -315,9 +315,7 @@ class Caregiver extends AuditableModel implements
 
     public function schedule_requests()
     {
-        return $this->belongsToMany( Schedule::class, 'caregiver_schedule_requests' )
-            ->withTimestamps()
-            ->withPivot([ 'status' ]);
+        return $this->hasMany( CaregiverScheduleRequest::class );
     }
 
     public function phoneNumber()
@@ -421,14 +419,6 @@ class Caregiver extends AuditableModel implements
     ///////////////////////////////////////////
     /// Instance Methods
     ///////////////////////////////////////////
-
-    public function getMappedScheduleRequestsAttribute()
-    {
-        return $this->schedule_requests->map( function( $s ){
-
-            return $s->pivot;
-        });
-    }
 
     public function getAddress(): ?Address
     {

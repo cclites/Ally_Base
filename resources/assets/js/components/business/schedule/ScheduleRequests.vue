@@ -21,31 +21,31 @@
             <div v-for=" request in requests " :key=" request.id " class="d-flex align-items-center my-2">
 
                 <div class="f-1">{{ request.nameLastFirst }}</div>
-                <div class="f-1">{{ formatDateFromUTC( request.pivot.created_at ) }}</div>
+                <div class="f-1">{{ formatDateFromUTC( request.created_at ) }}</div>
                 <div class="f-1">{{ request.caregiver_client_relationship_exists ? 'yes' : 'no' }}</div>
-                <div class="f-1">{{ request.pivot.status }}</div>
+                <div class="f-1">{{ request.status }}</div>
                 <div class="f-1" style="min-width: 300px">
 
-                    <transition name="slide-fade" mode="out-in" v-if=" request.pivot.status == 'pending' ">
+                    <transition name="slide-fade" mode="out-in" v-if=" request.status == 'pending' ">
 
-                        <div v-if=" !chosenRequest || request.pivot.id != chosenRequest.pivot.id " key="first">
+                        <div v-if=" !chosenRequest || request.id != chosenRequest.id " key="first">
 
-                            <b-button variant="success" size="sm" type="button" :disabled=" busy " @click=" checkRequest( request ) ">
+                            <b-button variant="success" size="sm" type="button" :disabled=" busy || form.busy " @click=" checkRequest( request ) ">
 
                                 Check Warnings
                             </b-button>
-                            <b-button variant="danger" size="sm" type="button" :disabled=" busy " @click=" respondToRequest( request, 'denied' ) ">
+                            <b-button variant="danger" size="sm" type="button" :disabled=" busy || form.busy " @click=" respondToRequest( request, OPEN_SHIFTS_STATUS.DENIED ) ">
 
                                 Decline
                             </b-button>
                         </div>
                         <div v-else key="second">
 
-                            <b-button variant="info" size="sm" type="button" :disabled=" busy " @click=" respondToRequest( request, 'approved' ) ">
+                            <b-button variant="info" size="sm" type="button" :disabled=" busy || form.busy " @click=" respondToRequest( request, OPEN_SHIFTS_STATUS.APPROVED ) ">
 
                                 Approve
                             </b-button>
-                            <b-button variant="default" size="sm" type="button" :disabled=" busy " @click=" cancelRequest() ">
+                            <b-button variant="default" size="sm" type="button" :disabled=" busy || form.busy " @click=" cancelRequest() ">
 
                                 Cancel
                             </b-button>
@@ -68,10 +68,11 @@
 
     import FormatsDates from '../../../mixins/FormatsDates';
     import ScheduleMethods from '../../../mixins/ScheduleMethods';
+    import Constants from '../../../mixins/Constants';
 
     export default {
 
-        mixins : [ FormatsDates, ScheduleMethods ],
+        mixins : [ FormatsDates, ScheduleMethods, Constants ],
         props  : {
 
             selectedScheduleId: {
@@ -91,6 +92,11 @@
                 checkingRequest : false,
                 chosenRequest   : null,
                 warnings        : null,
+                form            : new Form({
+
+                    status       : null,
+                    caregiver_id : null
+                })
             }
         },
         computed : {
@@ -119,8 +125,8 @@
 
                 let form = new Form({
 
-                    caregiver  : request.pivot.caregiver_id,
-                    client     : request.pivot.client_id,
+                    caregiver  : request.caregiver_id,
+                    client     : request.client_id,
                     duration   : this.getDuration(),
                     starts_at  : this.getStartsAt(),
                     id         : this.schedule.id,
@@ -164,26 +170,21 @@
             },
             respondToRequest( request, status ){
 
-                if( ![ 'denied', 'approved' ].includes( status ) ) return false;
+                if( ![ this.OPEN_SHIFTS_STATUS.DENIED, this.OPEN_SHIFTS_STATUS.APPROVED ].includes( status ) ) return false;
 
-                this.busy = true;
-                let form = new Form({
+                this.form.status = status;
+                this.form.caregiver_id = request.caregiver_id
 
-                    'status'       : status,
-                    'schedule_id'  : request.pivot.schedule_id,
-                    'caregiver_id' : request.pivot.caregiver_id
-                });
-
-                form.patch( '/business/schedule/requests/' + request.pivot.id )
+                this.form.patch( `/business/schedule/requests/${request.id}/${request.schedule_id}` )
                     .then( res => {
 
-                        request.pivot.status = res.data.data;
+                        request.status = res.data.data;
 
                         this.$emit( 'request-response', { status: res.data.data, schedule: this.schedule, request: request });
 
-                        if( status === 'denied' ){
+                        if( status === this.OPEN_SHIFTS_STATUS.DENIED ){
 
-                            const index = this.requests.map( el => el.pivot.schedule_id ).indexOf( request.pivot.schedule_id );
+                            const index = this.requests.map( el => el.schedule_id ).indexOf( request.schedule_id );
                             this.requests.splice( index, 1 );
                         }
                     })
@@ -191,10 +192,6 @@
 
                         console.error( e );
                     })
-                    .finally( () => {
-
-                        this.busy = false;
-                    });
             }
         },
         async mounted(){

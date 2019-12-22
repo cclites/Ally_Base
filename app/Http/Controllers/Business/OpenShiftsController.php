@@ -35,8 +35,8 @@ class OpenShiftsController extends BaseController
                     'client'            => $schedule->client->nameLastFirst(),
                     'client_id'         => $schedule->client->id,
                     'start_time'        => $schedule->starts_at->copy()->format('g:i A'),
-                    'end_time'          => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A'),
-                    'requests_count'    => $schedule->schedule_requests->filter( function( $r ){ return in_array( $r->pivot->status, [ 'pending', 'uninterested' ]); })->count()
+                    'end_time'          => $schedule->starts_at->copy()->addMinutes( $schedule->duration )->addSecond()->format( 'g:i A' ),
+                    'requests_count'    => $schedule->schedule_requests->filter( function( $r ){ return in_array( $r->status, [ 'pending', 'uninterested' ]); })->count()
                 ];
             });
 

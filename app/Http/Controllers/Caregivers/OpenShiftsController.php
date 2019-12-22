@@ -90,7 +90,7 @@ class OpenShiftsController extends BaseController
                     ];
             });
 
-            return [ 'events' => $schedules, 'requests' => $caregiver->mapped_schedule_requests ];
+            return [ 'events' => $schedules, 'requests' => $caregiver->schedule_requests ];
         }
 
         return view_component( 'open-shifts',

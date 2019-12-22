@@ -104,7 +104,7 @@ class ScheduleEvents implements Responsable
                 'has_overtime' => $schedule->hasOvertime(),
                 'added_to_past' => $schedule->added_to_past,
                 'service_types' => $this->getServiceTypes($schedule),
-                'requests_count' => $schedule->schedule_requests->filter( function( $r ){ return $r->pivot->status == 'pending'; })->count(),
+                'requests_count' => $schedule->schedule_requests->filter( function( $r ){ return $r->status == 'pending'; })->count(),
             ], $additionalOptions);
         });
     }

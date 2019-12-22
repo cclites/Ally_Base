@@ -49,12 +49,12 @@ class CaregiverScheduleRequestController extends BaseController
 
         $requests = $schedule->schedule_requests->map( function( $r ){
 
-            $req = CaregiverScheduleRequest::find( $r->pivot->id ); // this may not be necessary, I may be able to pass this event in from eagar loading it above with the schedule..
-            $r[ 'caregiver_client_relationship_exists' ] = $req->caregiver_client_relationship_exists();
+            $r[ 'caregiver_client_relationship_exists' ] = $r->caregiver_client_relationship_exists();
+            $r[ 'nameLastFirst' ] = $r->caregiver->nameLastFirst;
             return $r;
         });
 
-        return new SuccessResponse( 'Successfully loaded schedule requests..', [ 'requests' => $schedule->schedule_requests, 'schedule' => $schedule ]);
+        return new SuccessResponse( 'Successfully loaded schedule requests..', [ 'requests' => $requests, 'schedule' => $schedule ]);
     }
 
     /**
@@ -64,11 +64,9 @@ class CaregiverScheduleRequestController extends BaseController
      * @param  \App\CaregiverScheduleRequest  $caregiverScheduleRequest
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, CaregiverScheduleRequest $caregiverScheduleRequest, ScheduleAggregator $aggregator)
+    public function update(Request $request, CaregiverScheduleRequest $caregiverScheduleRequest, Schedule $schedule, ScheduleAggregator $aggregator)
     {
-        // validate request object
-
-        $schedule = Schedule::findOrFail( $request->schedule_id );
+        // $schedule = Schedule::findOrFail( $request->schedule_id );
 
         $this->authorize( 'update', $schedule );
 
