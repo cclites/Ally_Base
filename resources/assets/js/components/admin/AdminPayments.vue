@@ -119,18 +119,18 @@
             </div>
         </div>
 
-        <pin-confirmation-model ref="pinModal" />
+        <pin-confirmation-modal ref="pinModal" />
     </b-card>
 </template>
 
 <script>
     import FormatsDates from "../../mixins/FormatsDates";
     import FormatsNumbers from "../../mixins/FormatsNumbers";
-    import PinConfirmationModel from "../PinConfirmationModal";
+    import PinConfirmationModal from "../PinConfirmationModal";
 
     export default {
         name: "AdminPayments",
-        components: {PinConfirmationModel},
+        components: { PinConfirmationModal },
         mixins: [FormatsDates, FormatsNumbers],
 
         props: {
