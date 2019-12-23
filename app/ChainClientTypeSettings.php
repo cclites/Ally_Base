@@ -10,6 +10,7 @@ class ChainClientTypeSettings extends Model
     protected $table = 'chain_client_type_settings';
 
     protected $fillable = [
+        'business_chain_id',
         'medicaid_1099_default',
         'medicaid_1099_edit',
         'medicaid_1099_from',
