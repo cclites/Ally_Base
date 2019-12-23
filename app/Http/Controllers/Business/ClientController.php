@@ -335,6 +335,10 @@ class ClientController extends BaseController
             return new ErrorResponse(400, 'You cannot delete this client because they have an active shift clocked in.');
         }
 
+        if($client->hasOpenInvoices()){
+            return new ErrorResponse(400, 'Warning: This client has an outstanding invoice or payment and cannot be deactivated. Contact Ally support with any questions.');
+        }
+
         $data = request()->all();
 
         try {

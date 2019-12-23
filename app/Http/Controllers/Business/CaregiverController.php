@@ -274,6 +274,10 @@ class CaregiverController extends BaseController
             return new ErrorResponse(400, 'You cannot archive this caregiver because they have an active shift clocked in.');
         }
 
+        if($caregiver->hasOpenInvoices()){
+            return new ErrorResponse(400, 'Warning: This caregiver has an outstanding invoice or payment and cannot be deactivated. Contact Ally support with any questions.');
+        }
+
         try {
             $inactive_at = request('inactive_at') ? Carbon::parse(request('inactive_at')) : Carbon::now();
         } catch (\Exception $ex) {
