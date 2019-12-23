@@ -9,7 +9,7 @@ use App\Client;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Schedule;
-use App\Scheduling\OpenShiftStatus;
+use App\Scheduling\OpenShiftRequestStatus;
 use App\Scheduling\ScheduleAggregator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -75,7 +75,7 @@ class CaregiverScheduleRequestController extends BaseController
         DB::beginTransaction();
         switch( $action ){
 
-            case OpenShiftStatus::REQUEST_APPROVED():
+            case OpenShiftRequestStatus::REQUEST_APPROVED():
 
                 if( !$caregiverScheduleRequest->update([ 'status' => $action ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
 
@@ -119,9 +119,15 @@ class CaregiverScheduleRequestController extends BaseController
                     'caregiver_id'   => $request->caregiver_id
                 ]);
 
-                // ERIK TODO => text them? notification? Ask Jason
+                // ERIK TODO => text them, I need to clear up the specifics with Jason and Jon as to how to implement this
+
+                // if the caregiver is eligible for texting
+                // if the business can receive messages
+                // create a thread?
+                // dispatch the send and attach the recipient
+
                 break;
-            case OpenShiftStatus::REQUEST_DENIED():
+            case OpenShiftRequestStatus::REQUEST_DENIED():
 
                 if( !$caregiverScheduleRequest->update([ 'status' => $action ]) ) return new ErrorResponse( 500, 'failed to update schedule request, please try again later' );
 

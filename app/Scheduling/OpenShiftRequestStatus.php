@@ -4,16 +4,16 @@ namespace App\Scheduling;
 use App\BaseEnum;
 
 /**
- * OpenShiftStatus Enum
+ * OpenShiftRequestStatus Enum
  *
- * @method static OpenShiftStatus REQUEST_APPROVED()
- * @method static OpenShiftStatus REQUEST_DENIED()
- * @method static OpenShiftStatus REQUEST_PENDING()
- * @method static OpenShiftStatus REQUEST_CANCELLED()
- * @method static OpenShiftStatus REQUEST_UNINTERESTED()
+ * @method static OpenShiftRequestStatus REQUEST_APPROVED()
+ * @method static OpenShiftRequestStatus REQUEST_DENIED()
+ * @method static OpenShiftRequestStatus REQUEST_PENDING()
+ * @method static OpenShiftRequestStatus REQUEST_CANCELLED()
+ * @method static OpenShiftRequestStatus REQUEST_UNINTERESTED()
  * 
  */
-class OpenShiftStatus extends BaseEnum
+class OpenShiftRequestStatus extends BaseEnum
 {
     private const REQUEST_APPROVED     = 'approved';
     private const REQUEST_DENIED       = 'denied';
@@ -23,7 +23,7 @@ class OpenShiftStatus extends BaseEnum
 
     public static function isAcceptableStatus( $status )
     {
-        // could probably change this to return the array itOpenShiftStatus and then call it using if( in_array() ) to extend the usefullness of this..
+        // could probably change this to return the array itOpenShiftRequestStatus and then call it using if( in_array() ) to extend the usefullness of this..
         return in_array( $status, [
 
             self::REQUEST_APPROVED,

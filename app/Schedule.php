@@ -7,7 +7,7 @@ use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Exceptions\MissingTimezoneException;
 use App\Data\ScheduledRates;
-use App\Scheduling\OpenShiftStatus;
+use App\Scheduling\OpenShiftRequestStatus;
 use App\Scheduling\RuleParser;
 use App\Shifts\RateFactory;
 use App\Shifts\ScheduleConverter;
@@ -142,7 +142,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
                 DB::table( 'caregiver_schedule_requests' )
                     ->where( 'caregiver_id', $original[ 'caregiver_id' ] )
                     ->where( 'schedule_id', $schedule->id )
-                    ->update([ 'status' => OpenShiftStatus::REQUEST_DENIED() ]);
+                    ->update([ 'status' => OpenShiftRequestStatus::REQUEST_DENIED() ]);
 
                 // if theres a new cg, update their request if exists
                 if( !empty( $dirty[ 'caregiver_id' ] ) ){
@@ -150,7 +150,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
                     DB::table( 'caregiver_schedule_requests' )
                         ->where( 'caregiver_id', $dirty[ 'caregiver_id' ] )
                         ->where( 'schedule_id', $schedule->id )
-                        ->update([ 'status' => OpenShiftStatus::REQUEST_APPROVED() ]);
+                        ->update([ 'status' => OpenShiftRequestStatus::REQUEST_APPROVED() ]);
                 }
             }
         });

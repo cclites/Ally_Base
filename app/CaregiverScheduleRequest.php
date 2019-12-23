@@ -3,7 +3,7 @@
 namespace App;
 
 use App\Billing\ClientRate;
-use App\Scheduling\OpenShiftStatus;
+use App\Scheduling\OpenShiftRequestStatus;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class CaregiverScheduleRequest extends Pivot
@@ -91,7 +91,7 @@ class CaregiverScheduleRequest extends Pivot
      */
     public function scopeWhereActive( $query )
     {
-        $query->whereIn( 'status', [ OpenShiftStatus::REQUEST_UNINTERESTED(), OpenShiftStatus::REQUEST_PENDING() ] );
+        $query->whereIn( 'status', [ OpenShiftRequestStatus::REQUEST_UNINTERESTED(), OpenShiftRequestStatus::REQUEST_PENDING() ] );
     }
 
     /**
@@ -102,7 +102,7 @@ class CaregiverScheduleRequest extends Pivot
      */
     public function scopeWhereUninterested( $query )
     {
-        $query->where( 'status', OpenShiftStatus::REQUEST_UNINTERESTED() );
+        $query->where( 'status', OpenShiftRequestStatus::REQUEST_UNINTERESTED() );
     }
 
     /**
@@ -113,7 +113,7 @@ class CaregiverScheduleRequest extends Pivot
      */
     public function scopeWherePending( $query )
     {
-        $query->where( 'status', OpenShiftStatus::REQUEST_PENDING() );
+        $query->where( 'status', OpenShiftRequestStatus::REQUEST_PENDING() );
     }
 
     /**
