@@ -11,7 +11,7 @@
         <i class="fa fa-calendar"></i><span class="hide-menu">Schedule</span>
     </a>
 </li>
-@can( 'view-open-shifts' )
+@can( 'view-open-shifts', [ activeBusiness() ])
 <li>
     <a href="{{ route('schedule.open-shifts') }}" aria-expanded="false">
         <i class="fa fa-hand-paper-o"></i><span class="hide-menu">Open Shifts</span>

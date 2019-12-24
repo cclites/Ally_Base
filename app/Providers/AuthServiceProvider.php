@@ -123,9 +123,9 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        Gate::define( 'view-open-shifts', function ( User $user ) {
+        Gate::define( 'view-open-shifts', function ( User $user, $business ) {
 
-            if( ( is_office_user() || is_caregiver() ) && $user->role->has_access_to_open_shifts ) return true;
+            if( ( is_office_user() || is_caregiver() ) && $business->has_open_shifts ) return true;
 
             return false;
         });

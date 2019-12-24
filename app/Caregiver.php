@@ -643,14 +643,6 @@ class Caregiver extends AuditableModel implements
     }
 
     /**
-     * First pass at implementing the concept of 'what business am I in right now' for caregivers..
-     */
-    public function getHasAccessToOpenShiftsAttribute()
-    {
-        return $this->businessesWithOpenShiftsFeature()->count() > 0;
-    }
-
-    /**
      * first pass at the ability for features to be enabled/disabled based upon whether or not any of the associated businesses have the feature..
      * 
      * can be used in conjunction with the above relationship in code like " if( in_array( active_business() ) )
