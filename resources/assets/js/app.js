@@ -341,6 +341,7 @@ Vue.component('shift-history', require('./components/ShiftHistory.vue'));
 
 Vue.component('system-notifications-icon', require('./components/SystemNotificationsIcon.vue'));
 Vue.component('open-shifts-icon', require('./components/OpenShiftsIcon.vue'));
+Vue.component('open-shifts-side-menu-icon', require('./components/OpenShiftsSideMenuIcon.vue'));
 Vue.component('tasks-icon', require('./components/TasksIcon.vue'));
 
 Vue.component('phone-number', require('./components/PhoneNumber.vue'));

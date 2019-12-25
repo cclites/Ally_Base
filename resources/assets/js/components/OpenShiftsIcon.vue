@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+    import { mapGetters, mapActions } from 'vuex';
 
     export default {
 
@@ -36,7 +36,8 @@ import { mapGetters, mapActions } from 'vuex';
 
             ...mapGetters({
 
-                total : 'openShiftRequests/count'
+                total     : 'openShiftRequests/count',
+                debounced : 'openShiftRequests/debounced'
             }),
             current_business(){
 
@@ -45,7 +46,7 @@ import { mapGetters, mapActions } from 'vuex';
         },
         async mounted() {
 
-            await this.fetchRequestsCount();
+            if( !this.debounced ) await this.fetchRequestsCount();
         },
 
         methods: {
@@ -53,9 +54,11 @@ import { mapGetters, mapActions } from 'vuex';
             ...mapActions({
 
                 setCount : 'openShiftRequests/setCount',
+                debounce : 'openShiftRequests/debounce'
             }),
             async fetchRequestsCount(){
 
+                this.debounce();
                 let form = new Form({
 
                     business_id : this.current_business.id,

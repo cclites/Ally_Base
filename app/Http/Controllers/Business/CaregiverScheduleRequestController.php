@@ -41,7 +41,7 @@ class CaregiverScheduleRequestController extends BaseController
 
         $schedule = Schedule::with([ 'services', 'client', 'schedule_requests' => function( $q ){
 
-            return $q->whereIn( 'status', [ 'pending', 'uninterested' ]);
+            return $q->whereIn( 'status', [ OpenShiftRequestStatus::REQUEST_PENDING(), OpenShiftRequestStatus::REQUEST_UNINTERESTED() ]);
         }])->findOrFail( $request->schedule );
         $this->authorize( 'read', $schedule );
 
@@ -155,9 +155,8 @@ class CaregiverScheduleRequestController extends BaseController
     {
         $weekStart = $date->copy()->startOfWeek();
         $weekEnd = $date->copy()->endOfWeek();
-        $schedules = $this->fresh()
-            ->where('client_id', $client_id)
-            ->getSchedulesStartingBetween($weekStart, $weekEnd);
+        $schedules = Schedule::where('client_id', $client_id)
+            ->whereBetween( 'starts_at', [ $weekStart, $weekEnd ]);
 
         return $schedules->sum('duration') / 60;
     }

@@ -5,13 +5,15 @@ const state = {
     openShiftRequests : [],
     count             : 0,
     running           : false,
+    debounced         : false
 };
 
 // getters
 const getters = {
 
-    all   : state => state.openShiftRequests,
-    count : state => state.count, // this may not be necessary
+    all       : state => state.openShiftRequests,
+    debounced : state => state.debounced,
+    count     : state => state.count, // this may not be necessary
 };
 
 // mutations
@@ -35,6 +37,10 @@ const mutations = {
 
         state.count += count;
     },
+    debounceCall( state ){
+
+        state.debounced = true;
+    }
 };
 
 // actions
@@ -48,6 +54,10 @@ const actions = {
     updateCount( context, count ){
 
         context.commit( 'updateCount', count );
+    },
+    debounce( context ){
+
+        context.commit( 'debounceCall' );
     }
 };
 

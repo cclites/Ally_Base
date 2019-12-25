@@ -16,7 +16,7 @@
 
         <div v-show="! loading" class="table-responsive">
 
-            <ally-table id="open-shifts" :columns=" fields " :items=" events " sort-by="start" :perPage=" 1000 " :isBusy=" form.busy ">
+            <ally-table id="open-shifts" :columns=" fields " :items=" aggEvents " sort-by="start" :perPage=" 1000 " :isBusy=" form.busy ">
 
                 <template slot="start" scope="data">
 
@@ -68,6 +68,7 @@
     import HasOpenShiftsModal from '../../../mixins/HasOpenShiftsModal';
     import ScheduleRequestModal from "../../modals/ScheduleRequestModal";
     import Constants from '../../../mixins/Constants';
+    import { mapGetters, mapActions } from 'vuex';
 
     export default {
 
@@ -119,11 +120,29 @@
             if( !Array.isArray( this.businesses ) ) this.active_business = this.businesses;
             else this.active_business = this.businesses[ 0 ].id || null;
 
-            this.fetchEvents();
+            if( this.role_type == 'office_user' ){
+
+                this.fetchEvents();
+            }
         },
 
         computed: {
 
+            ...mapGetters({
+
+                openShifts : 'openShifts/openShifts',
+                cgRequests : 'openShifts/requests'
+            }),
+            aggEvents(){
+
+                if( this.openShifts.length == 0 ) return this.events;
+                else return this.openShifts.filter( s => ![ this.OPEN_SHIFTS_STATUS.UNINTERESTED, this.OPEN_SHIFTS_STATUS.DENIED ].includes( s.request_status ) );
+            },
+            aggRequests(){
+
+                if( this.cgRequests.length == 0 ) return this.requests;
+                else return this.cgRequests;
+            },
             eventsUrl() {
 
                 let url = '';
@@ -150,6 +169,10 @@
 
         methods: {
 
+            ...mapActions({
+
+                updateRequestStatus : 'openShifts/updateRequestStatus',
+            }),
             hasRequest( status ){
 
                 switch( status ){
@@ -177,6 +200,7 @@
                 this.form.post( `/schedule/requests/${schedule.id}` )
                     .then( res => {
 
+                        this.updateRequestStatus({ schedule_id: schedule.id, status: res.data.data.status });
                         schedule.request_status = res.data.data.status;
                         if( schedule.request_status == this.OPEN_SHIFTS_STATUS.UNINTERESTED ) this.removeScheduleEvent( schedule.id );
                     })

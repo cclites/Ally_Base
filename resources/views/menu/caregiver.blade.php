@@ -12,11 +12,8 @@
     </a>
 </li>
 @can( 'view-open-shifts', [ activeBusiness() ])
-<li>
-    <a href="{{ route('schedule.open-shifts') }}" aria-expanded="false">
-        <i class="fa fa-hand-paper-o"></i><span class="hide-menu">Open Shifts</span>
-    </a>
-</li>
+
+    <open-shifts-side-menu-icon business="{{ activeBusiness() ?? null }}"></open-shifts-side-menu-icon>
 @endcan
 <li>
 </li>
