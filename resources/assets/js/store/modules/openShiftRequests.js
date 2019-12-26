@@ -13,7 +13,7 @@ const getters = {
 
     all       : state => state.openShiftRequests,
     debounced : state => state.debounced,
-    count     : state => state.count, // this may not be necessary
+    count     : state => state.count, // this may not be necessary.. could just be a count on the requests array.. revisit later
 };
 
 // mutations

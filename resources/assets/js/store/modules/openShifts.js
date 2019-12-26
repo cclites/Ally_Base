@@ -3,21 +3,18 @@ import * as Vue from "vue";
 
 const state = {
 
-    // openShiftRequests : [],
-    openShifts           : [],
-    requests             : [],
-    // running           : false,
+    openShifts : [],
+    requests   : [],
 };
 
 // getters
 const getters = {
 
-    // all   : state => state.openShiftRequests,
     requests       : state => state.requests,
-    openShifts     : state => state.openShifts,
-    mappedShifts( state ){
+    openShifts     : state => Object.values( state.openShifts ),
+    mappedShifts( state, getters ){
 
-        return state.openShifts.map( e => {
+        return getters.openShifts.map( e => {
 
             for( let i = 0; i < state.requests.length; i++ ){
 
@@ -36,16 +33,6 @@ const getters = {
 
 // mutations
 const mutations = {
-
-    // start( state ) {
-
-    //     Vue.set( state, 'running', true );
-    // },
-
-    // update( state, data ) {
-
-    //     state.all = data.openShiftRequests;
-    // },
 
     setOpenShifts( state, openShifts ) {
 
@@ -67,13 +54,13 @@ const actions = {
 
     setShiftsAndRequests( context, data ){
 
-        context.commit( 'setOpenShifts', data.events );
+        context.commit( 'setOpenShifts', Object.values( data.events ) );
         context.commit( 'setRequests', data.requests );
     },
     updateRequestStatus( context, data ){
 
         // find schedule within requests object
-        let openShiftIndex = context.state.openShifts.findIndex( s => s.id == data.schedule_id );
+        let openShiftIndex = context.getters.openShifts.findIndex( s => s.id == data.schedule_id );
         if( openShiftIndex ){
 
             context.state.openShifts[ openShiftIndex ].request_status = data.status;
