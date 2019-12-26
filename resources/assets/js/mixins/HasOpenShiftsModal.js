@@ -27,7 +27,7 @@ export default {
             let schedule = this.events.find( e => e.id === data.request.schedule_id );
 
             // only applicable when on the schedule calendar
-            if( this.selectedEvent ) this.handleCalendarPropogation( status, data.schedule, data.request );
+            if( this.selectedEvent ) this.handleCalendarPropogation( status );
 
             if( status == this.OPEN_SHIFTS_STATUS.DENIED ){
 

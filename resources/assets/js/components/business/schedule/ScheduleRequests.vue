@@ -184,7 +184,7 @@
 
                         if( status === this.OPEN_SHIFTS_STATUS.DENIED ){
 
-                            const index = this.requests.map( el => el.schedule_id ).indexOf( request.schedule_id );
+                            const index = this.requests.map( el => el.id ).indexOf( request.id );
                             this.requests.splice( index, 1 );
                         }
                     })
