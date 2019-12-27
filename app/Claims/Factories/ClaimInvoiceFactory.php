@@ -517,16 +517,13 @@ class ClaimInvoiceFactory
      */
     public function deleteClaimInvoice(ClaimInvoice $claim): void
     {
-        if ($claim->adjustments()->count() > 0) {
-            throw new CannotDeleteClaimInvoiceException('This claim has had adjustments applied.');
-        }
-
         if ($claim->hasBeenTransmitted()) {
             throw new CannotDeleteClaimInvoiceException('This claim has already been transmitted.');
         }
 
         try {
             \DB::beginTransaction();
+            $claim->adjustments()->forceDelete();
 
             foreach ($claim->items as $item) {
                 $item->claimable->delete();
