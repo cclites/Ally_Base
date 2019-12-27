@@ -122,7 +122,7 @@ class Caregiver1099 extends BaseModel
 
         $systemSettings = \DB::table('system_settings')->first();
 
-        $pdf = new Pdf('../resources/pdf_forms/caregiver1099s/' . $this->year . '/1099-misc-full.pdf');
+        $pdf = new Pdf('../resources/pdf_forms/caregiver1099s/' . $this->year . '/cg-1099-b-2.pdf');
 
         $payerTin = $this->client_ssn ? decrypt($this->client_ssn) : '';
         $payerName = $this->client_first_name . " " . $this->client_last_name;
@@ -162,15 +162,6 @@ class Caregiver1099 extends BaseModel
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_5[0]' => $this->caregiver_address1 . $caAddress2, //recipient street address
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_6[0]' => $this->caregiver_address3(), //recipient city, state, zip
             'topmostSubform[0].CopyB[0].RightCol[0].f2_14[0]' => $paymentTotal,
-
-            /** COPY 1 **/
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_1[0]' => $payerAddress,
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_3[0]' => $caregiverTin, //recipient tin
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_4[0]' => $this->caregiver_first_name . " " . $this->caregiver_last_name, //recipient name
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_5[0]' => $this->caregiver_address1 . $caAddress2, //recipient street address
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_6[0]' => $this->caregiver_address3(), //recipient city, state, zip
-            'topmostSubform[0].Copy1[0].RightCol[0].f2_14[0]' => $paymentTotal,
 
             /** COPY 2 **/
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_1[0]' => $payerAddress,

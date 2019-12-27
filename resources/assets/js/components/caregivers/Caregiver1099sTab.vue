@@ -62,7 +62,7 @@
 
         methods:{
             load1099s(){
-                axios.get('/caregiver/caregiver-1099/' + this.caregiver)
+                axios.get('caregiver/caregiver-1099/' + this.caregiver)
                     .then(response => {
                         this.items = response.data;
                         this.fields = Object.keys(this.items);

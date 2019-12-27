@@ -14,24 +14,23 @@ class Caregiver1099Controller extends Controller
     /**
      * Display a listing of the resource for a single caregiver
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function index(Client $client)
     {
-        return response()->json([]);
-
-        if($client->caregiver_1099 === 'ally'){
-            return response()->json([]);
-        }
-
         $caregiver_1099s = $client->caregiver1099s
-                            ->map(function($caregiver_1099){
-                                return [
-                                    'year'=> $caregiver_1099->year,
-                                    'name' => $caregiver_1099->client_first_name . " " . $caregiver_1099->client_last_name,
-                                    'id' => $caregiver_1099->id
-                                ];
+                            ->map(function($caregiver_1099) use($client){
+                                if($caregiver_1099->payer === 'ally'){
+                                    return null;
+                                }else{
+                                    return [
+                                        'year'=> $caregiver_1099->year,
+                                        'name' => $caregiver_1099->client_first_name . " " . $caregiver_1099->client_last_name,
+                                        'id' => $caregiver_1099->id
+                                    ];
+                                }
+
                             })
                             ->groupBy('year');
 

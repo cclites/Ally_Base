@@ -18,8 +18,6 @@ class Caregiver1099Controller extends Controller
      */
     public function index(Caregiver $caregiver)
     {
-        return response()->json([]);
-
         $caregiver_1099s = $caregiver->caregiver1099s->map(function($caregiver_1099){
             return [
                 'year'=> $caregiver_1099->year,
