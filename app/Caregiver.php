@@ -313,7 +313,7 @@ class Caregiver extends AuditableModel implements
         return $this->hasMany(Payment::class);
     }
 
-    public function schedule_requests()
+    public function scheduleRequests()
     {
         return $this->hasMany( CaregiverScheduleRequest::class );
     }
@@ -535,6 +535,17 @@ class Caregiver extends AuditableModel implements
              ->where('starts_at', '>=', Carbon::today())
              ->doesntHave('shifts')
              ->update(['caregiver_id' => null]);
+    }
+
+    /**
+     * Remove all of the Caregiver's Schedule Requests
+     *
+     * @return void
+     */
+    public function removeOutstandingScheduleRequests()
+    {
+        $this->scheduleRequests()
+            ->delete();
     }
 
     /**

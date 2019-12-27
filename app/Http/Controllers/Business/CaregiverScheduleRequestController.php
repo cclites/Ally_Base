@@ -42,7 +42,7 @@ class CaregiverScheduleRequestController extends BaseController
             return response()->json( compact( 'count' ) );
         }
 
-        $schedule = Schedule::with([ 'services', 'client', 'schedule_requests' => function( $q ){
+        $schedule = Schedule::with([ 'services', 'client', 'scheduleRequests' => function( $q ){
 
             return $q->whereIn( 'status', [ OpenShiftRequestStatus::REQUEST_PENDING(), OpenShiftRequestStatus::REQUEST_UNINTERESTED() ]);
         }])->findOrFail( $request->schedule );
@@ -52,7 +52,7 @@ class CaregiverScheduleRequestController extends BaseController
         $schedule[ 'start_time' ] = $schedule->starts_at->copy()->format( 'g:i A' );
         $schedule[ 'end_time' ]   = $schedule->starts_at->copy()->addMinutes( $schedule->duration )->addSecond()->format( 'g:i A' );
 
-        $requests = $schedule->schedule_requests->map( function( $r ){
+        $requests = $schedule->scheduleRequests->map( function( $r ){
 
             $r[ 'caregiverClientRelationshipExists' ] = $r->caregiverClientRelationshipExists();
             $r[ 'nameLastFirst' ] = $r->caregiver->nameLastFirst;

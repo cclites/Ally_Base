@@ -5,9 +5,12 @@ namespace App;
 use App\Billing\ClientRate;
 use App\Scheduling\OpenShiftRequestStatus;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CaregiverScheduleRequest extends Pivot
 {
+    use SoftDeletes;
+
     protected $table = 'caregiver_schedule_requests';
     protected $orderedColumn = 'created_at';
 

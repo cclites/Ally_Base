@@ -238,7 +238,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         return $this->belongsTo(ScheduleGroup::class, 'group_id');
     }
 
-    public function schedule_requests()
+    public function scheduleRequests()
     {
         return $this->hasMany( CaregiverScheduleRequest::class );
     }
@@ -264,7 +264,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
      */
     public function latestRequestFor( $caregiver_id )
     {
-        return optional( $this->schedule_requests()->where( 'caregiver_id', $caregiver_id )->first() )->pivot;
+        return optional( $this->scheduleRequests()->where( 'caregiver_id', $caregiver_id )->first() )->pivot;
     }
 
     /**

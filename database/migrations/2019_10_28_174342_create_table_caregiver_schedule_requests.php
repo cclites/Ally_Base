@@ -22,6 +22,7 @@ class CreateTableCaregiverScheduleRequests extends Migration
             $table->unsignedInteger( 'schedule_id' );
             $table->string( 'status', 50 )->default( 'pending' )->index();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign( 'business_id' )
                 ->references( 'id' )
