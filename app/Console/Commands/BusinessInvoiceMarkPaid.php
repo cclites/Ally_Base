@@ -1,27 +1,29 @@
 <?php
 
+
 namespace App\Console\Commands;
 
 use App\Billing\Actions\ApplyDeposit;
+use App\Billing\BusinessInvoice;
 use App\Billing\CaregiverInvoice;
 use App\Billing\Deposit;
 use Illuminate\Console\Command;
 
-class MarkInvoicePaid extends Command
+class BusinessInvoiceMarkPaid extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'caregiver-invoice:mark-paid {invoice_id} {notes}';
+    protected $signature = 'business-invoice:mark-paid {invoice_id} {notes}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Mark given Caregiver invoice as paid without actual transaction.';
+    protected $description = 'Mark given Business invoice as paid without actual transaction.';
 
     /**
      * Create a new command instance.
@@ -43,16 +45,16 @@ class MarkInvoicePaid extends Command
     public function handle(ApplyDeposit $depositApplicator)
     {
         /** @var CaregiverInvoice $invoice */
-        $invoice = CaregiverInvoice::findOrFail($this->argument("invoice_id"));
+        $invoice = BusinessInvoice::findOrFail($this->argument("invoice_id"));
 
-        if (! $this->confirm("Mark this invoice as paid?\r\n#{$invoice->id} - {$invoice->caregiver->name} - \${$invoice->amount}")) {
+        if (! $this->confirm("Mark this invoice as paid?\r\n#{$invoice->name} ({$invoice->id}) - {$invoice->business->name} - \${$invoice->amount}")) {
             return;
         }
 
         $deposit = Deposit::create([
-            'deposit_type' => 'caregiver',
-            'caregiver_id' => $invoice->caregiver_id,
-            'business_id' => null,
+            'deposit_type' => 'business',
+            'caregiver_id' => null,
+            'business_id' => $invoice->business->id,
             'amount' => $invoice->getAmountDue(),
             'transaction_id' => null,
             'transaction_code' => null,
@@ -63,6 +65,6 @@ class MarkInvoicePaid extends Command
 
         $depositApplicator->apply($invoice, $deposit, $invoice->getAmountDue());
 
-        $this->info("Successfully applied deposit #{$deposit->id} to invoice #{$invoice->id}");
+        $this->info("Successfully applied deposit #{$deposit->id} to invoice #{$invoice->name} ({$invoice->id})");
     }
 }
