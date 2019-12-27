@@ -4,13 +4,16 @@ namespace App\Http\Controllers\Business;
 
 use App\Business;
 use App\Billing\ClientRate;
+use App\Caregiver;
 use App\CaregiverScheduleRequest;
 use App\Client;
+use App\Notifications\Business\OpenShiftRequestAccepted;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Schedule;
 use App\Scheduling\OpenShiftRequestStatus;
 use App\Scheduling\ScheduleAggregator;
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -119,12 +122,8 @@ class CaregiverScheduleRequestController extends BaseController
                     'caregiver_id'   => $request->caregiver_id
                 ]);
 
-                // ERIK TODO => text them, I need to clear up the specifics with Jason and Jon as to how to implement this
-
-                // if the caregiver is eligible for texting
-                // if the business can receive messages
-                // create a thread?
-                // dispatch the send and attach the recipient
+                $caregiverUser = User::find( $request->caregiver_id ); // just go ahead right to the user.. skip the extra eagar load query
+                \Notification::send( $caregiverUser, new OpenShiftRequestAccepted( $schedule ) );
 
                 break;
             case OpenShiftRequestStatus::REQUEST_DENIED():
