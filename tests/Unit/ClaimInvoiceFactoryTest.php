@@ -313,7 +313,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     }
 
     /** @test */
-    function it_cannot_delete_a_claim_that_has_had_adjustments_made()
+    function it_can_delete_a_claim_that_has_had_adjustments_made()
     {
         $this->createService(20.00);
         $invoice = $this->createPayedClientInvoice();
@@ -326,11 +326,9 @@ class ClaimInvoiceFactoryTest extends TestCase
             'amount_applied' => $claim->items->first()->amount,
         ]);
 
-        $this->expectException(CannotDeleteClaimInvoiceException::class);
-
         $this->claimGenerator->deleteClaimInvoice($claim);
 
-        $this->assertNotNull(ClaimInvoice::find($claim->id));
+        $this->assertNull(ClaimInvoice::find($claim->id));
     }
 
     /** @test */
