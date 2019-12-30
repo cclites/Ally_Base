@@ -90,6 +90,8 @@ class Caregiver1099PreviewReport extends BaseReport
                     'caregiver_1099_id' => $earnings->caregiver_1099_id,
                     'year' => $earnings->year,
                     'errors' => $earnings->getMissing1099Errors(),
+                    'caregiver_email' => $earnings->caregiver->email,
+                    'client_email' => $earnings->client->email
                 ];
             });
     }

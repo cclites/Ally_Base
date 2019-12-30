@@ -33,6 +33,8 @@ class AdminBad1099ReportController extends Controller
                     'client_id' => $item['client_id'],
                     'location' => $item['business_name'],
                     'errors' => $item['errors'] ? implode(", ", $item['errors']) : false,
+                    'caregiver_email' => $item['caregiver_email'],
+                    'client_email' => $item['client_email'],
                 ];
             })
             ->filter(function ($item) {
