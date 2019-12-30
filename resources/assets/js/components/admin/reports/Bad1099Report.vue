@@ -107,7 +107,6 @@
                 let emailString = "";
 
                 this.items.forEach(function(item){
-
                     if(item.errors && item.errors.includes('Client') && !emailString.includes(item.client_email)){
                         emailString += (',' + item.client_email);
                     }
@@ -118,9 +117,6 @@
                 });
 
                 this.emails = emailString.substr(1);
-
-                console.log(this.emails);
-
             },
         },
         data(){
