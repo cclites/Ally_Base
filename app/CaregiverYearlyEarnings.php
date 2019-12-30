@@ -143,6 +143,10 @@ class CaregiverYearlyEarnings extends BaseModel
                 $errors[] = "Client Email";
             }
         }
+        
+        if($this->client->caregiver_1099 == Caregiver1099Payer::ALLY()){
+            return $errors;
+        }
 
         if (empty($this->caregiver->first_name)) {
             $errors[] = "Caregiver First Name";
