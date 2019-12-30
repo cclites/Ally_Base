@@ -110,15 +110,15 @@
         data(){
             return{
                 form: new Form({
-                    medicaid_1099_default: this.chain.client_type_settings.medicaid_1099_default ? this.chain.client_type_settings.medicaid_1099_default : 'no',
-                    private_pay_1099_default: this.chain.client_type_settings.private_pay_1099_default ? this.chain.client_type_settings.private_pay_1099_default : 'no',
-                    other_1099_default: this.chain.client_type_settings.other_1099_default ? this.chain.client_type_settings.other_1099_default : 'no',
-                    medicaid_1099_edit: this.chain.client_type_settings.medicaid_1099_edit ? this.chain.client_type_settings.medicaid_1099_edit : 0,
-                    private_pay_1099_edit: this.chain.client_type_settings.private_pay_1099_edit ? this.chain.client_type_settings.private_pay_1099_edit : 0,
-                    other_1099_edit: this.chain.client_type_settings.other_1099_edit ? this.chain.client_type_settings.other_1099_edit : 0,
-                    medicaid_1099_from: this.chain.client_type_settings.medicaid_1099_from ? this.chain.client_type_settings.medicaid_1099_from : 'client',
-                    private_pay_1099_from: this.chain.client_type_settings.private_pay_1099_from ? this.chain.client_type_settings.private_pay_1099_from : 'client',
-                    other_1099_from: this.chain.client_type_settings.other_1099_from ? this.chain.client_type_settings.other_1099_from : 'client',
+                    medicaid_1099_default: this.chain.client_type_settings ? this.chain.client_type_settings.medicaid_1099_default : 'no',
+                    private_pay_1099_default: this.chain.client_type_settings ? this.chain.client_type_settings.private_pay_1099_default : 'no',
+                    other_1099_default: this.chain.client_type_settings ? this.chain.client_type_settings.other_1099_default : 'no',
+                    medicaid_1099_edit: this.chain.client_type_settings ? this.chain.client_type_settings.medicaid_1099_edit : 0,
+                    private_pay_1099_edit: this.chain.client_type_settings ? this.chain.client_type_settings.private_pay_1099_edit : 0,
+                    other_1099_edit: this.chain.client_type_settings ? this.chain.client_type_settings.other_1099_edit : 0,
+                    medicaid_1099_from: this.chain.client_type_settings ? this.chain.client_type_settings.medicaid_1099_from : 'client',
+                    private_pay_1099_from: this.chain.client_type_settings ? this.chain.client_type_settings.private_pay_1099_from : 'client',
+                    other_1099_from: this.chain.client_type_settings ? this.chain.client_type_settings.other_1099_from : 'client',
                 }),
             }
         },
