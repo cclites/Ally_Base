@@ -235,7 +235,10 @@ Route::group([
     Route::put('clients/{client}/ltci', 'Business\ClientController@ltci')->name('clients.ltci');
     Route::resource('clients/{client}/care-plans', 'Business\ClientCarePlanController');
     Route::resource('clients/{client}/goals', 'Business\ClientGoalsController');
+
     Route::post('clients/{client}/care-details', 'Business\ClientCareDetailsController@update')->name('clients.care-details.update');
+    Route::get('clients/{client}/care-details/pdf', 'Business\ClientCareDetailsController@generatePdf')->name('clients.care-details.generate-pdf');
+
     Route::post('clients/{client}/skilled-nursing-poc', 'Business\SkilledNursingPocController@update')->name('clients.skilled-nursing-poc.update');
     Route::get('clients/{client}/skilled-nursing-poc/print', 'Business\SkilledNursingPocController@generatePdf')->name('clients.skilled-nursing-poc.generate-pdf');
     Route::post('clients/{client}/exclude-caregiver', 'Business\ClientExcludedCaregiverController@store')->name('clients.exclude-caregiver');

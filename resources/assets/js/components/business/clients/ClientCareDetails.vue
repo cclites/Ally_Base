@@ -391,7 +391,7 @@
             },
 
             print(){
-                $('.client-care-needs').print();
+                window.location = this.url + '/pdf';
             },
         },
 
