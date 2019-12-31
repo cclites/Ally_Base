@@ -6,7 +6,8 @@
     >
 
         <b-form-group class="pb-2">
-            <b-btn @click="print()" variant="primary" class="float-right"><i class="fa fa-print"></i> Print</b-btn>
+            <b-btn @click="print()" variant="primary" class="float-right" :disabled="disablePrint"><i class="fa fa-print"></i> Print</b-btn>
+
         </b-form-group>
 
         <h2>
@@ -372,6 +373,13 @@
             url() {
                 return `/business/clients/${this.client.id}/care-details`;
             },
+
+            disablePrint(){
+                if(this.client.care_details && this.client.care_details.id){
+                    return false;
+                }
+                return true;
+            }
         },
         
         methods: {
