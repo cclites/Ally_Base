@@ -37,9 +37,21 @@ class ClientCareDetailsController extends BaseController
 
         $careDetails = $client->careDetails;
 
-        $client->careDetails->supplies_as_string = $this->snakeCaseArrayToUpperCaseString($careDetails->supplies);
-        $client->careDetails->safety_measures_as_string = $this->snakeCaseArrayToUpperCaseString($careDetails->safety_measures);
-        $client->careDetails->diet_as_string = $this->snakeCaseArrayToUpperCaseString($careDetails->diet);
+        if(!$careDetails){
+            return new ErrorResponse(500, 'You must first create and save a Care Details plan before printing.');
+        }
+
+        if($careDetails->supplies){
+            $client->careDetails->supplies_as_string = $this->snakeCaseArrayToUpperCaseString($careDetails->supplies);
+        }
+
+        if($careDetails->safety_measures){
+            $client->careDetails->safety_measures_as_string = $this->snakeCaseArrayToUpperCaseString($careDetails->safety_measures);
+        }
+
+        if($careDetails->diet){
+            $client->careDetails->diet_as_string = $this->snakeCaseArrayToUpperCaseString($careDetails->diet);
+        }
 
         $image = asset('/images/background1.jpg');
         $html = response(view('business.clients.client_care_details', ['client'=>$client, 'image'=>$image]))->getContent();
