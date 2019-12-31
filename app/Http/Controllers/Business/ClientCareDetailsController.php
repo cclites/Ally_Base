@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateClientCareDetailsRequest;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Client;
+use Illuminate\Http\Response;
 
 class ClientCareDetailsController extends BaseController
 {
@@ -28,5 +29,40 @@ class ClientCareDetailsController extends BaseController
         }
 
         return new ErrorResponse(500, 'An unexpected error occurred while trying to save the client care needs.  Please try again.');
+    }
+
+    public function generatePdf(Client $client){
+
+        $this->authorize('read', $client);
+
+        $careDetails = $client->careDetails;
+
+        $client->careDetails->supplies_as_string = $this->snakeCaseArrayToUpperCaseString($careDetails->supplies);
+        $client->careDetails->safety_measures_as_string = $this->snakeCaseArrayToUpperCaseString($careDetails->safety_measures);
+        $client->careDetails->diet_as_string = $this->snakeCaseArrayToUpperCaseString($careDetails->diet);
+
+        $image = asset('/images/background1.jpg');
+        $html = response(view('business.clients.client_care_details', ['client'=>$client, 'image'=>$image]))->getContent();
+
+        $snappy = \App::make('snappy.pdf');
+        return new Response(
+            $snappy->getOutputFromHtml($html),
+            200,
+            array(
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $client->nameLastFirst() . '_care_details.pdf"'
+            )
+        );
+    }
+
+    public function snakeCaseArrayToUpperCaseString($array){
+
+        $temp='';
+
+        foreach($array as $item){
+            $temp .= ucwords(str_replace("_", " ", $item)) . " ";
+        }
+
+        return $temp;
     }
 }
