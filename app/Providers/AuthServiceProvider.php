@@ -133,6 +133,7 @@ class AuthServiceProvider extends ServiceProvider
                 );
         });
 
+        Gate::define('view-reports', function (User $user) {
             return $user->role_type === 'admin'
                 || (
                     $user->role_type === 'office_user'
