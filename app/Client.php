@@ -81,7 +81,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $onboarding_step
  * @property int|null $hourly_rate_id
  * @property int|null $fixed_rate_id
- * @property int|null $case_manager_id
  * @property string|null $hic;
  * @property string|null $travel_directions;
  * @property \Carbon\Carbon|null $created_at
@@ -136,7 +135,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
  * @property-read \App\User $user
- * @property-read \App\User $case_manager
  * @property-read \App\User $creator
  * @property-read \App\User $updator
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client active()
@@ -185,7 +183,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferralSourceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereServiceStartDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereSsn($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereCaseManagerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereServicesCoordinatorId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereHIC($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereTravelDirections($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereCreatedBy($value)
@@ -199,7 +197,7 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Eloquent
  * @property-read string $masked_ssn
  * @property null|string $w9_ssn
- * @property-read \App\OfficeUser|null $caseManager
+ * @property-read \App\OfficeUser|null $servicesCoordinator
  * @property-read mixed $masked_name
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientPayer[] $payers
  * @property-read \App\Billing\ClientPayer $primaryPayer
@@ -307,7 +305,7 @@ class Client extends AuditableModel implements
         'disaster_code_plan',
         'disaster_planning',
         'caregiver_1099',
-        'case_manager_id',
+        'services_coordinator_id',
         'discharge_reason',
         'discharge_condition',
         'discharge_goals_eval',
@@ -435,9 +433,9 @@ class Client extends AuditableModel implements
                     ]);
     }
 
-    public function caseManager()
+    public function servicesCoordinator()
     {
-        return $this->belongsTo('App\OfficeUser', 'case_manager_id');
+        return $this->belongsTo('App\OfficeUser', 'services_coordinator_id');
     }
 
     /**

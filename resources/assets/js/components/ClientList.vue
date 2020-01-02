@@ -8,12 +8,12 @@
         <b-row class="mb-2">
             <b-col lg="12">
                 <div class="d-flex flex-md-row flex-sm-column justify-content-between align-items-start">
-                    <b-form-select v-model="filters.caseManager" class="f-1 mr-2">
+                    <b-form-select v-model="filters.services_coordinator_id" class="f-1 mr-2">
                         <template slot="first">
                             <!-- this slot appears above the options from 'options' prop -->
                         <option value="">All Service Coordinators</option>
                         </template>
-                        <option :value="cm.id" v-for="cm in filteredCaseManagers" :key="cm.id">{{ cm.nameLastFirst }}</option>
+                        <option :value="sc.id" v-for="sc in filteredServicesCoordinators" :key="sc.id">{{ sc.nameLastFirst }}</option>
                     </b-form-select>
 
                     <business-location-form-group :label="null" v-model="filters.business_id" :allow-all="true" class="f-1 mr-2" />
@@ -89,7 +89,7 @@
                     client_type: '',
                     business_id: '',
                     search: '',
-                    caseManager: '',
+                    services_coordinator_id: '',
                 },
                 sortBy: 'lastname',
                 totalRows: 0,
@@ -100,7 +100,8 @@
                 modalDetails: { index:'', data:'' },
                 selectedItem: {},
                 clients: [],
-                caseManagers: [],
+                //caseManagers: [],
+                servicesCoordinators: [],
                 fields: [
                     {
                         key: 'firstname',
@@ -129,7 +130,7 @@
                         formatter: this.formatUppercase,
                     },
                     {
-                        key: 'case_manager_name',
+                        key: 'service_coordinator_name',
                         label: 'Service Coordinator',
                         sortable: true,
                     },
@@ -160,17 +161,17 @@
 
         computed: {
 
-            filteredCaseManagers() {
+            filteredServicesCoordinators() {
                 return (!this.filters.business_id)
-                    ? this.caseManagers
-                    : this.caseManagers.filter(x => x.business_ids.includes(this.filters.business_id));
+                    ? this.servicesCoordinators
+                    : this.servicesCoordinators.filter(x => x.business_ids.includes(this.filters.business_id));
             },
 
             listFilters() {
 
                 // &page=${ctx.currentPage}&perPage=${ctx.perPage}&sort=${sort}
 
-                let query = '&address=1&case_managers=1'; // this seems wierd that it is hard-coded.. but it was here when I got here
+                let query = '&address=1&services_coordinators=1'; // this seems wierd that it is hard-coded.. but it was here when I got here
 
                 let active = this.filters.status;
                 let aliasId = '';
@@ -204,7 +205,7 @@
                 query += '&status=' + aliasId;
 
                 query += '&client_type=' + this.filters.client_type;
-                query += '&case_manager_id=' + this.filters.caseManager;
+                query += '&services_coordinator_id=' + this.filters.services_coordinator_id;
                 query += '&businesses[]=' + this.filters.business_id;
                 query += '&search=' + this.filters.search;
 
@@ -230,7 +231,7 @@
                         this.clients = res.data[ 'clients' ].map( client => {
 
                             client.county = client.address ? client.address.county : '';
-                            client.case_manager_name = client.case_manager ? client.case_manager.name : null;
+                            client.services_coordinator_name = client.services_coordinator ? client.services_coordinator.name : null;
                             return client;
                         });
 
@@ -247,7 +248,7 @@
             },
             async loadOfficeUsers() {
                 const response = await axios.get(`/business/office-users`);
-                this.caseManagers = response.data;
+                this.servicesCoordinators = response.data;
             },
             details(item, index, button) {
                 this.selectedItem = item;

@@ -38,17 +38,17 @@
                         <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
                         <b-form-text class="">NOTE: Changing the client type will change the 1099 settings.</b-form-text>
                     </b-form-group>
-                    <b-form-group label="Client Services Coordinator" label-for="case_manager">
+                    <b-form-group label="Client Services Coordinator" label-for="services_coordinator">
                         <b-form-select
-                                v-model="form.case_manager_id"
-                                id="case_manager_id"
-                                name="case_manager_id"
+                                v-model="form.services_coordinator_id"
+                                id="services_coordinator_id"
+                                name="services_coordinator_id"
                                 class="mr-2 mb-2"
                         >
                             <option :value="null">-- Client Services Coordinator --</option>
-                            <option :value="cm.id" v-for="cm in caseManagers" :key="cm.id">{{ cm.name }}</option>
+                            <option :value="sc.id" v-for="sc in servicesCoordinators" :key="sc.id">{{ sc.name }}</option>
                         </b-form-select>
-                        <input-help :form="form" field="case_manager_id" text="Select service coordinator for the client."></input-help>
+                        <input-help :form="form" field="services_coordinator_id" text="Select service coordinator for the client."></input-help>
                     </b-form-group>
                     <b-form-group label="Salesperson">
                         <b-form-select v-model="form.sales_person_id">
@@ -505,7 +505,8 @@
                     hospital_number: this.client.hospital_number,
                     avatar: this.client.avatar,
                     business_id: this.client.business_id,
-                    case_manager_id: this.client.case_manager_id,
+                    //case_manager: this.client.case_manager ? this.client.case_manager : '',
+                    services_coordinator_id: this.client.services_coordinator_id,
                     hic: this.client.hic,
                     travel_directions: this.client.travel_directions,
                     caregiver_1099: this.client.caregiver_1099,
@@ -525,7 +526,7 @@
                 deactivateModal: false,
                 activateModal: false,
                 showReferralModal: false,
-                caseManagers: [],
+                servicesCoordinators: [],
                 sendEmailModal: false,
                 statusAliases: [],
                 localLastStatusDate: null,
@@ -627,7 +628,7 @@
 
             async loadOfficeUsers() {
                 const response = await axios.get(`/business/${this.client.business_id}/office-users`);
-                this.caseManagers = response.data;
+                this.servicesCoordinators = response.data;
             },
 
             checkForNoEmailDomain() {
