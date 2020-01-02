@@ -25,6 +25,7 @@ class PopulateReasonCodeTable extends Migration
                 'description' => $reason[ 'description' ]
             ]);
         }
+
         foreach( VisitEditActionEnum::fullList() as $action ){
 
             VisitEditAction::create([

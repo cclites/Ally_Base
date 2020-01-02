@@ -1,0 +1,39 @@
+<?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class AlterTableShiftsAddReferenceToEditCodes extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table( 'shifts', function ( Blueprint $table ) {
+
+            $table->unsignedInteger( 'visit_edit_action' )->nullable();
+            $table->unsignedInteger( 'visit_edit_reason' )->nullable();
+
+            $table->foreign( 'visit_edit_action' )->references( 'id' )->on( 'visit_edit_actions' )->onDelete( 'RESTRICT' );
+            $table->foreign( 'visit_edit_reason' )->references( 'id' )->on( 'visit_edit_reasons' )->onDelete( 'RESTRICT' );
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table( 'shifts', function ( Blueprint $table ) {
+
+            $table->dropColumn( 'edit_action_code' );
+            $table->dropColumn( 'edit_reason_code' );
+        });
+    }
+}

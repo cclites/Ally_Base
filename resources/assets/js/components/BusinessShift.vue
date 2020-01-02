@@ -482,23 +482,9 @@
                     </b-row>
                     <shift-evv-data-table v-if="shift.id" :shift="shift"></shift-evv-data-table>
                 </div> <!-- // end ! isClient -->
-                <b-row>
 
-                    <b-col sm="6">
+                <edit-code-dropdowns />
 
-                        <b-form-select v-model="form.quickbooks_service_id" :disabled="disableQuickbooksMapping">
-                            <option value="">--None--</option>
-                            <option v-for="item in quickbooksServices" :value="item.id" :key="item.id">{{ item.name }}</option>
-                        </b-form-select>
-                    </b-col>
-                    <b-col sm="6">
-
-                        <b-form-select v-model="form.quickbooks_service_id" :disabled="disableQuickbooksMapping">
-                            <option value="">--None--</option>
-                            <option v-for="item in quickbooksServices" :value="item.id" :key="item.id">{{ item.name }}</option>
-                        </b-form-select>
-                    </b-col>
-                </b-row>
                 <b-row v-if="isClient">
                     <b-col lg="12" class="text-right mt-3">
                         <b-button variant="info" type="submit" @click="saveShift(false)">
