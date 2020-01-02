@@ -66,8 +66,8 @@ class Kernel extends HttpKernel
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        'active' => CheckActive::class, // TODO: This appears to be unused
         'roles' => CheckRole::class,
-        'active' => CheckActive::class,
         'twilio' => TwilioRequestValidator::class,
     ];
 }
