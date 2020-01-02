@@ -20,6 +20,12 @@ class ActiveBusiness
             return $this->business;
         }
         if (Auth::check() && Auth::user()->role_type === 'office_user') {
+            if (Auth::user()->active === 0) {
+                // This resolves an issue where office users that have
+                // been deactivated and are already logged in receive
+                // an exception before they are bounced to the login screen.
+                return new Business(); // Return a blank business to prevent exceptions
+            }
             return Auth::user()->role->getDefaultBusiness();
         }
         // For administrators only: get the last used business_id
