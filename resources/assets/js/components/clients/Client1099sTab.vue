@@ -3,6 +3,12 @@
                 header-bg-variant="info"
                 header-text-variant="white">
 
+            <p>
+                1099 totals do not include expenses, mileage, deductions, adjustments, etc.
+            </p>
+
+            <hr>
+
             <div v-if="fields.length">
                 <div v-for="field in fields" :key="field" class="mb-3">
                     <h4 class="chat-text">{{ field }}</h4>
