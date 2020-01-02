@@ -10,9 +10,9 @@
                     <b-row>
                         <b-col lg="2">
                             <b-form-group label="Service Coordinator">
-                                <b-form-select v-model="filters.case_manager_id" class="mr-1 mb-1" name="case_manager_id">
+                                <b-form-select v-model="filters.services_coordinator_id" class="mr-1 mb-1" name="services_coordinator_id">
                                     <option value="">All Service Coordinators</option>
-                                    <option v-for="item in caseManagers" :key="item.id" :value="item.id">{{ item.nameLastFirst }}</option>
+                                    <option v-for="item in servicesCoordinators" :key="item.id" :value="item.id">{{ item.nameLastFirst }}</option>
                                 </b-form-select>
                             </b-form-group>
                         </b-col>
@@ -54,8 +54,8 @@
                                 :per-page="perPage"
                                 @filtered="onFiltered"
                             >
-                                <template slot="case_manager" scope="row">
-                                    {{ row.item.case_manager.user.nameLastFirst }}
+                                <template slot="services_coordinator" scope="row">
+                                    {{ row.item.services_coordinator.user.nameLastFirst }}
                                 </template>
                                 <template slot="status" scope="row">
                                     {{ row.item.user.active ? 'Active' : 'Inactive' }}
@@ -91,7 +91,7 @@
         mixins: [FormatsDates, FormatsNumbers],
 
         props: {
-            caseManagers: {
+            servicesCoordinators: {
                 type: Array,
                 required: true,
             },
@@ -105,7 +105,7 @@
             return {
                 loading: false,
                 filters: {
-                    case_manager_id: '',
+                    services_coordinator_id: '',
                     client_id: '',
                     client_status: '',
                     days_since_contact: '',
@@ -115,7 +115,7 @@
                 currentPage: 1,
                 fields: [
                     {
-                        key: 'case_manager',
+                        key: 'services_coordinator',
                         sortable: true,
                     },
                     {
@@ -155,8 +155,8 @@
                     };
                 });
 
-                if(this.filters.case_manager_id) {
-                    result = result.filter(client => client.case_manager_id == this.filters.case_manager_id);
+                if(this.filters.services_coordinator_id) {
+                    result = result.filter(client => client.services_coordinator_id == this.filters.services_coordinator_id);
                 }
 
                 if(this.filters.client_status !== '') {

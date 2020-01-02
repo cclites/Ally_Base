@@ -599,20 +599,20 @@ class ReportsController extends BaseController
             ->groupBy('client_id');
     }
 
-    public function caseManager()
+    public function servicesCoordinator()
     {
         $clients = Client::forRequestedBusinesses()
-            ->whereNotNull('case_manager_id')
-            ->with('caseManager')
+            ->whereNotNull('services_coordinator_id')
+            ->with('servicesCoordinator')
             ->with(['notes' => function($query) {
                 return $query->where('type', 'phone');
             }])
             ->get();
-        $ids = $clients->pluck('case_manager_id');
-        $caseManagers = OfficeUser::forRequestedBusinesses()
+        $ids = $clients->pluck('services_coordinator_id');
+        $servicesCoordinators = OfficeUser::forRequestedBusinesses()
             ->whereIn('id', $ids)
             ->get();
-        return view('business.reports.case_manager', compact('caseManagers', 'clients'));
+        return view('business.reports.services_coordinator', compact('servicesCoordinators', 'clients'));
     }
 
     /**

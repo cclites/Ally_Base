@@ -11,7 +11,7 @@
 @section('content')
     <div class="row">
         <div class="col-lg-12">
-            <case-manager-report :case-managers="{{ $caseManagers }}" :clients="{{ $clients }}"></case-manager-report>
+            <services-coordinator-report :services-coordinators="{{ servicesCoordinators }}" :clients="{{ $clients }}"></services-coordinator-report>
         </div>
     </div>
 @endsection

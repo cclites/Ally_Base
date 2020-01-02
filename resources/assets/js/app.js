@@ -232,7 +232,7 @@ Vue.component('schedule-clock-out-modal', require('./components/business/schedul
 Vue.component('business-caregiver-pay-statements', require('./components/business/caregivers/CaregiverPayStatementsTab'));
 Vue.component('business-client-caregiver-visits-report', require('./components/admin/reports/ClientCaregiverVisitsReport'));
 Vue.component('caregiver-application-edit', require('./components/caregivers/CaregiverApplicationEdit'));
-Vue.component('case-manager-report', require('./components/business/reports/CaseManager'));
+Vue.component('services-coordinator-report', require('./components/business/reports/ServicesCoordinator'));
 Vue.component('ltci-claims-report', require('./components/business/reports/LtciClaimsReport'));
 Vue.component('referral-sources-report', require('./components/business/reports/ReferralSources'));
 Vue.component('prospects-report', require('./components/business/reports/Prospects'));
