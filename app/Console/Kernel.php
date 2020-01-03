@@ -3,9 +3,9 @@
 namespace App\Console;
 
 use App\Console\Commands\AchOfflineChargeCommand;
+use App\Console\Commands\Cron\CronSyncTellusResources;
 use App\Console\Commands\Cron\CronTellusCheckStatusv2;
 use App\Console\Commands\CronChargePaymentNotifications;
-use App\Console\Commands\CronHhaCheckStatus;
 use App\Console\Commands\CronHhaCheckStatusv2;
 use App\Console\Commands\CronScheduleConverter;
 use App\Console\Commands\CronUpdateTransactionLog;
@@ -42,6 +42,7 @@ class Kernel extends ConsoleKernel
         GenerateItemizedReconciliationReport::class,
         CronHhaCheckStatusv2::class,
         CronTellusCheckStatusv2::class,
+        CronSyncTellusResources::class,
     ];
 
     /**
@@ -86,6 +87,9 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('cron:charge_payment_notifications')
             ->dailyAt('23:30'); // 6:30 PM EST / 7:30 EDT
+
+        $schedule->command(CronSyncTellusResources::class)
+            ->dailyAt('05:00'); // 12am EST / 1am EDT
     }
 
     /**

@@ -33,7 +33,6 @@ class TellusService
      */
     protected $endpoint;
 
-    public const TYPECODE_DICTIONARY_FILENAME = 'tellus/typecode-dictionary.xlsx';
     public const XML_SCHEMA_FILENAME = 'tellus/xml-schema.xsd';
 
     /**
@@ -86,9 +85,9 @@ class TellusService
     {
         $xml = $this->convertArrayToXML($records);
 
-//        if ($errors = $this->getValidationErrors($xml)) {
-//            throw new TellusValidationException('Claim file did not pass local XML validation.', $errors);
-//        }
+        if ($errors = $this->getValidationErrors($xml)) {
+            throw new TellusValidationException('Claim file did not pass local XML validation.', $errors);
+        }
 
         list($httpCode, $response) = $this->sendXml($xml);
 
@@ -310,27 +309,5 @@ class TellusService
         $root = ends_with($root, '/') ? $root : $root . '/';
 
         return $root . $filename;
-    }
-
-    /**
-     * Download remote resource files and store on public disk.
-     *
-     * @return bool
-     */
-    public static function downloadApiResources(): bool
-    {
-        $dictionary = download_file(
-            config('services.tellus.dictionary_file'),
-            \Storage::disk('public'),
-            self::TYPECODE_DICTIONARY_FILENAME
-        );
-
-        $schema = download_file(
-            config('services.tellus.schema_file'),
-            \Storage::disk('public'),
-            self::XML_SCHEMA_FILENAME
-        );
-
-        return $dictionary && $schema;
     }
 }
