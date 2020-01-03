@@ -33,7 +33,7 @@ class UpdateClientRequest extends BusinessRequest
             'date_of_birth' => 'nullable|date',
             'business_fee' => 'nullable|numeric',
             'client_type' => 'required',
-            'case_manager' => 'nullable',
+            'case_manager' => 'nullable|string|max:100',
             'services_coordinator_id' => 'nullable',
             'ssn' => ['nullable', new ValidSSN()],
             'gender' => 'nullable|in:M,F',

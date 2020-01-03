@@ -50,6 +50,19 @@
                         </b-form-select>
                         <input-help :form="form" field="services_coordinator_id" text="Select service coordinator for the client."></input-help>
                     </b-form-group>
+
+                    <b-form-group label="Client Case Manager" label-for="case_manager">
+                        <b-form-input
+                                v-model="form.case_manager"
+                                id="case_manager"
+                                name="case_manager"
+                                class="mr-2 mb-2"
+                        >
+                        </b-form-input>
+                        <input-help :form="form" field="case_manager" text="Enter Case Manager for the client."></input-help>
+                    </b-form-group>
+
+
                     <b-form-group label="Salesperson">
                         <b-form-select v-model="form.sales_person_id">
                             <option :value="null">None</option>
@@ -505,7 +518,7 @@
                     hospital_number: this.client.hospital_number,
                     avatar: this.client.avatar,
                     business_id: this.client.business_id,
-                    //case_manager: this.client.case_manager ? this.client.case_manager : '',
+                    case_manager: this.client.case_manager ? this.client.case_manager : '',
                     services_coordinator_id: this.client.services_coordinator_id,
                     hic: this.client.hic,
                     travel_directions: this.client.travel_directions,
