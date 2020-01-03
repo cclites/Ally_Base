@@ -34,7 +34,7 @@ class CronSyncTellusResources extends BaseImport
     protected $renderedServicesContentId;
 
     /** @var string */
-    protected $xsd_search_string;
+    protected $xsdSearchString;
 
     /** @var string */
     protected $dictionaryFile;
