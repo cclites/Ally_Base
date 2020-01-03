@@ -15,7 +15,6 @@ class AlterTableClientsAddServicesCoordinatorIdAndCaseManager extends Migration
     {
         Schema::table('clients', function (Blueprint $table) {
             $table->dropForeign('fk_client_case_manager_id');
-            $table->dropIndex('fk_client_case_manager_id');
             $table->renameColumn('case_manager_id', 'services_coordinator_id');
             $table->foreign('services_coordinator_id', 'fk_services_coordinator_id')->references('id')->on('users');
         });
@@ -34,7 +33,6 @@ class AlterTableClientsAddServicesCoordinatorIdAndCaseManager extends Migration
     {
         Schema::table('clients', function (Blueprint $table) {
             $table->dropForeign('fk_services_coordinator_id');
-            $table->dropIndex('fk_services_coordinator_id');
         });
 
         Schema::table('clients', function (Blueprint $table) {
