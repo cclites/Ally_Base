@@ -226,6 +226,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read mixed $setup_status
  * @property-read string $setup_url
  * @property-read mixed $status_alias_id
+ * @property-read string $case_manager
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\UserNotificationPreferences[] $notificationPreferences
  * @property-read \App\QuickbooksCustomer|null $quickbooksCustomer
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientAuthorization[] $serviceAuthorizations
@@ -316,6 +317,7 @@ class Client extends AuditableModel implements
         'quickbooks_customer_id',
         'send_1099',
         'can_edit_send_1099',
+        'case_manager'
     ];
 
     ///////////////////////////////////////////

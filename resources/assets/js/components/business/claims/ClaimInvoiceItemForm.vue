@@ -422,15 +422,15 @@
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">
-                    <b-form-group label="Case Manager" label-for="client_case_manager">
+                    <b-form-group label="Services Coordinator" label-for="services_coordinator">
                         <b-form-input
-                            v-model="form.client_case_manager"
-                            id="client_case_manager"
-                            name="client_case_manager"
+                            v-model="form.services_coordinator"
+                            id="services_coordinator"
+                            name="services_coordinator"
                             type="text"
                             :disabled="form.busy || form.client_reload"
                         />
-                        <input-help :form="form" field="client_case_manager" text=""></input-help>
+                        <input-help :form="form" field="services_coordinator" text=""></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -944,13 +944,14 @@
                     client_cirts_number: '',
                     client_ltci_policy_number: '',
                     client_ltci_claim_number: '',
-                    client_case_manager: '',
                     client_hic: '',
                     client_invoice_notes: '',
 
                     client_signature_id: '',
                     caregiver_signature_id: '',
                     is_overtime: false,
+
+                    services_coordinator: '',
                 }),
             };
         },
@@ -1036,7 +1037,7 @@
                 this.form.client_cirts_number = '';
                 this.form.client_ltci_policy_number = '';
                 this.form.client_ltci_claim_number = '';
-                this.form.client_case_manager = '';
+                this.form.services_coordinator = '';
             },
 
             onChangeService(id) {

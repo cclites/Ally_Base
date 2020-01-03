@@ -317,7 +317,7 @@ class ClaimInvoiceItem extends AuditableModel
             'client_cirts_number' => $faker->randomNumber(8),
             'client_ltci_policy_number' => $faker->randomNumber(8),
             'client_ltci_claim_number' => $faker->randomNumber(8),
-            'client_case_manager' => $faker->name(),
+            'services_coordinator' => $faker->name(),
             'client_hic' => $faker->randomNumber(8),
             'client_invoice_notes' => $faker->sentence,
 

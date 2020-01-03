@@ -45,8 +45,6 @@ class ClientController extends BaseController
      */
     public function index(Request $request)
     {
-        \Log::info("Business\ClientController::index");
-
 
         if ($request->expectsJson()) {
             $query = Client::forRequestedBusinesses()->ordered();
@@ -283,8 +281,6 @@ class ClientController extends BaseController
         $this->authorize('update', $client);
         $data = $request->filtered();
 
-        unset($client->case_manager);
-
         $addOnboardRecord = false;
         if ($client->agreement_status != $data['agreement_status']) {
             $addOnboardRecord = true;
@@ -372,8 +368,6 @@ class ClientController extends BaseController
      */
     public function reactivate(Client $client)
     {
-        unset($client->case_manager);
-
         $this->authorize('update', $client);
 
         if ($client->update(['active' => true, 'inactive_at' => null, 'status_alias_id' => null])) {

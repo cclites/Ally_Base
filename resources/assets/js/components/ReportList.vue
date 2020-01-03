@@ -434,7 +434,7 @@
                     },
                     {
                         name: 'Client Service Coordinators',
-                        url: 'reports/case-manager',
+                        url: 'reports/services-coordinator',
                         description: 'Shows all clients each service coordinator is assigned',
                         category: 2,
                         allowed: ['office_user'],

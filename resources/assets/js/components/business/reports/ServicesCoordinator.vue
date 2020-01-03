@@ -55,7 +55,7 @@
                                 @filtered="onFiltered"
                             >
                                 <template slot="services_coordinator" scope="row">
-                                    {{ row.item.services_coordinator.user.nameLastFirst }}
+                                    {{ row.item.services_coordinator.nameLastFirst }}
                                 </template>
                                 <template slot="status" scope="row">
                                     {{ row.item.user.active ? 'Active' : 'Inactive' }}

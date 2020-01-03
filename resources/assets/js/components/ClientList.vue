@@ -130,7 +130,7 @@
                         formatter: this.formatUppercase,
                     },
                     {
-                        key: 'service_coordinator_name',
+                        key: 'services_coordinator_name',
                         label: 'Service Coordinator',
                         sortable: true,
                     },

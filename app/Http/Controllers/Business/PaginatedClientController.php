@@ -20,8 +20,6 @@ class PaginatedClientController extends BaseController
      */
     public function index( Request $request )
     {
-        \Log::info("PaginatedClientController::index");
-
         if ( $request->filled( 'json' ) || $request->expectsJson() ) {
 
             $query = Client::forRequestedBusinesses();

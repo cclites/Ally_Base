@@ -611,7 +611,7 @@ class ReportsController extends BaseController
         $ids = $clients->pluck('services_coordinator_id');
         $servicesCoordinators = OfficeUser::forRequestedBusinesses()
             ->whereIn('id', $ids)
-            ->get();
+            ->get()->values();
         return view('business.reports.services_coordinator', compact('servicesCoordinators', 'clients'));
     }
 

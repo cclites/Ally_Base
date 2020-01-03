@@ -60,7 +60,7 @@ class ClaimInvoiceItemResource extends Resource
             'client_dob' => $this->resource->client_dob ? Carbon::parse($this->resource->client_dob)->format('m/d/Y') : '',
             'client_medicaid_id' => $this->resource->client_medicaid_id,
             'client_medicaid_diagnosis_codes' => $this->resource->client_medicaid_diagnosis_codes,
-            'client_case_manager' => $this->resource->client_case_manager,
+            'services_coordinator' => $this->resource->services_coordinator,
             'client_program_number' => $this->resource->client_program_number,
             'client_cirts_number' => $this->resource->client_cirts_number,
             'client_ltci_policy_number' => $this->resource->client_ltci_policy_number,
