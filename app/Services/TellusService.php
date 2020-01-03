@@ -85,9 +85,9 @@ class TellusService
     {
         $xml = $this->convertArrayToXML($records);
 
-//        if ($errors = $this->getValidationErrors($xml)) {
-//            throw new TellusValidationException('Claim file did not pass local XML validation.', $errors);
-//        }
+        if ($errors = $this->getValidationErrors($xml)) {
+            throw new TellusValidationException('Claim file did not pass local XML validation.', $errors);
+        }
 
         list($httpCode, $response) = $this->sendXml($xml);
 
