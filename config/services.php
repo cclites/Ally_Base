@@ -72,12 +72,16 @@ return [
 
     'tellus' => [
         'endpoint' => env('TELLUS_ENDPOINT', 'https://edi.stg.4tellus.net/v2.0/{username}/SRVC'),
-        'dictionary_file' => env('TELLUS_DICTIONARY_FILE', 'https://tellusolutions.atlassian.net/wiki/download/attachments/591527967/Typecode%20Data%20Dictionary%2020191011.xlsx?api=v2'),
-        'schema_file' => env('TELLUS_SCHEMA_FILE', 'https://tellusolutions.atlassian.net/wiki/download/attachments/182124545/Rendered%20Services%20v2%20XML%20Schema%2020191011.xsd?api=v2'),
+
         'sftp_host' => env('TELLUS_SFTP_HOST', 'sftp-gateway.4tellus.com'),
         'sftp_port' => env('TELLUS_SFTP_PORT', 22),
         'sftp_directory' => env('TELLUS_SFTP_DIRECTORY', '/home/{username}/'),
         'pem_path' => env('TELLUS_SFTP_PEM', ''),
+
+        'confluence_host' => env('TELLUS_CONFLUENCE_HOST', 'tellusolutions.atlassian.net'),
+        'typecode_content_id' => env('TELLUS_TYPECODE_CONTENT_ID', '591527967'),
+        'rendered_services_content_id' => env('TELLUS_RENDERED_SERVICES_CONTENT_ID', '182124545'),
+        'xsd_search_string' => env('TELLUS_XSD_SEARCH_STRING', 'XML Schema'),
     ],
 
     'fullcalendar' => [

@@ -61,18 +61,15 @@ class KnowledgeBaseController extends Controller
     /**
      * View the Tellus Guide
      *
-     * @param $attachment
      * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
      */
     public function tellusGuide()
     {
-
-        // this should probably be a relationship within the model itself..
-        // however defining a model based on a composite key is not simple, couldnt figure it out on google
+        // This gets all text code values from the dictionary for the queried categories
+        // and only shows the ones that are accepted in the Tellus XSD validation file.
         $xsd = DB::table( 'tellus_typecodes as dictionary' )
-            ->whereIn( 'dictionary.category', [ 'Payer', 'Plan' ])
+            ->whereIn( 'dictionary.category', [ 'Jurisdiction', 'Payer', 'Plan', 'Program' ])
             ->leftJoin( 'tellus_enumerations as xsd', function( $join ){
-
                 $join->on( 'xsd.code', '=', 'dictionary.code' );
                 $join->on( 'xsd.category', '=', 'dictionary.category' );
             })
