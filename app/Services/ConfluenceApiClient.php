@@ -95,7 +95,7 @@ class ConfluenceApiClient
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HEADER, 1);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        if (filled($this->username) && $this->filled($this->apiToken)) {
+        if (filled($this->username) && filled($this->apiToken)) {
             curl_setopt($ch, CURLOPT_USERPWD, $this->username . ":" . $this->apiToken);
         }
         curl_setopt($ch, CURLOPT_POST, 1);
@@ -150,7 +150,7 @@ class ConfluenceApiClient
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        if (filled($this->username) && $this->filled($this->apiToken)) {
+        if (filled($this->username) && filled($this->apiToken)) {
             curl_setopt($ch, CURLOPT_USERPWD, $this->username . ":" . $this->apiToken);
         }
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
