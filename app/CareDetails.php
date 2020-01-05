@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @property int $id
  * @property int $client_id
- * @property int $lives_alone
+ * @property int|null $lives_alone
  * @property string|null $pets
- * @property int $smoker
- * @property int $alcohol
- * @property int $incompetent
+ * @property int|null $smoker
+ * @property int|null $alcohol
+ * @property int|null $incompetent
  * @property string|null $competency_level
  * @property int $can_provide_direction
- * @property int $assist_medications
+ * @property int|null $assist_medications
  * @property string|null $medication_overseer
  * @property string|null $safety_measures
  * @property string|null $safety_instructions
@@ -522,9 +522,10 @@ class CareDetails extends AuditableModel
     public static function convertFormData($data)
     {
         // fix boolean values
+        /*
         foreach (self::$boolKeys as $key) {
             $data[$key] = $data[$key] ?? false;
-        }
+        }*/
 
         // implode all array fields
         foreach (self::$arrayKeys as $key) {
