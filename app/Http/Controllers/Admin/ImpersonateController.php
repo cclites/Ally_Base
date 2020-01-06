@@ -18,7 +18,7 @@ class ImpersonateController extends Controller
     public function impersonate(User $user)
     {
         if (! is_admin()) {
-            abort(401);
+            abort(403);
         }
 
         if (auth()->user()->impersonator()) {
