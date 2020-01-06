@@ -483,7 +483,13 @@
                     <shift-evv-data-table v-if="shift.id" :shift="shift"></shift-evv-data-table>
                 </div> <!-- // end ! isClient -->
 
-                <edit-code-dropdowns />
+                <edit-code-dropdowns
+                    class="my-3"
+                    :visit_edit_action=" form.visit_edit_action "
+                    :visit_edit_reason=" form.visit_edit_reason "
+                    :updateAction=" updateAction "
+                    :updateReason=" updateReason "
+                />
 
                 <b-row v-if="isClient">
                     <b-col lg="12" class="text-right mt-3">
@@ -730,6 +736,15 @@
 
         },
         methods: {
+
+            updateAction( action ){
+
+                this.form.visit_edit_action = action;
+            },
+            updateReason( reason ){
+
+                this.form.visit_edit_reason = reason;
+            },
             changedShift(shift) {
                 if (this.isRoot) {
                     // If we are not working from the SHR or other parent
@@ -883,6 +898,8 @@
                         'ally_fee': null,
                     },
                     quickbooks_service_id: shift.quickbooks_service_id || '',
+                    visit_edit_reason : shift.visit_edit_reason,
+                    visit_edit_action : shift.visit_edit_action
                 };
             },
             createIssue() {

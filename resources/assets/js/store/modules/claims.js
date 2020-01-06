@@ -11,10 +11,17 @@ const state = {
     remits: [],
     remit: {},
     remitClaimList: [],
+
+    loadedReasons : false,
+    visitEditReasonCodes : [],
+    visitEditActionCodes : [],
 };
 
 // getters
 const getters = {
+
+    visitEditReasonCodes : state => state.visitEditReasonCodes,
+    visitEditActionCodes : state => state.visitEditActionCodes,
     queue(state) {
         return state.queue;
     },
@@ -49,6 +56,11 @@ const getters = {
 
 // mutations
 const mutations = {
+
+    setVisitEditReasonCodes : ( state, visitEditReasonCodes ) => state.visitEditReasonCodes = visitEditReasonCodes,
+    setVisitEditActionCodes : ( state, visitEditActionCodes ) => state.visitEditActionCodes = visitEditActionCodes,
+    loadedReasons : state => state.loadedReasons = true,
+
     setClaim(state, claim) {
         Vue.set(state, 'claim', claim);
     },
@@ -101,6 +113,26 @@ const actions = {
             .catch(() => {
                 commit('setServiceList', []);
             });
+    },
+    async fetchVisitEditCodes( ctx ) {
+
+        if( !ctx.state.loadedReasons ){
+            // debounce the component.. noticed it fired twice on the SHR
+
+            await axios.get( `/business/dropdown/visit-edit-codes` )
+                .then( ({ data }) => {
+
+                    console.log( 'data returned: ', data );
+                    ctx.commit( 'loadedReasons' );
+                    ctx.commit( 'setVisitEditReasonCodes', data.reasons );
+                    ctx.commit( 'setVisitEditActionCodes', data.actions );
+                })
+                .catch( () => {
+
+                    ctx.commit( 'setVisitEditReasonCodes', [] );
+                    ctx.commit( 'setVisitEditActionCodes', [] );
+                });
+            }
     },
 };
 
