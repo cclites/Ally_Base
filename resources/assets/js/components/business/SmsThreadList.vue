@@ -72,18 +72,19 @@
 </template>
 
 <script>
-    import FormatsDates from '../../mixins/FormatsDates';
-    import FormatsListData from "../../mixins/FormatsListData";
-    import BusinessLocationFormGroup from "./BusinessLocationFormGroup";
-    import BusinessLocationSelect from "./BusinessLocationSelect";
+import FormatsDates from '../../mixins/FormatsDates';
+import FormatsListData from "../../mixins/FormatsListData";
+import BusinessLocationFormGroup from "./BusinessLocationFormGroup";
+import BusinessLocationSelect from "./BusinessLocationSelect";
 
-    export default {
-        name: "BusinessSmsThreadList",
+export default {
+    name: "BusinessSmsThreadList",
 
-        mixins: [FormatsDates, FormatsListData],
-        components: {BusinessLocationFormGroup, BusinessLocationSelect},
+    mixins: [FormatsDates, FormatsListData],
+    components: {BusinessLocationFormGroup, BusinessLocationSelect},
 
-        data: () => ({
+    data() {
+        return {
             busy: false,
             items: [],
             perPage: 25,
@@ -125,39 +126,40 @@
             end_date: moment().format('MM/DD/YYYY'),
             repliesOnly: 0,
             business_id: '',
-        }),
+        }
+    },
 
-        computed: {
-            businesses() {
-                return this.$store.state.business.businesses.filter(item => item.outgoing_sms_number);
-            }
+    computed: {
+        businesses() {
+            return this.$store.state.business.businesses.filter(item => item.outgoing_sms_number);
+        }
+    },
+
+    methods: {
+        fetch() {
+            this.busy = true;
+            axios.get(`/business/communication/sms-threads?json=1&start_date=${this.start_date}&end_date=${this.end_date}&reply_only=${this.repliesOnly}&business_id=${this.business_id}`)
+                .then( ({ data }) => {
+                    this.items = data;
+                })
+                .catch(e => {
+                })
+                .finally(() => {
+                    this.busy = false;
+                })
         },
 
-        methods: {
-            fetch() {
-                this.busy = true;
-                axios.get(`/business/communication/sms-threads?json=1&start_date=${this.start_date}&end_date=${this.end_date}&reply_only=${this.repliesOnly}&business_id=${this.business_id}`)
-                    .then( ({ data }) => {
-                        this.items = data;
-                    })
-                    .catch(e => {
-                    })
-                    .finally(() => {
-                        this.busy = false;
-                    })
-            },
-
-            messagePreview(message) {
-                if (message.length <= 70) {
-                    return message;
-                }
-
-                return message.substr(0, 70) + '...';
-            },
-
-            openThread(thread) {
-                window.location = `/business/communication/sms-threads/${thread.id}`;
+        messagePreview(message) {
+            if (message.length <= 70) {
+                return message;
             }
+
+            return message.substr(0, 70) + '...';
         },
-    }
+
+        openThread(thread) {
+            window.location = `/business/communication/sms-threads/${thread.id}`;
+        }
+    },
+}
 </script>
