@@ -4,7 +4,11 @@
         header-text-variant="white"
         header-bg-variant="info"
     >
-        <b-btn variant="info" class="mb-2" @click="showModal()">Add Medication</b-btn>
+        <div>
+            <b-btn variant="info" class="mb-2" @click="showModal()">Add Medication</b-btn>
+            <b-btn @click="generatePdf()" variant="primary" class="float-right"><i class="fa fa-print"></i> Print</b-btn>
+        </div>
+
         <ally-table id="client-medication" :columns="fields" :items="items" sort-by="">
             <template slot="actions" scope="row">
                 <b-btn size="sm" @click="destroyMedication(row.item)" variant="danger">X</b-btn>
@@ -302,6 +306,10 @@
                     this.items.push(medication);
                 }
             },
+
+            generatePdf(){
+                window.location = `/business/clients/${this.client.id}/medications/print`;
+            }
         }
     }
 </script>

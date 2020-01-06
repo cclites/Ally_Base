@@ -217,6 +217,7 @@ Route::group([
     Route::patch('caregivers/{caregiver}/office-locations', 'Business\CaregiverController@updateOfficeLocations');
     Route::patch('caregivers/{caregiver}/meta', 'Business\CaregiverMetaController@update')->name('caregivers.meta.update');
 
+    Route::get('clients/{client}/medications/print', 'Business\ClientMedicationController@generatePdf');
     Route::resource('clients/{client}/medications', 'Business\ClientMedicationController');
     Route::patch('clients/{client}/meta', 'Business\ClientMetaController@update')->name('clients.meta.update');
 
@@ -234,6 +235,7 @@ Route::group([
     Route::put('clients/{client}/ltci', 'Business\ClientController@ltci')->name('clients.ltci');
     Route::resource('clients/{client}/care-plans', 'Business\ClientCarePlanController');
     Route::resource('clients/{client}/goals', 'Business\ClientGoalsController');
+    Route::get('clients/{client}/goals/print', 'Business\ClientGoalsController@generatePdf');
     Route::post('clients/{client}/care-details', 'Business\ClientCareDetailsController@update')->name('clients.care-details.update');
     Route::post('clients/{client}/skilled-nursing-poc', 'Business\SkilledNursingPocController@update')->name('clients.skilled-nursing-poc.update');
     Route::get('clients/{client}/skilled-nursing-poc/print', 'Business\SkilledNursingPocController@generatePdf')->name('clients.skilled-nursing-poc.generate-pdf');
