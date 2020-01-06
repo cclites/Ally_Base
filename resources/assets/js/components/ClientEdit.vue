@@ -396,6 +396,13 @@
                         <b-button variant="info" @click="activateModal = true"><i class="fa fa-refresh"></i> Re-activate Client</b-button>
                         <b-button variant="info" @click=" getDischarge() "><i class="fa fa-file mr-1"></i>Download Discharge Summary</b-button>
                     </template>
+                    <b-button variant="secondary"
+                        type="button"
+                        :href="`/business/impersonate/${client.id}`"
+                        v-if="isAdmin"
+                    >
+                        Impersonate User
+                    </b-button>
                 </b-col>
             </b-row>
         </form>
