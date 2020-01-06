@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AlterTableShiftsAddReferenceToEditCodes extends Migration
+class AlterTableClaimableServicesAddVisitEditCodes extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class AlterTableShiftsAddReferenceToEditCodes extends Migration
      */
     public function up()
     {
-        Schema::table( 'shifts', function ( Blueprint $table ) {
+        Schema::table( 'claimable_services', function ( Blueprint $table ) {
 
             $table->unsignedInteger( 'visit_edit_action' )->nullable();
             $table->unsignedInteger( 'visit_edit_reason' )->nullable();
@@ -30,7 +30,7 @@ class AlterTableShiftsAddReferenceToEditCodes extends Migration
      */
     public function down()
     {
-        Schema::table( 'shifts', function ( Blueprint $table ) {
+        Schema::table( 'claimable_services', function ( Blueprint $table ) {
 
             $table->dropColumn( 'visit_edit_action' );
             $table->dropColumn( 'visit_edit_reason' );

@@ -19,6 +19,8 @@ use App\Claims\ClaimInvoice;
 use App\Billing\Service;
 use App\Billing\Payer;
 use App\Address;
+use App\Billing\VisitEditActionEnum;
+use App\Billing\VisitEditReasonEnum;
 use App\Shift;
 
 class ClaimInvoiceFactory
@@ -442,6 +444,8 @@ class ClaimInvoiceFactory
             'client_signature_id' => optional($shift->clientSignature)->id,
             'caregiver_signature_id' => optional($shift->caregiverSignature)->id,
             'is_overtime' => $shift->hours_type == 'default' ? false : true,
+            'visit_edit_action' => $shift->verified ? $shift->visit_edit_action : 14,
+            'visit_edit_reason' => $shift->verified ? $shift->visit_edit_reason : 910,
         ]);
     }
 
