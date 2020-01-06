@@ -102,12 +102,7 @@ class ClientGoalsController extends BaseController
 
         return new ErrorResponse(500, 'The goal could not be deleted.');
     }
-
-    public function show($client){
-        $client = Client::where('id', $client)->with(['goals']);
-        return response()->json($client);
-    }
-
+    
     public function generatePdf($client)
     {
         $client = Client::where('id', $client)->with(['goals'])->get()->first();

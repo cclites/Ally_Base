@@ -75,11 +75,6 @@ class ClientMedicationController extends Controller
         return new ErrorResponse(500, 'An error occurred while trying to delete client medication. Please refresh and try again.');
     }
 
-    public function show($client){
-        $client = Client::where('id', $client)->with(['medications']);
-        return response()->json($client);
-    }
-
     public function generatePdf($client)
     {
         $client = Client::where('id', $client)->with(['medications'])->get()->first();
