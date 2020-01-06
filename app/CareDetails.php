@@ -485,12 +485,6 @@ class CareDetails extends AuditableModel
     // OTHER FUNCTIONS
     // **********************************************************
 
-    /**
-     * Attributes that are booleans.
-     *
-     * @var array
-     */
-    protected static $boolKeys = ['lives_alone', 'smoker', 'alcohol', 'incompetent', 'can_provide_direction', 'assist_medications'];
 
     /**
      * Attributes that are imploded arrays.
@@ -521,12 +515,6 @@ class CareDetails extends AuditableModel
      */
     public static function convertFormData($data)
     {
-        // fix boolean values
-        /*
-        foreach (self::$boolKeys as $key) {
-            $data[$key] = $data[$key] ?? false;
-        }*/
-
         // implode all array fields
         foreach (self::$arrayKeys as $key) {
             $data[$key] = self::arrayToString($data[$key]);
