@@ -2,24 +2,33 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Business;
 use App\User;
+use App\Business;
 use App\Http\Controllers\Controller;
 
 class ImpersonateController extends Controller
 {
+    /**
+     * Impersonate the given user.
+     *
+     * @param User $user
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @throws \Exception
+     */
     public function impersonate(User $user)
     {
-        if(auth()->user()->role_type === 'office_user'){
-            \Session::put('impersonate', $user->id);
-            $session_key = \Auth::getName();
-
-            if ($session_key) {
-                \Session::put($session_key, $user->id);
-            }
-        }else{
-            $user->impersonate();
+        if (! is_admin()) {
+            abort(401);
         }
+
+        if (auth()->user()->impersonator()) {
+            // Automatically stop impersonating if already impersonating
+            // an office user.
+            auth()->user()->stopImpersonating();
+            return redirect()->route('business.impersonate', [$user->id]);
+        }
+
+        $user->impersonate();
 
         return redirect('/');
     }
@@ -41,5 +50,4 @@ class ImpersonateController extends Controller
         }
         return redirect()->action('Admin\ImpersonateController@impersonate', [$user->id]);
     }
-
 }

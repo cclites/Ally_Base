@@ -1,7 +1,14 @@
 <li class="nav-item dropdown hidden-xs-down">
     <a class="nav-link dropdown-toggle" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <span class="active-business">
-            {{ ($active_business && !is_admin_now()) ? $active_business->name : 'Admin Overview' }} <i class="fa fa-caret-down"></i>
+            @if($active_business && !is_admin_now())
+                <span>{{ $active_business->name }}</span>
+            @elseif (is_client() || is_caregiver())
+                <span>{{ auth()->user()->name }}</span>
+            @else
+                <span>Admin Overview</span>
+            @endif
+            <i class="fa fa-caret-down"></i>
         </span>
     </a>
     <div class="dropdown-menu dropdown-menu-right scale-up">

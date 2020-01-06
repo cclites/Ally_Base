@@ -45,6 +45,9 @@
             </div>
             <div class="col-sm-4 text-right">
                 <a href="{{ route('impersonate.stop') }}" class="btn btn-small btn-secondary" style="padding: 2px 5px;">Stop Impersonating</a>
+                @if(in_array(auth()->user()->role_type, ['client', 'caregiver']))
+                    <a href="{{ route('impersonate.business', ['business' => collect(auth()->user()->getBusinessIds())->first() ]) }}" class="btn btn-small btn-secondary" style="padding: 2px 5px;">Back to Business</a>
+                @endif
             </div>
         </div>
     </div>
