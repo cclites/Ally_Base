@@ -40,7 +40,7 @@ class UpdateClientRequest extends BusinessRequest
             'inquiry_date' => 'nullable|date',
             'service_start_date' => 'nullable|date',
             'diagnosis' => 'nullable|string|max:100',
-            'ambulatory' => 'nullable|boolean',
+            'ambulatory' => ['nullable','string', Rule::in(Client::AMBULATORY)],
             'hospital_name' => 'nullable|string|max:100',
             'hospital_number' => 'nullable|string|max:25',
             'avatar' => ['nullable', new ImageCropperUpload()],

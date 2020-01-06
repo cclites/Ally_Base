@@ -234,6 +234,12 @@ class ClientController extends BaseController
         $payers = Payer::forAuthorizedChain()->ordered()->get();
         $auths = (new ClientAuthController())->listByClient($client->id);
 
+        if($client->ambulatory === '1'){
+            $client->ambulatory = 'independent';
+        }elseif($client->ambulatory === '0'){
+            $client->ambulatory = 'physical';
+        }
+
         $invoiceQuery = new ClientInvoiceQuery();
         $invoices = $invoiceQuery->forClient($client->id, false)
             ->get()

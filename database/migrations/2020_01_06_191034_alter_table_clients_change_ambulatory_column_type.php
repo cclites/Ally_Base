@@ -13,7 +13,9 @@ class AlterTableClientsChangeAmbulatoryColumnType extends Migration
      */
     public function up()
     {
-        //
+        Schema::table('clients', function (Blueprint $table) {
+            $table->string('ambulatory', 255)->nullable()->change();
+        });
     }
 
     /**
@@ -23,6 +25,8 @@ class AlterTableClientsChangeAmbulatoryColumnType extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('clients', function (Blueprint $table) {
+            $table->boolean('ambulatory')->nullable()->change();
+        });
     }
 }
