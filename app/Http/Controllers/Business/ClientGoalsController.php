@@ -104,16 +104,15 @@ class ClientGoalsController extends BaseController
     }
 
     public function show($client){
-        return Client::find($client)->with(['goals']);
+        $client = Client::where('id', $client)->with(['goals']);
+        return response()->json($client);
     }
 
-    public function generatePdf(Request $request, Client $client)
+    public function generatePdf($client)
     {
-        $this->authorize('read', $client);
+        $client = Client::where('id', $client)->with(['goals'])->get()->first();
 
-        $image = asset('/images/background1.jpg');
-
-        $html = response(view('business.client.client_goals', ['client'=>$client, 'image'=>$image]))->getContent();
+        $html = response(view('business.clients.client_goals', ['client'=>$client]))->getContent();
 
         $snappy = \App::make('snappy.pdf');
         return new Response(

@@ -83,6 +83,7 @@ class ClientMedicationController extends Controller
     public function generatePdf($client)
     {
         $client = Client::where('id', $client)->with(['medications'])->get()->first();
+
         $html = response(view('business.clients.client_medications', ['client'=>$client]))->getContent();
 
         $snappy = \App::make('snappy.pdf');
