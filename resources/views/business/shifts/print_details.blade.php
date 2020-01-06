@@ -173,11 +173,11 @@
 
             <div class="col-sm-6">
 
-                {{ "Edit Reason: " . $shift->visitEditReason->code . ': ' . $shift->visitEditReason->description }}
+                {{ "Edit Reason: " . $shift->visitEditReason->formatted_name }}
             </div>
             <div class="col-sm-6">
 
-                {{ "Action Taken: " . $shift->visitEditAction->code . ': ' . $shift->visitEditAction->description }}
+                {{ "Action Taken: " . $shift->visitEditAction->formatted_name }}
             </div>
         </div>
     @endif

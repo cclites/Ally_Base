@@ -8,7 +8,11 @@ class VisitEditReason extends Model
 {
     protected $guarded = ['id'];
 
-    //////////////////////////////////////
-    /// Relationship Methods
-    //////////////////////////////////////
+
+
+
+    public function getFormattedNameAttribute()
+    {
+        return $this->code . ": " . $this->description;
+    }
 }
