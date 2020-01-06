@@ -207,22 +207,26 @@ class NoteController extends Controller
         );
     }
 
-    public function creators(Request $request){
-
-        $creators = Note::whereBusinessId($request->businesses)
-                    ->with('creator')
-                    ->select('created_by')
-                    ->groupBy('created_by')
-                    ->get()
-                    ->map(function($note){
-                        return [
-                            'id'=> $note->creator->id,
-                            'name' => $note->creator->nameLastFirst
-                        ];
-                    });
+    /**
+     * Get all note creators for the current chain.
+     *
+     * @param Request $request
+     * @return Note[]|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Support\Collection
+     */
+    public function creators(Request $request)
+    {
+        $creators = Note::forRequestedBusinesses()
+            ->with('creator')
+            ->select('created_by')
+            ->groupBy('created_by')
+            ->get()
+            ->map(function ($note) {
+                return [
+                    'id' => $note->creator->id,
+                    'name' => $note->creator->nameLastFirst
+                ];
+            });
 
         return $creators;
-
-
     }
 }

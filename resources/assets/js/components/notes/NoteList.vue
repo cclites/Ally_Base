@@ -46,7 +46,7 @@
                 </b-col>
                 <b-col lg="3">
                     <b-form-select v-model="searchForm.user" class="mb-2">
-                        <option :value="null">-- Sent By --</option>
+                        <option :value="null">-- Created by --</option>
                         <option :value="user.id" v-for="user in users" :key="user.id">{{ user.name }}</option>
                     </b-form-select>
                 </b-col>
@@ -256,8 +256,12 @@
             },
 
             async loadUsers(){
-                const response = await axios.get('/business/notes/creator?businesses='+ this.searchForm.businesses +'&json=1');
-                this.users = response.data;
+                axios.get(`/business/notes/creators?json=1`)
+                .then( ({ data }) => {
+                    this.users = data;
+                })
+                .catch(() => {
+                });
             },
 
             onFiltered(filteredItems) {
