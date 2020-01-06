@@ -70,6 +70,8 @@ class UpdateShiftRequest extends BusinessClientRequest
                     $query->where('business_id', $this->getBusinessId());
                 }),
             ],
+            'visit_edit_action' => 'nullable|integer',
+            'visit_edit_reason' => 'nullable|integer'
         ];
     }
 
@@ -118,12 +120,12 @@ class UpdateShiftRequest extends BusinessClientRequest
         }, $this->validated()['services'] ?? []);
     }
 
-    public function getShiftArray(string $status, string $clockInMethod = Shift::METHOD_OFFICE, $clockOutMethod = null): array
+    public function getShiftArray(string $status, string $clockInMethod = Shift::METHOD_OFFICE, $clockOutMethod = null ): array
     {
-        return $this->getShiftFactory($status, $clockInMethod, $clockOutMethod)->toArray();
+        return $this->getShiftFactory($status, $clockInMethod, $clockOutMethod )->toArray();
     }
 
-    public function getShiftFactory(string $status, string $clockInMethod = Shift::METHOD_OFFICE, $clockOutMethod = null): ShiftFactory
+    public function getShiftFactory(string $status, string $clockInMethod = Shift::METHOD_OFFICE, $clockOutMethod = null ): ShiftFactory
     {
         $checkedInTime = Carbon::parse($this->input('checked_in_time'), $this->getClient()->getTimezone())
             ->setTimezone('UTC')
@@ -158,7 +160,9 @@ class UpdateShiftRequest extends BusinessClientRequest
             $status,
             $this->input('service_id') ? Service::find($this->input('service_id')) : null,
             $this->filled('payer_id') ? Payer::find($this->input('payer_id')) : null,
-            $this->input('quickbooks_service_id')
+            $this->input('quickbooks_service_id'),
+            $this->input( 'visit_edit_action', null ),
+            $this->input( 'visit_edit_reason', null )
         )->withData($clockOutData)->withServices($this->getServices());
 
         return $shiftData;

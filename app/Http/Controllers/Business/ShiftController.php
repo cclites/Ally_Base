@@ -148,7 +148,7 @@ class ShiftController extends BaseController
             return new ErrorResponse(400, 'The registry fee must be a positive number.');
         }
 
-        $data = $request->getShiftArray($shift->status, $shift->checked_in_method, $shift->checked_out_method);
+        $data = $request->getShiftArray($shift->status, $shift->checked_in_method, $shift->checked_out_method );
 
         $allQuestions = $shift->business->questions()->forType($shift->client->client_type)->get();
         if ($allQuestions->count() > 0) {

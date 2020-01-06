@@ -484,6 +484,7 @@
                 </div> <!-- // end ! isClient -->
 
                 <edit-code-dropdowns
+                    v-if=" shift.id "
                     class="my-3"
                     :visit_edit_action=" form.visit_edit_action "
                     :visit_edit_reason=" form.visit_edit_reason "

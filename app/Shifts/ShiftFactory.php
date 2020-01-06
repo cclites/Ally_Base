@@ -52,7 +52,9 @@ class ShiftFactory implements Arrayable
         ?string $currentStatus = null,
         ?Service $service = null,
         ?Payer $payer = null,
-        ?int $quickbooksService = null
+        ?int $quickbooksService = null,
+        ?int $visit_edit_action = null,
+        ?int $visit_edit_reason = null
     ): self
     {
         $rates = self::resolveRates(clone $clockIn, $rates, $client->id, $caregiver->id, $service->id ?? null, $payer->id ?? null);
@@ -72,6 +74,8 @@ class ShiftFactory implements Arrayable
             'caregiver_rate'    => $rates->caregiverRate(),
             'status'            => $currentStatus ?? self::getDefaultStatus(!!$clockOut),
             'quickbooks_service_id' => $quickbooksService,
+            'visit_edit_action' => $visit_edit_action,
+            'visit_edit_reason' => $visit_edit_reason
         ]);
     }
 

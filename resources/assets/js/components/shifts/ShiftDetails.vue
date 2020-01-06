@@ -131,6 +131,10 @@
                 <shift-evv-data-table v-if="isOfficeUserOrAdmin" :shift="shift"></shift-evv-data-table>
             </b-col>
         </b-row>
+        <b-row class="mb-2">
+            <b-col sm="6" v-if=" shift.visit_edit_reason "><strong>Reason shift was edited:</strong> {{ mappedShiftEditReason( shift.visit_edit_reason ) }}</b-col>
+            <b-col sm="6" v-if=" shift.visit_edit_action "><strong>Edit Action taken:</strong> {{ mappedShiftEditAction( shift.visit_edit_action ) }}</b-col>
+        </b-row>
     </div>
 </template>
 
@@ -138,6 +142,7 @@
     import authUser from '../../mixins/AuthUser';
     import ShiftServices from "../../mixins/ShiftServices";
     import FormatsNumbers from "../../mixins/FormatsNumbers";
+    import { mapGetters } from 'vuex';
 
     export default {
         mixins: [ authUser, ShiftServices, FormatsNumbers ],
@@ -155,6 +160,12 @@
         },
 
         computed: {
+
+            ...mapGetters({
+
+                visitEditReasonCodes : 'claims/visitEditReasonCodes',
+                visitEditActionCodes : 'claims/visitEditActionCodes',
+            }),
             business() {
                 return this.shift.business_id ? this.$store.getters.getBusiness(this.shift.business_id) : {};
             },
@@ -208,6 +219,19 @@
         },
 
         methods: {
+
+            mappedShiftEditReason( id ){
+
+                const reason = this.visitEditReasonCodes.find( r => r.id === id );
+                if( !reason ) return null;
+                return `${reason.code}: ${reason.description}`;
+            },
+            mappedShiftEditAction( id ){
+
+                const action = this.visitEditActionCodes.find( r => r.id === id );
+                if( !action ) return null;
+                return `${action.code}: ${action.description}`;
+            },
             formatHoursType(hoursType) {
                 switch (hoursType) {
                     case 'default':
@@ -228,6 +252,8 @@
         },
 
         mounted() {
+
+            this.$store.dispatch( 'claims/fetchVisitEditCodes' );
             if (this.isOfficeUserOrAdmin) {
                 this.fetchServices();
             }
