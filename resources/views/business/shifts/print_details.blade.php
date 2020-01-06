@@ -166,6 +166,22 @@
         </div>
     @endif
 
+    @if( $shift->visit_edit_reason || $shift->visit_edit_action )
+
+        <h4>Visit Edited</h4>
+        <div class="row">
+
+            <div class="col-sm-6">
+
+                {{ "Edit Reason: " . $shift->visitEditReason->code . ': ' . $shift->visitEditReason->description }}
+            </div>
+            <div class="col-sm-6">
+
+                {{ "Action Taken: " . $shift->visitEditAction->code . ': ' . $shift->visitEditAction->description }}
+            </div>
+        </div>
+    @endif
+
     <h4>EVV</h4>
     <div class="row">
         <div class="col-sm-12">

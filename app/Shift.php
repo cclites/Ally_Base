@@ -350,12 +350,12 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
 
     public function visitEditAction()
     {
-        return $this->hasOne( VisitEditAction::class );
+        return $this->hasOne( VisitEditAction::class, 'id', 'visit_edit_action' );
     }
 
     public function visitEditReason()
     {
-        return $this->hasOne( VisitEditReason::class );
+        return $this->hasOne( VisitEditReason::class, 'id', 'visit_edit_reason' );
     }
 
     /**

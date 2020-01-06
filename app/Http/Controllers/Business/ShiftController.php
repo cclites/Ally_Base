@@ -302,7 +302,7 @@ class ShiftController extends BaseController
         $this->authorize('read', $shift);
 
         // Load needed relationships
-        $shift->load('activities', 'issues', 'schedule', 'client', 'caregiver', 'caregiverSignature', 'clientSignature', 'business');
+        $shift->load('activities', 'issues', 'schedule', 'client', 'caregiver', 'caregiverSignature', 'clientSignature', 'business', 'visitEditAction', 'visitEditReason' );
 
         $timezone = $this->business()->timezone;
         $override_ally_logo = $this->business()->logo;
