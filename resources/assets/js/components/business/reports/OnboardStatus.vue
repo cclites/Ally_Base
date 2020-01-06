@@ -6,8 +6,8 @@
             </div>
             <div class="ml-auto">
                 <b-button-group>
-                    <b-button variant="info" :class="{ disabled: type == 'caregiver' }" @click="switchType('client')">Clients</b-button>
-                    <b-button variant="info" :class="{ disabled: type == 'client' }" @click="switchType('caregiver')">Caregivers</b-button>
+                    <b-button variant="info" :class="{ disabled: typeExceptWeAreeNotMutatingPropsThisTime == 'caregiver' }" @click="switchType('client')">Generate Clients Report</b-button>
+                    <b-button variant="info" :class="{ disabled: typeExceptWeAreeNotMutatingPropsThisTime == 'client' }" @click="switchType('caregiver')">Generate Caregivers Report</b-button>
                 </b-button-group>
             </div>
         </div>
@@ -19,7 +19,7 @@
                 show-empty
                 :fields="fields">
                 <template slot="name" scope="data">
-                    <a :href="`/business/${type}s/${data.item.id}`">{{ data.item.name }}</a>
+                    <a :href="`/business/${typeExceptWeAreeNotMutatingPropsThisTime}s/${data.item.id}`">{{ data.item.name }}</a>
                 </template>>
                 <template slot="email_sent_at" scope="data">
                     <span v-if="data.item.email_sent_at">{{ formatDateTime(data.item.email_sent_at) }}</span>
@@ -31,17 +31,22 @@
 </template>
 
 <script>
+
     import FormatsDates from '../../../mixins/FormatsDates';
 
     export default {
+
         mixins: [ FormatsDates ],
 
         props: ['type'],
 
         data() {
+
             return {
+
                 items: [],
                 loading: false,
+                typeExceptWeAreeNotMutatingPropsThisTime : null,
                 fields: [
                     { key: 'name' },
                     { key: 'email_sent_at', label: 'Email Sent' },
@@ -52,14 +57,14 @@
 
         computed: {
             typeTitle() {
-                return this.type == 'client' ? 'Client' : 'Caregiver';
+                return this.typeExceptWeAreeNotMutatingPropsThisTime == 'client' ? 'Client' : 'Caregiver';
             },
         },
 
         methods: {
             fetch() {
                 this.loading = true;
-                axios.get(`/business/reports/onboard-status?fetch=1&type=${this.type}`)
+                axios.get(`/business/reports/onboard-status?fetch=1&type=${this.typeExceptWeAreeNotMutatingPropsThisTime}`)
                     .then(response => {
                         this.items = _.sortBy(response.data, 'name');
                         this.loading = false;
@@ -71,13 +76,15 @@
             },
 
             switchType(val) {
-                this.type = val;
+
+                this.typeExceptWeAreeNotMutatingPropsThisTime = val;
                 this.fetch();
             },
         },
 
         mounted() {
-            this.fetch();
+
+            this.typeExceptWeAreeNotMutatingPropsThisTime = this.type;
         },
     }
 </script>

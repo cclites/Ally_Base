@@ -21,6 +21,13 @@
                     </b-col>
                 </b-row>
             </b-col>
+            <b-col sm="6" class="d-flex justify-content-end">
+
+                <b-button variant="info" @click=" loadData() ">
+
+                    Generate Report
+                </b-button>
+            </b-col>
         </b-row>
 
         <loading-card v-show="loading"></loading-card>
@@ -58,7 +65,7 @@
             return {
                 items: [],
                 sortBy: null,
-                loading: true,
+                loading: false,
                 sortDesc: null,
                 clients: [],
                 caregivers: [],
@@ -68,7 +75,6 @@
         },
 
         mounted() {
-            this.loadData();
             this.loadFiltersData();
         },
 

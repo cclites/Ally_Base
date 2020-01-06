@@ -40,7 +40,7 @@
             <b-col lg="2">
                 Filter:<br />
                 <b-button @click="reloadData" variant="info">
-                    Update
+                    Generate Report
                 </b-button>
             </b-col>
         </b-row>

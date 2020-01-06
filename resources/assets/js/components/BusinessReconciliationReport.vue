@@ -126,9 +126,6 @@
             }
         },
 
-        mounted() {
-            this.loadData();
-        },
         methods: {
             printTable() {
                 $(".shift-table").print();

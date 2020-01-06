@@ -189,8 +189,6 @@
         mounted() {
             this.start_date = moment().format('MM/DD/YYYY');
             this.end_date = moment().format('MM/DD/YYYY');
-
-            this.loadReport()
         },
     }
 </script>

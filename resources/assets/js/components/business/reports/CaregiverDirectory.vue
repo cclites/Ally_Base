@@ -26,7 +26,7 @@
                             </b-form-select>
                         </b-col>
                         <b-col md="3">
-                            <b-button @click="loadTable()" variant="info" :disabled="busy">
+                            <b-button @click=" itemProvider() " variant="info" :disabled="busy">
                                 <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="busy"></i>
                                 Generate Report
                             </b-button>
@@ -59,7 +59,7 @@
                     <div id="table" class="table-responsive">
                         <b-table
                             bordered striped hover show-empty
-                            :items="itemProvider"
+                            :items="items"
                             :fields="fields"
                             :current-page.sync="currentPage"
                             :per-page="perPage"
@@ -114,6 +114,7 @@
                     status_alias_id: '',
                     json: 1
                 }),
+                items: [],
                 loading: false,
                 busy: false,
                 statusAliases: [],
@@ -177,22 +178,23 @@
         },
 
         methods: {
-            loadTable() {
-                this.$refs.table.refresh();
-            },
 
-            itemProvider(ctx) {
+            itemProvider() {
+
                 this.loading = true;
-                let sort = ctx.sortBy == null ? 'lastname' : ctx.sortBy;
-                return this.filters.get(`/business/reports/caregiver-directory?&page=${ctx.currentPage}&perPage=${ctx.perPage}&sort=${sort}&desc=${ctx.sortDesc}`)
+                let sort = this.sortBy == null ? 'lastname' : this.sortBy;
+                return this.filters.get(`/business/reports/caregiver-directory?&page=${this.currentPage}&perpage=${this.perPage}&sort=${sort}&desc=${this.sortDesc}`)
                     .then( ({ data }) => {
+
                         this.totalRows = data.total;
-                        return data.rows || [];
+                        this.items = data.rows || [];
                     })
                     .catch(() => {
-                        return [];
+
+                        this.items = [];
                     })
                     .finally(() => {
+
                         this.loading = false;
                     });
             },

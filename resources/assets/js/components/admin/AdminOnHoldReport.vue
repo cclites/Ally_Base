@@ -14,6 +14,11 @@
                 <b-form-input v-model="filter" placeholder="Type to Search" />
             </b-col>
         </b-row>
+        <b-row class="mb-2">
+            <b-col class="text-right">
+                <b-button variant="info" @click=" loadData() ">Generate Report</b-button>
+            </b-col>
+        </b-row>
 
         <loading-card v-show="loading"></loading-card>
 
@@ -148,7 +153,6 @@
 
         mounted() {
             this.loadBusinesses();
-            this.loadData();
         },
 
         methods: {

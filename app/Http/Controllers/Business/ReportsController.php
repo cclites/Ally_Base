@@ -620,12 +620,16 @@ class ReportsController extends BaseController
      *
      * @return \Illuminate\Http\Response
      */
-    public function caregiverAnniversary()
+    public function caregiverAnniversary( Request $request )
     {
-        $users = Caregiver::forRequestedBusinesses()->get()->map(function ($item) {
-            return array_merge($item->toArray(), ['created_at' => $item->created_at->toDateTimeString()]);
-        });
-        return view('business.reports.caregiver_anniversary', compact('users'));
+        if( $request->filled( 'json' ) ){
+
+            return Caregiver::forRequestedBusinesses()->get()->map(function ($item) {
+                return array_merge($item->toArray(), ['created_at' => $item->created_at->toDateTimeString()]);
+            });
+        }
+
+        return view( 'business.reports.caregiver_anniversary' );
     }
 
     /**
