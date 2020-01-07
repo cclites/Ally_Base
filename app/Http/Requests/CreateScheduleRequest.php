@@ -18,14 +18,12 @@ class CreateScheduleRequest extends BusinessClientRequest
             'client_id' => 'required|exists:clients,id',
             'caregiver_id' => 'nullable|exists:caregivers,id',
             'fixed_rates' => 'required|boolean',
-            'caregiver_rate' => 'nullable|numeric|min:0|max:999.99',
-            'client_rate' => 'nullable|numeric|min:0|max:999.99',
-//            'provider_fee' => 'nullable|numeric|min:0|max:999.99',
+            'caregiver_rate' => 'nullable|required_with:client_rate|numeric|min:0|max:999.99',
+            'client_rate' => 'nullable|required_with:caregiver_rate|numeric|min:0|max:999.99',
             'caregiver_rate_id' => 'nullable|exists:rate_codes,id',
             'client_rate_id' => 'nullable|exists:rate_codes,id',
             'notes' => 'nullable|string|max:1024',
             'hours_type' => 'required|in:default,overtime,holiday',
-//            'overtime_duration' => 'nullable|numeric|min:0|max:' . (int) $this->input('duration'),
             'interval_type' => 'nullable|in:weekly,biweekly,monthly,bimonthly',
             'recurring_end_date' => 'nullable|date|after:' . $this->input('starts_at') . '|before:' . $maxDate,
             'bydays' => 'required_if:interval_type,weekly,biweekly|array',
@@ -71,6 +69,8 @@ class CreateScheduleRequest extends BusinessClientRequest
             'starts_at.max' => 'Schedules can are restricted to a 2 year range.  Lower your start date.',
             'overtime_duration.max' => 'Overtime duration can not exceed schedule duration.',
             'fixed_rates.*' => 'You must select whether the shift is hourly or daily.',
+            'caregiver_rate.required_with' => 'You must specify a Caregiver rate.',
+            'client_rate.required_with' => 'You must specify a Total rate.',
         ];
     }
 
