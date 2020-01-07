@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Business;
 
 use App\Billing\ClientRate;
 use App\Billing\ScheduleService;
-use App\Billing\Service;
 use App\Business;
 use App\Caregiver;
 use App\CaregiverLicense;
@@ -630,16 +629,11 @@ class ScheduleController extends BaseController
     public function ensureCaregiverAssignmentAndCreateDefaultRates(CreateScheduleRequest $request) : bool
     {
         $client = Client::findOrFail($request->client_id);
-        $scheduledService = Service::where('id', $request->service_id)->get()->first();
 
         if ($request->caregiver_id && ! $client->hasCaregiver($request->caregiver_id)) {
             if (filled($request->service_id)) { // hourly or fixed rate
                 if ($request->hours_type != Shift::HOURS_DEFAULT) {
                     throw new AutomaticCaregiverAssignmentException('Cannot create caregiver assignment because you are using HOL/OT rates.  If this is correct, you must assign the Caregiver manually from the Client\'s Caregivers & Rates tab.');
-                }
-
-                if( !$scheduledService->code){
-                    $request->service_id = null;
                 }
 
                 // Create default rates based on the rates in the request
@@ -651,16 +645,19 @@ class ScheduleController extends BaseController
                     'client_hourly_rate' => ($request->fixed_rates ? 0 : $request->client_rate) ?? 0,
                     'caregiver_fixed_rate' => ($request->fixed_rates ? $request->caregiver_rate : 0) ?? 0,
                     'client_fixed_rate' => ($request->fixed_rates ? $request->client_rate : 0) ?? 0,
-                    'service_id' => $request->service_id,
+                    'service_id' => null, // Set default rates for ALL services
                     'payer_id' => $request->payer_id,
                 ]);
 
             } else { // service breakout
                 // Create default rates for each *UNIQUE* service entry
+                $shouldBeServiceSpecific = $request->hasMultipleUniqueServices();
+
                 foreach ($request->getServices() as $service) {
                     if (app(RateFactory::class)->matchingRateExists($client, Carbon::parse($request->starts_at)->toDateString(), $service['service_id'], $service['payer_id'], $request->caregiver_id)) {
                         throw new AutomaticCaregiverAssignmentException('Cannot create caregiver assignment because you have different rates for the same service/payer.  If this is correct, you must assign the Caregiver manually from the Client\'s Caregivers & Rates tab.');
                     }
+
                     if ($service['hours_type'] != Shift::HOURS_DEFAULT) {
                         throw new AutomaticCaregiverAssignmentException('Cannot create caregiver assignment because you are using HOL/OT rates.  If this is correct, you must assign the Caregiver manually from the Client\'s Caregivers & Rates tab.');
                     }
@@ -674,7 +671,7 @@ class ScheduleController extends BaseController
                         'client_hourly_rate' => $service['client_rate'] ?? 0,
                         'caregiver_fixed_rate' => 0,
                         'client_fixed_rate' => 0,
-                        'service_id' => $service['service_id'],
+                        'service_id' => $shouldBeServiceSpecific ? $service['service_id'] : null, // Set rates to ALL unless multiple services exists
                         'payer_id' => $service['payer_id'],
                     ]);
 

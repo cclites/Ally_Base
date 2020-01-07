@@ -510,7 +510,7 @@
                 paymentType: 'NONE',
                 clientCaregivers: [],
                 clientCaregiversLoaded: false,
-                //cgMode: 'client',
+                cgMode: 'client',
                 care_plans: [],
                 daysOfWeek: {
                     'Sunday': 'su',
@@ -529,7 +529,6 @@
                 loadingQuickbooksConfig: false,
                 auditLogItems: [],
                 emptyText: 'No results',
-                'cgMode': '',
             }
         },
 
