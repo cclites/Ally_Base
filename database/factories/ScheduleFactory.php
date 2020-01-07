@@ -32,7 +32,7 @@ $factory->define(Schedule::class, function(Faker $faker) {
     // TODO: Use an actual rate calculator to get the proper ally fee
     $clientRate = add(
         add($caregiverRate, $providerRate),
-        multiply(add($caregiverRate, $providerRate), 0.06),
+        multiply(add($caregiverRate, $providerRate), 0.06)
     );
 
     return [
