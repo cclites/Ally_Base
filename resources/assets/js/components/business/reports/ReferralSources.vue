@@ -196,8 +196,6 @@
 
         computed: {
 
-
-
             referralSourceData() {
                 return this.items.map(stats => ({
                     organization: stats.organization,

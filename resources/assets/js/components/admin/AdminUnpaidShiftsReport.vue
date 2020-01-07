@@ -119,7 +119,6 @@
             this.loadBusinesses();
             this.loadClients();
             this.loadCaregivers();
-            this.loadData();
         },
 
         methods: {

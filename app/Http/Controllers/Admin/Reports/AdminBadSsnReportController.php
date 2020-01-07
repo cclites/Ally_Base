@@ -25,7 +25,6 @@ class AdminBadSsnReportController extends Controller
 
         if($request->json){
 
-            $report = collect();
             if ($type === 'clients') {
                 $report = Client::query()->with(['user']);
 

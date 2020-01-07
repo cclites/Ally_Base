@@ -2,31 +2,34 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\AdminPin;
 use App\Business;
 use App\ClientType;
+use App\ChainClientTypeSettings;
+use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateSystemSettingsRequest;
-
-use App\ChainClientTypeSettings;
-use App\Client;
 
 class ChainSettingsController extends Controller
 {
     /**
+     * @param UpdateSystemSettingsRequest $request
      * @param ChainClientTypeSettings $chainClientTypeSettings
-     * @param Request $request
      * @return SuccessResponse
      * @throws \Exception
      */
-    public function update(UpdateSystemSettingsRequest $request, ChainClientTypeSettings $chainClientTypeSettings )
+    public function update(UpdateSystemSettingsRequest $request, ChainClientTypeSettings $chainClientTypeSettings)
     {
+        if (! AdminPin::verify(request()->pin, 'update-chain-1099-settings')) {
+            return new ErrorResponse(422, "Invalid PIN.");
+        }
+
         $chainClientTypeSettings->update($request->validated());
 
         \DB::beginTransaction();
 
-        $chainClientTypeSettings->chain->businesses->each(function(Business $business) use ($chainClientTypeSettings){
+        $chainClientTypeSettings->chain->businesses->each(function (Business $business) use ($chainClientTypeSettings) {
             $business->clients()->where('client_type', ClientType::MEDICAID)
                 ->update([
                     'caregiver_1099' => $chainClientTypeSettings->medicaid_1099_from, //ally or client
@@ -47,16 +50,10 @@ class ChainSettingsController extends Controller
                     'can_edit_send_1099' => $chainClientTypeSettings->other_1099_edit, //can edit
                     'send_1099' => $chainClientTypeSettings->other_1099_default, //send by default
                 ]);
-
-            $business->clients()->where('send_1099', 'choose')
-                ->update([
-                    'can_edit_send_1099' => 1,
-                ]);
         });
 
         \DB::commit();
 
         return new SuccessResponse("Settings successfully updated");
     }
-
 }

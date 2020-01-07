@@ -1064,7 +1064,7 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
             'outgoing_sms_number' => $faker->simple_phone,
             'ein' => $faker->randomNumber(9, true),
             'medicaid_id' => $faker->randomNumber(9, true),
-            'medicaid_npi_number' => $faker->randomNumber(10, true),
+            'medicaid_npi_number' => $faker->randomNumber(9, true) . "1",
             'medicaid_npi_taxonomy' => $faker->randomNumber(9, true),
             'medicaid_license_number' => $faker->randomNumber(9, true),
         ];

@@ -135,6 +135,7 @@ class ShiftCostCalculator
     /**
      * Return the caregiver allotments with expense reimbursements (no ally fee)
      *
+     * @param bool $expensesIncluded
      * @return float
      */
     public function getCaregiverCost($expensesIncluded = true)

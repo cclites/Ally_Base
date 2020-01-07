@@ -79,7 +79,12 @@ class ScheduleWarningAggregator
         $caregiver = $this->schedule->caregiver;
 
         // take the input date for when the scheduled shift is trying to be made at and find all scheduled shifts for that entire day
-        $other_schedules = $caregiver->schedules()->whereBetween( 'starts_at', [ Carbon::parse( $this->schedule->starts_at )->startOfDay(), Carbon::parse( $this->schedule->starts_at )->endOfDay() ] )->get();
+        $other_schedules = $caregiver->schedules()
+            ->where('id', '<>', $this->schedule->id)
+            ->whereBetween( 'starts_at', [
+                Carbon::parse( $this->schedule->starts_at )->startOfDay(),
+                Carbon::parse( $this->schedule->starts_at )->endOfDay()
+            ])->get();
 
         if( count( $other_schedules ) < 1 ) return; // if nothing else is scheduled that day, return early
 
@@ -89,7 +94,6 @@ class ScheduleWarningAggregator
         $target_schedule = null;
 
         foreach( $other_schedules as $schedule ){
-
             $target_start = Carbon::parse( $schedule->starts_at );
             $target_end   = Carbon::parse( $schedule->starts_at )->addMinutes( $schedule->duration );
 

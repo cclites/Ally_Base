@@ -255,7 +255,6 @@
         },
 
         mounted() {
-            this.loadItems();
             this.loadFilters();
         },
 

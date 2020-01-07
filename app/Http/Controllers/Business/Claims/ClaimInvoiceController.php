@@ -83,7 +83,11 @@ class ClaimInvoiceController extends BaseController
 
         $this->authorize('read', $clientInvoice);
 
-        list($claim, $warnings) = $factory->createFromClientInvoice($clientInvoice);
+        try {
+            list($claim, $warnings) = $factory->createFromClientInvoice($clientInvoice);
+        } catch (\InvalidArgumentException $ex) {
+            return new ErrorResponse(500, 'Error creating claim: ' . $ex->getMessage());
+        }
 
         $message = 'Claim has been created.';
         if ($warnings->count() > 0) {
@@ -151,14 +155,19 @@ class ClaimInvoiceController extends BaseController
     /**
      * Delete a ClaimInvoice.
      *
+     * @param Request $request
      * @param ClaimInvoice $claim
      * @param ClaimInvoiceFactory $factory
      * @return SuccessResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function destroy(ClaimInvoice $claim, ClaimInvoiceFactory $factory)
+    public function destroy(Request $request, ClaimInvoice $claim, ClaimInvoiceFactory $factory)
     {
         $this->authorize('delete', $claim);
+
+        if (! $request->force && $claim->adjustments()->count() > 0) {
+            return new ErrorResponse(412, 'This claim has had adjustments applied.');
+        }
 
         try {
             $factory->deleteClaimInvoice($claim);

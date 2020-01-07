@@ -544,6 +544,7 @@ Route::group([
     /* Caregiver 1099s */
     Route::get('caregiver-1099/{caregiver}', 'Business\Caregiver1099Controller@index')->name('business-1099');
     Route::get('business-1099/download/{caregiver1099}', 'Business\Caregiver1099Controller@downloadPdf')->name('business-caregivers-1099-download');
+    Route::get('impersonate/{user}', 'Admin\ImpersonateController@impersonate')->name('impersonate');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['admin', 'office_user']], function () {
@@ -553,6 +554,7 @@ Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['admin', 'office_us
     Route::resource('note-templates', 'NoteTemplateController');
     Route::resource('note-templates', 'NoteTemplateController');
     Route::get('/business/office-users', 'Business\OfficeUserController@index');
+    Route::get('/business/notes/creators', 'NoteController@creators');
 });
 
 Route::group([
@@ -650,7 +652,7 @@ Route::group([
     Route::post('business-1099/create', 'Admin\Caregiver1099Controller@store')->name('business-1099-create');
     Route::patch('business-1099/{caregiver1099}', 'Admin\Caregiver1099Controller@update')->name('business-1099-update');
 
-    Route::get('/business-1099/userEmails/{year}/{role}', 'Admin\Admin1099Controller@UserEmailsList')->name('business-1099-transmit');
+    Route::get('/business-1099/user-emails/{year}/{role}', 'Admin\Admin1099Controller@UserEmailsList')->name('business-1099-transmit');
     Route::get('business-1099/transmit/{year}', 'Admin\Caregiver1099Controller@transmit')->name('business-1099-transmit');
     Route::get('admin-1099', 'Admin\Caregiver1099Controller@admin')->name('admin-1099');
     Route::patch('business-1099-settings/{business}', 'Business\SettingController@updateBusiness1099Settings')->name('business-1099-settings');
@@ -725,6 +727,7 @@ Route::group([
 
     Route::get('/control-file', 'Admin\ControlFileController@index')->name('control-file');
 });
+
 
 Route::get('impersonate/stop', 'Admin\ImpersonateController@stopImpersonating')->name('impersonate.stop');
 Route::get('impersonate/business/{business}', 'Admin\ImpersonateController@business')->name('impersonate.business');

@@ -115,7 +115,6 @@
         mounted() {
             this.loadBusinesses();
             this.loadCaregivers();
-            this.loadData();
         },
 
         methods: {

@@ -20,7 +20,6 @@
                     <b-form-select v-model="form.medicaid_1099_default">
                         <option value="no">No</option>
                         <option value="yes">Yes</option>
-                        <option value="choose">No Default (Must Choose)</option>
                     </b-form-select>
                 </td>
                 <td>
@@ -42,7 +41,6 @@
                     <b-form-select v-model="form.private_pay_1099_default">
                         <option value="no">No</option>
                         <option value="yes">Yes</option>
-                        <option value="choose">No Default (Must Choose)</option>
                     </b-form-select>
                 </td>
                 <td>
@@ -64,7 +62,6 @@
                     <b-form-select v-model="form.other_1099_default">
                         <option value="no">No</option>
                         <option value="yes">Yes</option>
-                        <option value="choose">No Default (Must Choose)</option>
                     </b-form-select>
                 </td>
                 <td>
@@ -85,20 +82,24 @@
         <b-row>
             <b-col lg="12">
                 <b-button variant="success"
-                          @click="save1099Settings"
+                          @click="save"
                           class="mt-2">
-                    <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="busy"></i>
+                    <i class="fa fa-circle-o-notch fa-spin mr-1" v-if="form.busy"></i>
                     Save 1099 Settings
                 </b-button>
             </b-col>
         </b-row>
 
+        <b-alert variant="danger" show class="mt-3"><strong>IMPORTANT:</strong> Clicking save will OVERWRITE ALL SETTINGS for this entire Registry.  Please proceed with caution and double check with Tom/Jason.</b-alert>
+        <pin-confirmation-modal ref="pinModal" />
     </b-card>
 </template>
 
 <script>
+    import PinConfirmationModal from "../../PinConfirmationModal";
     export default {
         name: "Chain1099Settings",
+        components: { PinConfirmationModal },
         props: {
             chain: {
                 type: Object,
@@ -109,27 +110,30 @@
         data(){
             return{
                 form: new Form({
-                    medicaid_1099_default: this.chain.client_type_settings.medicaid_1099_default ? this.chain.client_type_settings.medicaid_1099_default : 'no',
-                    private_pay_1099_default: this.chain.client_type_settings.private_pay_1099_default ? this.chain.client_type_settings.private_pay_1099_default : 'no',
-                    other_1099_default: this.chain.client_type_settings.other_1099_default ? this.chain.client_type_settings.other_1099_default : 'no',
-                    medicaid_1099_edit: this.chain.client_type_settings.medicaid_1099_edit ? this.chain.client_type_settings.medicaid_1099_edit : 0,
-                    private_pay_1099_edit: this.chain.client_type_settings.private_pay_1099_edit ? this.chain.client_type_settings.private_pay_1099_edit : 0,
-                    other_1099_edit: this.chain.client_type_settings.other_1099_edit ? this.chain.client_type_settings.other_1099_edit : 0,
-                    medicaid_1099_from: this.chain.client_type_settings.medicaid_1099_from ? this.chain.client_type_settings.medicaid_1099_from : 'client',
-                    private_pay_1099_from: this.chain.client_type_settings.private_pay_1099_from ? this.chain.client_type_settings.private_pay_1099_from : 'client',
-                    other_1099_from: this.chain.client_type_settings.other_1099_from ? this.chain.client_type_settings.other_1099_from : 'client',
+                    medicaid_1099_default: this.chain.client_type_settings ? this.chain.client_type_settings.medicaid_1099_default : 'no',
+                    private_pay_1099_default: this.chain.client_type_settings ? this.chain.client_type_settings.private_pay_1099_default : 'no',
+                    other_1099_default: this.chain.client_type_settings ? this.chain.client_type_settings.other_1099_default : 'no',
+                    medicaid_1099_edit: this.chain.client_type_settings ? this.chain.client_type_settings.medicaid_1099_edit : 0,
+                    private_pay_1099_edit: this.chain.client_type_settings ? this.chain.client_type_settings.private_pay_1099_edit : 0,
+                    other_1099_edit: this.chain.client_type_settings ? this.chain.client_type_settings.other_1099_edit : 0,
+                    medicaid_1099_from: this.chain.client_type_settings ? this.chain.client_type_settings.medicaid_1099_from : 'client',
+                    private_pay_1099_from: this.chain.client_type_settings ? this.chain.client_type_settings.private_pay_1099_from : 'client',
+                    other_1099_from: this.chain.client_type_settings ? this.chain.client_type_settings.other_1099_from : 'client',
                 }),
-                busy: false,
             }
         },
+
         methods: {
-            save1099Settings(){
-                this.busy = true;
-                let url = '/admin/chain-1099-settings/' + this.chain.client_type_settings.id;
-                this.form.patch(url);
-                this.busy = false;
+            save() {
+                this.$refs.pinModal.confirm('Update chain 1099 settings?', pin => {
+                    this.form.patch(`/admin/chain-1099-settings/${this.chain.client_type_settings.id}?pin=${pin}`)
+                        .then(({data}) => {
+                        })
+                        .catch(() => {
+                        });
+                });
             }
-        }
+        },
     }
 </script>
 

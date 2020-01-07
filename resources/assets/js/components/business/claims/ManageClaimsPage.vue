@@ -258,7 +258,7 @@
         </confirm-modal>
 
         <confirm-modal title="Delete Claim" ref="confirmDeleteClaim" yesButton="Delete" yesVariant="danger">
-            <p>Are you sure you want to delete this claim?</p>
+            <p>{{ deleteException }} Are you sure you want to delete this claim?</p>
         </confirm-modal>
 
         <b-modal id="adjustmentModal"
@@ -397,6 +397,7 @@
                     import_status: { sortable: true, label: 'Import Status' },
                 },
                 selectedClaim: {},
+                deleteException: '',
             }
         },
 
@@ -452,19 +453,26 @@
             /**
              * Handle deleting the Claim Invoice and update the record.
              * @param {Object} claim
+             * @param {Boolean} force
              */
-            deleteClaim(claim) {
+            deleteClaim(claim, force = 0) {
                 this.$refs.confirmDeleteClaim.confirm(() => {
                     this.deletingId = claim.id;
+                    this.deleteException = '';
                     let form = new Form({});
-                    form.submit('delete', `/business/claims/${claim.id}`)
+                    form.submit('delete', `/business/claims/${claim.id}?force=${force}`)
                         .then( ({ data }) => {
                             let index = this.items.findIndex(x => x.id == claim.id);
                             if (index >= 0) {
                                 this.items.splice(index, 1);
                             }
                         })
-                        .catch(() => {})
+                        .catch((e) => {
+                            if (e.response && e.response.status == 412) {
+                                this.deleteException = e.response.data.message;
+                                this.deleteClaim(claim, 1);
+                            }
+                        })
                         .finally(() => {
                             this.deletingId = null;
                         })

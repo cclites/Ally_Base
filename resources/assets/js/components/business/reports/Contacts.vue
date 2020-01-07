@@ -1,5 +1,16 @@
 <template>
     <b-card :title="`${typeTitle}s Contacts`">
+
+        <b-row>
+
+            <b-col class="d-flex justify-content-end">
+
+                <b-button variant="info" @click=" fetch() ">
+
+                    Generate Report
+                </b-button>
+            </b-col>
+        </b-row>
         <loading-card v-show="loading" />
 
         <div v-show="! loading" class="table-responsive">
@@ -66,10 +77,6 @@
                         console.error(error.response);
                 });
             },
-        },
-
-        mounted() {
-            this.fetch();
-        },
+        }
     }
 </script>

@@ -181,6 +181,7 @@
                     </b-form-group>
                 </b-col>
             </b-row>
+            <!------------------------------------->
             <b-row>
                 <b-col lg="6">
                     <b-form-group label="Date inquired about Service">
@@ -220,29 +221,24 @@
                             <input-help :form="form" field="receive_summary_email" text="An example of this email can be found under Settings > General > Shift Confirmations" class="ml-4"></input-help>
                         </div>
                     </b-form-group>
+                    <b-row>
+                        <b-col lg="4" v-if="canEdit1099">
+                            <b-form-group label="Send Caregiver 1099" label-class="required">
+                                <b-form-select v-model="form.send_1099">
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col lg="8" v-if="form.send_1099 == 'yes'">
+                            <b-form-group label="Caregiver 1099">
+                                <label>
+                                    1099s are being sent on behalf of {{ payerLabel }}. Contact Ally if you wish to change this.
+                                </label>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
                 </b-col>
-            </b-row>
-            <!------------------------------------->
-            <b-row >
-                <b-col lg="3" v-if="canEdit1099">
-                    <b-form-group label="Caregiver 1099" :label-class="this.client.send_1099 == 'choose' ? 'required' : null">
-                        <b-form-select v-model="form.send_1099">
-                            <option value="choose">Select an Option</option>
-                            <option value="yes">Yes</option>
-                            <option value="no">No</option>
-                        </b-form-select>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6" v-if="form.send_1099 == 'yes'">
-                    <b-form-group label="Caregiver 1099">
-                        <label>
-                            1099s are being sent on behalf of {{ payerLabel }}. Contact Ally if you wish to change this.
-                        </label>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <!------------------------------------->
-            <b-row>
                 <b-col lg="6">
                     <b-form-group label="Service Start Date">
                         <date-picker id="service_start_date" v-model="form.service_start_date"></date-picker>
@@ -271,6 +267,7 @@
                     </b-form-group>
                 </b-col>
             </b-row>
+            <!------------------------------------->
             <b-row>
                 <b-col lg="6">
                     <b-form-group label="Created On" label-for="created_at">
@@ -399,6 +396,13 @@
                         <b-button variant="info" @click="activateModal = true"><i class="fa fa-refresh"></i> Re-activate Client</b-button>
                         <b-button variant="info" @click=" getDischarge() "><i class="fa fa-file mr-1"></i>Download Discharge Summary</b-button>
                     </template>
+                    <b-button variant="secondary"
+                        type="button"
+                        :href="`/business/impersonate/${client.id}`"
+                        v-if="isAdmin"
+                    >
+                        Impersonate User
+                    </b-button>
                 </b-col>
             </b-row>
         </form>

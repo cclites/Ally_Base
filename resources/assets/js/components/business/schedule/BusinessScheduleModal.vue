@@ -702,7 +702,6 @@
             },
 
             checkForWarnings: _.debounce((vm) => {
-                console.log('check warnings: ', vm);
                 let form = new Form({
                     caregiver: vm.form.caregiver_id ? vm.form.caregiver_id : '',
                     client: vm.form.client_id ? vm.form.client_id : '',

@@ -19,6 +19,7 @@ use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftConfirmed;
 use App\Listeners\AddPaymentHoldsOnFailedTransaction;
 use App\Listeners\CheckForClockOut;
+use App\Listeners\CreateDefaultChainSettings;
 use App\Listeners\CreateDefaultClientPayer;
 use App\Listeners\CreateDefaultService;
 use App\Listeners\PostToSlackOnFailedTransaction;
@@ -60,6 +61,7 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         BusinessChainCreated::class => [
             CreateDefaultService::class,
+            CreateDefaultChainSettings::class,
         ],
         ClientCreated::class => [
             CreateDefaultClientPayer::class,

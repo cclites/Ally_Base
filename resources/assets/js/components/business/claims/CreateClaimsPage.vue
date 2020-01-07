@@ -302,7 +302,7 @@
         },
 
         watch: {
-            'form.businesses'(newValue, oldValue) {
+            'filters.businesses'(newValue, oldValue) {
                 this.$store.commit('filters/setBusiness', newValue);
             },
             selectAll(newVal) {

@@ -4,23 +4,16 @@ namespace App\Http\Controllers\Business;
 
 use App\Caregiver;
 use App\Http\Requests\SendTextRequest;
-use App\Providers\AuthServiceProvider;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Responses\SuccessResponse;
 use App\Jobs\SendTextMessage;
-use App\User;
 use App\Responses\ErrorResponse;
 use App\Schedule;
 use App\Traits\ActiveBusiness;
-use App\Business;
 use App\SmsThread;
-use App\PhoneNumber;
 use App\SmsThreadReply;
 use Carbon\Carbon;
-use App\SmsThreadRecipient;
-use Illuminate\Support\Collection;
-use Twilio\Security\RequestValidator;
 
 class CommunicationController extends Controller
 {
@@ -48,7 +41,7 @@ class CommunicationController extends Controller
                 ->whereHas('phoneNumbers')
                 ->with(['phoneNumbers', 'user'])
                 ->get()
-                ->map(function($caregiver) {
+                ->map(function ($caregiver) {
                     $caregiver->phone = $caregiver->smsNumber ? $caregiver->smsNumber->number : $caregiver->default_phone;
                     $caregiver->role_type = $caregiver->user->role_type;
                     return $caregiver->only(['id', 'name', 'role_type', 'phone']);
@@ -109,7 +102,7 @@ class CommunicationController extends Controller
 
         // Get the business selection for which outgoing number to use.
         $business = $request->getBusiness();
-        if (! $from = $request->getOutgoingNumber()) {
+        if (!$from = $request->getOutgoingNumber()) {
             return new ErrorResponse(418, 'You cannot receive text message replies at this time because you have not been assigned a unique outgoing text messaging number, please contact Ally.');
         }
 
@@ -171,7 +164,7 @@ class CommunicationController extends Controller
      */
     public function threadIndex(Request $request)
     {
-        $threads = SmsThread::forRequestedBusinesses()
+        $threads = SmsThread::forRequestedBusinesses([$request->business_id])
             ->betweenDates($request->start_date, $request->end_date)
             ->withReplies($request->reply_only == 1 ? true : false)
             ->withCount(['recipients', 'replies'])
