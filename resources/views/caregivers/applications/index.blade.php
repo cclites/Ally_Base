@@ -8,7 +8,5 @@
 @endsection
 
 @section('content')
-    <caregiver-application-list application-url="{{ $applicationUrl }}"
-                                :applications="{{ json_encode($applications) }}">
-    </caregiver-application-list>
+    <caregiver-application-list application-url="{{ $applicationUrl }}"></caregiver-application-list>
 @endsection
