@@ -97,4 +97,18 @@ class CreateScheduleRequest extends BusinessClientRequest
             return Arr::only($service, ['id', 'service_id', 'payer_id', 'hours_type', 'duration', 'client_rate', 'caregiver_rate', 'quickbooks_service_id']);
         }, $this->validated()['services'] ?? []);
     }
+
+    /**
+     * Check if there is more than one type of service
+     * in a service breakout request.
+     *
+     * @return bool
+     */
+    public function hasMultipleUniqueServices()
+    {
+        return collect($this->getServices())
+            ->pluck('service_id')
+            ->unique()
+            ->count() > 1;
+    }
 }
