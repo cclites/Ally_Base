@@ -220,15 +220,15 @@
 
         methods: {
 
-            mappedShiftEditReason( id ){
+            mappedShiftEditReason( code ){
 
-                const reason = this.visitEditReasonCodes.find( r => r.id === id );
+                const reason = this.visitEditReasonCodes.find( r => r.code === code );
                 if( !reason ) return null;
                 return `${reason.code}: ${reason.description}`;
             },
-            mappedShiftEditAction( id ){
+            mappedShiftEditAction( code ){
 
-                const action = this.visitEditActionCodes.find( r => r.id === id );
+                const action = this.visitEditActionCodes.find( r => r.code === code );
                 if( !action ) return null;
                 return `${action.code}: ${action.description}`;
             },

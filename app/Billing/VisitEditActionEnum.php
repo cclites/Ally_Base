@@ -77,6 +77,16 @@ class VisitEditActionEnum extends BaseEnum
     }
 
     /**
+     * the default action for non-verified shifts
+     *
+     * @return array
+     */
+    public static function nonverifiedDefault()
+    {
+        return 14;
+    }
+
+    /**
      * get an array of the codes for every edit action
      *
      * @return array

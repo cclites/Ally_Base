@@ -122,7 +122,6 @@ const actions = {
             await axios.get( `/business/dropdown/visit-edit-codes` )
                 .then( ({ data }) => {
 
-                    console.log( 'data returned: ', data );
                     ctx.commit( 'loadedReasons' );
                     ctx.commit( 'setVisitEditReasonCodes', data.reasons );
                     ctx.commit( 'setVisitEditActionCodes', data.actions );

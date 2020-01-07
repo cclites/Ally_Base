@@ -125,6 +125,16 @@ class VisitEditReasonEnum extends BaseEnum
     }
 
     /**
+     * the default action for non-verified shifts
+     *
+     * @return array
+     */
+    public static function nonverifiedDefault()
+    {
+        return 910;
+    }
+
+    /**
      * get an array of the codes for every edit reason
      *
      * @return array
