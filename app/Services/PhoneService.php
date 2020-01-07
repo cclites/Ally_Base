@@ -98,6 +98,10 @@ class PhoneService
                 // if this is a blacklist error..
 
                 $this->log->update([ 'error' => 'Blacklisted Phone Number' ]);
+            } elseif (strpos($ex->getMessage(), 'not a valid phone number') !== false) {
+                //if this is not a valid phone number
+
+                $this->log->update(['error' => 'Invalid phone number']);
             } else {
                 // else pass along to log to sentry..
 
