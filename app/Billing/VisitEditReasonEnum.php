@@ -129,7 +129,7 @@ class VisitEditReasonEnum extends BaseEnum
      *
      * @return array
      */
-    public static function nonverifiedDefault()
+    public static function nonEvvDefault()
     {
         return 910;
     }

@@ -81,7 +81,7 @@ class VisitEditActionEnum extends BaseEnum
      *
      * @return array
      */
-    public static function nonverifiedDefault()
+    public static function nonEvvDefault()
     {
         return 14;
     }

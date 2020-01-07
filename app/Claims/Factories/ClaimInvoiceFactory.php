@@ -444,8 +444,8 @@ class ClaimInvoiceFactory
             'client_signature_id' => optional($shift->clientSignature)->id,
             'caregiver_signature_id' => optional($shift->caregiverSignature)->id,
             'is_overtime' => $shift->hours_type == 'default' ? false : true,
-            'visit_edit_action' => $shift->verified ? $shift->visit_edit_action : VisitEditActionEnum::nonverifiedDefault(),
-            'visit_edit_reason' => $shift->verified ? $shift->visit_edit_reason : VisitEditReasonEnum::nonverifiedDefault(),
+            'visit_edit_action' => $shift->verified ? $shift->visit_edit_action : VisitEditActionEnum::nonEvvDefault(),
+            'visit_edit_reason' => $shift->verified ? $shift->visit_edit_reason : VisitEditReasonEnum::nonEvvDefault(),
         ]);
     }
 

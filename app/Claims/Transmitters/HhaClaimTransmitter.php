@@ -2,6 +2,8 @@
 
 namespace App\Claims\Transmitters;
 
+use App\Billing\VisitEditActionEnum;
+use App\Billing\VisitEditReasonEnum;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Contracts\ClaimTransmitterInterface;
 use App\Services\HhaExchangeService;
@@ -150,9 +152,8 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             $service->checked_out_longitude, //    "Clock-Out Longitude",
             '', //    "Clock-Out EVV Other Info",
             $claim->name, //    "Invoice Number",
-            // TODO: implement reason codes:
-            $service->getHasEvv() ? '' : '910', //    "Visit Edit Reason Code",
-            $service->getHasEvv() ? '' : '14', //    "Visit Edit Action Taken",
+            $service->getHasEvv() ? $service->visit_edit_reason : VisitEditActionEnum::nonEvvDefault(), //    "Visit Edit Reason Code",
+            $service->getHasEvv() ? $service->visit_edit_action : VisitEditReasonEnum::nonEvvDefault(), //    "Visit Edit Action Taken",
             $service->caregiver_comments, //    "Notes",
             'N', //    "Is Deletion",
             $item->id, //    "Invoice Line Item ID",

@@ -75,6 +75,9 @@ class ClaimInvoiceItemResource extends Resource
             'caregiver_dob' => $this->resource->caregiver_dob ? Carbon::parse($this->resource->caregiver_dob)->format('m/d/Y') : '',
             'caregiver_ssn' => filled($this->resource->caregiver_ssn) ? '***-**-****' : '',
             'caregiver_medicaid_id' => $this->resource->caregiver_medicaid_id,
+
+            'visit_edit_action' => $this->resource->claimable->visit_edit_action,
+            'visit_edit_reason' => $this->resource->claimable->visit_edit_reason,
         ];
     }
 

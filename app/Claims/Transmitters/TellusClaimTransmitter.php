@@ -230,8 +230,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'DiagnosisCode4' => $diagnosisCodes[3], // OPTIONAL && TODO
             'StartVerificationType' => $this->tcLookup('StartVerificationType', $this->getVerificationType($service->evv_method_in)), // OPTIONAL
             'EndVerificationType' => $this->tcLookup('EndVerificationType', $this->getVerificationType($service->evv_method_out)), // OPTIONAL
-            'ScheduledStartDateTime' => $service->scheduled_start_time->format($this->timeFormat), // OPTIONAL
-            'ScheduledEndDateTime' => $service->scheduled_end_time->format($this->timeFormat), // OPTIONAL
+            'ScheduledStartDateTime' => $service->scheduled_start_time->setTimezone( $business->timezone )->format($this->timeFormat), // OPTIONAL
+            'ScheduledEndDateTime' => $service->scheduled_end_time->setTimezone( $business->timezone )->format($this->timeFormat), // OPTIONAL
             'ScheduledLatitude' => '',
             'ScheduledLongitude' => '',
             'ActualStartDateTime' => $service->evv_start_time->setTimezone($business->timezone)->format($this->timeFormat), // OPTIONAL
@@ -243,8 +243,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'UserField1' => $claim->id, // OPTIONAL
             'UserField2' => $item->id, // OPTIONAL
             'UserField3' => $service->visit_start_time->setTimezone($business->timezone)->format($this->timeFormat), // OPTIONAL
-            // 'ReasonCode1'            => $this->tcLookup( 'ReasonCode', '105' ), // OPTIONAL && TODO
-            // 'ReasonCode2' => '', // OPTIONAL && TODO
+            'ReasonCode1' => $this->tcLookup( 'ReasonCode', $service->visit_edit_reason ),
+            // 'ReasonCode2' => $this->tcLookup( 'ReasonCode', $service->visit_edit_reason ),
             // 'ReasonCode3' => '', // OPTIONAL && TODO
             // 'ReasonCode4' => '', // OPTIONAL && TODO
             'TimeZone' => $this->tcLookup('TimeZone', $this->getBusinessTimezone($business)),
