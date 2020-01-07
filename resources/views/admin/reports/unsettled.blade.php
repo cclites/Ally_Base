@@ -9,7 +9,7 @@
 
 @section('content')
     <admin-unsettled-report
-        start_at="{{ request('start_date', '10/01/2017') }}"
+        start_at="{{ request('start_date') }}"
         end_at="{{ request('end_date') }}"
         client_id="{{ request('client_id') }}"
         business_id="{{ request('business_id') }}"
