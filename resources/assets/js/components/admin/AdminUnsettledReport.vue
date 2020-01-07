@@ -105,7 +105,7 @@
                         <th>{{ sum('caregiver_total') }}</th>
                         <th>{{ sum('provider_total') }}</th>
                         <th>{{ sum('ally_total') }}</th>
-                        <th colspan="2"></th>
+                        <th colspan="3"></th>
                     </template>
                     <template slot="actions" scope="data">
                         <b-btn variant="info" :href="`/business/shifts/${data.item.id}`" size="sm">
@@ -129,6 +129,7 @@
 <script>
     import FormatsNumbers from '../../mixins/FormatsNumbers';
     import FormatsDates from '../../mixins/FormatsDates';
+    import {Decimal} from "decimal.js";
 
     export default {
         mixins: [FormatsNumbers, FormatsDates],
@@ -262,17 +263,11 @@
 
         methods: {
             sum(prop) {
-                let total = 0;
-                total = this.items.reduce((sum, item) => {
+                let total = this.items.reduce((carry, item) => {
+                    return carry.add(new Decimal(item[prop].replace(/,/g, '')));
+                }, new Decimal(0.00));
 
-                    let parsed = parseFloat(
-                        item[prop].toString().replace(/,/g, '')
-                    )
-                    
-                    return sum + parsed
-                }, total);
-                
-                return this.numberFormat(total);
+                return this.numberFormat(total.toString());
             },
             
             provider(id) {
