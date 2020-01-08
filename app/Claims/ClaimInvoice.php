@@ -508,8 +508,8 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
             $data->push("HIC: $value");
         }
 
-        if ($value = $this->getFirstItemData('services_coordinator')) {
-            $data->push("Srvcs Coord: $value");
+        if ($value = $this->getFirstItemData('client_case_manager')) {
+            $data->push("Case Mgr: $value");
         }
 
         return $data->toArray();

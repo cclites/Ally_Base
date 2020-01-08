@@ -96,7 +96,7 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             'client_dob' => 'nullable|date',
             'client_medicaid_id' => 'nullable',
             'client_medicaid_diagnosis_codes' => 'nullable',
-            'services_coordinator' => 'nullable',
+            'client_case_manager' => 'nullable',
             'client_program_number' => 'nullable',
             'client_cirts_number' => 'nullable',
             'client_ltci_policy_number' => 'nullable',
@@ -264,7 +264,7 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             'client_dob',
             'client_medicaid_id',
             'client_medicaid_diagnosis_codes',
-            'services_coordinator',
+            'client_case_manager',
             'client_program_number',
             'client_cirts_number',
             'client_ltci_policy_number',
@@ -325,7 +325,7 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             $data['client_last_name'] = $client->last_name;
             $data['client_medicaid_id'] = $client->medicaid_id;
             $data['client_medicaid_diagnosis_codes'] = $client->medicaid_diagnosis_codes;
-            $data['services_coordinator'] = optional($client->servicesCoordinator)->name_last_first;
+            $data['client_case_manager'] = $client->case_manager;
             // TODO: how would we know to reload the client payer ?
             // $data['client_program_number'] = $clientPayer->program_number;
             // $data['client_cirts_number'] = $clientPayer->cirts_number;

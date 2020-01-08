@@ -45,15 +45,12 @@ class ClaimInvoiceFactory
             'items.shift',
             'clientPayer',
 
-            'items.shift.client.servicesCoordinator',
             'items.shift.clientSignature',
             'items.shift.caregiverSignature',
 
             'items.shiftExpense.shift.caregiver',
-            'items.shiftExpense.shift.client.servicesCoordinator',
 
             'items.shiftService',
-            'items.shiftService.shift.client.servicesCoordinator',
             'items.shiftService.shift.clientSignature',
             'items.shiftService.shift.caregiverSignature',
         ]);
@@ -241,7 +238,7 @@ class ClaimInvoiceFactory
             'client_dob' => $client->date_of_birth,
             'client_medicaid_id' => $client->medicaid_id,
             'client_medicaid_diagnosis_codes' => $client->medicaid_diagnosis_codes,
-            'services_coordinator' => optional($client->servicesCoordinator)->name_last_first,
+            'client_case_manager' => $client->case_manager,
             'client_ltci_policy_number' => $client->getPolicyNumber(),
             'client_ltci_claim_number' => $client->getClaimNumber(),
             'client_hic' => $client->hic,
@@ -306,7 +303,7 @@ class ClaimInvoiceFactory
             'client_dob' => $client->date_of_birth,
             'client_medicaid_id' => $client->medicaid_id,
             'client_medicaid_diagnosis_codes' => $client->medicaid_diagnosis_codes,
-            'services_coordinator' => optional($client->servicesCoordinator)->name_last_first,
+            'client_case_manager' => $client->case_manager,
             'client_ltci_policy_number' => $client->getPolicyNumber(),
             'client_ltci_claim_number' => $client->getClaimNumber(),
             'client_hic' => $client->hic,
@@ -374,7 +371,7 @@ class ClaimInvoiceFactory
             'client_dob' => $client->date_of_birth,
             'client_medicaid_id' => $client->medicaid_id,
             'client_medicaid_diagnosis_codes' => $client->medicaid_diagnosis_codes,
-            'services_coordinator' => optional($client->servicesCoordinator)->name_last_first,
+            'client_case_manager' => $client->case_manager,
             'client_ltci_policy_number' => $client->getPolicyNumber(),
             'client_ltci_claim_number' => $client->getClaimNumber(),
             'client_hic' => $client->hic,
