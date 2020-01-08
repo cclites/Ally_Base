@@ -38,6 +38,7 @@ class ClientPayerController extends Controller
      * @param \App\Client $client
      * @return ErrorResponse|SuccessResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Exception
      */
     public function update(UpdateClientPayersRequest $request, Client $client)
     {
@@ -60,7 +61,9 @@ class ClientPayerController extends Controller
 
             throw new \Exception();
         } catch (\Exception $ex) {
-            app('sentry')->captureException($ex);
+            // This means the call to syncPayers threw an exception, and was already
+            // captured there.  No need to log to sentry again, besides this is an
+            // empty exception as thrown above.
             \DB::rollBack();
             return new ErrorResponse(500, 'An unexpected error occurred.  Please try again.');
         }
