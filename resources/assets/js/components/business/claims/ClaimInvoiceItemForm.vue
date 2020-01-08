@@ -944,14 +944,13 @@
                     client_cirts_number: '',
                     client_ltci_policy_number: '',
                     client_ltci_claim_number: '',
+                    client_case_manager: '',
                     client_hic: '',
                     client_invoice_notes: '',
 
                     client_signature_id: '',
                     caregiver_signature_id: '',
                     is_overtime: false,
-
-                    client_case_manager: '',
                 }),
             };
         },
