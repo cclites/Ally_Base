@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1bc18046ddf35254dc25e735464e69e3",
+    "content-hash": "2177dac42c079ffea0c927bca7b0ea82",
     "packages": [
         {
             "name": "barryvdh/laravel-snappy",
@@ -5148,6 +5148,7 @@
                 "psr",
                 "psr-7"
             ],
+            "abandoned": "laminas/laminas-diactoros",
             "time": "2019-01-05T20:13:32+00:00"
         }
     ],

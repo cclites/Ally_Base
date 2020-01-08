@@ -6,6 +6,7 @@ use App\Http\Controllers\Business\BaseController;
 use App\Claims\ClaimInvoiceType;
 use App\Claims\ClaimInvoice;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PrintClaimInvoiceController extends BaseController
 {
@@ -127,5 +128,21 @@ class PrintClaimInvoiceController extends BaseController
         }
 
         return $view;
+    }
+
+    /**
+     * Print CMS-1500 invoice format.
+     *
+     * @param ClaimInvoice $claim
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Throwable
+     */
+    public function cmsInvoice(ClaimInvoice $claim, Request $request)
+    {
+        $this->authorize('read', $claim);
+
+        dd( 'testing' );
     }
 }

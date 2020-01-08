@@ -200,6 +200,9 @@
                             <b-dropdown-item v-if="row.item.type != CLAIM_INVOICE_TYPES.PAYER" :href="`/business/claims/${row.item.id}/print/full?download=1`">
                                 <i class="fa fa-download mr-1" />Download Full PDF
                             </b-dropdown-item>
+                            <b-dropdown-item :href="`/business/claims/${row.item.id}/cmsInvoice?download=1`">
+                                <i class="fa fa-download mr-1" />Download CMS-1500
+                            </b-dropdown-item>
                             <b-dropdown-item v-if="row.item.status == 'CREATED'" @click="transmit(row.item)">
                                 <i class="fa fa-send-o mr-1" />Transmit Claim
                             </b-dropdown-item>
