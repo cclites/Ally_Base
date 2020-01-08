@@ -38,7 +38,8 @@
             </template>
             <template slot="invoices" scope="data">
                 <div v-for="invoice in data.item.invoices" :key="invoice.id">
-                    <a :href="`/business/client/invoices/${invoice.id}`" target="_blank">#{{ invoice.name }}</a>
+                    <a v-if="isOfficeUserOrAdmin" :href="`/business/client/invoices/${invoice.id}`" target="_blank">#{{ invoice.name }}</a>
+                    <a v-else :href="`/client/invoices/${invoice.id}`" target="_blank">#{{ invoice.name }}</a>
                 </div>
             </template>
             <template slot="FOOT_payment_date" scope="data">
@@ -63,11 +64,11 @@
 <script>
     import FormatsDates from '../../mixins/FormatsDates';
     import FormatsNumbers from '../../mixins/FormatsNumbers';
+    import AuthUser from '../../mixins/AuthUser';
 
     export default {
         props: ['client'],
-
-        mixins: [FormatsDates, FormatsNumbers],
+        mixins: [FormatsDates, FormatsNumbers, AuthUser],
 
         computed: {
             years() {
