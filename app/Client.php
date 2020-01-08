@@ -435,9 +435,14 @@ class Client extends AuditableModel implements
                     ]);
     }
 
+    /**
+     * Get the client services coordinator relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function servicesCoordinator()
     {
-        return $this->belongsTo('App\OfficeUser', 'services_coordinator_id');
+        return $this->belongsTo(OfficeUser::class, 'services_coordinator_id');
     }
 
     /**
@@ -1018,6 +1023,16 @@ class Client extends AuditableModel implements
                  })
                 ->get();
         return $audits;
+    }
+
+    /**
+     * Get the URL to the Clients edit profile page.
+     *
+     * @return string
+     */
+    public function getProfileUrl() : string
+    {
+        return route('business.clients.show', $this->id);
     }
 
     // **********************************************************
