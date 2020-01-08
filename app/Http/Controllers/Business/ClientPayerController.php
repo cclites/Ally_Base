@@ -34,9 +34,10 @@ class ClientPayerController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  UpdateClientPayersRequest  $request
-     * @param  \App\Client  $client
-     * @return \Illuminate\Http\Response
+     * @param UpdateClientPayersRequest $request
+     * @param \App\Client $client
+     * @return ErrorResponse|SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function update(UpdateClientPayersRequest $request, Client $client)
     {
@@ -59,7 +60,7 @@ class ClientPayerController extends Controller
 
             throw new \Exception();
         } catch (\Exception $ex) {
-            \Log::debug($ex->getMessage());
+            app('sentry')->captureException($ex);
             \DB::rollBack();
             return new ErrorResponse(500, 'An unexpected error occurred.  Please try again.');
         }
