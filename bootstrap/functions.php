@@ -412,3 +412,16 @@ if (! function_exists('dump_csv')) {
         return true;
     }
 }
+
+if (! function_exists('standard_filename')) {
+    function standard_filename(string $subject, string $documentName, string $extension, bool $addDate = true) : string
+    {
+        $date = ' ' . Carbon::now()->format('Y-m-d');
+
+        if (! $addDate) {
+            $date = '';
+        }
+
+        return strtolower(str_slug("{$subject} {$documentName}{$date}.{$extension}"));
+    }
+}

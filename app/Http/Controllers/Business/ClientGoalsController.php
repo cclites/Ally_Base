@@ -115,7 +115,7 @@ class ClientGoalsController extends BaseController
             200,
             array(
                 'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename="' . $client->nameLastFirst() . '_client_goals.pdf"'
+                'Content-Disposition' => 'attachment; filename="'.standard_filename($client->name, 'goals', 'pdf').'"'
             )
         );
     }

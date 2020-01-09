@@ -87,7 +87,7 @@ class ClientMedicationController extends Controller
             200,
             array(
                 'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename="' . $client->nameLastFirst() . '_client_medications.pdf"'
+                'Content-Disposition' => 'attachment; filename="' . standard_filename($client->name, 'client medications', 'pdf') . '"',
             )
         );
     }
