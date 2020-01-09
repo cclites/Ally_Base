@@ -3,6 +3,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Billing\Actions\ProcessChainDeposits;
 use App\Billing\CaregiverInvoice;
+use App\Billing\Exceptions\PaymentMethodError;
+use App\Billing\Exceptions\PaymentMethodDeclined;
 use App\Billing\View\DepositViewGenerator;
 use App\Billing\View\Html\HtmlDepositView;
 use App\Billing\View\Pdf\PdfDepositView;
@@ -242,7 +244,13 @@ class DepositsController extends Controller
 
             if ($request->process) {
                 if (!$caregiver->bankAccount) return new ErrorResponse(400, 'Caregiver does not have a bank account.');
-                $transaction = SingleDepositProcessor::depositCaregiver($caregiver, $amount, $request->adjustment ?? false, $request->notes, $chainId);
+
+                try{
+                    $transaction = SingleDepositProcessor::depositCaregiver($caregiver, $amount, $request->adjustment ?? false, $request->notes, $chainId);
+                }catch(PaymentMethodError $e){
+                    return new ErrorResponse(400, $e->getMessage());
+                }
+
             } else {
                 $invoice = SingleDepositProcessor::generateCaregiverAdjustmentInvoice($caregiver, $amount, $request->notes);
             }
@@ -252,7 +260,13 @@ class DepositsController extends Controller
 
             if ($request->process) {
                 if (!$business->bankAccount) return new ErrorResponse(400, 'Business does not have a bank account.');
-                $transaction = SingleDepositProcessor::depositBusiness($business, $amount, $request->adjustment ?? false, $request->notes);
+
+                try{
+                    $transaction = SingleDepositProcessor::depositBusiness($business, $amount, $request->adjustment ?? false, $request->notes);
+                }catch(PaymentMethodError $e){
+                    return new ErrorResponse(400, $e->getMessage());
+                }
+
             } else {
                 $invoice = SingleDepositProcessor::generateBusinessAdjustmentInvoice($business, $amount, $request->notes);
             }
