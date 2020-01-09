@@ -14,7 +14,7 @@ class AlterTableAddPayerToCaregiver1099s extends Migration
     public function up()
     {
         Schema::table( 'caregiver_1099s', function ( Blueprint $table ) {
-            $table->string( 'payer', 20 )->after( 'modified_by' )->nullable();
+            $table->string( 'caregiver_1099_payer', 20 )->after( 'modified_by' )->nullable();
         });
     }
 
@@ -26,7 +26,7 @@ class AlterTableAddPayerToCaregiver1099s extends Migration
     public function down()
     {
         Schema::table( 'caregiver_1099s', function ( Blueprint $table ) {
-            $table->dropColumn( ['payer'] );
+            $table->dropColumn( ['caregiver_1099_payer'] );
         });
     }
 }

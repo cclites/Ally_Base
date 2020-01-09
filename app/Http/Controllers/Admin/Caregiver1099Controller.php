@@ -174,7 +174,7 @@ class Caregiver1099Controller extends Controller
         $caregiver1099s = $caregiver1099
             ->where('year', $year)
             ->whereNull('transmitted_at')
-            ->with('client')
+            ->with(['client', 'client.user'])
             ->get()
             ->map(function ($cg1099) use ($systemSettings) {
                 //$cg1099->update(['transmitted_at'=>\Carbon\Carbon::now(),'transmitted_by'=> auth()->user()->id]);
@@ -185,7 +185,7 @@ class Caregiver1099Controller extends Controller
                 $payerCity = $cg1099->client_city;
                 $payerState = $cg1099->client_state;
                 $payerZip = $cg1099->client_zip;
-                $payerPhone = $cg1099->client_phone;
+                $payerPhone = $cg1099->client->user->getDefaultPhoneAttribute();
                 $caregiverTin = decrypt($cg1099->caregiver_ssn);
 
                 if ($cg1099->uses_ein_number) {
@@ -193,13 +193,9 @@ class Caregiver1099Controller extends Controller
                     $caregiverTin = substr($caregiverTin, 0, 2) . "-" . substr($caregiverTin, 2, 7);
                 }
 
-                if ($cg1099->payer == Caregiver1099Payer::ALLY()) {
+                if ($cg1099->caregiver_1099_payer == Caregiver1099Payer::ALLY()) {
                     $payerName = $systemSettings->company_name;
                     $payerTin = $systemSettings->company_ein;
-                    $payerCity = $systemSettings->company_city;
-                    $payerState = $systemSettings->company_state;
-                    $payerZip = $systemSettings->company_zip;
-                    $payerAddress = $systemSettings->company_address1 . ($systemSettings->company_address2 ? ", " . $systemSettings->company_address2 : '');
                     $payerPhone = $systemSettings->company_contact_phone;
                 }
 

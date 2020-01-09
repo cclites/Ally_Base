@@ -228,7 +228,7 @@ class CaregiverYearlyEarnings extends BaseModel
             'caregiver_zip' => $this->caregiver->address->zip,
             'caregiver_ssn' => encrypt($this->caregiver->ssn),
             'created_by' => auth()->user()->nameLastFirst(),
-            'payer' => $this->client->caregiver_1099,
+            'caregiver_1099_payer' => $this->client->caregiver_1099,
         ]);
     }
 }

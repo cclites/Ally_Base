@@ -40,82 +40,6 @@ class Caregiver1099 extends BaseModel
         return $this->caregiver_city . ", " . $this->caregiver_state . " " . $this->caregiver_zip;
     }
 
-    public static function getErrors($cg1099){
-        $errors = [];
-
-        if(! $cg1099->client_first_name){
-            $errors[] = "Client First Name";
-        }
-
-        if(! $cg1099->client_last_name){
-            $errors[] = "Client Last Name";
-        }
-
-        if(! $cg1099->client_address1){
-            $errors[] = "Client Address";
-        }
-
-        if(! $cg1099->client_city){
-            $errors[] = "Client City";
-        }
-
-        if(! $cg1099->client_state){
-            $errors[] = "Client State";
-        }
-
-        if(! $cg1099->client_zip){
-            $errors[] = "Client Zip";
-        }
-
-        if(! $cg1099->client_ssn){
-            $errors[] = "Client Ssn";
-        }
-
-        if(! $cg1099->client_email){
-            $errors[] = "Client Email";
-        }
-
-        if($cg1099->caregiver_1099 === 'ally'){
-            return $errors;
-        }
-
-        if(! $cg1099->caregiver_first_name){
-            $errors[] = "Caregiver First Name";
-        }
-
-        if(! $cg1099->caregiver_last_name){
-            $errors[] = "Caregiver Last Name";
-        }
-
-        if(! $cg1099->caregiver_address1){
-            $errors[] = "Caregiver Address";
-        }
-
-        if(! $cg1099->caregiver_city){
-            $errors[] = "Caregiver City";
-        }
-
-        if(! $cg1099->caregiver_state){
-            $errors[] = "Caregiver State";
-        }
-
-        if(! $cg1099->caregiver_zip){
-            $errors[] = "Caregiver Zip";
-        }
-
-        if(! $cg1099->caregiver_ssn){
-            $errors[] = "Caregiver Ssn";
-        }
-
-        if(! $cg1099->caregiver_email){
-            $errors[] = "Caregiver Email";
-        }elseif(strpos($cg1099->caregiver_email, 'noemail') !== false){
-            $errors[] = "Caregiver has no Email";
-        }
-
-        return $errors;
-    }
-
     public function getFilledCaregiverPdf($maskPayerSsn = true, $maskRecipientSsn = true) : Pdf
     {
         $this->load("client");
@@ -137,7 +61,7 @@ class Caregiver1099 extends BaseModel
             $caregiverTin = substr($caregiverTin, 0, 2) . "-" . substr($caregiverTin, 2, 7);
         }
 
-        if ($this->client->caregiver_1099 === 'ally') {
+        if ($this->caregiver_1099_payer == 'ally') {
             $payerName = $this->client_first_name;
             $payerAddress3 = $systemSettings->company_city . ", " . $systemSettings->company_state . " " . $systemSettings->company_zip;
             $clAddress2 = $systemSettings->company_address2 ? $systemSettings->company_address2 . "\n" : '';

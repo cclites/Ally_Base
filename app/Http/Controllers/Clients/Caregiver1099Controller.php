@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Clients;
 
+use App\Caregiver1099Payer;
 use App\Client;
 use App\Caregiver1099;
 use Illuminate\Http\Request;
@@ -55,7 +56,7 @@ class Caregiver1099Controller extends Controller
             $caregiverTin = substr($caregiverTin,0, 2) . "-" . substr($caregiverTin, 2,7);
         }
 
-        if($caregiver1099->client->caregiver_1099 === 'ally'){
+        if($caregiver1099->caregiver_1099_payer == Caregiver1099Payer::ALLY()){
             $systemSettings = \DB::table('system_settings')->first();
 
             $payerName = $systemSettings->company_name;
