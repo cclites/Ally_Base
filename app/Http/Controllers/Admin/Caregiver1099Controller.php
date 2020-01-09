@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Caregiver1099;
 use App\Caregiver;
+use App\Caregiver1099Payer;
 use App\CaregiverYearlyEarnings;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -192,7 +193,7 @@ class Caregiver1099Controller extends Controller
                     $caregiverTin = substr($caregiverTin, 0, 2) . "-" . substr($caregiverTin, 2, 7);
                 }
 
-                if ($cg1099->client->caregiver_1099 === 'ally') {
+                if ($cg1099->payer == Caregiver1099Payer::ALLY()) {
                     $payerName = $systemSettings->company_name;
                     $payerTin = $systemSettings->company_ein;
                     $payerCity = $systemSettings->company_city;
@@ -203,18 +204,18 @@ class Caregiver1099Controller extends Controller
                 }
 
                 return [
-                    'payer_name' => $payerName,
-                    'payer_address' => $payerAddress,
-                    'payer_city' => $payerCity,
-                    'payer_state' => $payerState,
+                    'payer_name' => strtoupper($payerName),
+                    'payer_address' => strtoupper($payerAddress),
+                    'payer_city' => strtoupper($payerCity),
+                    'payer_state' => strtoupper($payerState),
                     'payer_zip' => $payerZip,
                     'payer_phone' => $payerPhone,
                     'payer_tin' => $payerTin,
                     'recipient_tin' => $caregiverTin,
-                    'recipient_name' => $cg1099->caregiver_first_name . " " . $cg1099->caregiver_last_name,
-                    'recipient_address' => $cg1099->caregiver_address1 . "\n" . filled($cg1099->caregiver_address2),
-                    'recipient_city' => $cg1099->caregiver_city,
-                    'recipient_state' => $cg1099->caregiver_state,
+                    'recipient_name' => strtoupper($cg1099->caregiver_first_name . " " . $cg1099->caregiver_last_name),
+                    'recipient_address' => strtoupper($cg1099->caregiver_address1 . "\n" . filled($cg1099->caregiver_address2)),
+                    'recipient_city' => strtoupper($cg1099->caregiver_city),
+                    'recipient_state' => strtoupper($cg1099->caregiver_state),
                     'recipient_zip' => $cg1099->caregiver_zip,
                     'payment_total' => $cg1099->payment_total,
                 ];

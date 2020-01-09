@@ -26,7 +26,7 @@ class Caregiver1099Controller extends Controller
                                 }else{
                                     return [
                                         'year'=> $caregiver_1099->year,
-                                        'name' => $caregiver_1099->client_first_name . " " . $caregiver_1099->client_last_name,
+                                        'name' => $caregiver_1099->caregiver_first_name . " " . $caregiver_1099->caregiver_last_name,
                                         'id' => $caregiver_1099->id
                                     ];
                                 }
