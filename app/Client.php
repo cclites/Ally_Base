@@ -1054,7 +1054,7 @@ class Client extends AuditableModel implements
     public function getUnpaidInvoicesCount() : int
     {
         return (new ClientInvoiceQuery())
-            ->forClient($this->id)
+            ->forClient($this->id, false)
             ->notPaidInFull()
             ->count();
     }

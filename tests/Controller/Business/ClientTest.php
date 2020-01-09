@@ -55,7 +55,8 @@ class ClientTest extends TestCase
         $this->assertEquals(1, $this->client->active);
 
         // Create an unpaid invoice
-        factory(ClientInvoice::class)->create(['client_id' => $this->client->id, 'amount' => 100, 'amount_paid' => 0]);
+        $invoice = factory(ClientInvoice::class)->create(['client_id' => $this->client->id, 'amount' => 100, 'amount_paid' => 0, 'offline' => 0]);
+
         $this->assertEquals(1, $this->client->getUnpaidInvoicesCount());
 
         $this->postJson(route('business.clients.deactivate', ['client' => $this->client]), ['active' => false])
