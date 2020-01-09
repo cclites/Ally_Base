@@ -1,5 +1,9 @@
 @extends('layouts.print')
 
+@section('title')
+    {{ $client->name }} Client Care Details Summary
+@endsection
+
 @push('head')
     <style>
         .row{
