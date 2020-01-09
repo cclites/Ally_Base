@@ -10,13 +10,12 @@ use App\Client;
 use App\Billing\Payments\Methods\CreditCard;
 use App\Billing\Payment;
 use App\PhoneNumber;
-use Tests\CreatesBusinesses;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ClientTest extends TestCase
 {
-    use RefreshDatabase, CreatesBusinesses;
+    use RefreshDatabase;
 
     public $client;
 
@@ -157,26 +156,4 @@ class ClientTest extends TestCase
 
         $this->assertCount(0, $this->client->payments);
     }
-
-    public function testClientCanBeDeactivated(){
-
-        $this->createBusinessWithUsers();
-        $this->actingAs( $this->officeUser->user );
-
-        $this->deleteJson(route('business.clients.destroy', ['client' => $this->client]));
-
-        $this->assertEquals(null, $this->client->fresh()->status_alias_id, "Client was not deactived");
-    }
-
-    public function testClientHasOpenInvoicesCanNotDeactivate()
-    {
-        $this->createBusinessWithUsers();
-        $this->actingAs($this->officeUser->user);
-
-        factory(ClientInvoice::class)->create(['client_id'=>$this->client->id, 'amount'=>100, 'amount_paid'=>0]);
-
-        $this->deleteJson(route('business.clients.destroy', ['client' => $this->client]))
-            ->assertStatus(400, "Should not be able to deactivate this client");
-    }
-
 }

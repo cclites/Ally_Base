@@ -6,18 +6,13 @@ use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
 use App\BusinessChain;
 use App\Caregiver;
-
-use App\Billing\CaregiverInvoice;
-use Tests\CreatesBusinesses;
-
-
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 
 class CaregiverTest extends TestCase
 {
-    use RefreshDatabase, CreatesBusinesses;
+    use RefreshDatabase;
 
     public $caregiver;
 
@@ -112,25 +107,4 @@ class CaregiverTest extends TestCase
         $this->assertEquals($this->caregiver->id, $result->id);
         $this->assertEquals(1, $count, 'Only one caregiver should show up as a result of the forBusinesses query.');
     }
-
-    public function testCaregiverCanBeDeactivated(){
-
-        $this->createBusinessWithUsers();
-        $this->actingAs( $this->officeUser->user );
-
-        $this->deleteJson(route('business.caregivers.destroy', ['caregiver' => $this->caregiver]));
-        $this->assertEquals(0, $this->caregiver->fresh()->active, "Caregiver was not deactivated");
-    }
-
-    public function testCaregiverHasOpenInvoicesCanNotDeactivate(){
-
-        $this->createBusinessWithUsers();
-        $this->actingAs( $this->officeUser->user );
-
-        factory(CaregiverInvoice::class)->create(['caregiver_id'=>$this->caregiver->id, 'amount'=>100, 'amount_paid'=>0]);
-
-        $this->deleteJson(route('business.caregivers.destroy', ['caregiver' => $this->caregiver]))
-            ->assertStatus(400, 'Should not be able to deactivate this caregiver');
-    }
-
 }
