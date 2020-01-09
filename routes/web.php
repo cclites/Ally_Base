@@ -353,7 +353,7 @@ Route::group([
     Route::post('reports/client-referral-sources', 'Business\Report\ClientReferralSourcesController@index');
     Route::get('reports/caregiver-referral-sources', 'Business\Report\CaregiverReferralSourcesController@index')->name('reports.caregiver_referral_sources');
     Route::post('reports/caregiver-referral-sources', 'Business\Report\CaregiverReferralSourcesController@index');
-    Route::get('reports/case-manager', 'Business\ReportsController@caseManager')->name('reports.case_manager');
+    Route::get('reports/services-coordinator', 'Business\ReportsController@servicesCoordinator')->name('reports.services_coordinator');
     Route::get('reports/caregiver-shifts', 'Business\ReportsController@caregiverShifts')->name('reports.caregiver_shifts');
 
     Route::get('reports/client-shifts', 'Business\ReportsController@clientShifts')->name('reports.client_shifts');

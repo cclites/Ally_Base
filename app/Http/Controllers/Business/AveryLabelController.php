@@ -46,11 +46,11 @@ class AveryLabelController extends BaseController
         }
 
 
-        if( $caseManagerId = $request->input( 'case_manager_id' ) ) {
+        if( $servicesCoordinatorId = $request->input( 'services_coordinator_id' ) ) {
 
-            $query->whereHas( "$entity.caseManager", function ( $q ) use ( $caseManagerId ) {
+            $query->whereHas( "$entity.servicesCoordinator", function ( $q ) use ( $servicesCoordinatorId ) {
 
-                $q->where( 'id', $caseManagerId );
+                $q->where( 'id', $servicesCoordinatorId );
             });
         }
 

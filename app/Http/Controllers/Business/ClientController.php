@@ -45,6 +45,7 @@ class ClientController extends BaseController
      */
     public function index(Request $request)
     {
+
         if ($request->expectsJson()) {
             $query = Client::forRequestedBusinesses()->ordered();
 
@@ -58,9 +59,9 @@ class ClientController extends BaseController
             if ($clientType = $request->input('client_type')) {
                 $query->where('client_type', $clientType);
             }
-            if ($caseManagerId = $request->input('case_manager_id')) {
-                $query->whereHas('caseManager', function ($q) use ($caseManagerId) {
-                    $q->where('id', $caseManagerId);
+            if ($servicesCoordinatorId = $request->input('services_coordinator_id')) {
+                $query->whereHas('servicesCoordinator', function ($q) use ($servicesCoordinatorId) {
+                    $q->where('id', $servicesCoordinatorId);
                 });
             }
             // Use query string ?address=1&phone_number=1&care_plans=1&case_managers=1 if data is needed
@@ -73,8 +74,8 @@ class ClientController extends BaseController
             if ($request->input('care_plans')) {
                 $query->with('carePlans');
             }
-            if ($request->input('case_managers')) {
-                $query->with('caseManager');
+            if ($request->input('services_coordinator')) {
+                $query->with('servicesCoordinator');
             }
 
             $clients = $query->get();
@@ -184,7 +185,7 @@ class ClientController extends BaseController
             'notes.creator',
             'careDetails',
             'carePlans',
-            'caseManager',
+            'servicesCoordinator',
             'deactivationReason',
             'skilledNursingPoc',
             'goals',

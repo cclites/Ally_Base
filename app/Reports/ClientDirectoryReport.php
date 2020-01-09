@@ -44,7 +44,7 @@ class ClientDirectoryReport extends BusinessResourceReport
      */
     public function __construct()
     {
-        $this->query = Client::with(['user', 'addresses', 'creator', 'updator', 'statusAlias', 'evvPhone', 'salesperson', 'caseManager', 'referralSource', 'evvAddress', 'business'])
+        $this->query = Client::with(['user', 'addresses', 'creator', 'updator', 'statusAlias', 'evvPhone', 'salesperson', 'servicesCoordinator', 'referralSource', 'evvAddress', 'business'])
             ->leftJoin('users', 'clients.id', '=', 'users.id');
     }
 
@@ -240,7 +240,7 @@ class ClientDirectoryReport extends BusinessResourceReport
                 'updated_at' => optional($client->updated_at)->toDateTimeString(),
                 'updated_by' => optional($client->updator)->name,
 
-                'services_coordinator' => optional($client->caseManager)->name,
+                'services_coordinator' => optional($client->servicesCoordinator)->name,
                 'salesperson' => optional($client->salesperson)->fullName(),
                 'inquiry_date' => optional($client->inquiry_date)->toDateTimeString(),
                 'service_start_date' => optional($client->service_start_date)->toDateTimeString(),
