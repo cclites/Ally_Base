@@ -95,7 +95,7 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-row>
+        <b-row v-if="isAdmin">
             <b-col lg="6">
                 <b-card>
                     <table class="table table-bordered">
