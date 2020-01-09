@@ -3,7 +3,6 @@
 namespace Tests\Model;
 
 use App\Address;
-use App\Billing\ClientInvoice;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
 use App\Client;
@@ -156,4 +155,5 @@ class ClientTest extends TestCase
 
         $this->assertCount(0, $this->client->payments);
     }
+
 }

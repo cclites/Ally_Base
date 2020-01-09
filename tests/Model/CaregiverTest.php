@@ -9,7 +9,6 @@ use App\Caregiver;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-
 class CaregiverTest extends TestCase
 {
     use RefreshDatabase;
@@ -19,7 +18,6 @@ class CaregiverTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-
         $this->caregiver = factory(Caregiver::class)->create();
     }
 
