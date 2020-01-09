@@ -247,8 +247,8 @@ class DepositsController extends Controller
 
                 try{
                     $transaction = SingleDepositProcessor::depositCaregiver($caregiver, $amount, $request->adjustment ?? false, $request->notes, $chainId);
-                }catch(\Exception $e){
-                    return new ErrorResponse(400, 'Error: ' . $e->getMessage());
+                }catch(PaymentMethodError $e){
+                    return new ErrorResponse(400, $e->getMessage());
                 }
 
             } else {
@@ -263,8 +263,8 @@ class DepositsController extends Controller
 
                 try{
                     $transaction = SingleDepositProcessor::depositBusiness($business, $amount, $request->adjustment ?? false, $request->notes);
-                }catch(\Exception $e){
-                    return new ErrorResponse(400, 'Error: ' . $e->getMessage());
+                }catch(PaymentMethodError $e){
+                    return new ErrorResponse(400, $e->getMessage());
                 }
 
             } else {
