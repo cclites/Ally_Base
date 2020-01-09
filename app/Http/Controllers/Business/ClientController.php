@@ -236,6 +236,7 @@ class ClientController extends BaseController
         $auths = (new ClientAuthController())->listByClient($client->id);
 
         $invoiceQuery = new ClientInvoiceQuery();
+
         $invoices = $invoiceQuery->forClient($client->id, false)
             ->get()
             ->map(function (ClientInvoice $item) {
@@ -330,6 +331,10 @@ class ClientController extends BaseController
 
         if ($client->hasActiveShift()) {
             return new ErrorResponse(400, 'You cannot delete this client because they have an active shift clocked in.');
+        }
+
+        if($client->getUnpaidInvoicesCount() > 0){
+            return new ErrorResponse(400, 'Warning: This client has an outstanding invoice or payment and cannot be deactivated. Contact Ally support with any questions.');
         }
 
         $data = request()->all();
@@ -599,5 +604,22 @@ class ClientController extends BaseController
         ];
 
         return $data;
+    }
+
+    /**
+     * Check if the Caregiver has open (unpaid) invoices.
+     *
+     * @param Client $client
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function openInvoices(Client $client)
+    {
+        $count = $client->getUnpaidInvoicesCount();
+
+        return response()->json([
+            'caregiver_id' => $client->id,
+            'open_invoice_count' => $client->getUnpaidInvoicesCount(),
+            'has_open_invoices' => $count > 0
+        ]);
     }
 }

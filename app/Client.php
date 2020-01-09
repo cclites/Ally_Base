@@ -4,6 +4,7 @@ namespace App;
 
 use App\Audit;
 use App\Billing\BillingCalculator;
+use App\Billing\ClientInvoice;
 use App\Billing\ClientPayer;
 use App\Billing\ClientRate;
 use App\Billing\FeeOverrideRule;
@@ -12,6 +13,7 @@ use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\Methods\CreditCard;
 use App\Billing\Payments\PaymentMethodType;
+use App\Billing\Queries\ClientInvoiceQuery;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Billing\Contracts\ChargeableInterface;
@@ -39,7 +41,6 @@ use App\Traits\CanHaveEmptyUsername;
 use App\BusinessCommunications;
 use App\SalesPerson;
 use Illuminate\Database\Eloquent\Model;
-
 
 /**
  * App\Client
@@ -362,9 +363,9 @@ class Client extends AuditableModel implements
     // made this a relationship method so it can be eager loaded
     public function paymentLogs()
     {
-        return $this->hasMany( PaymentLog::class, 'payment_method_id', 'default_payment_id' )
-            ->where( 'payment_method_type', $this->default_payment_type )
-            ->orderBy( 'created_at', 'desc' );
+        return $this->hasMany(PaymentLog::class, 'payment_method_id', 'default_payment_id')
+            ->where('payment_method_type', $this->default_payment_type)
+            ->orderBy('created_at', 'desc');
     }
 
     public function creator()
@@ -608,7 +609,8 @@ class Client extends AuditableModel implements
         return $this->belongsTo(QuickbooksCustomer::class);
     }
 
-    public function salesperson(){
+    public function salesperson()
+    {
         return $this->hasOne(SalesPerson::class, 'id', 'sales_person_id', $this->sales_person_id);
     }
 
@@ -617,7 +619,8 @@ class Client extends AuditableModel implements
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function caregiver1099s(){
+    public function caregiver1099s()
+    {
         return $this->hasMany(Caregiver1099::class);
     }
 
@@ -646,13 +649,13 @@ class Client extends AuditableModel implements
 
     public function getPaymentErrorsAttribute()
     {
-        $most_recent = optional( $this->paymentLogs->groupBy( 'batch_id' )->first() )->first();
+        $most_recent = optional($this->paymentLogs->groupBy('batch_id')->first())->first();
 
-        if( $most_recent && $most_recent->exception ){
+        if ($most_recent && $most_recent->exception) {
             // error_message is the most descriptive, but the last string in the exception is still a viable fallback in case the error_message is null
 
-            $exception = explode( '\\', $most_recent->exception );
-            $specific_infraction = empty( $most_recent->error_message ) ? $exception[ count( $exception ) - 1 ] : $most_recent->error_message;
+            $exception = explode('\\', $most_recent->exception);
+            $specific_infraction = empty($most_recent->error_message) ? $exception[ count($exception) - 1 ] : $most_recent->error_message;
 
             return 'Outstanding Client Payer Issue - ' . $specific_infraction;
         }
@@ -921,8 +924,7 @@ class Client extends AuditableModel implements
             if ($override = FeeOverrideRule::lookup($this->business_id, $this->getPaymentType())) {
                 return $override->getRate();
             }
-        }
-        catch (Billing\Exceptions\PaymentMethodError $ex) {
+        } catch (Billing\Exceptions\PaymentMethodError $ex) {
         }
 
         if ($payer = $this->primaryPayer) {
@@ -1026,7 +1028,7 @@ class Client extends AuditableModel implements
     public function auditTrail()
     {
         $audits = Audit::where('new_values', 'like', '%"client_id":' . $this->id . '%')
-                 ->orWhere(function($q){
+                 ->orWhere(function ($q) {
                      $q->whereIn('auditable_type', ['App\User', 'clients'])
                          ->where('auditable_id', $this->id);
                  })
@@ -1042,6 +1044,19 @@ class Client extends AuditableModel implements
     public function getProfileUrl() : string
     {
         return route('business.clients.show', $this->id);
+    }
+
+    /**
+     * Get number of unpaid invoices for the Client.
+     *
+     * @return int
+     */
+    public function getUnpaidInvoicesCount() : int
+    {
+        return (new ClientInvoiceQuery())
+            ->forClient($this->id)
+            ->notPaidInFull()
+            ->count();
     }
 
     // **********************************************************

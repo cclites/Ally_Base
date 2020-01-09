@@ -2,10 +2,12 @@
 
 namespace App;
 
+use App\Billing\CaregiverInvoice;
 use App\Billing\Deposit;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
+use App\Billing\Queries\CaregiverInvoiceQuery;
 use App\Caregiver1099;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
@@ -165,8 +167,13 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver notOnboarded()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver onboarded()
  */
-class Caregiver extends AuditableModel implements UserRole, ReconcilableInterface,
-    HasPaymentHoldInterface, BelongsToChainsInterface, BelongsToBusinessesInterface, HasTimezone
+class Caregiver extends AuditableModel implements
+    UserRole,
+    ReconcilableInterface,
+    HasPaymentHoldInterface,
+    BelongsToChainsInterface,
+    BelongsToBusinessesInterface,
+    HasTimezone
 {
     use IsUserRole, BelongsToBusinesses, BelongsToChains, Notifiable;
     use HasSSNAttribute, HasPaymentHold, HasOwnMetaData, HasDefaultRates, CanHaveEmptyEmail, CanHaveEmptyUsername;
@@ -348,7 +355,8 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
         return $this->belongsToMany(Activity::class, 'caregiver_skills');
     }
 
-    public function referralSource() {
+    public function referralSource()
+    {
         return $this->belongsTo('App\ReferralSource');
     }
 
@@ -378,7 +386,8 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function caregiver1099s(){
+    public function caregiver1099s()
+    {
         return $this->hasMany(Caregiver1099::class);
     }
 
@@ -393,7 +402,7 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
      */
     public function getSetupUrlAttribute()
     {
-        return route('setup.caregivers', ['token' => $this->getEncryptedKey()]);    
+        return route('setup.caregivers', ['token' => $this->getEncryptedKey()]);
     }
 
 
@@ -422,15 +431,14 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
      * @param array $data
      * @return \App\CaregiverAvailability|false
      */
-    public function setAvailability(array $data) {
-
+    public function setAvailability(array $data)
+    {
         $availability = $this->availability()->firstOrNew([]);
         $availability->fill($data);
 
         $saved = $availability->save();
 
         return $saved ? $availability : false;
-
     }
 
     /**
@@ -700,7 +708,7 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
      */
     public function scopeWhereHasShiftsOrSchedules($query)
     {
-        return $query->where(function($query) {
+        return $query->where(function ($query) {
             $query->whereHas('schedules')
                 ->orWhereHas('shifts');
         });
@@ -778,7 +786,7 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
      */
     public function scopeForBusinesses(Builder $builder, array $businessIds)
     {
-        $builder->whereHas('businesses', function($q) use ($businessIds) {
+        $builder->whereHas('businesses', function ($q) use ($businessIds) {
             $q->whereIn('businesses.id', $businessIds);
         });
     }
@@ -792,11 +800,11 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
      */
     public function scopeForChains(Builder $builder, $chains)
     {
-        $chains = array_map(function($chain) {
+        $chains = array_map(function ($chain) {
             return ($chain instanceof BusinessChain) ? $chain->id : $chain;
         }, (array) $chains);
 
-        $builder->whereHas('businessChains', function($q) use ($chains) {
+        $builder->whereHas('businessChains', function ($q) use ($chains) {
             $q->whereIn('chain_id', $chains);
         });
     }
@@ -836,6 +844,19 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
             })
             ->get();
         return $audits;
+    }
+
+    /**
+     * Get number of unpaid invoices for the Caregiver.
+     *
+     * @return int
+     */
+    public function getUnpaidInvoicesCount() : int
+    {
+        return (new CaregiverInvoiceQuery())
+            ->forCaregiver($this->id)
+            ->notPaidInFull()
+            ->count();
     }
 
     /*

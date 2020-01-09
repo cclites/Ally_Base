@@ -10,6 +10,13 @@
                     </div>
                     <div v-else class="text-info">They have no future scheduled shifts.</div>
 
+                    <div v-if="open_invoice_count > 0">This caregiver has <span class="text-danger">{{ open_invoice_count }}</span>
+                      open invoices.
+                    </div>
+                    <div v-else class="text-success">
+                        They have no open invoices.
+                    </div>
+
                     <b-form-group slabel-for="inactive_at" class="mt-4">
                         <date-picker
                             v-model="inactive_at"
@@ -73,6 +80,7 @@
                     client: [],
                     caregiver: []
                 },
+                open_invoice_count: 0,
             }
         },
 
@@ -90,6 +98,11 @@
             },
 
             archiveCaregiver () {
+
+                if (! confirm('This will prevent any charges or deposits from being completed. Please be sure to check that there are no outstanding invoices or payments.')) {
+                    return;
+                }
+
                 let form = new Form ();
                 let url = `/business/caregivers/${this.caregiver.id}?inactive_at=${this.inactive_at}&deactivation_reason_id=${this.deactivation_reason_id}&note=${this.deactivation_note}`;
                 form.submit ('delete', url);
@@ -100,7 +113,14 @@
             axios.get('/business/settings/deactivation-reasons')
                 .then( ({ data }) => {
                     this.deactivationReasons = data;        
-                });
+                })
+                .catch(() => {});
+
+            axios.get(`/business/caregivers/${this.caregiver.id}/open-invoices`)
+                .then( ({ data }) => {
+                    this.open_invoice_count = data.open_invoice_count;
+                })
+                .catch(() => {});
         },
     }
 </script>
