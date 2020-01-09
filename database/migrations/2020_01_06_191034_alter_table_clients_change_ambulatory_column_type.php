@@ -14,7 +14,7 @@ class AlterTableClientsChangeAmbulatoryColumnType extends Migration
     public function up()
     {
         Schema::table('clients', function (Blueprint $table) {
-            $table->string('ambulatory', 255)->nullable()->change();
+            $table->string('ambulatory', 50)->nullable()->change();
         });
     }
 
