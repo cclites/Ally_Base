@@ -1,5 +1,9 @@
 @extends('layouts.print')
 
+@section('title')
+    {{ $client->name }} Client Goals Summary
+@endsection
+
 @section('content')
 
     @include('layouts.partials.print_logo')
