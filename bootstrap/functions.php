@@ -422,6 +422,6 @@ if (! function_exists('standard_filename')) {
             $date = '';
         }
 
-        return strtolower(str_slug("{$subject} {$documentName}{$date}.{$extension}"));
+        return strtolower(str_slug("{$subject} {$documentName}{$date}")) . ".{$extension}";
     }
 }
