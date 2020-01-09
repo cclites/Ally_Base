@@ -102,7 +102,13 @@ class ClientGoalsController extends BaseController
 
         return new ErrorResponse(500, 'The goal could not be deleted.');
     }
-    
+
+    /**
+     * Download PDF for summary of client goals.
+     *
+     * @param $client
+     * @return Response
+     */
     public function generatePdf($client)
     {
         $client = Client::where('id', $client)->with(['goals'])->get()->first();
