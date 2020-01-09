@@ -340,7 +340,7 @@ class Client extends AuditableModel implements
     const AMBULATORY_INDEPENDENT = 'independent';
     const AMBULATORY_VISUAL = 'visual';
     const AMBULATORY_PHYSICAL = 'physical';
-    const AMBULATORY = [
+    const AMBULATORY_OPTIONS = [
         self::AMBULATORY_INDEPENDENT,
         self::AMBULATORY_VISUAL,
         self::AMBULATORY_PHYSICAL
