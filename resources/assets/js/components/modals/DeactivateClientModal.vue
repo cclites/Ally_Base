@@ -18,7 +18,7 @@
 
             <b-row>
                 <b-col class="text-center">
-                    <div v-if="client.open_invoices > 0">This client has <span class="text-danger">{{ this.client.open_invoices }}</span>
+                    <div v-if="open_invoice_count > 0">This client has <span class="text-danger">{{ open_invoice_count }}</span>
                         open invoices.
                     </div>
                     <div v-else class="text-success">
@@ -137,7 +137,8 @@
                     client: [],
                     caregiver: []
                 },
-                deactivateModal: false
+                deactivateModal: false,
+                open_invoice_count: 0,
             }
         },
 
@@ -167,7 +168,14 @@
             axios.get(`/business/settings/deactivation-reasons?business_id=${this.client.business_id}`)
                 .then( ({ data }) => {
                     this.deactivationReasons = data;
-                });
+                })
+                .catch(() => {});
+
+            axios.get(`/business/clients/${this.client.id}/open-invoices`)
+                .then( ({ data }) => {
+                    this.open_invoice_count = data.open_invoice_count;
+                })
+                .catch(() => {});
         },
     }
 </script>

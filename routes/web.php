@@ -193,6 +193,7 @@ Route::group([
     Route::get('caregivers/paginate', 'Business\PaginatedCaregiverController@index')->name('caregivers.paginate');
     Route::get('caregivers/avery-labels', 'Business\AveryLabelController@index');
     Route::resource('caregivers', 'Business\CaregiverController');
+    Route::get('caregivers/{caregiver}/open-invoices', 'Business\CaregiverController@openInvoices')->name('caregivers.open-invoices');
     Route::post('caregivers/{caregiver}/reactivate', 'Business\CaregiverController@reactivate')->name('caregivers.reactivate');
     Route::post('caregivers/{caregiver}/address/{type}', 'Business\CaregiverController@address')->name('caregivers.address');
     Route::post('caregivers/{caregiver}/phone/{type}', 'Business\CaregiverController@phone')->name('caregivers.phone');
@@ -216,6 +217,8 @@ Route::group([
     Route::resource('caregivers/{caregiver}/restrictions', 'Business\BusinessCaregiverRestrictionController');
     Route::patch('caregivers/{caregiver}/office-locations', 'Business\CaregiverController@updateOfficeLocations');
     Route::patch('caregivers/{caregiver}/meta', 'Business\CaregiverMetaController@update')->name('caregivers.meta.update');
+
+    Route::get('clients/{client}/open-invoices', 'Business\ClientController@openInvoices')->name('caregivers.open-invoices');
 
     Route::get('clients/{client}/medications/print', 'Business\ClientMedicationController@generatePdf');
     Route::resource('clients/{client}/medications', 'Business\ClientMedicationController');

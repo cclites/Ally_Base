@@ -10,7 +10,7 @@
                     </div>
                     <div v-else class="text-info">They have no future scheduled shifts.</div>
 
-                    <div v-if="caregiver.open_invoices > 0">This caregiver has <span class="text-danger">{{ this.caregiver.open_invoices }}</span>
+                    <div v-if="open_invoice_count > 0">This caregiver has <span class="text-danger">{{ open_invoice_count }}</span>
                       open invoices.
                     </div>
                     <div v-else class="text-success">
@@ -80,6 +80,7 @@
                     client: [],
                     caregiver: []
                 },
+                open_invoice_count: 0,
             }
         },
 
@@ -112,7 +113,14 @@
             axios.get('/business/settings/deactivation-reasons')
                 .then( ({ data }) => {
                     this.deactivationReasons = data;        
-                });
+                })
+                .catch(() => {});
+
+            axios.get(`/business/caregivers/${this.caregiver.id}/open-invoices`)
+                .then( ({ data }) => {
+                    this.open_invoice_count = data.open_invoice_count;
+                })
+                .catch(() => {});
         },
     }
 </script>

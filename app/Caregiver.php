@@ -7,6 +7,7 @@ use App\Billing\Deposit;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
+use App\Billing\Queries\CaregiverInvoiceQuery;
 use App\Caregiver1099;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
@@ -683,16 +684,6 @@ class Caregiver extends AuditableModel implements
         return true;
     }
 
-    /**
-     * Get count of unpaid invoices.
-     *
-     * @return int
-     */
-    public function hasOpenInvoices()
-    {
-        return $this->hasMany(CaregiverInvoice::class)->whereRaw('amount_paid != amount')->count();
-    }
-
     ////////////////////////////////////
     //// Query Scopes
     ////////////////////////////////////
@@ -853,6 +844,19 @@ class Caregiver extends AuditableModel implements
             })
             ->get();
         return $audits;
+    }
+
+    /**
+     * Get number of unpaid invoices for the Caregiver.
+     *
+     * @return int
+     */
+    public function getUnpaidInvoicesCount() : int
+    {
+        return (new CaregiverInvoiceQuery())
+            ->forCaregiver($this->id)
+            ->notPaidInFull()
+            ->count();
     }
 
     /*

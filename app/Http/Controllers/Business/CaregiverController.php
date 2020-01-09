@@ -176,7 +176,6 @@ class CaregiverController extends BaseController
         $caregiver->hours_last_30 = $caregiver->totalServiceHours(null, Carbon::now()->subDays(30)->format('Y-m-d'), Carbon::now()->format('Y-m-d'));
         $caregiver->hours_last_90 = $caregiver->totalServiceHours(null, Carbon::now()->subDays(90)->format('Y-m-d'), Carbon::now()->format('Y-m-d'));
         $caregiver->setup_url = $caregiver->setup_url;
-        $caregiver->open_invoices = $caregiver->hasOpenInvoices();
 
         $notifications = $caregiver->user->getAvailableNotifications()->map(function ($cls) {
             return [
@@ -274,7 +273,7 @@ class CaregiverController extends BaseController
             return new ErrorResponse(400, 'You cannot archive this caregiver because they have an active shift clocked in.');
         }
 
-        if($caregiver->hasOpenInvoices()){
+        if($caregiver->getUnpaidInvoicesCount() > 0){
             return new ErrorResponse(400, 'Warning: This caregiver has an outstanding invoice or payment and cannot be deactivated. Contact Ally support with any questions.');
         }
 
@@ -542,5 +541,22 @@ class CaregiverController extends BaseController
 
         $filePath = $caregiver->id . '-' . 'deactivation-details-' . Carbon::now()->format('m-d-Y');
         return $pdf->stream( $filePath . '.pdf' );
+    }
+
+    /**
+     * Check if the Caregiver has open (unpaid) invoices.
+     *
+     * @param Caregiver $caregiver
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function openInvoices(Caregiver $caregiver)
+    {
+        $count = $caregiver->getUnpaidInvoicesCount();
+
+        return response()->json([
+            'caregiver_id' => $caregiver->id,
+            'open_invoice_count' => $caregiver->getUnpaidInvoicesCount(),
+            'has_open_invoices' => $count > 0
+        ]);
     }
 }

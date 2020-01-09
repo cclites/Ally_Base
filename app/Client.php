@@ -13,6 +13,7 @@ use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\Methods\CreditCard;
 use App\Billing\Payments\PaymentMethodType;
+use App\Billing\Queries\ClientInvoiceQuery;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Billing\Contracts\ChargeableInterface;
@@ -816,16 +817,6 @@ class Client extends AuditableModel implements
     }
 
     /**
-     * Get count of unpaid invoices.
-     *
-     * @return int
-     */
-    public function hasOpenInvoices()
-    {
-        return $this->hasMany(ClientInvoice::class)->whereRaw('amount_paid != amount')->count();
-    }
-
-    /**
      * A client has many future schedules.
      *
      * @return void
@@ -1053,6 +1044,19 @@ class Client extends AuditableModel implements
     public function getProfileUrl() : string
     {
         return route('business.clients.show', $this->id);
+    }
+
+    /**
+     * Get number of unpaid invoices for the Client.
+     *
+     * @return int
+     */
+    public function getUnpaidInvoicesCount() : int
+    {
+        return (new ClientInvoiceQuery())
+            ->forClient($this->id)
+            ->notPaidInFull()
+            ->count();
     }
 
     // **********************************************************
