@@ -9,6 +9,8 @@ use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
 use App\ClientMedication;
 use App\Client;
+use Illuminate\Http\Response;
+use Barryvdh\Snappy\PdfWrapper;
 
 class ClientMedicationController extends Controller
 {
@@ -71,5 +73,28 @@ class ClientMedicationController extends Controller
         }
 
         return new ErrorResponse(500, 'An error occurred while trying to delete client medication. Please refresh and try again.');
+    }
+
+    /**
+     * Download PDF for summary of client medications.
+     *
+     * @param $client
+     * @return Response
+     */
+    public function generatePdf($client)
+    {
+        $client = Client::where('id', $client)->with(['medications'])->get()->first();
+
+        $html = response(view('print.business.client_medications', ['client'=>$client]))->getContent();
+
+        $snappy = \App::make('snappy.pdf');
+        return new Response(
+            $snappy->getOutputFromHtml($html),
+            200,
+            array(
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . standard_filename($client->name, 'client medications', 'pdf') . '"',
+            )
+        );
     }
 }
