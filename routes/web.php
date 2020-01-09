@@ -81,8 +81,6 @@ Route::group([
     Route::get('unconfirmed-shifts/{shift}', 'Clients\UnconfirmedShiftsController@show')->name('client.unconfirmed-shifts.show');
     Route::post('shift-history/approve', 'Clients\ShiftController@approveWeek');
     Route::get('shift-history/{week?}', 'Clients\ShiftController@index')->name('client.shift-history');
-    Route::get('payment-history/{id}/print', 'Clients\PaymentHistoryController@printDetails');
-    Route::resource('payment-history', 'Clients\PaymentHistoryController');
     Route::post('/profile/payment/{type}', 'ProfileController@paymentMethod');
     Route::delete('/profile/payment/{type}', 'ProfileController@destroyPaymentMethod');
     Route::get('payment-type', 'Clients\UnconfirmedShiftsController@getPaymentType')->name('client.payment_type');
@@ -92,6 +90,7 @@ Route::group([
     Route::delete('contacts/{clientContact}', 'Clients\ClientContactController@destroy');
     Route::patch('contacts/{clientContact}/priority', 'Clients\ClientContactController@raisePriority');
     Route::get('client/payments', 'Clients\PaymentController@index')->name('client.payments');
+    Route::get('client/payment-summary/print', 'Clients\PaymentController@printSummary')->name('client.payment-summary.print');
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('client.payments.show');
     Route::get('client/invoices', 'Clients\InvoiceController@index')->name('client.invoices');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('client.invoices.show');
@@ -292,6 +291,8 @@ Route::group([
     Route::post('clients/{client}/narrative', 'Business\ClientNarrativeController@store')->name('clients.narrative.store');
     Route::delete('clients/{client}/narrative/{narrative}', 'Business\ClientNarrativeController@destroy')->name('clients.narrative.store');
     Route::post('clients/{client}/notification-preferences', 'Business\ClientController@updateNotificationPreferences');
+    Route::get('clients/{client}/payment-history', 'Business\Clients\ClientPaymentsController@index');
+    Route::get('clients/{client}/payment-history/print', 'Business\Clients\ClientPaymentsController@print');
 
     Route::get('/settings/sms-autoresponse/{businessId}', 'Business\BusinessCommunicationSettingsController@show');
     Route::post('/settings/sms-autoresponse/{businessId}', 'Business\BusinessCommunicationSettingsController@store');

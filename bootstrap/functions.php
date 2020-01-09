@@ -387,3 +387,28 @@ if (! function_exists('download_file')) {
         }
     }
 }
+
+if (! function_exists('dump_csv')) {
+    function dump_csv(string $filename, \Illuminate\Support\Collection $data, array $headers = null): bool
+    {
+        if (! count($data)) {
+            return false;
+        }
+
+        $fp = fopen($filename, 'w');
+
+        if ($headers) {
+            fputcsv($fp, $headers);
+        } else {
+            fputcsv($fp, array_keys($data->first()));
+        }
+
+        $data->each(function ($row) use ($fp) {
+            fputcsv($fp, $row);
+        });
+
+        fclose($fp);
+
+        return true;
+    }
+}
