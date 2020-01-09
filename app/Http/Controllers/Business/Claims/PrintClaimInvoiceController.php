@@ -7,6 +7,7 @@ use App\Claims\ClaimInvoiceType;
 use App\Claims\ClaimInvoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use mikehaertl\pdftk\Pdf;
 
 class PrintClaimInvoiceController extends BaseController
 {
@@ -143,6 +144,14 @@ class PrintClaimInvoiceController extends BaseController
     {
         $this->authorize('read', $claim);
 
-        dd( 'testing' );
+        $pdf = new Pdf( '../resources/pdf_forms/cms1500/cmsform.pdf' );
+        $thing = $pdf->fillForm([
+
+            'ref_physician' => 'christ himself',
+        ])
+            ->needAppearances()
+            ->saveAs( 'fuckboi.pdf' );
+
+        dd( $thing, $pdf );
     }
 }
