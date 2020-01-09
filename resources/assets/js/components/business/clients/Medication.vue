@@ -179,6 +179,7 @@
                         key: 'was_changed',
                         sortable: true,
                         shouldShow: true,
+                        formatter: x => x == 1 ? 'Changed' : 'New',
                     },
                     {
                         key: 'tracking',

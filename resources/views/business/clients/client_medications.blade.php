@@ -34,7 +34,7 @@
                 <td>{{ $medication->frequency }}</td>
                 <td>{{ $medication->description }}</td>
                 <td>{{ $medication->route }}</td>
-                <td>{{ $medication->wasChanged ? "Yes" : "No" }}</td>
+                <td>{{ $medication->wasChanged ? "Changed" : "New" }}</td>
                 <td>{{ $medication->tracking }}</td>
                 <td>{{ $medication->side_effects }}</td>
                 <td>{{ $medication->notes }}</td>
