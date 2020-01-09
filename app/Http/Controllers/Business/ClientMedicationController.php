@@ -79,7 +79,7 @@ class ClientMedicationController extends Controller
     {
         $client = Client::where('id', $client)->with(['medications'])->get()->first();
 
-        $html = response(view('business.clients.client_medications', ['client'=>$client]))->getContent();
+        $html = response(view('print.business.client_medications', ['client'=>$client]))->getContent();
 
         $snappy = \App::make('snappy.pdf');
         return new Response(

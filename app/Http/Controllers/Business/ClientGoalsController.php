@@ -107,7 +107,7 @@ class ClientGoalsController extends BaseController
     {
         $client = Client::where('id', $client)->with(['goals'])->get()->first();
 
-        $html = response(view('business.clients.client_goals', ['client'=>$client]))->getContent();
+        $html = response(view('print.business.client_goals', ['client'=>$client]))->getContent();
 
         $snappy = \App::make('snappy.pdf');
         return new Response(
