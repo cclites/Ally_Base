@@ -5,6 +5,7 @@ use App\Traits\BelongsToOneBusiness;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Events\SmsThreadReplyCreated;
 use App\Traits\ScrubsForSeeding;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -88,6 +89,30 @@ class SmsThreadReply extends BaseModel implements BelongsToBusinessesInterface
     public function thread()
     {
         return $this->belongsTo(SmsThread::class);
+    }
+
+    // **********************************************************
+    // QUERY SCOPES
+    // **********************************************************
+
+    /**
+     * Gets shifts that are checked in between given given start and end dates.
+     * Automatically applies timezone transformation.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param string $start
+     * @param string $end
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeBetweenDates($query, $start, $end)
+    {
+        if (empty($start) || empty($end)) {
+            return $query;
+        }
+
+        $startDate = (new Carbon($start . ' 00:00:00', 'America/New_York'))->setTimezone('UTC');
+        $endDate = (new Carbon($end . ' 23:59:59', 'America/New_York'))->setTimezone('UTC');
+        return $query->whereBetween('created_at', [$startDate, $endDate]);
     }
 
     // **********************************************************

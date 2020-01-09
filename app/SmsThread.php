@@ -172,14 +172,13 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
      * Get the threads that have replies.
      *
      * @param \Illuminate\Database\Query\Builder $query
+     * @param bool $onOff
      * @return \Illuminate\Database\Query\Builder
      */
     public function scopeWithReplies($query, bool $onOff = false)
     {
         if ($onOff) {
-            return $query->whereHas('replies', function ($q) {
-                $q->whereNotNull('id');
-            });
+            return $query->whereHas('replies');
         }
 
         return $query;

@@ -369,6 +369,7 @@ Vue.component('microbilt-test', require('./components/admin/MicrobiltTest'));
 Vue.component('question-list', require('./components/business/QuestionList'));
 Vue.component('question-form', require('./components/business/QuestionForm'));
 Vue.component('business-text-caregivers', require('./components/business/TextCaregivers'));
+Vue.component('business-sms-other-replies-page', require('./components/business/SmsOtherRepliesPage'));
 Vue.component('business-sms-thread-list', require('./components/business/SmsThreadList'));
 Vue.component('business-sms-thread', require('./components/business/SmsThread'));
 Vue.component('business-sms-reply-table', require('./components/business/SmsReplyTable'));

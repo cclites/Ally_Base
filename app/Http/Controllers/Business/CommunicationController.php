@@ -164,14 +164,14 @@ class CommunicationController extends Controller
      */
     public function threadIndex(Request $request)
     {
-        $threads = SmsThread::forRequestedBusinesses([$request->business_id])
-            ->betweenDates($request->start_date, $request->end_date)
-            ->withReplies($request->reply_only == 1 ? true : false)
-            ->withCount(['recipients', 'replies'])
-            ->latest()
-            ->get();
+        if ($request->filled('json') && $request->wantsJson()) {
+            $threads = SmsThread::forRequestedBusinesses()
+                ->betweenDates($request->start_date, $request->end_date)
+                ->withReplies($request->reply_only == 1 ? true : false)
+                ->withCount(['recipients', 'replies'])
+                ->latest()
+                ->get();
 
-        if (request()->filled('json') && request()->wantsJson()) {
             return response()->json($threads);
         }
 
@@ -200,20 +200,26 @@ class CommunicationController extends Controller
     /**
      * Get list of SMS replies that do not belong to a thread.
      *
+     * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function otherReplies()
+    public function otherReplies(Request $request)
     {
-        $replies = SmsThreadReply::forRequestedBusinesses()
-            ->whereNull('sms_thread_id')
-            ->latest()
-            ->get();
+        if ($request->wantsJson() && filled($request->input('json'))) {
+            $replies = SmsThreadReply::forRequestedBusinesses()
+                ->betweenDates($request->start_date, $request->end_date)
+                ->whereNull('sms_thread_id')
+                ->latest()
+                ->get();
 
-        if (request()->wantsJson()) {
             return response()->json($replies);
         }
 
-        return view('business.communication.sms-replies', compact(['replies']));
+        return view_component('business-sms-other-replies-page', 'Other Text Message Replies', [], [
+            'Home' => route('home'),
+            'Communication' => '',
+            'Sent Texts' => route('business.communication.sms-threads')
+        ]);
     }
 
     /**
