@@ -43,7 +43,7 @@ class ClientTest extends TestCase
     {
         $this->assertEquals(1, $this->client->active);
 
-        $this->deleteJson(route('business.clients.destroy', ['client' => $this->client]))
+        $this->postJson(route('business.clients.deactivate', ['client' => $this->client]), ['active' => false])
             ->assertStatus(200);
 
         $this->assertEquals(0, $this->client->fresh()->active, "Client was not deactivated");
@@ -58,7 +58,7 @@ class ClientTest extends TestCase
         factory(ClientInvoice::class)->create(['client_id' => $this->client->id, 'amount' => 100, 'amount_paid' => 0]);
         $this->assertEquals(1, $this->client->getUnpaidInvoicesCount());
 
-        $this->deleteJson(route('business.clients.destroy', ['client' => $this->client]))
+        $this->postJson(route('business.clients.deactivate', ['client' => $this->client]), ['active' => false])
             ->assertStatus(400);
 
         $this->assertEquals(1, $this->client->fresh()->active);
