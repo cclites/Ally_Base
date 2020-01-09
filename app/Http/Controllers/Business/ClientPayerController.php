@@ -65,7 +65,7 @@ class ClientPayerController extends Controller
             // captured there.  No need to log to sentry again, besides this is an
             // empty exception as thrown above.
             \DB::rollBack();
-            return new ErrorResponse(500, 'An unexpected error occurred.  Please try again.');
+            return new ErrorResponse(500, 'An unexpected error occurred.  If you are removing a payer, make sure they do not have any invoices in the system.  You cannot delete a payer that has been used, instead, change the effective end date.');
         }
     }
 }
