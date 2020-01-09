@@ -60,7 +60,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Carbon\Carbon|null $service_start_date
  * @property string|null $referral
  * @property string|null $diagnosis
- * @property int|null $ambulatory
+ * @property string|null $ambulatory
  * @property string|null $import_identifier
  * @property string|null $ltci_name
  * @property string|null $ltci_address
@@ -336,6 +336,15 @@ class Client extends AuditableModel implements
     const SETUP_ACCEPTED_TERMS = 'accepted_terms'; // step 2
     const SETUP_CREATED_ACCOUNT = 'created_account'; // step 3
     const SETUP_ADDED_PAYMENT = 'added_payment'; // step 4 (complete)
+
+    const AMBULATORY_INDEPENDENT = 'independent';
+    const AMBULATORY_VISUAL = 'visual';
+    const AMBULATORY_PHYSICAL = 'physical';
+    const AMBULATORY_OPTIONS = [
+        self::AMBULATORY_INDEPENDENT,
+        self::AMBULATORY_VISUAL,
+        self::AMBULATORY_PHYSICAL
+    ];
 
     /**
      * The notification classes related to this user role.

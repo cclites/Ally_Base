@@ -184,6 +184,16 @@ export default {
                 { value: 'transferred', text: 'Transferred' },
                 { value: 'errored', text: 'Errored' },
             ],
+            CLIENT_AMBULATORY: {
+                INDEPENDENT: 'independent',
+                VISUAL: 'visual',
+                PHYSICAL: 'physical',
+            },
+            clientAmbulatoryOptions: [
+                { value: 'independent', text: 'Independent / No restrictions' },
+                { value: 'visual', text: 'Visual supervision' },
+                { value: 'physical', text: 'Physical assistance' },
+            ],
         }
     },
 }

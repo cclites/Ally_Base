@@ -196,13 +196,9 @@
                         </div>
                     </b-form-group>
 
-                    <b-form-group>
-                        <b-form-checkbox id="ambulatory"
-                                         v-model="form.ambulatory"
-                                         :value="true"
-                                         :unchecked-value="false">
-                            Ambulatory
-                        </b-form-checkbox>
+                    <b-form-group label="Ambulatory">
+                        <b-form-select id="ambulatory" v-model="form.ambulatory" :options="clientAmbulatoryOptions">
+                        </b-form-select>
                     </b-form-group>
 
                     <b-form-group v-if="businessSendsSummaryEmails">
@@ -499,7 +495,7 @@
                     service_start_date: this.client.service_start_date ? this.formatDate(this.client.service_start_date) : '',
                     referral_source_id: this.client.referral_source_id ? this.client.referral_source_id : "",
                     diagnosis: this.client.diagnosis,
-                    ambulatory: !!this.client.ambulatory,
+                    ambulatory: this.client.ambulatory,
                     gender: this.client.gender,
                     hospital_name: this.client.hospital_name,
                     hospital_number: this.client.hospital_number,
