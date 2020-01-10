@@ -129,7 +129,7 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
      */
     public function visitEditReason()
     {
-        return $this->hasOne(VisitEditReason::class, 'code', 'visit_edit_reason');
+        return $this->hasOne(VisitEditReason::class, 'id', 'visit_edit_reason');
     }
 
     /**
@@ -139,7 +139,7 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
      */
     public function visitEditAction()
     {
-        return $this->hasOne(VisitEditAction::class, 'code', 'visit_edit_action');
+        return $this->hasOne(VisitEditAction::class, 'id', 'visit_edit_action');
     }
 
     /**

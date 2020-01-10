@@ -13,7 +13,7 @@
                     >
 
                     <option value="">--None--</option>
-                    <option v-for=" ( item, index ) in visit_edit_reasons " :value=" item.code " :key=" index ">{{ item.code + ': ' + item.description }}</option>
+                    <option v-for=" ( item, index ) in visit_edit_reasons " :value=" item.id " :key=" index ">{{ item.code + ': ' + item.description }}</option>
                 </b-form-select>
             </b-form-group>
         </b-col>
@@ -28,7 +28,7 @@
                 >
 
                     <option value="">--None--</option>
-                    <option v-for=" ( item, index ) in visit_edit_actions " :value=" item.code " :key=" index ">{{ item.code + ': ' + item.description }}</option>
+                    <option v-for=" ( item, index ) in visit_edit_actions " :value=" item.id " :key=" index ">{{ item.code + ': ' + item.description }}</option>
                 </b-form-select>
             </b-form-group>
         </b-col>
