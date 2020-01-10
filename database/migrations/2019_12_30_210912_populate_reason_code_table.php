@@ -1,7 +1,5 @@
 <?php
 
-use App\Billing\VisitEditActionEnum;
-use App\Billing\VisitEditReasonEnum;
 use App\VisitEditAction;
 use App\VisitEditReason;
 use Illuminate\Support\Facades\Schema;
