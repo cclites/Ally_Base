@@ -15,11 +15,11 @@ class AlterTableShiftsAddReferenceToEditCodes extends Migration
     {
         Schema::table( 'shifts', function ( Blueprint $table ) {
 
-            $table->unsignedBigInteger( 'visit_edit_action' )->nullable();
-            $table->unsignedBigInteger( 'visit_edit_reason' )->nullable();
+            $table->unsignedInteger( 'visit_edit_action' )->nullable();
+            $table->unsignedInteger( 'visit_edit_reason' )->nullable();
 
-            $table->foreign( 'visit_edit_action' )->references( 'code' )->on( 'visit_edit_actions' )->onDelete( 'RESTRICT' );
-            $table->foreign( 'visit_edit_reason' )->references( 'code' )->on( 'visit_edit_reasons' )->onDelete( 'RESTRICT' );
+            $table->foreign( 'visit_edit_action' )->references( 'id' )->on( 'visit_edit_actions' )->onDelete( 'RESTRICT' );
+            $table->foreign( 'visit_edit_reason' )->references( 'id' )->on( 'visit_edit_reasons' )->onDelete( 'RESTRICT' );
         });
     }
 

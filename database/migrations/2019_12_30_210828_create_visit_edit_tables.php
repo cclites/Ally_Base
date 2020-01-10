@@ -15,19 +15,17 @@ class CreateVisitEditTables extends Migration
     {
         Schema::create( 'visit_edit_reasons', function ( Blueprint $table ) {
 
-            $table->unsignedBigInteger( 'code' );
+            $table->increments( 'id' );
+            $table->integer( 'code' );
             $table->string( 'description', 255 );
             $table->timestamps();
-
-            $table->primary( 'code' );
         });
         Schema::create( 'visit_edit_actions', function ( Blueprint $table ) {
 
-            $table->unsignedBigInteger( 'code' );
+            $table->increments( 'id' );
+            $table->integer( 'code' );
             $table->string( 'description', 255 );
             $table->timestamps();
-
-            $table->primary( 'code' );
         });
     }
 
