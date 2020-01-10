@@ -884,7 +884,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
      */
     public function scopeWhereOpen($query)
     {
-        $query->whereDoesntHave( 'caregiver' );
+        $query->whereDoesntHave( 'caregiver' )->whereHas( 'client' );
     }
 
     /**
