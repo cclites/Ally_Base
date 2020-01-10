@@ -27,7 +27,7 @@ class Caregiver1099Controller extends Controller
                 $client = Client::find($caregiver_1099->client_id);
                 $name = $client->first_name . " " . $client->last_name;
             }else{
-                $name = $caregiver_1099->client_first_name;
+                $name = $caregiver_1099->client_first_name . ' ' . $caregiver_1099->client_last_name;
             }
 
             return [
