@@ -26,3 +26,4 @@ yarn-error.log
 db-dump.sh
 logs.sh
 tellus.sh
+/testing.txt
