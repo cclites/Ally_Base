@@ -145,13 +145,16 @@ class PrintClaimInvoiceController extends BaseController
         $this->authorize('read', $claim);
 
         $pdf = new Pdf( '../resources/pdf_forms/cms1500/cmsform.pdf' );
-        $thing = $pdf->fillForm([
 
-            'ref_physician' => 'christ himself',
-        ])
-            ->needAppearances()
-            ->saveAs( 'fuckboi.pdf' );
+        $thing = $pdf->getData();
 
-        dd( $thing, $pdf );
+        // $thing = $pdf->fillForm([
+
+        //     'ref_physician' => 'christ himself',
+        // ])
+        //     ->needAppearances()
+        //     ->saveAs( 'fuckboi.pdf' );
+
+        dd( $thing );
     }
 }
