@@ -44,7 +44,7 @@ class CaregiverScheduleRequestController extends BaseController
 
         $schedule = Schedule::with([ 'services', 'client', 'scheduleRequests' => function( $q ){
 
-            return $q->whereIn( 'status', [ OpenShiftRequestStatus::REQUEST_PENDING(), OpenShiftRequestStatus::REQUEST_UNINTERESTED() ]);
+            return $q->whereActive();
         }])->findOrFail( $request->schedule );
         $this->authorize( 'read', $schedule );
 

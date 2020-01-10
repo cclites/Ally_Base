@@ -94,7 +94,7 @@ class CaregiverScheduleRequest extends Pivot
      */
     public function scopeWhereActive( $query )
     {
-        $query->whereIn( 'status', [ OpenShiftRequestStatus::REQUEST_UNINTERESTED(), OpenShiftRequestStatus::REQUEST_PENDING() ] );
+        $query->whereIn( 'status', [ OpenShiftRequestStatus::REQUEST_PENDING() ] );
     }
 
     /**
