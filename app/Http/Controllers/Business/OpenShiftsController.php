@@ -19,7 +19,7 @@ class OpenShiftsController extends BaseController
             $results = Schedule::forRequestedBusinesses()
                 ->with([ 'client', 'scheduleRequests' => function( $q ){
 
-                    return $q->whereIn( 'status', [ OpenShiftRequestStatus::REQUEST_PENDING(), OpenShiftRequestStatus::REQUEST_UNINTERESTED() ] );
+                    return $q->whereActive()->whereUninterested();
                 }])
                 ->ordered()
                 ->inTheNextMonth( $chain->businesses->first()->timezone )
@@ -37,7 +37,7 @@ class OpenShiftsController extends BaseController
                     'client_id'         => $schedule->client->id,
                     'start_time'        => $schedule->starts_at->copy()->format('g:i A'),
                     'end_time'          => $schedule->starts_at->copy()->addMinutes( $schedule->duration )->addSecond()->format( 'g:i A' ),
-                    'requests_count'    => $schedule->scheduleRequests->filter( function( $r ){ return in_array( $r->status, [ OpenShiftRequestStatus::REQUEST_PENDING(), OpenShiftRequestStatus::REQUEST_UNINTERESTED() ]); })->count()
+                    'requests_count'    => $schedule->scheduleRequests->filter( function( $r ){ return in_array( $r->status, [ OpenShiftRequestStatus::REQUEST_PENDING() ]); })->count()
                 ];
             });
 
