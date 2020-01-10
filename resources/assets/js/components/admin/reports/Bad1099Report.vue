@@ -20,6 +20,8 @@
 
             <b-form-group label="&nbsp;" class="mr-2">
                 <b-btn variant="info" @click="generate()" :disabled="disableGenerate">Generate</b-btn>
+                <b-button variant="info" @click="copy()"><i class="fa fa-copy mr-1"></i>Copy Emails to Clipboard</b-button>
+                <input id="emailString" v-model="emails">
             </b-form-group>
         </b-row>
 
@@ -85,11 +87,36 @@
                     .then( ({ data }) => {
                         this.items = data;
                         this.totalRows = this.items.length;
+                        this.storeEmailAddresses();
                     })
                     .catch(e => {})
                     .finally(() => {
                         this.busy = false;
                     })
+            },
+
+            copy(){
+                var copyText = document.querySelector("#emailString");
+                copyText.select();
+                document.execCommand("copy");
+                alerts.addMessage('success', "Emails copied to clipboard");
+            },
+
+            storeEmailAddresses(){
+
+                let emailString = "";
+
+                this.items.forEach(function(item){
+                    if(item.errors && item.errors.includes('Client') && !emailString.includes(item.client_email)){
+                        emailString += (',' + item.client_email);
+                    }
+
+                    if(item.errors && item.errors.includes('Caregiver')  && !emailString.includes(item.caregiver_email)){
+                        emailString += (',' + item.caregiver_email);
+                    }
+                });
+
+                this.emails = emailString.substr(1);
             },
         },
         data(){
@@ -103,6 +130,7 @@
               busy: false,
               emptyText: "No records to display",
               selected: '',
+              emails: '',
               form: new Form({
                   'year': '2019',
                   'business_id': '',
@@ -131,5 +159,11 @@
     #year{
         position: relative;
         bottom: 5px;
+    }
+
+    #emailString{
+        position: absolute;
+        z-index: -100;
+        left: 99999px;
     }
 </style>

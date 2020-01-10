@@ -14,7 +14,7 @@ class Caregiver1099PreviewReport extends BaseReport
     public function __construct()
     {
         $this->query = CaregiverYearlyEarnings::with(['client', 'caregiver', 'business'])
-            ->select(['caregiver_yearly_earnings.*', 'c1099.id as caregiver_1099_id'])
+            ->select(['caregiver_yearly_earnings.*', 'c1099.id as caregiver_1099_id', 'c1099.payment_total as payment_total'])
             ->leftJoin('caregiver_1099s as c1099', function ($join) {
                 $join->on('caregiver_yearly_earnings.client_id', '=', 'c1099.client_id')
                     ->on('caregiver_yearly_earnings.caregiver_id', '=', 'c1099.caregiver_id')
@@ -55,16 +55,6 @@ class Caregiver1099PreviewReport extends BaseReport
                 $q->whereNotNull('c1099.id');
             });
 
-        // TODO: how does transmitted work??
-//        if (array_key_exists('transmitted', $this->filters) && filled($this->filters['transmitted']['value'])) {
-//            if ($this->filters['transmitted']['value'] && $this->filters['transmitted']['value'] === 1) {
-//                $query->whereNotNull('ct.transmitted_at');
-//            } elseif ($this->filters['transmitted']['value'] && $this->filters['transmitted']['value'] === 0) {
-//                // TODO: check if this if statement is correct
-//                $query->whereNull('ct.transmitted_at');
-//            }
-//        }
-
     }
 
     /**
@@ -85,11 +75,13 @@ class Caregiver1099PreviewReport extends BaseReport
                     'caregiver_last_name' => $earnings->caregiver->last_name,
                     'business_id' => $earnings->business->id,
                     'business_name' => $earnings->business->name,
-                    'payment_total' => $earnings->earnings,
+                    'payment_total' => $earnings->payment_total ? $earnings->payment_total : $earnings->earnings,
                     'caregiver_1099' => $earnings->client->caregiver_1099,
                     'caregiver_1099_id' => $earnings->caregiver_1099_id,
                     'year' => $earnings->year,
                     'errors' => $earnings->getMissing1099Errors(),
+                    'caregiver_email' => $earnings->caregiver->email,
+                    'client_email' => $earnings->client->email
                 ];
             });
     }

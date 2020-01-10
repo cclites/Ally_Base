@@ -177,8 +177,8 @@
     }
 
     #emailString{
-        width:0px;
-        height:0px;
-        opacity:0;
+        position: absolute;
+        z-index: -100;
+        left: 99999px;
     }
 </style>

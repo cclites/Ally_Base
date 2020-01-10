@@ -26,13 +26,23 @@ class AdminBad1099ReportController extends Controller
             $report->applyFilters($request->year, null, null, $request->business_id);
 
             $results = $report->rows()->map(function ($item) {
+
+                if($item['caregiver_1099'] === 'ally'){
+                    $caregiver = 'Ally';
+                }else{
+                    $caregiver = $item['caregiver_last_name'] . ", " . $item['caregiver_first_name'];
+                }
+
+
                 return [
-                    'caregiver' => $item['caregiver_last_name'] . ", " . $item['caregiver_first_name'],
+                    'caregiver' => $caregiver,
                     'client' => $item['client_last_name'] . ", " . $item['client_first_name'],
                     'caregiver_id' => $item['caregiver_id'],
                     'client_id' => $item['client_id'],
                     'location' => $item['business_name'],
                     'errors' => $item['errors'] ? implode(", ", $item['errors']) : false,
+                    'caregiver_email' => $item['caregiver_email'],
+                    'client_email' => $item['client_email'],
                 ];
             })
             ->filter(function ($item) {
