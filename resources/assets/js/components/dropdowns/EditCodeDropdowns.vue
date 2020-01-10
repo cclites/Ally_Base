@@ -17,7 +17,7 @@
                 </b-form-select>
             </b-form-group>
         </b-col>
-        <b-col sm="6">
+        <b-col sm="6" v-if=" chosenReason != '' ">
 
             <b-form-group label="Visit Edit Action" label-for="visit-edit-action">
 
@@ -65,22 +65,22 @@
 
                 get: function(){
 
-                    return this.visit_edit_reason;
+                    return this.visit_edit_reason || '';
                 },
                 set: function( newValue ){
 
-                    if( newValue && newValue !== this.visit_edit_reason ) this.updateReason( newValue );
+                    if( newValue !== this.visit_edit_reason ) this.updateReason( newValue );
                 }
             },
             chosenAction: {
 
                 get(){
 
-                    return this.visit_edit_action;
+                    return this.visit_edit_action || '';
                 },
                 set( newValue ){
 
-                    if( newValue && newValue !== this.visit_edit_action ) this.updateAction( newValue );
+                    if( newValue !== this.visit_edit_action ) this.updateAction( newValue );
                 }
             }
         },
