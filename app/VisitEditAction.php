@@ -10,7 +10,6 @@ class VisitEditAction extends Model
 
     const NONEVVDEFAULT = 14;
 
-
     /**
      * the default action for non-verified shifts
      *
@@ -18,7 +17,7 @@ class VisitEditAction extends Model
      */
     public static function nonEvvDefault()
     {
-        return self::NONEVVDEFAULT;
+        return self::where( 'code', self::NONEVVDEFAULT )->first()->id;
     }
 
     public function getFormattedNameAttribute()

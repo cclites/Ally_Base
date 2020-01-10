@@ -8,7 +8,7 @@ class VisitEditReason extends Model
 {
     protected $guarded = ['id'];
 
-    const NONEVVVDEFAULT = 910;
+    const NONEVVDEFAULT = 910;
 
     /**
      * the default action for non-verified shifts
@@ -17,9 +17,8 @@ class VisitEditReason extends Model
      */
     public static function nonEvvDefault()
     {
-        return self::NONEVVVDEFAULT;
+        return self::where( 'code', self::NONEVVDEFAULT )->first()->id;
     }
-
 
     public function getFormattedNameAttribute()
     {
