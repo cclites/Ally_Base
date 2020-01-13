@@ -75,8 +75,8 @@
                                               field="business_id">
                 </business-location-form-group>
                 <b-form-group label="Message" label-class="required">
-                    <b-textarea :rows="6" v-model="form.message" required :disabled="submitting"></b-textarea>
-                    <input-help :form="form" field="message" text=""></input-help>
+                    <b-textarea :rows="6" v-model="form.message" required :disabled="submitting" :state=" form.message.length <= 140 "></b-textarea>
+                    <input-help :form="form" field="Message" :text=" `Maximum 140 characters. Currently ${form.message.length}` "></input-help>
                 </b-form-group>
                 <b-form-group>
                     <b-button variant="info" type="submit" :disabled="submitting">
@@ -158,11 +158,22 @@ export default {
 
         async submit()
         {
+            this.form.clearError();
+            let hasErrors = false;
+
             if (this.selectedUsers.length == 0 && ! this.form.all) {
                 this.form.addError('recipients', 'You must add at least one recipient.');
-                return;
+                hasErrors = true;
             }
-            
+
+            if (this.form.message.length > 140 ) {
+
+                this.form.addError( 'Message', 'A maximum character count of 140 is applied to text messages' );
+                hasErrors = true;
+            }
+
+            if( hasErrors ) return;
+
             let confirmMessage = 'Are you sure you wish to send this text message to the ' + this.selectedUsers.length + ' selected recipients?';
             if (this.form.all) {
                 confirmMessage = 'Are you sure you wish to send this text message to all active Caregivers?';
