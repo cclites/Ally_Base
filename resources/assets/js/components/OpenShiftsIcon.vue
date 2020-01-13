@@ -4,7 +4,8 @@
 
         <a class="nav-link text-muted text-muted position-relative h-100" style="width: 40px" id="openShiftsDropdown" href="/business/schedule/open-shifts" aria-haspopup="true" aria-expanded="false">
 
-            <i class="notification-icon open-shifts-icon"></i>
+            <!-- <i class="notification-icon open-shifts-icon"></i> -->
+            <i class="fa fa-hand-paper-o open-shift-icon-custom-styles"></i>
 
             <span class="badge badge-danger badge-notifications" v-if=" total > 0">{{ total }}</span>
 
@@ -80,6 +81,13 @@
 </script>
 
 <style>
+
+    .open-shift-icon-custom-styles {
+
+        font-size: 30px;
+        position: relative;
+        top: 2px;
+    }
     .badge-notifications {
         position: absolute;
         top: 18px;

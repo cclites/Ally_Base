@@ -39,7 +39,7 @@
 
                         <div v-if=" hasRequest( data.item.request_status ) " class="" key="second-block">
 
-                            <b-button variant="default" size="sm" class="btn-block" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.CANCELLED ) " key="rescind">Cancel Request</b-button>
+                            <b-button variant="danger" size="sm" class="btn-block" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.CANCELLED ) " key="rescind">Cancel Request</b-button>
                         </div>
                     </transition>
                 </template>
