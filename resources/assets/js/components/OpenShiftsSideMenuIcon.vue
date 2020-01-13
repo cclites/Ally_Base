@@ -1,7 +1,7 @@
 <template>
 
     <li>
-        <a href="schedule/open-shifts" aria-expanded="false" style="position:relative">
+        <a :href=" route " aria-expanded="false" style="position:relative">
 
             <i class="fa fa-hand-paper-o"></i><span class="hide-menu">Open Shifts</span>
             <span class="badge badge-danger badge-notifications" v-if=" total > 0">{{ total }}</span>
@@ -20,7 +20,8 @@
 
                 type : String,
                 default : null
-            }
+            },
+            route : String
         },
         data() {
 

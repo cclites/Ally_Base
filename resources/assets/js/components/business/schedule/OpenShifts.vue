@@ -200,6 +200,7 @@
                 this.form.post( `/schedule/requests/${schedule.id}` )
                     .then( res => {
 
+                        // console.log( 'Returned response object: ', res );
                         this.updateRequestStatus({ schedule_id: schedule.id, status: res.data.data.status });
                         schedule.request_status = res.data.data.status;
                         if( schedule.request_status == this.OPEN_SHIFTS_STATUS.UNINTERESTED ) this.removeScheduleEvent( schedule.id );

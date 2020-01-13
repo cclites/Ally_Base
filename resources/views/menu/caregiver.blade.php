@@ -13,7 +13,7 @@
 </li>
 @can( 'view-open-shifts', [ activeBusiness() ])
 
-    <open-shifts-side-menu-icon business="{{ activeBusiness() ?? null }}"></open-shifts-side-menu-icon>
+    <open-shifts-side-menu-icon business="{{ activeBusiness() ?? null }}" route="{{ route( 'schedule.open-shifts' ) }}"></open-shifts-side-menu-icon>
 @endcan
 <li>
 </li>
