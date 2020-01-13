@@ -3271,6 +3271,7 @@ $url_0: url(../../assets/images/tooltip/tooltip1.svg);
 $url_1: url(../../assets/images/tooltip/shape1.svg);
 
 $solid_open_shift_icon: url(../../assets/images/solidHand.svg);
+$solid_open_shift_icon_white: url(../../assets/images/solidHandWhite.svg);
 $open_shift_icon: url(../../assets/images/question.svg);
 
 //@extend-elements
@@ -4137,6 +4138,15 @@ Contact app Page
     background-size: 100% 100%;
     width: 20px;
     height: 20px;
+}
+
+.solid-open-shifts-icon-top-menu {
+
+    position: absolute;
+    background: $solid_open_shift_icon_white no-repeat center;
+    top: 2px;
+    width: 100%;
+    height: 100%;
 }
 
 

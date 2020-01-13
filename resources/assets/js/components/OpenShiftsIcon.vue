@@ -4,8 +4,7 @@
 
         <a class="nav-link text-muted text-muted position-relative h-100" style="width: 40px" id="openShiftsDropdown" href="/business/schedule/open-shifts" aria-haspopup="true" aria-expanded="false">
 
-            <!-- <i class="notification-icon open-shifts-icon"></i> -->
-            <i class="fa fa-hand-paper-o open-shift-icon-custom-styles"></i>
+            <i class="solid-open-shifts-icon-top-menu"></i>
 
             <span class="badge badge-danger badge-notifications" v-if=" total > 0">{{ total }}</span>
 
@@ -82,20 +81,9 @@
 
 <style>
 
-    .open-shift-icon-custom-styles {
-
-        font-size: 30px;
-        position: relative;
-        top: 2px;
-    }
     .badge-notifications {
         position: absolute;
         top: 18px;
         left: 34px;
-    }
-    .mdi-message {
-        font-size: 24px;
-        margin-right: -7px;
-        padding-left: 7px;
     }
 </style>
