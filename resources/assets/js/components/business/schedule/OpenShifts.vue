@@ -135,7 +135,6 @@
             }),
             aggEvents(){
 
-                console.log( 'checking agg: ', this.openShifts.length == 0, this.openShifts );
                 if( this.openShifts.length == 0 ) return this.events;
                 else return this.openShifts.filter( s => ![ this.OPEN_SHIFTS_STATUS.UNINTERESTED, this.OPEN_SHIFTS_STATUS.DENIED ].includes( s.request_status ) );
             },

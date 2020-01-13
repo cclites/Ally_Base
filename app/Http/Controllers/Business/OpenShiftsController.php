@@ -19,7 +19,7 @@ class OpenShiftsController extends BaseController
             $results = Schedule::forRequestedBusinesses()
                 ->with([ 'client', 'scheduleRequests' => function( $q ){
 
-                    return $q->whereActive()->whereUninterested();
+                    return $q->whereActiveOrUninterested();
                 }])
                 ->ordered()
                 ->inTheNextMonth( $chain->businesses->first()->timezone )

@@ -44,7 +44,7 @@ class CaregiverScheduleRequestController extends BaseController
 
         $schedule = Schedule::with([ 'services', 'client', 'scheduleRequests' => function( $q ){
 
-            return $q->whereActive()->whereUninterested();
+            return $q->whereActiveOrUninterested();
         }])->findOrFail( $request->schedule );
         $this->authorize( 'read', $schedule );
 
