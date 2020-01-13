@@ -19,6 +19,10 @@
             <template slot="from_number" scope="row">
                 {{ formatPhone(row.item.from_number) }}
             </template>
+            <template slot="actions" scope="row">
+
+                <b-button variant="info" @click=" replyText( row.item ) ">Reply</b-button>
+            </template>
         </b-table>
         <b-row>
             <b-col lg="6" >
@@ -28,6 +32,8 @@
                 Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
             </b-col>
         </b-row>
+
+        <business-sms-reply-modal v-model=" replyModalOpen " :data=" activeReply "></business-sms-reply-modal>
     </div>
 </template>
 
@@ -47,6 +53,9 @@ export default {
     },
 
     data: () => ({
+
+        activeReply : {},
+        replyModalOpen : false,
         busy: false,
         perPage: 50,
         currentPage: 1,
@@ -74,6 +83,12 @@ export default {
                 label: 'Received',
                 key: 'created_at',
                 sortable: true,
+                tdClass: 'text-nowrap',
+            },
+            {
+                label: 'Actions',
+                key: 'actions',
+                sortable: false,
                 tdClass: 'text-nowrap',
             },
         ],
@@ -104,6 +119,11 @@ export default {
             }
             return `/business/caregivers/${user.id}`;
         },
+        replyText( reply ){
+
+            this.replyModalOpen = true;
+            this.activeReply = reply;
+        }
     },
 
     mounted() {
