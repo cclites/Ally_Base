@@ -43,12 +43,12 @@ class CaregiverScheduleRequestController extends BaseController
             $new_request->business_id  = $schedule->business_id;
             $new_request->client_id    = $schedule->client_id;
             $new_request->save();
-            return new SuccessResponse( "Schedule requested.", [ 'status' => $request->status ]);
+            return new SuccessResponse( "Schedule requested.", [ 'status' => $request->status, 'new_request' => $new_request ]);
         } else {
 
             $outstanding_request->update([ 'status' => $request->status ]);
             $outstanding_request->touch();
-            return new SuccessResponse( "Schedule request updated", [ 'status' => $request->status ]);
+            return new SuccessResponse( "Schedule request updated", [ 'status' => $request->status, 'new_request' => null ]);
         }
     }
 }

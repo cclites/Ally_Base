@@ -264,7 +264,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
      */
     public function latestRequestFor( $caregiver_id )
     {
-        return optional( $this->scheduleRequests()->where( 'caregiver_id', $caregiver_id )->first() )->pivot;
+        return $this->scheduleRequests()->where( 'caregiver_id', $caregiver_id )->first();
     }
 
     /**

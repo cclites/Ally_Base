@@ -42,9 +42,13 @@ const mutations = {
 
         state.requests = requests;
     },
-    updateOpenShifts( state, shifts ) {
+    updateOpenShifts( state, data ) {
 
-        state.openShifts = shifts;
+        state.openShifts[ data.index ].request_status = data.status;
+    },
+    appendShiftRequest( state, req ) {
+
+        state.requests.push( req );
     },
 };
 
@@ -59,13 +63,15 @@ const actions = {
     },
     updateRequestStatus( context, data ){
 
-        // find schedule within requests object
-        let openShiftIndex = context.getters.openShifts.findIndex( s => s.id == data.schedule_id );
-        if( openShiftIndex ){
+        if( data.new_request ){
+            // if new_request is populated, it needs to be appended
 
-            context.state.openShifts[ openShiftIndex ].request_status = data.status;
-            let newShifts = _.cloneDeep( context.state.openShifts );
-            context.commit( 'updateOpenShifts', newShifts );
+            context.commit( 'appendShiftRequest', data.new_request );
+        } else {
+            // else find the existing schedule request within requests object and update it
+
+            let openShiftIndex = context.getters.openShifts.findIndex( s => s.id == data.schedule_id );
+            if( openShiftIndex ) context.commit( 'updateOpenShifts', { index: openShiftIndex, status: data.status } );
         }
     }
 };

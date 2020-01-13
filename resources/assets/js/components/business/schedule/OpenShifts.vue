@@ -130,11 +130,12 @@
 
             ...mapGetters({
 
-                openShifts : 'openShifts/openShifts',
+                openShifts : 'openShifts/mappedShifts',
                 cgRequests : 'openShifts/requests'
             }),
             aggEvents(){
 
+                console.log( 'checking agg: ', this.openShifts.length == 0, this.openShifts );
                 if( this.openShifts.length == 0 ) return this.events;
                 else return this.openShifts.filter( s => ![ this.OPEN_SHIFTS_STATUS.UNINTERESTED, this.OPEN_SHIFTS_STATUS.DENIED ].includes( s.request_status ) );
             },
@@ -200,8 +201,7 @@
                 this.form.post( `/schedule/requests/${schedule.id}` )
                     .then( res => {
 
-                        // console.log( 'Returned response object: ', res );
-                        this.updateRequestStatus({ schedule_id: schedule.id, status: res.data.data.status });
+                        this.updateRequestStatus({ schedule_id: schedule.id, status: res.data.data.status, new_request: res.data.data.new_request });
                         schedule.request_status = res.data.data.status;
                         if( schedule.request_status == this.OPEN_SHIFTS_STATUS.UNINTERESTED ) this.removeScheduleEvent( schedule.id );
                     })
@@ -217,7 +217,7 @@
                 axios.get( this.eventsUrl )
                     .then( ({ data }) => {
 
-                        console.log( data );
+                        // console.log( data );
                         this.requests = data.requests;
                         this.events   = Object.values( data.events ).map( e => {
 
@@ -232,7 +232,6 @@
 
                             return e;
                         }).filter( e => ![ this.OPEN_SHIFTS_STATUS.DENIED, this.OPEN_SHIFTS_STATUS.UNINTERESTED ].includes( e.request_status ) );
-
                         this.eventsLoaded = true;
                     })
                     .catch( e => {

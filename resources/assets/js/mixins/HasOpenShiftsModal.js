@@ -21,7 +21,7 @@ export default {
         }),
         requestResponded( data ){
 
-            console.log( data );
+            // console.log( data );
 
             const status = data.status;
             let schedule = this.events.find( e => e.id === data.request.schedule_id );
