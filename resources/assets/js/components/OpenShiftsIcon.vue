@@ -2,7 +2,7 @@
 
     <li class="nav-item pr-2">
 
-        <a class="nav-link text-muted text-muted position-relative h-100" style="width: 40px" id="openShiftsDropdown" href="/business/schedule/open-shifts" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link text-muted text-muted position-relative h-100" style="width: 40px" id="openShiftsDropdown" @click.prevent=" toggleOpenShiftsModal " aria-haspopup="true" aria-expanded="false">
 
             <i class="solid-open-shifts-icon-top-menu"></i>
 
@@ -53,8 +53,9 @@
 
             ...mapActions({
 
-                setCount : 'openShiftRequests/setCount',
-                debounce : 'openShiftRequests/debounce'
+                setCount              : 'openShiftRequests/setCount',
+                debounce              : 'openShiftRequests/debounce',
+                toggleOpenShiftsModal : 'openShifts/toggleOpenShiftsModal'
             }),
             async fetchRequestsCount(){
 
@@ -79,7 +80,12 @@
     }
 </script>
 
-<style>
+<style scoped>
+
+    a {
+
+        cursor: pointer;
+    }
 
     .badge-notifications {
         position: absolute;

@@ -1,18 +1,31 @@
 <template>
 
-  <div>
+    <b-modal id="openShiftsModal" title="Open Shifts" v-model=" openShiftsModalActive " size="xl" no-close-on-backdrop no-close-on-esc ok-only ok-variant="default" ok-title="Close">
 
-    <b-card :title=" active_business ? active_business.name : '' ">
+        <template v-slot:modal-header="{ close }">
+
+            <div class="d-flex w-100 justify-content-end">
+
+                <b-button size="sm" variant="default" @click=" toggleOpenShiftsModal() ">
+                    Close Modal
+                </b-button>
+            </div>
+        </template>
 
         <p class="mt-3 mb-4" v-if=" role_type == 'office_user' ">
-            Caregivers can see all of these open shifts
-            - anytime within the Ally app
-            - that do not overlap any of their scheduled shifts.
-            You do not have to send out text messages for every open shifts.
-            Instead, maybe send a reminder once a week that all caregivers should check the available open shifts within the Ally App
+            Check Settings > General for open shifts settings for your business
         </p>
 
         <loading-card v-show=" loading " />
+
+        <transition-group mode="out-in" name="slide-fade">
+
+            <schedule-requests :selected-schedule-id=" selectedScheduleId " v-if=" selectedScheduleId " @request-response=" requestResponded " class="mb-5" key="uno"></schedule-requests>
+            <div class="d-flex w-100 justify-content-end mb-4" key="dos">
+
+                <b-button variant="default" v-if=" selectedScheduleId " @click=" selectedScheduleId = null ">Close Requests</b-button>
+            </div>
+        </transition-group>
 
         <div v-show="! loading" class="table-responsive">
 
@@ -55,10 +68,7 @@
                 <template slot="status" scope="data">Open</template>
             </ally-table>
         </div>
-    </b-card>
-
-    <schedule-request-modal v-model=" requestsModal " :selected-schedule-id=" selectedScheduleId " @request-response=" requestResponded "></schedule-request-modal>
-  </div>
+    </b-modal>
 </template>
 
 <script>
@@ -66,8 +76,8 @@
     import FormatsDates from '../../../mixins/FormatsDates';
     import AuthUser from '../../../mixins/AuthUser';
     import HasOpenShiftsModal from '../../../mixins/HasOpenShiftsModal';
-    import ScheduleRequestModal from "../../modals/ScheduleRequestModal";
     import Constants from '../../../mixins/Constants';
+    import ScheduleRequests from '../../business/schedule/ScheduleRequests';
     import { mapGetters, mapActions } from 'vuex';
 
     export default {
@@ -124,6 +134,8 @@
 
                 this.fetchEvents();
             }
+
+
         },
 
         computed: {
@@ -131,8 +143,19 @@
             ...mapGetters({
 
                 openShifts : 'openShifts/mappedShifts',
-                cgRequests : 'openShifts/requests'
+                cgRequests : 'openShifts/requests',
             }),
+            openShiftsModalActive : {
+
+                get: function(){
+
+                    return this.$store.getters[ 'openShifts/openShiftsModalActive' ];
+                },
+                set: function(){
+
+                    this.toggleOpenShiftsModal();
+                }
+            },
             aggEvents(){
 
                 if( this.openShifts.length == 0 ) return this.events;
@@ -171,7 +194,8 @@
 
             ...mapActions({
 
-                updateRequestStatus : 'openShifts/updateRequestStatus',
+                updateRequestStatus   : 'openShifts/updateRequestStatus',
+                toggleOpenShiftsModal : 'openShifts/toggleOpenShiftsModal',
             }),
             hasRequest( status ){
 
@@ -254,7 +278,7 @@
 
         components: {
 
-            ScheduleRequestModal
+            ScheduleRequests
         }
     }
 </script>

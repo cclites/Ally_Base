@@ -44,6 +44,7 @@ class OpenShiftsController extends BaseController
             return [ 'events' => $schedules, 'requests' => [] ];
         }
 
+        // deprecated, changed open shifts to be a modal
         return view_component( 'open-shifts',
             'Open Shifts',
             [ 'businesses' => $chain->id, 'role_type' => auth()->user()->role_type ],

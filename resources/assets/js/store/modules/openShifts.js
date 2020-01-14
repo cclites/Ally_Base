@@ -5,6 +5,7 @@ const state = {
 
     openShifts : [],
     requests   : [],
+    openShiftsModalActive : false
 };
 
 // getters
@@ -28,7 +29,8 @@ const getters = {
             return e;
         });
     },
-    newShiftsCount : ( state, getters ) => getters.mappedShifts.filter( e => !e.request_status ).length
+    newShiftsCount : ( state, getters ) => getters.mappedShifts.filter( e => !e.request_status ).length,
+    openShiftsModalActive : state => state.openShiftsModalActive
 };
 
 // mutations
@@ -50,6 +52,7 @@ const mutations = {
 
         state.requests.push( req );
     },
+    toggleOpenShiftsModal : state => state.openShiftsModalActive = !state.openShiftsModalActive
 };
 
 // actions
@@ -73,6 +76,11 @@ const actions = {
             let openShiftIndex = context.getters.openShifts.findIndex( s => s.id == data.schedule_id );
             if( openShiftIndex ) context.commit( 'updateOpenShifts', { index: openShiftIndex, status: data.status } );
         }
+    },
+    toggleOpenShiftsModal : context => {
+
+        console.log( 'toggling..' );
+        context.commit( 'toggleOpenShiftsModal' );
     }
 };
 
