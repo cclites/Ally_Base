@@ -20,6 +20,8 @@ use App\Billing\Service;
 use App\Billing\Payer;
 use App\Address;
 use App\Shift;
+use App\VisitEditAction;
+use App\VisitEditReason;
 
 class ClaimInvoiceFactory
 {
@@ -442,6 +444,8 @@ class ClaimInvoiceFactory
             'client_signature_id' => optional($shift->clientSignature)->id,
             'caregiver_signature_id' => optional($shift->caregiverSignature)->id,
             'is_overtime' => $shift->hours_type == 'default' ? false : true,
+            'visit_edit_action_id' => $shift->verified ? $shift->visit_edit_action_id : VisitEditAction::nonEvvDefault(),
+            'visit_edit_reason_id' => $shift->verified ? $shift->visit_edit_reason_id : VisitEditReason::nonEvvDefault(),
         ]);
     }
 

@@ -262,14 +262,14 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'EndVerificationType'    => $this->tcLookup( 'EndVerificationType', $this->getVerificationType($shift->checked_out_method) ), // OPTIONAL
             'ScheduledStartDateTime' => $this->getScheduledStartTime($shift), // OPTIONAL
             'ScheduledEndDateTime'   => $this->getScheduledEndTime($shift), // OPTIONAL
-            'ScheduledLatitude' => '',
-            'ScheduledLongitude' => '',
+            'ScheduledLatitude'      => '', // gets set below
+            'ScheduledLongitude'     => '', // gets set below
             'ActualStartDateTime'    => $shift->checked_in_time->setTimezone( $business->timezone )->format( $this->timeFormat ),
             'ActualEndDateTime'      => $shift->checked_out_time->setTimezone( $business->timezone )->format( $this->timeFormat ),
-            'ActualStartLatitude' => '',
-            'ActualStartLongitude' => '',
-            'ActualEndLatitude' => '',
-            'ActualEndLongitude' => '',
+            'ActualStartLatitude'    => '', // gets set below
+            'ActualStartLongitude'   => '', // gets set below
+            'ActualEndLatitude'      => '', // gets set below
+            'ActualEndLongitude'     => '', // gets set below
             'UserField1'             => $claim->id, // OPTIONAL
             // 'UserField2'             => '', // OPTIONAL
             // 'UserField3'             => '', // OPTIONAL
@@ -278,19 +278,19 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             // 'ReasonCode3' => '', // OPTIONAL && TODO
             // 'ReasonCode4' => '', // OPTIONAL && TODO
             'TimeZone'               => $this->tcLookup( 'TimeZone', $this->getBusinessTimezone( $business ) ),
-             'VisitNote'              => $shift->caregiver_comments ?? '', // OPTIONAL
-             'EndAddress1'            => $address->address1, // OPTIONAL
-             'EndAddress2'            => $address->address2, // OPTIONAL
-             'EndCity'                => $address->city, // OPTIONAL
-             'EndState'               => $address->state, // OPTIONAL
-             'EndZip'                 => $address->zip, // OPTIONAL
-             'VisitStatus'            => $this->tcLookup( 'VisitStatus', 'COMP' ), // OPTIONAL, Hardcoded to 'Completed' on purpose
+            'VisitNote'              => $shift->caregiver_comments ?? '', // OPTIONAL
+            'EndAddress1'            => $address->address1, // OPTIONAL
+            'EndAddress2'            => $address->address2, // OPTIONAL
+            'EndCity'                => $address->city, // OPTIONAL
+            'EndState'               => $address->state, // OPTIONAL
+            'EndZip'                 => $address->zip, // OPTIONAL
+            'VisitStatus'            => $this->tcLookup( 'VisitStatus', 'COMP' ), // OPTIONAL, Hardcoded to 'Completed' on purpose
             // 'MissedVisitReason'      => $this->tcLookup( 'MissedVisitReason', 'PCAN' ), // OPTIONAL, TODO
             // 'MissedVisitActionTaken' => $this->tcLookup( 'MissedVisitActionTaken', 'SCHS' ), // OPTIONAL, TODO
             // 'InvoiceUnits'           => '', // OPTIONAL && TODO
             // 'InvoiceAmount'          => '13.37', // OPTIONAL && TODO
-            'ScheduledEndLatitude' => '',
-            'ScheduledEndLongitude' => '',
+            'ScheduledEndLatitude'  => '', // gets set below
+            'ScheduledEndLongitude' => '', // gets set below
             // 'PaidAmount'             => '13.37', // OPTIONAL && TODO
              'CareDirectionType'      => $this->tcLookup( 'CareDirectionType', 'PROV' ), // OPTIONAL
             'Tasks'                  => '', // a wrapper element for the tasks
@@ -298,17 +298,17 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         ];
 
         if ($gps_in) {
-            $data['ScheduledLatitude'] = $address->latitude ?? ''; // OPTIONAL
-            $data['ScheduledLongitude'] = $address->longitude ?? ''; // OPTIONAL
-            $data['ActualStartLatitude'] = $shift->checked_in_latitude; //OPTIONAL
-            $data['ActualStartLongitude'] = $shift->checked_in_longitude; //OPTIONAL
+            $data['ScheduledLatitude'] = $address->latitude ?? '';
+            $data['ScheduledLongitude'] = $address->longitude ?? '';
+            $data['ActualStartLatitude'] = $shift->checked_in_latitude;
+            $data['ActualStartLongitude'] = $shift->checked_in_longitude;
         }
 
         if ($gps_out) {
-            $data['ActualEndLatitude']      = $shift->checked_out_latitude; // OPTIONAL
-            $data['ActualEndLongitude']     = $shift->checked_out_longitude; //OPTIONAL
-            $data['ScheduledEndLatitude']   = $address->latitude ?? ''; // OPTIONAL
-            $data['ScheduledEndLongitude']  = $address->longitude ?? ''; // OPTIONAL
+            $data['ActualEndLatitude']      = $shift->checked_out_latitude;
+            $data['ActualEndLongitude']     = $shift->checked_out_longitude;
+            $data['ScheduledEndLatitude']   = $address->latitude ?? '';
+            $data['ScheduledEndLongitude']  = $address->longitude ?? '';
         }
 
         return $data;

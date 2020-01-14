@@ -73,6 +73,7 @@ Vue.component('client-contacts-modal', require('./components/ClientContactsModal
 Vue.component('shift-details', require('./components/shifts/ShiftDetails'));
 Vue.component('payer-dropdown', require('./components/dropdowns/PayerDropdown'));
 Vue.component('client-type-dropdown', require('./components/dropdowns/ClientTypeDropdown'));
+Vue.component('edit-code-dropdowns', require('./components/dropdowns/EditCodeDropdowns'));
 Vue.component('number-input', require('./components/NumberInput'));
 
 Vue.component('avery-modal', require('./components/modals/AveryModal'));
