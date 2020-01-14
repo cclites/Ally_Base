@@ -9,6 +9,7 @@
                 :per-page="perPage"
                 :sort-by.sync="sort"
                 @filtered="onFiltered"
+                :busy=" isBusy "
             >
                 <template v-for="field in columns" :slot="field.key || field" scope="data">
                     <slot v-bind="data" :name="field.key || field"> {{ renderCell(data.item, field) }}</slot>
@@ -49,6 +50,10 @@ export default {
         perPage: {
             type: Number,
             default: () => 15,
+        },
+        isBusy: {
+            type: Boolean,
+            default: () => false,
         },
     },
 

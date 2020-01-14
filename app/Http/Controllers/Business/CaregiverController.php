@@ -297,6 +297,7 @@ class CaregiverController extends BaseController
         if ($caregiver->update($data)) {
 
             $caregiver->unassignFromFutureSchedules();
+            $caregiver->removeOutstandingScheduleRequests();
 
             \DB::commit();
             return new SuccessResponse('The caregiver has been archived.', [], route('business.caregivers.index'));

@@ -172,7 +172,7 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
         if (! empty($this->timezone)) {
             return $this->timezone;
         }
-        
+
         if ($business = $this->businesses->first()) {
             return Timezone::getTimezone($business->id);
         }

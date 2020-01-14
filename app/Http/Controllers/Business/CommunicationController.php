@@ -69,18 +69,16 @@ class CommunicationController extends Controller
      */
     public function draftOpenShiftMessage($shift)
     {
-        $clientName = $shift->client->name;
+        $clientName = $shift->client->initialedName;
         $date = $shift->starts_at->format('m/d/y');
         $time = $shift->starts_at->format('g:i A');
 
         $location = '';
         if ($shift->client->evvAddress) {
-            $location = $shift->client->evvAddress->city . ', ' . $shift->client->evvAddress->zip;
+            $location = ' in zip ' . $shift->client->evvAddress->zip;
         }
-        $registryName = $shift->business->name;
-        $phone = $shift->business->phone1;
 
-        return "Shift Available\r\n$clientName / $date @ $time / $location\r\n\r\nPlease call $registryName if interested.  First come, first serve. $phone";
+        return "$date@$time-Shift Available-$clientName" . $location . ". Visit the Open Shifts page anytime within Ally to express interest in this or other shifts";
     }
 
     /**

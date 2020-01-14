@@ -473,10 +473,11 @@
     import { mapGetters } from 'vuex';
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import AuditsTable from '../../../components/AuditsTable';
+    import ScheduleMethods from '../../../mixins/ScheduleMethods';
 
     export default {
         components: {ScheduleGroupModal, ConfirmationModal, AuditsTable},
-        mixins: [FormatsNumbers, RateCodes, ShiftServices, FormatsDates, FormatsStrings],
+        mixins: [FormatsNumbers, RateCodes, ShiftServices, FormatsDates, FormatsStrings, ScheduleMethods],
 
         props: {
             model: Boolean,
@@ -499,10 +500,6 @@
             return {
                 activeTab: 0,
                 submitting: false,
-                startDate: "",
-                startTime: "",
-                endTime: "",
-                endDate: "",
                 scheduleModal: this.model,
                 form: new Form(),
                 copiedSchedule: {},
@@ -961,32 +958,6 @@
                 }
             },
 
-            getDuration() {
-                if (this.endTime && this.startTime) {
-                    if (this.startTime === this.endTime) {
-                        return 1440; // have 12:00am to 12:00am = 24 hours
-                    }
-                    let start = moment(this.startDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm');
-                    let end = moment(this.startDate + ' ' + this.endTime, 'MM/DD/YYYY HH:mm');
-                    if (start && end) {
-                        if (end.isBefore(start)) {
-                            end = end.add(1, 'days');
-                        }
-                        let diff = end.diff(start, 'minutes');
-                        if (diff) {
-                            return parseInt(diff);
-                        }
-                    }
-                }
-                return null;
-            },
-
-            getStartsAt() {
-                if (this.startDate && this.startTime) {
-                    return moment(this.startDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm').format();
-                }
-                return null;
-            },
 
             refreshEvents() {
                 this.$emit('refresh-events');
