@@ -1,13 +1,15 @@
 <template>
 
-    <b-modal id="openShiftsModal" title="Open Shifts" v-model=" openShiftsModalActive " size="xl" no-close-on-backdrop no-close-on-esc ok-only ok-variant="default" ok-title="Close">
+    <b-modal id="openShiftsModal" title="Open Shifts" v-model=" openShiftsModalActive " size="xl" no-close-on-backdrop no-close-on-esc>
 
-        <template v-slot:modal-header="{ close }">
+        <template slot="modal-header">
 
-            <div class="d-flex w-100 justify-content-end">
+            <div class="d-flex w-100 justify-content-between">
 
-                <b-button size="sm" variant="default" @click=" toggleOpenShiftsModal() ">
-                    Close Modal
+                <h3>Open Shifts</h3>
+
+                <b-button variant="default" @click=" toggleOpenShiftsModal() " style="cursor:pointer">
+                    &times;
                 </b-button>
             </div>
         </template>
@@ -68,6 +70,15 @@
                 <template slot="status" scope="data">Open</template>
             </ally-table>
         </div>
+        <template slot="modal-footer">
+
+            <div class="d-flex w-100 justify-content-end">
+
+                <b-button variant="default" @click=" toggleOpenShiftsModal() " style="cursor:pointer">
+                    Close
+                </b-button>
+            </div>
+        </template>
     </b-modal>
 </template>
 
@@ -126,6 +137,8 @@
 
         mounted() {
 
+
+
             // this will be for when we allow caregivers to switch between businesses
             if( !Array.isArray( this.businesses ) ) this.active_business = this.businesses;
             else this.active_business = this.businesses[ 0 ].id || null;
@@ -134,8 +147,6 @@
 
                 this.fetchEvents();
             }
-
-
         },
 
         computed: {
@@ -152,8 +163,8 @@
                     return this.$store.getters[ 'openShifts/openShiftsModalActive' ];
                 },
                 set: function(){
+                    // only here to stop an innacurate error from occurring
 
-                    this.toggleOpenShiftsModal();
                 }
             },
             aggEvents(){

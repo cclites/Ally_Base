@@ -77,11 +77,7 @@ const actions = {
             if( openShiftIndex ) context.commit( 'updateOpenShifts', { index: openShiftIndex, status: data.status } );
         }
     },
-    toggleOpenShiftsModal : context => {
-
-        console.log( 'toggling..' );
-        context.commit( 'toggleOpenShiftsModal' );
-    }
+    toggleOpenShiftsModal : context => context.commit( 'toggleOpenShiftsModal' ),
 };
 
 export default {

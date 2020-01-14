@@ -1,7 +1,7 @@
 <template>
 
-    <li>
-        <a :href=" route " aria-expanded="false" style="position:relative">
+    <li style="cursor: pointer">
+        <a href="" @click.prevent=" toggleOpenShiftsModal " aria-expanded="false" style="position:relative">
 
             <i class="fa fa-hand-paper-o"></i><span class="hide-menu">Open Shifts</span>
             <span class="badge badge-danger badge-notifications" v-if=" total > 0">{{ total }}</span>
@@ -49,7 +49,8 @@
 
             ...mapActions({
 
-                setShiftsAndRequests : 'openShifts/setShiftsAndRequests',
+                setShiftsAndRequests  : 'openShifts/setShiftsAndRequests',
+                toggleOpenShiftsModal : 'openShifts/toggleOpenShiftsModal'
             }),
             async fetchOpenShiftsCount(){
 
