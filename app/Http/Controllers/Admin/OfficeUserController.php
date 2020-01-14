@@ -15,7 +15,7 @@ class OfficeUserController extends Controller
 {
     public function index(BusinessChain $chain)
     {
-        $users = $chain->users->where( 'active', 1 )->sortBy('name');
+        $users = $chain->users->where( 'active', 1 )->sortBy('name')->values();
 
         return OfficeUserResource::collection($users);
     }
