@@ -19,8 +19,6 @@ class CaregiverScheduleRequestController extends BaseController
      */
     public function store( Request $request, Schedule $schedule )
     {
-        if( !is_caregiver() ) abort( 403 );
-
         // white list acceptable values
         if( !OpenShiftRequestStatus::isAcceptableStatus( $request->status ) ) new ErrorResponse( 500, 'Unable to request shift at this time, please contact support' );
 
