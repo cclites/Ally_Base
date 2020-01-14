@@ -132,8 +132,8 @@
             </b-col>
         </b-row>
         <b-row class="mb-2">
-            <b-col sm="6" v-if=" shift.visit_edit_reason "><strong>Reason shift was edited:</strong> {{ mappedShiftEditReason( shift.visit_edit_reason ) }}</b-col>
-            <b-col sm="6" v-if=" shift.visit_edit_action "><strong>Edit Action taken:</strong> {{ mappedShiftEditAction( shift.visit_edit_action ) }}</b-col>
+            <b-col sm="6" v-if=" shift.visit_edit_reason_id "><strong>Reason shift was edited:</strong> {{ mappedShiftEditReason( shift.visit_edit_reason_id ) }}</b-col>
+            <b-col sm="6" v-if=" shift.visit_edit_action_id "><strong>Edit Action taken:</strong> {{ mappedShiftEditAction( shift.visit_edit_action_id ) }}</b-col>
         </b-row>
     </div>
 </template>

@@ -43,8 +43,8 @@
 
         props: [
 
-            'visit_edit_action',
-            'visit_edit_reason',
+            'visit_edit_action_id',
+            'visit_edit_reason_id',
             'updateAction',
             'updateReason'
         ],
@@ -65,22 +65,22 @@
 
                 get: function(){
 
-                    return this.visit_edit_reason || '';
+                    return this.visit_edit_reason_id || '';
                 },
                 set: function( newValue ){
 
-                    if( newValue !== this.visit_edit_reason ) this.updateReason( newValue );
+                    if( newValue !== this.visit_edit_reason_id ) this.updateReason( newValue );
                 }
             },
             chosenAction: {
 
                 get(){
 
-                    return this.visit_edit_action || '';
+                    return this.visit_edit_action_id || '';
                 },
                 set( newValue ){
 
-                    if( newValue !== this.visit_edit_action ) this.updateAction( newValue );
+                    if( newValue !== this.visit_edit_action_id ) this.updateAction( newValue );
                 }
             }
         },

@@ -486,8 +486,8 @@
                 <edit-code-dropdowns
                     v-if=" shift.id "
                     class="my-3"
-                    :visit_edit_action=" form.visit_edit_action "
-                    :visit_edit_reason=" form.visit_edit_reason "
+                    :visit_edit_action_id=" form.visit_edit_action_id "
+                    :visit_edit_reason_id=" form.visit_edit_reason_id "
                     :updateAction=" updateAction "
                     :updateReason=" updateReason "
                 />
@@ -740,11 +740,11 @@
 
             updateAction( action ){
 
-                this.form.visit_edit_action = action;
+                this.form.visit_edit_action_id = action;
             },
             updateReason( reason ){
 
-                this.form.visit_edit_reason = reason;
+                this.form.visit_edit_reason_id = reason;
             },
             changedShift(shift) {
                 if (this.isRoot) {
@@ -899,8 +899,8 @@
                         'ally_fee': null,
                     },
                     quickbooks_service_id: shift.quickbooks_service_id || '',
-                    visit_edit_reason : shift.visit_edit_reason,
-                    visit_edit_action : shift.visit_edit_action
+                    visit_edit_reason_id : shift.visit_edit_reason_id,
+                    visit_edit_action_id : shift.visit_edit_action_id
                 };
             },
             createIssue() {

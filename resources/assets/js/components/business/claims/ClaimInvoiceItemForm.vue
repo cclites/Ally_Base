@@ -378,8 +378,8 @@
                     <edit-code-dropdowns
                         v-if="item.id"
                         class="my-3"
-                        :visit_edit_action=" form.visit_edit_action "
-                        :visit_edit_reason=" form.visit_edit_reason "
+                        :visit_edit_action_id=" form.visit_edit_action_id "
+                        :visit_edit_reason_id=" form.visit_edit_reason_id "
                         :updateAction=" updateAction "
                         :updateReason=" updateReason "
                     />
@@ -968,8 +968,8 @@
                     client_signature_id: '',
                     caregiver_signature_id: '',
                     is_overtime: false,
-                    visit_edit_action : '',
-                    visit_edit_reason : ''
+                    visit_edit_action_id : '',
+                    visit_edit_reason_id : ''
                 }),
             };
         },
@@ -995,10 +995,10 @@
 
             updateAction( action ){
 
-                this.form.visit_edit_action = action;
+                this.form.visit_edit_action_id = action;
             },
             updateReason( reason ){
-                this.form.visit_edit_reason = reason;
+                this.form.visit_edit_reason_id = reason;
             },
             save() {
                 if (this.item.id) {

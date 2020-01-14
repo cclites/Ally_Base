@@ -104,8 +104,8 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             'client_hic' => 'nullable',
             'client_invoice_notes' => 'nullable',
 
-            'visit_edit_action' => 'nullable|integer',
-            'visit_edit_reason' => 'nullable|integer',
+            'visit_edit_action_id' => 'nullable|integer',
+            'visit_edit_reason_id' => 'nullable|integer',
         ];
     }
 
@@ -173,8 +173,8 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
                     'service_start_date',
                     'service_start_time',
 
-                    'visit_edit_action',
-                    'visit_edit_reason',
+                    'visit_edit_action_id',
+                    'visit_edit_reason_id',
                 ])->toArray();
 
                 // convert dates and times

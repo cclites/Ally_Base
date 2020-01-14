@@ -70,8 +70,8 @@ class UpdateShiftRequest extends BusinessClientRequest
                     $query->where('business_id', $this->getBusinessId());
                 }),
             ],
-            'visit_edit_action' => 'nullable|integer',
-            'visit_edit_reason' => 'nullable|integer'
+            'visit_edit_action_id' => 'nullable|integer',
+            'visit_edit_reason_id' => 'nullable|integer'
         ];
     }
 
@@ -161,8 +161,8 @@ class UpdateShiftRequest extends BusinessClientRequest
             $this->input('service_id') ? Service::find($this->input('service_id')) : null,
             $this->filled('payer_id') ? Payer::find($this->input('payer_id')) : null,
             $this->input('quickbooks_service_id'),
-            $this->input( 'visit_edit_action', null ),
-            $this->input( 'visit_edit_reason', null )
+            $this->input( 'visit_edit_action_id', null ),
+            $this->input( 'visit_edit_reason_id', null )
         )->withData($clockOutData)->withServices($this->getServices());
 
         return $shiftData;

@@ -63,8 +63,8 @@ class ShiftHistoryItemResource extends Resource
             'created_at' => optional($shift->created_at)->toDateTimeString(),
             'services' => $this->mapServices($shift),
 
-            'visit_edit_reason' => optional( $shift->visitEditReason )->formatted_name,
-            'visit_edit_action' => optional( $shift->visitEditAction )->formatted_name,
+            'visit_edit_reason_id' => optional( $shift->visitEditReason )->formatted_name,
+            'visit_edit_action_id' => optional( $shift->visitEditAction )->formatted_name,
         ];
     }
 

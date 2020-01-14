@@ -166,7 +166,7 @@
         </div>
     @endif
 
-    @if( $shift->visit_edit_reason || $shift->visit_edit_action )
+    @if( $shift->visit_edit_reason_id )
 
         <h4>Visit Edited</h4>
         <div class="row">
@@ -175,10 +175,13 @@
 
                 {{ "Edit Reason: " . $shift->visitEditReason->formatted_name }}
             </div>
-            <div class="col-sm-6">
+            @if( $shift->visit_edit_action_id )
 
-                {{ "Action Taken: " . $shift->visitEditAction->formatted_name }}
-            </div>
+                <div class="col-sm-6">
+
+                    {{ "Action Taken: " . $shift->visitEditAction->formatted_name }}
+                </div>
+            @endif
         </div>
     @endif
 
