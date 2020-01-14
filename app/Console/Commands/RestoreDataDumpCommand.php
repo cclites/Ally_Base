@@ -78,6 +78,7 @@ class RestoreDataDumpCommand extends Command
 
         $this->info("Unzipping $zipFile...");
         $process = new Process(['unzip', '-o', '-P', $zipPassword, $zipFile]);
+        $process->setTimeout(1200); // this can take a while
         $process->run();
         if (! $process->isSuccessful()) {
             throw new ProcessFailedException($process);
@@ -94,6 +95,7 @@ class RestoreDataDumpCommand extends Command
 
         $this->info("Dropping existing database...");
         $process = new Process("mysql -u $databaseUser --password=$databasePassword -h $host -P $port -Nse  'drop database if exists $databaseName; create database $databaseName'");
+        $process->setTimeout(1200); // this can take a while
         $process->run();
         if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
