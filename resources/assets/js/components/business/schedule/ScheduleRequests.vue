@@ -135,7 +135,7 @@
                     services   : this.schedule.services || null, // ERIK TODO => check if this is necessary, this isnt included with the requests modal.. 
                 });
 
-                form.alertOnResponse = false; // wtf is this
+                form.alertOnResponse = false;
                 form.post( '/business/schedule/warnings' )
                     .then( ({ data }) => {
 
