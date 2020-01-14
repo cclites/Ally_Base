@@ -89,9 +89,7 @@ class TellusService
             throw new TellusValidationException('Claim file did not pass local XML validation.', $errors);
         }
 
-        \Log::info( $xml );
         list($httpCode, $response) = $this->sendXml($xml);
-        \Log::info( $response );
 
         if ($httpCode === 401) {
             throw new TellusApiException('Invalid credentials or otherwise not authorized.');
@@ -101,7 +99,6 @@ class TellusService
             throw new TellusApiException("Unexpected response code from Tellus, code: $httpCode.  Please try again.");
         }
 
-        \Log::info($response);
         $xml = new SimpleXMLElement($response);
         if (isset($xml->xsdValidation) && (string)$xml->xsdValidation == 'FAILED') {
             \Log::error("Tellus API XML Error:\r\n$response");
