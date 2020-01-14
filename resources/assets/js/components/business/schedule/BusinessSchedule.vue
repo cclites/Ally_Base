@@ -164,9 +164,9 @@
                                     @refresh="fetchEvents(true)"
         ></schedule-clock-out-modal>
 
-        <div v-show="preview" 
-            id="preview" 
-            class="preview-window" 
+        <div v-show="preview"
+            id="preview"
+            class="preview-window"
             :style="{ top: previewTop, left: previewLeft }"
         >
             <div class="d-flex">
@@ -371,7 +371,16 @@
                     resourceColumns: [
                         {
                             labelText: this.resourceIdField === 'client_id' ? 'Client' : 'Caregiver',
-                            field: 'title',
+                            text: function(resource) {
+                                return resource.title;
+                            },
+                            render: function(resource, el) {
+                                // need client/caregiver link
+                                if (resource.title !== 'Open Shifts') {
+                                    let link = `<a href='/business/${resource.idField}/${resource.id}'>${resource.title}</a>`;
+                                    el.html(link);
+                                }
+                            }
                         },
                         {
                             labelText: 'S',
@@ -505,6 +514,7 @@
                         scheduled: kpis.SCHEDULED.hours.toFixed(0),
                         completed: kpis.COMPLETED.hours.toFixed(0),
                         projected: kpis.PROJECTED.hours.toFixed(0),
+                        idField: this.resourceIdField === 'client_id' ? 'clients' : 'caregivers',
                     };
                 });
 
@@ -651,7 +661,7 @@
 
             eventHover(event, jsEvent, view) {
                 let target = null;
-                
+
                 if ($(jsEvent.currentTarget).is('a')) {
                     target = $(jsEvent.currentTarget);
                 } else {
@@ -691,7 +701,7 @@
 
                     let availableWidth = document.documentElement.clientWidth - $('#schedule-card').offset().left;
                     let availableHeight = document.documentElement.clientHeight - $('#schedule-card').offset().top + document.documentElement.scrollTop;
-                  
+
                     if (left + $('#preview').outerWidth() > availableWidth) {
                         left = left - $('#preview').outerWidth() + target.width();
                     }
@@ -716,14 +726,14 @@
                                 if (e.clientX >= eventRect.left - extra && e.clientX <= eventRect.right + extra &&
                                     e.clientY >= eventRect.top - extra && e.clientY <= eventRect.bottom + extra) {
                                         return;
-                                } 
+                                }
 
                                 if (e.clientX >= divRect.left - extra && e.clientX <= divRect.right + extra &&
                                     e.clientY >= divRect.top - extra && e.clientY <= divRect.bottom + extra) {
                                         return;
                                 }
                             }
-                            
+
                             this.preview = false;
                             document.body.removeEventListener('mousemove', handler);
                         }.bind(this);
@@ -1250,7 +1260,7 @@
             h2 {
                 font-weight: bold;
             }
-            
+
             h6 {
                 display: none;
             }
