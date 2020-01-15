@@ -377,7 +377,7 @@
                             render: function(resource, el) {
                                 // need client/caregiver link
                                 if (resource.title !== 'Open Shifts') {
-                                    let link = `<a href='/business/${resource.idField}/${resource.id}'>${resource.title}</a>`;
+                                    let link = `<a href='/business/${resource.role}/${resource.id}' target='_blank'>${resource.title}</a>`;
                                     el.html(link);
                                 }
                             }
@@ -514,7 +514,7 @@
                         scheduled: kpis.SCHEDULED.hours.toFixed(0),
                         completed: kpis.COMPLETED.hours.toFixed(0),
                         projected: kpis.PROJECTED.hours.toFixed(0),
-                        idField: this.resourceIdField === 'client_id' ? 'clients' : 'caregivers',
+                        role: this.resourceIdField === 'client_id' ? 'clients' : 'caregivers',
                     };
                 });
 
