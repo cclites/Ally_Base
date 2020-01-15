@@ -80,14 +80,12 @@ class SystemNotification extends AuditableModel
     /**
      * Set notification as acknowledged and update the notes.
      *
-     * @param string $note
      * @return bool
      */
-    public function acknowledge($note = null)
+    public function acknowledge()
     {
         return $this->update([
             'acknowledged_at' => Carbon::now(),
-            'notes' => $note,
         ]);
     }
 
