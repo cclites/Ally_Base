@@ -146,6 +146,8 @@ class ReferralSource extends AuditableModel implements BelongsToChainsInterface
                 $set[$key]['web_address'] = $item[ 'web_address' ];
                 $set[$key]['is_company'] = $item[ 'is_company' ];
                 $set[$key]['work_phone'] = $item[ 'work_phone' ];
+                $set[$key]['active'] = $item[ 'active' ];
+
             }else{
                 if($item['active']){
                     $set[$key]['contact_name'] .= $item['contact_name'] . ", ";
