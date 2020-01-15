@@ -21,7 +21,8 @@
             </template>
             <template slot="actions" scope="row">
 
-                <b-button variant="info" @click=" replyText( row.item ) ">Reply</b-button>
+                <a :href=" `/business/communication/sms-threads/${row.item.continued_thread_id}` " v-if=" row.item.continued_thread_id " target="_blank">continued</a>
+                <b-button variant="info" @click=" replyText( row.item ) " v-else>Reply</b-button>
             </template>
         </b-table>
         <b-row>
@@ -33,7 +34,7 @@
             </b-col>
         </b-row>
 
-        <business-sms-reply-modal v-model=" replyModalOpen " :data=" activeReply "></business-sms-reply-modal>
+        <business-sms-reply-modal v-model=" replyModalOpen " :data=" activeReply " @continuedThread=" continuedThread "></business-sms-reply-modal>
     </div>
 </template>
 
@@ -101,6 +102,12 @@ export default {
     },
 
     methods: {
+
+        continuedThread({ new_thread_id, reply_id }){
+
+            let reply = this.replies.find( r => r.id == reply_id );
+            reply.continued_thread_id = new_thread_id;
+        },
         formatPhone(phone) {
             if (! phone) {
                 return '';

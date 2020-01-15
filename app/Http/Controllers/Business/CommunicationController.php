@@ -133,6 +133,13 @@ class CommunicationController extends Controller
             }
         }
 
+        if( $id = $request->input( 'original_reply', false ) ){
+
+            $reply = SmsThreadReply::find( $id );
+            $reply->continued_thread_id = $thread->id;
+            $reply->save();
+        }
+
         if (count($failed) > 0) {
             return new ErrorResponse(500, "Message was sent but failed for the following users:\r\n" . join("\r\n", $failed));
         }
@@ -152,7 +159,7 @@ class CommunicationController extends Controller
             ]);
         }
 
-        return new SuccessResponse('Text messages were successfully dispatched.');
+        return new SuccessResponse('Text messages were successfully dispatched.', [ 'new_thread_id' => $thread->id ]);
     }
 
     /**
