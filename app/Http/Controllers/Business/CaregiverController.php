@@ -48,6 +48,9 @@ class CaregiverController extends BaseController
      */
     public function index(Request $request)
     {
+        if (empty($request->businesses) && auth()->user()->role_type == 'admin') {
+            return [];
+        }
 
         if ($request->expectsJson()) {
             $query = Caregiver::with('businesses')
