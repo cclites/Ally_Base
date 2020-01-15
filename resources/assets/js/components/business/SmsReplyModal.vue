@@ -11,6 +11,19 @@
 
                     <label>Recipient: {{ recipient }}</label>
                 </b-col>
+                <b-col>
+
+                    <b-form-group class="ml-auto pull-right">
+                        <div class="form-check">
+                            <label class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" name="can_reply" v-model=" form.can_reply " value="1">
+                                <span class="custom-control-indicator"></span>
+                                <span class="custom-control-description">Accept Replies</span>
+                            </label>
+                            <input-help :form="form" field="accepted_terms" text=""></input-help>
+                        </div>
+                    </b-form-group>
+                </b-col>
             </b-row>
             <b-row>
 
@@ -55,7 +68,8 @@
 
                 type    : Object,
                 default : {}
-            }
+            },
+            continuedThread : Function
         },
 
         data() {
@@ -65,13 +79,15 @@
                 recipient : '',
                 'form'      : new Form({
 
-                    can_reply   : 1,
-                    all         : 0,
-                    message     : '',
-                    recipients  : [],
-                    business_id : "",
-                    businesses  : '',
-                    debug       : false,
+                    original_reply : this.data ? this.data.id : null,
+                    can_reply      : 1,
+                    all            : 0,
+                    message        : '',
+                    recipients     : [],
+                    business_id    : "",
+                    businesses     : '',
+                    debug          : false,
+                    continued      : 1
                 }),
                 showModal : this.value,
             }
@@ -89,13 +105,15 @@
                 // console.log(defaults);
                 this.recipient = defaults.user ? defaults.user.name : '';
 
-                this.form.can_reply   = 1;
-                this.form.all         = 0;
-                this.form.message     = '';
-                this.form.recipients  = defaults.user ? [ defaults.user.id ] : [];
-                this.form.business_id = defaults.business_id || "";
-                this.form.businesses  = '';
-                this.form.debug       = false;
+                this.form.original_reply = defaults.id || null,
+                this.form.can_reply      = 1;
+                this.form.all            = 0;
+                this.form.message        = '';
+                this.form.recipients     = defaults.user ? [ defaults.user.id ] : [];
+                this.form.business_id    = defaults.business_id || "";
+                this.form.businesses     = '';
+                this.form.debug          = false;
+                this.form.continued      = 1;
             },
 
             async submitForm(){
@@ -112,9 +130,13 @@
 
                 try {
 
-                    await this.form.post( `/business/communication/text-caregivers` );
-                    this.makeForm();
-                    this.showModal = false;
+                    this.form.post( `/business/communication/text-caregivers` )
+                        .then( res => {
+
+                            this.$emit( 'continuedThread', { new_thread_id : res.data.data.new_thread_id, reply_id: this.data.id });
+                            this.makeForm();
+                            this.showModal = false;
+                        });
                 } catch ( e ) {
 
                     console.error( e );
