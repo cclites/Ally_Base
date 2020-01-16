@@ -524,7 +524,7 @@
                     created_by: this.client.creator && this.client.creator.nameLastFirst,
                     created_at: this.formatDateTime(this.client.created_at.date),
                     modified_by: this.client.updator && this.client.updator.nameLastFirst,
-                    modified_at: this.formatDateTime(this.client.updated_at.date),
+                    modified_at: this.client.updator ? this.formatDateTimeFromUTC(this.client.updated_by_timestamp) : null,
                     receive_summary_email: this.client.receive_summary_email,
                     sales_person_id: this.client.sales_person_id,
                     status_alias_id: this.client.status_alias_id || '',

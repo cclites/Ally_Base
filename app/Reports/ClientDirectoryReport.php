@@ -237,7 +237,7 @@ class ClientDirectoryReport extends BusinessResourceReport
 
                 'created_at' => $client->created_at->toDateTimeString(),
                 'created_by' => optional($client->creator)->name,
-                'updated_at' => optional($client->updated_at)->toDateTimeString(),
+                'updated_by_timestamp' => $client->updated_by_timestamp ? $client->updated_by_timestamp->toDateTimeString() : null,
                 'updated_by' => optional($client->updator)->name,
 
                 'services_coordinator' => optional($client->servicesCoordinator)->name,

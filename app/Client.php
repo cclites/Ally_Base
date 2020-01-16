@@ -255,7 +255,7 @@ class Client extends AuditableModel implements
     protected $table = 'clients';
     public $timestamps = false;
     public $hidden = ['ssn'];
-    public $dates = ['service_start_date', 'inquiry_date'];
+    public $dates = ['service_start_date', 'inquiry_date', 'updated_by_timestamp'];
     public $fillable = [
         'business_id',
         'business_fee',
@@ -304,6 +304,7 @@ class Client extends AuditableModel implements
         'travel_directions',
         'created_by',
         'updated_by',
+        'updated_by_timestamp',
         'disaster_code_plan',
         'disaster_planning',
         'caregiver_1099',
