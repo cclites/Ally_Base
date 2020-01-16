@@ -143,10 +143,10 @@ class PrintClaimInvoiceController extends BaseController
      */
     public function cmsInvoice(ClaimInvoice $claim, Request $request)
     {
-        dd( $claim, $claim->client->primaryPayer, $claim->serviceItems );
+        // dd( $claim, $claim->client->primaryPayer, $claim->client->evvAddress, $claim->client->evvPhone, $claim->client->evvPhone, $claim->serviceItems );
         $this->authorize('read', $claim);
 
-        $claim->load([ 'client', 'client.primaryPayer', 'serviceItems', 'business' ]);
+        $claim->load([ 'client', 'client.primaryPayer', 'client.evvPhone', 'serviceItems', 'business' ]);
 
         $client = $claim->client;
         // $address = $client->something;
@@ -161,104 +161,117 @@ class PrintClaimInvoiceController extends BaseController
         $client_bday_year = Carbon::parse( $client->date_of_birth )->format( 'Y' );
         $client_bday_month = Carbon::parse( $client->date_of_birth )->format( 'm' );
         $client_bday_day = Carbon::parse( $client->date_of_birth )->format( 'd' );
+        $client_area_code = substr( $client->evvPhone->national_number, 0, 3 );
+        $client_phone = substr( $client->evvPhone->national_number, -7 );
 
-        $thing = $pdf->fillForm([
+        $total_charge = 0.00;
+        $amount_paid = 0.00;
+        $diagnosis_incrementer = 1;
+        foreach( $serviceItems as $key => $item ){
 
-            // text-fields
-            'insurance_name'           => 'Go Fuck Yourself Insurance',
-            'insurance_address'        => '9 Burning Tree Lane',
-            'insurance_address2'       => 'Unit 107',
-            'insurance_city_state_zip' => 'Boca raton, Fl, 33431',
+            $count = $key + 1;
+
+            $total_charge += $item->amount;
+            $amount_paid += ( $item->amount_due - $item->amount );
+
+            $pdf = new Pdf( $pdf );
+            $pdf->fillForm([
+
+                "service_{$count}_name"           => $item->claimable->service_name,
+                "service_{$count}_charge_dollars" => explode( '.', $item->amount )[ 0 ],
+                "service_{$count}_charge_change"  => explode( '.', $item->amount )[ 1 ] ?? '00',
+                "service_{$count}_units"          => $item->units,
+                "service_{$count}_from_month"     => $item->claimable->visit_start_time->format( 'm' ), // $claimable->service->checked_in_time
+                "service_{$count}_from_day"       => $item->claimable->visit_start_time->format( 'd' ), // $claimable->service->checked_in_time
+                "service_{$count}_from_year"      => $item->claimable->visit_start_time->format( 'Y' ), // $claimable->service->checked_in_time
+                "service_{$count}_to_month"       => $item->claimable->visit_end_time->format( 'm' ), // $claimable->service->checked_out_time
+                "service_{$count}_to_day"         => $item->claimable->visit_end_time->format( 'd' ), // $claimable->service->checked_out_time
+                "service_{$count}_to_year"        => $item->claimable->visit_end_time->format( 'Y' ), // $claimable->service->checked_out_time
+                "service_{$count}_place"          => 12, // 24.b Place of Service => **ALWAYS 12**
+                "service_{$count}_code"           => $item->claimable->service_code, // 24.d CPT ( Service Code ) with MODs => $claim->CPT
+                "service_{$count}_npi"            => $business->medicaid_npi_number, // 24.j Pull NPI based off of client branch location
+            ])->needAppearances();
+
+            if( !empty( $item->client_medicaid_diagnosis_codes ) ){
+
+                foreach( explode( ',', $item->client_medicaid_diagnosis_codes ) as $key => $diagnosis ){
+
+                    $pdf = new Pdf( $pdf );
+                    $pdf->fillForm([ "diagnosis_code_$diagnosis_incrementer" => trim( $diagnosis )])->needAppearances();
+                    $diagnosis_incrementer++;
+                }
+            }
+        }
+
+        $pdf = new Pdf( $pdf );
+        $pdf->fillForm([
+
+            // text-fields **PULL FROM PAYER**
+            'insurance_name'           => $payer->payer->name,
+            'insurance_address'        => $payer->payer->address1,
+            'insurance_address2'       => $payer->payer->address2,
+            'insurance_city_state_zip' => $payer->payer->city . ", " . $payer->payer->state . ", " . $payer->payer->zip,
 
             // Insured Person Information
             'ins_program_name'        => $payer->payer->name, // $client->payer.. the plan or program name
             'ins_insurance_id_number' => $client->hic, // $client->hic
             'ins_name_last_first'     => $client->name_last_first, // $client->name_last_first
-            'ins_address'             => '5188 somethign something road', // $client->serviceAddress details
-            'ins_city'                => 'fort lauderdale', // $client->serviceAddress details
-            'ins_state'               => 'fl', // $client->serviceAddress details
-            'ins_zip_code'            => '33445', // $client->serviceAddress details
-            'ins_phone_area_code'     => '561', // $client->primary_phone_number.. figure this out and break it up
-            'ins_phone_number'        => '6999715', // $client->primary_phone_number.. figure this out and break it up
-            'ins_policy_number'       => '1337ssdpol13', // $client->payer Policy Number ( HIC for MCO ).. whatever that means
+            'ins_address'             => $client->evvAddress ? $client->evvAddress->address1 . ' ' . $client->evvAddress->address2 : '', // $client->evvAddress details
+            'ins_city'                => $client->evvAddress ? $client->evvAddress->city : '', // $client->evvAddress details
+            'ins_state'               => $client->evvAddress ? $client->evvAddress->state : '', // $client->evvAddress details
+            'ins_zip_code'            => $client->evvAddress ? $client->evvAddress->zip : '', // $client->evvAddress details
+            'ins_phone_area_code'     => $client_area_code, // $client->primary_phone_number.. figure this out and break it up
+            'ins_phone_number'        => $client_phone, // $client->primary_phone_number.. figure this out and break it up
+            'ins_policy_number'       => $payer->policy_number, // $client->payer Policy Number ( HIC for MCO ).. whatever that means
             'ins_gender'              => strtolower( $client->gender ), // options: [ m, f ] $client->gender
             'ins_bday_month'          => $client_bday_month, // $client->bday.. will have to be broken up
             'ins_bday_day'            => $client_bday_day, // $client->bday.. will have to be broken up
             'ins_bday_year'           => $client_bday_year, // $client->bday.. will have to be broken up
             'ins_signature'           => 'SIGNATURE ON FILE', // SHOULD ALWAYS SAY **SIGNATURE ON FILE**
 
-            'pt_ins_relationship' => 'self', // options: [ self, spouse, child, other ] **ALWAYS DO SELF**
-
             // Patient Information
-            'pt_name_last_first' => $client->name_last_first, // $client->name_last_first
-            'pt_address'         => '5188 somethign something road', // $client->serviceAddress details
-            'pt_city'            => 'fort lauderdale', // $client->serviceAddress details
-            'pt_state'           => 'fl', // $client->serviceAddress details
-            'pt_zip_code'        => '33445', // $client->serviceAddress details
-            'pt_phone_area_code' => '561', // $client->primary_phone_number.. figure this out and break it up
-            'pt_phone_number'    => '6999715', // $client->primary_phone_number.. figure this out and break it up
-            'pt_policy_number'   => '1337ssdpol13', // $client->payer Policy Number ( HIC for MCO ).. whatever that means
-            'pt_gender'          => strtolower( $client->gender ), // options: [ m, f ] $client->gender
-            'pt_bday_month'      => $client_bday_month, // $client->bday.. will have to be broken up
-            'pt_bday_day'        => $client_bday_day, // $client->bday.. will have to be broken up
-            'pt_bday_year'       => $client_bday_year, // $client->bday.. will have to be broken up
-            'pt_signature'       => 'SIGNATURE ON FILE', // SHOULD ALWAYS SAY **SIGNATURE ON FILE**
-            'pt_todays_date'     => $todays_date,
+            'pt_ins_relationship' => 'self', // options: [ self, spouse, child, other ] **ALWAYS DO SELF**
+            'pt_name_last_first'  => $client->name_last_first, // $client->name_last_first
+            'pt_address'          => $client->evvAddress ? $client->evvAddress->address1 : '', // $client->evvAddress details
+            'pt_city'             => $client->evvAddress ? $client->evvAddress->city : '', // $client->evvAddress details
+            'pt_state'            => $client->evvAddress ? $client->evvAddress->state : '', // $client->evvAddress details
+            'pt_zip_code'         => $client->evvAddress ? $client->evvAddress->zip : '', // $client->evvAddress details
+            'pt_phone_area_code'  => $client_area_code, // $client->primary_phone_number.. figure this out and break it up
+            'pt_phone_number'     => $client_phone, // $client->primary_phone_number.. figure this out and break it up
+            'pt_policy_number'    => $payer->policy_number, // $client->payer Policy Number ( HIC for MCO ).. whatever that means
+            'pt_gender'           => strtolower( $client->gender ), // options: [ m, f ] $client->gender
+            'pt_bday_month'       => $client_bday_month, // $client->bday.. will have to be broken up
+            'pt_bday_day'         => $client_bday_day, // $client->bday.. will have to be broken up
+            'pt_bday_year'        => $client_bday_year, // $client->bday.. will have to be broken up
+            'pt_signature'        => 'SIGNATURE ON FILE', // SHOULD ALWAYS SAY **SIGNATURE ON FILE**
+            'pt_todays_date'      => $todays_date,
 
             'condition_related_to_employment'     => 'n', // options: [ y, n ] **ALWAYS NO**
             'condition_related_to_auto_accident'  => 'n', // options: [ y, n ] **ALWAYS NO**
             'condition_related_to_other_accident' => 'n', // options: [ y, n ] **ALWAYS NO**
 
-            // Check Insurance and Service Auths.. Medical Diagnosis Codes
-            'diagnosis_code_1' => '0123',
-            'diagnosis_code_2' => '0123',
-            'diagnosis_code_3' => '0123',
-            'diagnosis_code_4' => '0123',
-            'diagnosis_code_5' => '0123',
-            'diagnosis_code_6' => '0123',
-            'diagnosis_code_7' => '0123',
-            'diagnosis_code_8' => '0123',
-            'diagnosis_code_9' => '0123',
-            'diagnosis_code_10' => '0123',
-            'diagnosis_code_11' => '0123',
-            'diagnosis_code_12' => '0123',
-
-            'prior_authorization_number' => 'asd123ddsas1zaqwsx', // TODO => need to figure this one out
-
-            'service_1_name'           => 'Testicular Care',
-            'service_1_charge_dollars' => 456,
-            'service_1_charge_change'  => 54,
-            'service_1_units'          => '45',
-            'service_1_from_month'     => '02', // $claimable->service->checked_in_time
-            'service_1_from_day'       => '12', // $claimable->service->checked_in_time
-            'service_1_from_year'      => '1994', // $claimable->service->checked_in_time
-            'service_1_to_month'       => '04', // $claimable->service->checked_out_time
-            'service_1_to_day'         => '20', // $claimable->service->checked_out_time
-            'service_1_to_year'        => '1994', // $claimable->service->checked_out_time
-            'service_1_place'          => 12, // 24.b Place of Service => **ALWAYS 12**
-            'service_1_code'           => '', // 24.d CPT ( Service Code ) with MODs => $claim->CPT
-            'service_1_npi'            => $business->medicaid_npi_number, // 24.j Pull NPI based off of client branch location
+            'prior_authorization_number' => 'need to figure out', // TODO => need to figure this one out
 
             'federal_tax_id'         => $business->medicaid_npi_number, // 25 Federal Tax ID => same as 24.j Pull NPI based off of client branch location
-            'patient_account_number' => '', // 26 Patient Account Number => Pull based off of Ally assigned ID
-            'total_charge_dollars'   => 123, // 28
-            'total_charge_change'    => 20, // 28 Total Charges => Sum of all charges on page (not claim total)
-            'amount_paid_dollars'    => 100, // 29 Amount Paid => Typically 0 or left blank
-            'amount_paid_change'     => 20, // 29 Amount Paid => Typically 0 or left blank
-            'blanace_due'            => 123.20 - 100.20, // 30 Balance Due => Sum of charges minus payments (on page not claim total)
+            'patient_account_number' => 'need to figure out', // TODO => 26 Patient Account Number => Pull based off of Ally assigned ID
+            'total_charge_dollars'   => explode( '.', $total_charge )[ 0 ], // 28
+            'total_charge_change'    => explode( '.', $total_charge )[ 1 ] ?? '00', // 28 Total Charges => Sum of all charges on page (not claim total)
+            'amount_paid_dollars'    => explode( '.', $amount_paid )[ 0 ], // 29 Amount Paid => Typically 0 or left blank
+            'amount_paid_change'     => explode( '.', $amount_paid )[ 1 ] ?? '00', // 29 Amount Paid => Typically 0 or left blank
+            'blanace_due_dollars'    => explode( '.', $total_charge - $amount_paid )[ 0 ], // 30 Balance Due => Sum of charges minus payments (on page not claim total)
+            'blanace_due_change'     => explode( '.', $total_charge - $amount_paid )[ 1 ] ?? '00', // 30 Balance Due => Sum of charges minus payments (on page not claim total)
 
             // NEED TO CLARIFY
-            'supplier_signature'     => '', // 31 Signature of Supplier => Pull from Contacts within Payer Setup 
-            'service_provider'       => '', // 32 Service Facility => Location Pull branch specific location info based off branch designation
-            'billing_provider'       => '', // 33 Billing Provider => Info Pull branch specific location info based off branch designation
-            
-            'todays_date'            => $todays_date
+            'service_facility_line_1'       => $business->address1 . ' ' . $business->address2, // 32 Service Facility => Location Pull branch specific location info based off branch designation **THESE ARE THE SAME**
+            'service_facility_line_2'       => $business->city . ', ' . $business->state . ', ' . $business->zip, // 32 Service Facility => Location Pull branch specific location info based off branch designation **THESE ARE THE SAME**
+            'billing_provider_line_1'       => $business->address1 . ' ' . $business->address2, // 33 Billing Provider => Info Pull branch specific location info based off branch designation **THESE ARE THE SAME**
+            'billing_provider_line_2'       => $business->city . ', ' . $business->state . ', ' . $business->zip, // 33 Billing Provider => Info Pull branch specific location info based off branch designation **THESE ARE THE SAME**
         ])
-            ->flatten()
+            ->needAppearances()
             ->saveAs( '../resources/pdf_forms/cms1500/jeeee.pdf' );
 
-        // $thing = $pdf->dropXfa()->flatten()->saveAs( '../resources/pdf_forms/cms1500/fuck.pdf' );
+        // $thing = $pdf->dropXfa()->needAppearances()->saveAs( '../resources/pdf_forms/cms1500/fuck.pdf' );
 
-        dd( $thing, $pdf );
+        dd( $pdf );
     }
 }
