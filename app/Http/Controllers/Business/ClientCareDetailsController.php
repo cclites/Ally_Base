@@ -32,6 +32,49 @@ class ClientCareDetailsController extends BaseController
         return new ErrorResponse(500, 'An unexpected error occurred while trying to save the client care needs.  Please try again.');
     }
 
+    /**
+     * Download PDF of the clients care details.
+     *
+     * @param Client $client
+     * @return ErrorResponse|Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function generatePdf(Client $client){
+
+        $this->authorize('read', $client);
+
+        $careDetails = $client->careDetails;
+
+        if(!$careDetails){
+            return new ErrorResponse(500, 'You must first create and save a Care Details plan before printing.');
+        }
+
+        if($careDetails->supplies){
+            $client->careDetails->supplies_as_string = $this->snakeCaseArrayToUpperCaseString($careDetails->supplies);
+        }
+
+        if($careDetails->safety_measures){
+            $client->careDetails->safety_measures_as_string = $this->snakeCaseArrayToUpperCaseString($careDetails->safety_measures);
+        }
+
+        if($careDetails->diet){
+            $client->careDetails->diet_as_string = $this->snakeCaseArrayToUpperCaseString($careDetails->diet);
+        }
+
+        $html = response(view('print.business.client_care_details', ['client'=>$client]))->getContent();
+
+        $snappy = \App::make('snappy.pdf');
+        return new Response(
+            $snappy->getOutputFromHtml($html),
+            200,
+            array(
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . standard_filename($client->name, 'care details', 'pdf') . '"'
+            )
+        );
+    }
+
+
 
     public function snakeCaseArrayToUpperCaseString($array){
 
