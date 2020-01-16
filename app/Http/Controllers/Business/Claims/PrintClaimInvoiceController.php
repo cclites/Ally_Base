@@ -203,6 +203,8 @@ class PrintClaimInvoiceController extends BaseController
             }
         }
 
+        $rndm = rand( 10000, 99999 );
+
         $pdf = new Pdf( $pdf );
         $pdf->fillForm([
 
@@ -268,10 +270,6 @@ class PrintClaimInvoiceController extends BaseController
             'billing_provider_line_2'       => $business->city . ', ' . $business->state . ', ' . $business->zip, // 33 Billing Provider => Info Pull branch specific location info based off branch designation **THESE ARE THE SAME**
         ])
             ->needAppearances()
-            ->saveAs( '../resources/pdf_forms/cms1500/jeeee.pdf' );
-
-        // $thing = $pdf->dropXfa()->needAppearances()->saveAs( '../resources/pdf_forms/cms1500/fuck.pdf' );
-
-        dd( $pdf );
+            ->saveAs( "../resources/pdf_forms/cms1500/testingOutput$rndm.pdf" );
     }
 }
