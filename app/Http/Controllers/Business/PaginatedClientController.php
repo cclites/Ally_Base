@@ -39,12 +39,12 @@ class PaginatedClientController extends BaseController
             if ($clientType = $request->input('client_type')) {
                 $query->where('client_type', $clientType);
             }
-            if ($caseManagerId = $request->input('case_manager_id')) {
-                $query->whereHas('caseManager', function ($q) use ($caseManagerId) {
-                    $q->where('id', $caseManagerId);
+            if ($servicesCoordinatorId = $request->input('services_coordinator_id')) {
+                $query->whereHas('servicesCoordinator', function ($q) use ($servicesCoordinatorId) {
+                    $q->where('id', $servicesCoordinatorId);
                 });
             }
-            // Use query string ?address=1&phone_number=1&care_plans=1&case_managers=1 if data is needed
+            // Use query string ?address=1&phone_number=1&care_plans=1&services_coordinators=1 if data is needed
             if ($request->input('address')) {
                 $query->with('address');
             }
@@ -54,8 +54,8 @@ class PaginatedClientController extends BaseController
             if ($request->input('care_plans')) {
                 $query->with('carePlans');
             }
-            if ($request->input('case_managers')) {
-                $query->with('caseManager');
+            if ($request->input('services_coordinators')) {
+                $query->with('servicesCoordinator');
             }
 
             $search = $request->input( 'search', null );

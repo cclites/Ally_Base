@@ -240,21 +240,21 @@ function is_office_user() {
 }
 
 /**
- * Check if the logged in user is a client
- *
- * @return bool
- */
-function is_client() {
-    return Auth::check() && Auth::user()->role_type === 'client';
-}
-
-/**
  * Check if the logged in user is a caregiver
  *
  * @return bool
  */
 function is_caregiver() {
     return Auth::check() && Auth::user()->role_type === 'caregiver';
+}
+
+/**
+ * Check if the logged in user is a client
+ *
+ * @return bool
+ */
+function is_client() {
+    return Auth::check() && Auth::user()->role_type === 'client';
 }
 
 if (! function_exists('activeBusiness')) {
@@ -265,7 +265,8 @@ if (! function_exists('activeBusiness')) {
      * @deprecated
      */
     function activeBusiness() {
-        if (Auth::check() && Auth::user()->role_type === 'caregiver') {
+
+        if ( is_caregiver() ) {
             return Auth::user()->role->businesses->first();
         }
 
@@ -385,5 +386,43 @@ if (! function_exists('download_file')) {
             app('sentry')->captureException($ex);
             return false;
         }
+    }
+}
+
+if (! function_exists('dump_csv')) {
+    function dump_csv(string $filename, \Illuminate\Support\Collection $data, array $headers = null): bool
+    {
+        if (! count($data)) {
+            return false;
+        }
+
+        $fp = fopen($filename, 'w');
+
+        if ($headers) {
+            fputcsv($fp, $headers);
+        } else {
+            fputcsv($fp, array_keys($data->first()));
+        }
+
+        $data->each(function ($row) use ($fp) {
+            fputcsv($fp, $row);
+        });
+
+        fclose($fp);
+
+        return true;
+    }
+}
+
+if (! function_exists('standard_filename')) {
+    function standard_filename(string $subject, string $documentName, string $extension, bool $addDate = true) : string
+    {
+        $date = ' ' . Carbon::now()->format('Y-m-d');
+
+        if (! $addDate) {
+            $date = '';
+        }
+
+        return strtolower(str_slug("{$subject} {$documentName}{$date}")) . ".{$extension}";
     }
 }

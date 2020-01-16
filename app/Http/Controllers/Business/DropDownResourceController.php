@@ -11,8 +11,12 @@ use App\Http\Resources\CaregiverDropdownResource;
 use App\Http\Resources\PayersDropdownResource;
 use App\Http\Resources\SalespersonDropdownResource;
 use App\Http\Resources\ServicesDropdownResource;
+use App\Http\Resources\VisitEditActionResource;
+use App\Http\Resources\VisitEditReasonResource;
 use App\Responses\ErrorResponse;
 use App\SalesPerson;
+use App\VisitEditAction;
+use App\VisitEditReason;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -29,7 +33,8 @@ class DropdownResourceController extends BaseController
         'sales-people',
         'marketing-clients',
         'clients-for-chain',
-        'services'
+        'services',
+        'visit-edit-codes'
     ];
 
     /**
@@ -132,5 +137,12 @@ class DropdownResourceController extends BaseController
     {
         $services = new ServicesDropdownResource(Service::forAuthorizedChain()->get());
         return response()->json($services);
+    }
+
+    public function visitEditCodes(Request $request)
+    {
+        $visitEditReasons = new VisitEditReasonResource( VisitEditReason::all() );
+        $visitEditActions = new VisitEditActionResource( VisitEditAction::all() );
+        return response()->json([ 'reasons' => $visitEditReasons, 'actions' => $visitEditActions ]);
     }
 }

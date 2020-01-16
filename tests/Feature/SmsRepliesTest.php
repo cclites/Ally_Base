@@ -274,7 +274,7 @@ class SmsRepliesTest extends TestCase
     
         $this->assertCount(2, SmsThreadReply::all());
 
-        $this->getJson(route('business.communication.sms-other-replies'))
+        $this->getJson(route('business.communication.sms-other-replies') . '?json=1')
             ->assertStatus(200)
             ->assertJsonCount(1);
     }

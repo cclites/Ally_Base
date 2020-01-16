@@ -69,18 +69,16 @@ class CommunicationController extends Controller
      */
     public function draftOpenShiftMessage($shift)
     {
-        $clientName = $shift->client->name;
+        $clientName = $shift->client->initialedName;
         $date = $shift->starts_at->format('m/d/y');
         $time = $shift->starts_at->format('g:i A');
 
         $location = '';
         if ($shift->client->evvAddress) {
-            $location = $shift->client->evvAddress->city . ', ' . $shift->client->evvAddress->zip;
+            $location = ' in zip ' . $shift->client->evvAddress->zip;
         }
-        $registryName = $shift->business->name;
-        $phone = $shift->business->phone1;
 
-        return "Shift Available\r\n$clientName / $date @ $time / $location\r\n\r\nPlease call $registryName if interested.  First come, first serve. $phone";
+        return "$date@$time-Shift Available-$clientName" . $location . ". Visit the Open Shifts page anytime within Ally to express interest in this or other shifts";
     }
 
     /**
@@ -164,14 +162,14 @@ class CommunicationController extends Controller
      */
     public function threadIndex(Request $request)
     {
-        $threads = SmsThread::forRequestedBusinesses([$request->business_id])
-            ->betweenDates($request->start_date, $request->end_date)
-            ->withReplies($request->reply_only == 1 ? true : false)
-            ->withCount(['recipients', 'replies'])
-            ->latest()
-            ->get();
+        if ($request->filled('json') && $request->wantsJson()) {
+            $threads = SmsThread::forRequestedBusinesses()
+                ->betweenDates($request->start_date, $request->end_date)
+                ->withReplies($request->reply_only == 1 ? true : false)
+                ->withCount(['recipients', 'replies'])
+                ->latest()
+                ->get();
 
-        if (request()->filled('json') && request()->wantsJson()) {
             return response()->json($threads);
         }
 
@@ -200,20 +198,26 @@ class CommunicationController extends Controller
     /**
      * Get list of SMS replies that do not belong to a thread.
      *
+     * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function otherReplies()
+    public function otherReplies(Request $request)
     {
-        $replies = SmsThreadReply::forRequestedBusinesses()
-            ->whereNull('sms_thread_id')
-            ->latest()
-            ->get();
+        if ($request->wantsJson() && filled($request->input('json'))) {
+            $replies = SmsThreadReply::forRequestedBusinesses()
+                ->betweenDates($request->start_date, $request->end_date)
+                ->whereNull('sms_thread_id')
+                ->latest()
+                ->get();
 
-        if (request()->wantsJson()) {
             return response()->json($replies);
         }
 
-        return view('business.communication.sms-replies', compact(['replies']));
+        return view_component('business-sms-other-replies-page', 'Other Text Message Replies', [], [
+            'Home' => route('home'),
+            'Communication' => '',
+            'Sent Texts' => route('business.communication.sms-threads')
+        ]);
     }
 
     /**

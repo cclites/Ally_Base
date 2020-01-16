@@ -16,7 +16,7 @@ class RestoreDataDumpCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'db:restore-dump {--content_id= : The confluence content ID where the database dumps are stored.} {--zip_password= : The password of the encrypted zip file containing the dump.} {--delete : Delete the downloaded files after restore.}';
+    protected $signature = 'db:restore-dump {--content_id= : The confluence content ID where the database dumps are stored.} {--zip_password= : The password of the encrypted zip file containing the dump.} {--keep : Keep the downloaded files after restore.}';
 
     /**
      * The console command description.
@@ -65,7 +65,7 @@ class RestoreDataDumpCommand extends Command
         }
 
         $choices = $attachments->pluck(['filename'])->toArray();
-        $choice = $this->choice('Which dump would you like to restore?', $choices, count($choices)-1);
+        $choice = $this->choice('Which dump would you like to restore?', $choices, 0);
 
         $attachment = $attachments->where('filename', '=', $choice)->first();
         $zipFile = $attachment['filename'];

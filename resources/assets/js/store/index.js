@@ -7,6 +7,8 @@ import tasks from './modules/tasks';
 import quickbooks from './modules/quickbooks';
 import claims from './modules/claims';
 import filters from './modules/filters';
+import openShiftRequests from './modules/openShiftRequests';
+import openShifts from './modules/openShifts';
 
 Vue.use(Vuex);
 
@@ -14,6 +16,9 @@ const debug = process.env.NODE_ENV !== 'production';
 
 export default new Vuex.Store({
     modules: {
+
+        openShifts,
+        openShiftRequests,
         business,
         paymentMethod,
         notifications,

@@ -9,6 +9,7 @@ use App\Billing\Exceptions\PaymentMethodError;
 use App\Billing\Payment;
 use App\Billing\Payments\Contracts\PaymentMethodStrategy;
 use App\Business;
+use App\Client;
 use App\FeeOverrideRule;
 use App\User;
 
@@ -48,6 +49,9 @@ class ProcessPayment
                 }
                 if ($owner instanceof Business) {
                     $business = $owner;
+                }
+                if ($owner instanceof Client) {
+                    $client = $owner;
                 }
             }
 

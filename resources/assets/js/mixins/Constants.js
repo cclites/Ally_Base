@@ -81,6 +81,18 @@ export default {
             SHIFT_MAX_FUTURE_END_DATE: 168, // hours
 
             /**
+             * Open Shifts
+             */
+            OPEN_SHIFTS_STATUS : {
+
+                CANCELLED    : 'cancelled',
+                PENDING      : 'pending',
+                DENIED       : 'denied',
+                APPROVED     : 'approved',
+                UNINTERESTED : 'uninterested'
+            },
+
+            /**
              * Claims
              */
             CLAIM_INVOICE_TYPES: {
@@ -183,6 +195,16 @@ export default {
                 { value: 'processing', text: 'Processing' },
                 { value: 'transferred', text: 'Transferred' },
                 { value: 'errored', text: 'Errored' },
+            ],
+            CLIENT_AMBULATORY: {
+                INDEPENDENT: 'independent',
+                VISUAL: 'visual',
+                PHYSICAL: 'physical',
+            },
+            clientAmbulatoryOptions: [
+                { value: 'independent', text: 'Independent / No restrictions' },
+                { value: 'visual', text: 'Visual supervision' },
+                { value: 'physical', text: 'Physical assistance' },
             ],
         }
     },

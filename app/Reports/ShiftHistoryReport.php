@@ -41,6 +41,9 @@ class ShiftHistoryReport extends BusinessResourceReport
             'client.primaryPayer.client',
             'client.primaryPayer.client.business',
             'client.primaryPayer.paymentMethod',
+
+            'visitEditReason',
+            'visitEditAction',
         ]);
     }
 

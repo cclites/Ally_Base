@@ -29,14 +29,15 @@
     export default {
         name: "ReferralSourceSelect",
 
-        props: ['value', 'sourceType', 'businessId', 'caregiver'],
+        props: ['value', 'sourceType', 'businessId', 'caregiver', 'showActiveOnly'],
 
         data() {
 
             return {
                 showReferralModal : false,
-                referralSources   : null,
-                business_id       : this.businessId || ''
+                referralSources   : [],
+                business_id       : this.businessId || '',
+                show_active_only : this.showActiveOnly || 0,
             }
         },
 
@@ -50,7 +51,22 @@
                 }
             },
             filteredSources() {
-                return this.referralSources;
+
+                if(this.show_active_only === 1){
+
+                    let filtered = this.referralSources.filter( function(x){
+
+                        if(x.active === 1){
+                            return x;
+                        }
+                    });
+
+                    return filtered;
+                }else{
+                    return this.referralSources;
+                }
+
+
             }
         },
 

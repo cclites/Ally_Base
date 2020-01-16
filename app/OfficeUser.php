@@ -172,12 +172,22 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
         if (! empty($this->timezone)) {
             return $this->timezone;
         }
-        
+
         if ($business = $this->businesses->first()) {
             return Timezone::getTimezone($business->id);
         }
 
         return config('ally.local_timezone');
+    }
+
+    /**
+     * Get the office user's assigned clients (clients they are the service coordinator for).
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function assignedClients()
+    {
+        return $this->hasMany(Client::class, 'services_coordinator_id', 'id');
     }
 
     ////////////////////////////////////

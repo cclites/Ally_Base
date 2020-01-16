@@ -163,12 +163,16 @@
     <!-- ============================================================== -->
     <!-- End Page wrapper  -->
     <!-- ============================================================== -->
+
+    @if( is_caregiver() && Gate::check( 'view-open-shifts', [ activeBusiness() ] ) )
+
+        <open-shifts role_type="{{ auth()->user()->role_type }}" businesses="{{ auth()->user()->role->businesses }}"></open-shifts>
+    @endif
+
 </div>
 <!-- ============================================================== -->
 <!-- End Wrapper -->
 <!-- ============================================================== -->
-
-
 
 <form id="logout-form" action="{{ url('/logout') }}" method="POST" style="display: none;">
     {{ csrf_field() }}

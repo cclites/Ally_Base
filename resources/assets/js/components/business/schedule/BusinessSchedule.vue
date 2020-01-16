@@ -127,7 +127,9 @@
             />
             <h6 class="print-date">Printed on <span>{{currentTime()}}</span></h6>
         </div>
-        
+
+        <schedule-request-modal v-model=" requestsModal " :selected-schedule-id=" selectedScheduleId " @request-response=" calendarRequestResponded "></schedule-request-modal>
+
         <schedule-notes-modal v-model="notesModal"
                                 :event="selectedEvent"
                                 @updateEvent="updateEvent"
@@ -162,9 +164,9 @@
                                     @refresh="fetchEvents(true)"
         ></schedule-clock-out-modal>
 
-        <div v-show="preview" 
-            id="preview" 
-            class="preview-window" 
+        <div v-show="preview"
+            id="preview"
+            class="preview-window"
             :style="{ top: previewTop, left: previewLeft }"
         >
             <div class="d-flex">
@@ -245,9 +247,11 @@
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
     import moment from 'moment';
+    import ScheduleRequestModal from "../../modals/ScheduleRequestModal";
+    import HasOpenShiftsModal from '../../../mixins/HasOpenShiftsModal';
 
     export default {
-        components: {BusinessLocationFormGroup},
+        components: {BusinessLocationFormGroup, ScheduleRequestModal},
         props: {
             'business': Object,
             'caregiver': Object,
@@ -318,6 +322,11 @@
         },
 
         computed: {
+
+            requestEvents(){
+
+                return this.events.filter( e => e.requests_count > 0 );
+            },
             eventsUrl() {
                 if (!this.filtersReady || !this.end) {
                     return '';
@@ -362,7 +371,16 @@
                     resourceColumns: [
                         {
                             labelText: this.resourceIdField === 'client_id' ? 'Client' : 'Caregiver',
-                            field: 'title',
+                            text: function(resource) {
+                                return resource.title;
+                            },
+                            render: function(resource, el) {
+                                // need client/caregiver link
+                                if (resource.title !== 'Open Shifts') {
+                                    let link = `<a href='/business/${resource.role}/${resource.id}' target='_blank'>${resource.title}</a>`;
+                                    el.html(link);
+                                }
+                            }
                         },
                         {
                             labelText: 'S',
@@ -435,6 +453,12 @@
         },
 
         methods: {
+
+            calendarRequestResponded( data ){
+
+                this.requestResponded( data );
+                this.fetchEvents(); // this should take care of background color, icon
+            },
             getFilteredEvents() {
                 let events = this.events;
 
@@ -490,6 +514,7 @@
                         scheduled: kpis.SCHEDULED.hours.toFixed(0),
                         completed: kpis.COMPLETED.hours.toFixed(0),
                         projected: kpis.PROJECTED.hours.toFixed(0),
+                        role: this.resourceIdField === 'client_id' ? 'clients' : 'caregivers',
                     };
                 });
 
@@ -570,7 +595,7 @@
                 if (! this.hoverShift.id) {
                     return;
                 }
-            
+
                 if (this.hoverShift.starts_at && moment(this.hoverShift.starts_at.date).isBefore(moment())) {
                     if (! confirm('Modifying past schedules will NOT change the shift history or billing.  Continue?')) {
                         return;
@@ -636,7 +661,7 @@
 
             eventHover(event, jsEvent, view) {
                 let target = null;
-                
+
                 if ($(jsEvent.currentTarget).is('a')) {
                     target = $(jsEvent.currentTarget);
                 } else {
@@ -676,7 +701,7 @@
 
                     let availableWidth = document.documentElement.clientWidth - $('#schedule-card').offset().left;
                     let availableHeight = document.documentElement.clientHeight - $('#schedule-card').offset().top + document.documentElement.scrollTop;
-                  
+
                     if (left + $('#preview').outerWidth() > availableWidth) {
                         left = left - $('#preview').outerWidth() + target.width();
                     }
@@ -701,14 +726,14 @@
                                 if (e.clientX >= eventRect.left - extra && e.clientX <= eventRect.right + extra &&
                                     e.clientY >= eventRect.top - extra && e.clientY <= eventRect.bottom + extra) {
                                         return;
-                                } 
+                                }
 
                                 if (e.clientX >= divRect.left - extra && e.clientX <= divRect.right + extra &&
                                     e.clientY >= divRect.top - extra && e.clientY <= divRect.bottom + extra) {
                                         return;
                                 }
                             }
-                            
+
                             this.preview = false;
                             document.body.removeEventListener('mousemove', handler);
                         }.bind(this);
@@ -805,9 +830,11 @@
                 let event = this.events.find(item => {
                     return item.id === id;
                 });
+                console.log( 'found event here:', event );
                 if (event) {
                     event.backgroundColor = this.getEventBackground(data);
                     event.note = data.note;
+                    event.requests_count = data.requests_count;
                     event.status = data.status;
                 }
             },
@@ -858,8 +885,11 @@
 
             renderEvent: function( event, element, view ) {
                 let note = '';
+                let requests = '';
 
                 if (event.note) {
+                    // adds the widget-icon for the note
+
                     note = $('<span/>', {
                         class: 'fc-note-btn',
                         html: $('<i/>', {
@@ -877,15 +907,36 @@
                     });
                 }
 
+                if( !event.caregiver_id && event.requests_count > 0 ){
+                    // adds the widget-icon for shift requests
+
+                    requests = $('<span/>', {
+                        class: 'fc-note-btn hand-icon-sizing',
+                        html: $('<i/>', {
+                            class: 'solid-open-shifts-icon',
+                        }),
+                    });
+
+                    let vm = this;
+                    requests.click((e) => {
+                        vm.selectedEvent = event;
+                        vm.selectedScheduleId = event.id;
+                        vm.hidePreview();
+                        vm.requestsModal = true;
+                        e.preventDefault();
+                        e.stopPropagation();
+                    });
+                }
+
                 let content = element.find('.fc-content');
                 if (view.name == 'agendaWeek') {
-                    this.renderAgendaWeekEvent(content, event, note);
+                    this.renderAgendaWeekEvent(content, event, note, requests);
                 } else if (view.name == 'timelineDay') {
-                    this.renderTimelineDayEvent(content, event, note);
+                    this.renderTimelineDayEvent(content, event, note, requests);
                 } else if (view.name == 'timelineWeek') {
-                    this.renderTimelineWeekEvent(content, event, note);
+                    this.renderTimelineWeekEvent(content, event, note, requests);
                 } else {
-                    this.renderDefaultEvent(content, event, note);
+                    this.renderDefaultEvent(content, event, note, requests);
                 }
 
                 this.resetScrollPosition = true;
@@ -910,41 +961,41 @@
                 return this.caregiverView ? event.client : event.caregiver;
             },
 
-            renderTimelineDayEvent(content, event, note) {
+            renderTimelineDayEvent(content, event, note, requests) {
                 let data = [`${this.getEventPersonName(event)} ${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
                 });
-                content.html($('<div/>').append(note, title));
+                content.html($('<div/>').append(requests, note, title));
             },
 
-            renderTimelineWeekEvent(content, event, note) {
+            renderTimelineWeekEvent(content, event, note, requests) {
                 let data = [this.getEventPersonName(event), `${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
                 });
-                content.html($('<div/>').append(note, title));
+                content.html($('<div/>').append(requests, note, title));
             },
 
-            renderAgendaWeekEvent(content, event, note) {
+            renderAgendaWeekEvent(content, event, note, requests) {
                 let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
                 });
-                content.html($('<div/>').append(note, title));
+                content.html($('<div/>').append(requests, note, title));
             },
 
-            renderDefaultEvent(content, event, note) {
+            renderDefaultEvent(content, event, note, requests) {
                 let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
                 });
                 content.html(title);
-                content.parent().prepend(note);
+                content.parent().prepend(note, requests);
             },
 
             resourceRender(resource, $td)  {
@@ -1054,13 +1105,14 @@
             },
         },
 
-        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers, FormatsStrings],
+        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers, FormatsStrings, HasOpenShiftsModal],
     }
 </script>
 
 <style lang="scss">
     .fc-view-container { font-size: 0.9em; }
     .fc-event { text-align: left!important; }
+    .hand-icon-sizing { height: 20px; width: 20px; }
     .fc-note-btn { float: right!important; z-index: 9999; padding-left: 5px; position: relative; }
     .fc-event { cursor: pointer; }
     .fc-note-btn:hover {
@@ -1208,7 +1260,7 @@
             h2 {
                 font-weight: bold;
             }
-            
+
             h6 {
                 display: none;
             }

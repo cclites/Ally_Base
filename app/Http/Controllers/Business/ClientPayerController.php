@@ -34,9 +34,11 @@ class ClientPayerController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  UpdateClientPayersRequest  $request
-     * @param  \App\Client  $client
-     * @return \Illuminate\Http\Response
+     * @param UpdateClientPayersRequest $request
+     * @param \App\Client $client
+     * @return ErrorResponse|SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @throws \Exception
      */
     public function update(UpdateClientPayersRequest $request, Client $client)
     {
@@ -59,9 +61,11 @@ class ClientPayerController extends Controller
 
             throw new \Exception();
         } catch (\Exception $ex) {
-            \Log::debug($ex->getMessage());
+            // This means the call to syncPayers threw an exception, and was already
+            // captured there.  No need to log to sentry again, besides this is an
+            // empty exception as thrown above.
             \DB::rollBack();
-            return new ErrorResponse(500, 'An unexpected error occurred.  Please try again.');
+            return new ErrorResponse(500, 'An unexpected error occurred.  If you are removing a payer, make sure they do not have any invoices in the system.  You cannot delete a payer that has been used, instead, change the effective end date.');
         }
     }
 }

@@ -138,7 +138,7 @@ export default {
     methods: {
         fetch() {
             this.busy = true;
-            axios.get(`/business/communication/sms-threads?json=1&start_date=${this.start_date}&end_date=${this.end_date}&reply_only=${this.repliesOnly}&business_id=${this.business_id}`)
+            axios.get(`/business/communication/sms-threads?json=1&start_date=${this.start_date}&end_date=${this.end_date}&reply_only=${this.repliesOnly}&businesses=${this.business_id}&json=1`)
                 .then( ({ data }) => {
                     this.items = data;
                 })
