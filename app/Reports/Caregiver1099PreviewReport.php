@@ -25,7 +25,7 @@ class Caregiver1099PreviewReport extends BaseReport
                     Caregiver1099Payer::ALLY(),
                     Caregiver1099Payer::ALLY_LOCKED(),
                     Caregiver1099Payer::CLIENT()
-                ]);
+                ])->where('send_1099', 'yes');
             })
             ->overThreshold(Caregiver1099::THRESHOLD);
     }

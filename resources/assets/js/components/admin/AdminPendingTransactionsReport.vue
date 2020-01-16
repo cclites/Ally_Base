@@ -46,6 +46,10 @@
                     </b-form-radio-group>
                 </b-form-group>
             </b-col>
+            <b-col class="text-right">
+
+                <b-button variant="info" @click=" loadItems() ">Generate Report</b-button>
+            </b-col>
         </b-row>
 
         <b-row class="mb-2 d-flex flex-row justify-content-around">
@@ -135,7 +139,6 @@
 
         mounted() {
             this.loadBusinesses();
-            this.loadData();
         },
 
         computed: {

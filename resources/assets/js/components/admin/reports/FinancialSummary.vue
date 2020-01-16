@@ -115,11 +115,7 @@
                 ]
             }
         },
-        
-        mounted() {
-            this.fetchData();
-        },
-        
+
         methods: {
             fetchData() {
                 this.loading = true;

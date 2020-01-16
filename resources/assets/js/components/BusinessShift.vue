@@ -169,7 +169,7 @@
                                     <tr v-if="billingType === 'hourly' || billingType === 'fixed'">
                                         <td>
                                             <b-form-select v-model="form.service_id" class="services" @input="changedService(form, form.service_id)">
-                                                <option v-for="service in services" :value="service.id">{{ service.name }} {{ service.code }}</option>
+                                                <option v-for="( service, i ) in services" :value="service.id" :key=" i ">{{ service.name }} {{ service.code }}</option>
                                             </b-form-select>
                                         </td>
                                         <td>
@@ -234,7 +234,7 @@
                                         <td :colspan="allowQuickbooksMapping ? 1 : 2">
                                             <b-form-select v-model="form.payer_id" class="payers" @input="changedPayer(form, form.payer_id)">
                                                 <option :value="null">(Auto)</option>
-                                                <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
+                                                <option v-for="( payer, i ) in clientPayers" :value="payer.id" :key=" i ">{{ payer.name }}</option>
                                             </b-form-select>
                                         </td>
                                         <td colspan="2" v-if="allowQuickbooksMapping">
@@ -246,99 +246,101 @@
                                     </tr>
 
                                     <!-- Service Breakout -->
-                                    <tr v-if="billingType === 'services'" v-for="(service,index) in form.services">
-                                        <td>
-                                            <b-form-select v-model="service.service_id" class="services" @input="changedService(service, service.service_id)">
-                                                <option v-for="s in services" :value="s.id">{{ s.name }} {{ s.code }}</option>
-                                            </b-form-select>
-                                        </td>
-                                        <td>
-                                            <b-form-select v-model="service.hours_type" name="hours_type" @change="(x) => onChangeServiceHoursType(x, service.hours_type, index)">
-                                                <option value="default">REG</option>
-                                                <option value="holiday">HOL</option>
-                                                <option value="overtime">OT</option>
-                                            </b-form-select>
-                                        </td>
-                                        <td>
-                                            <b-form-input
-                                                    name="duration"
-                                                    type="number"
-                                                    step="0.01"
-                                                    min="0"
-                                                    max="999.99"
-                                                    v-model="service.duration"
-                                                    @change="(val) => service.duration = parseFloat(val).toFixed(2)" />
-                                        </td>
-                                        <td class="text-only" v-if="defaultRates">
-                                            {{ numberFormat(service.default_rates.caregiver_rate) }}
-                                        </td>
-                                        <td v-else>
-                                            <b-form-input
-                                                    name="caregiver_rate"
-                                                    type="number"
-                                                    step="0.01"
-                                                    min="0"
-                                                    max="999.99"
-                                                    v-model="service.caregiver_rate"
-                                                    @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
-                                                    class="money-input"
-                                            />
-                                        </td>
-                                        <td class="text-only"  v-if="defaultRates">
-                                            {{ numberFormat(service.default_rates.provider_fee) }}
-                                        </td>
-                                        <td v-else>
-                                            <b-form-input
-                                                    name="provider_fee"
-                                                    type="number"
-                                                    step="0.01"
-                                                    min="0"
-                                                    max="999.99"
-                                                    v-model="service.provider_fee"
-                                                    @change="updateClientRates(service)"
-                                                    class="money-input"
-                                            />
-                                        </td>
-                                        <td class="text-only">
-                                            <span v-if="defaultRates">{{ numberFormat(service.default_rates.ally_fee) }}</span>
-                                            <span v-else>{{ numberFormat(service.ally_fee) }}</span>
-                                        </td>
-                                        <td class="text-only" v-if="defaultRates">
-                                            {{ numberFormat(service.default_rates.client_rate) }}
-                                        </td>
-                                        <td v-else>
-                                            <b-form-input
-                                                    name="client_rate"
-                                                    type="number"
-                                                    step="0.01"
-                                                    min="0"
-                                                    max="999.99"
-                                                    v-model="service.client_rate"
-                                                    @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
-                                                    class="money-input"
-                                            />
-                                        </td>
-                                        <td>
-                                            <b-form-select v-model="service.payer_id" class="payers" @input="changedPayer(service, service.payer_id)">
-                                                <option :value="null">(Auto)</option>
-                                                <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
-                                            </b-form-select>
-                                        </td>
-                                        <td v-if="allowQuickbooksMapping">
-                                            <b-form-select v-model="service.quickbooks_service_id" :disabled="disableQuickbooksMapping">
-                                                <option value="">--None--</option>
-                                                <option v-for="item in quickbooksServices" :value="item.id" :key="item.id">{{ item.name }}</option>
-                                            </b-form-select>
-                                        </td>
-                                        <td class="service-actions text-nowrap">
-                                            <b-btn size="xs" @click="removeService(index)" v-if="form.services.length > 1">
-                                                <i class="fa fa-times"></i>
-                                            </b-btn>
-                                            <b-btn size="xs" variant="success" style="background-color: green;" @click="addService()" v-if="index === form.services.length - 1">
-                                                <i class="fa fa-plus"></i>
-                                            </b-btn>
-                                        </td>
-                                    </tr>
+                                    <div v-if="billingType === 'services'">
+                                        <tr v-for="(service,index) in form.services" :key=" index ">
+                                            <td>
+                                                <b-form-select v-model="service.service_id" class="services" @input="changedService(service, service.service_id)">
+                                                    <option v-for="( s, i ) in services" :value="s.id" :key=" i ">{{ s.name }} {{ s.code }}</option>
+                                                </b-form-select>
+                                            </td>
+                                            <td>
+                                                <b-form-select v-model="service.hours_type" name="hours_type" @change="(x) => onChangeServiceHoursType(x, service.hours_type, index)">
+                                                    <option value="default">REG</option>
+                                                    <option value="holiday">HOL</option>
+                                                    <option value="overtime">OT</option>
+                                                </b-form-select>
+                                            </td>
+                                            <td>
+                                                <b-form-input
+                                                        name="duration"
+                                                        type="number"
+                                                        step="0.01"
+                                                        min="0"
+                                                        max="999.99"
+                                                        v-model="service.duration"
+                                                        @change="(val) => service.duration = parseFloat(val).toFixed(2)" />
+                                            </td>
+                                            <td class="text-only" v-if="defaultRates">
+                                                {{ numberFormat(service.default_rates.caregiver_rate) }}
+                                            </td>
+                                            <td v-else>
+                                                <b-form-input
+                                                        name="caregiver_rate"
+                                                        type="number"
+                                                        step="0.01"
+                                                        min="0"
+                                                        max="999.99"
+                                                        v-model="service.caregiver_rate"
+                                                        @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
+                                                        class="money-input"
+                                                />
+                                            </td>
+                                            <td class="text-only"  v-if="defaultRates">
+                                                {{ numberFormat(service.default_rates.provider_fee) }}
+                                            </td>
+                                            <td v-else>
+                                                <b-form-input
+                                                        name="provider_fee"
+                                                        type="number"
+                                                        step="0.01"
+                                                        min="0"
+                                                        max="999.99"
+                                                        v-model="service.provider_fee"
+                                                        @change="updateClientRates(service)"
+                                                        class="money-input"
+                                                />
+                                            </td>
+                                            <td class="text-only">
+                                                <span v-if="defaultRates">{{ numberFormat(service.default_rates.ally_fee) }}</span>
+                                                <span v-else>{{ numberFormat(service.ally_fee) }}</span>
+                                            </td>
+                                            <td class="text-only" v-if="defaultRates">
+                                                {{ numberFormat(service.default_rates.client_rate) }}
+                                            </td>
+                                            <td v-else>
+                                                <b-form-input
+                                                        name="client_rate"
+                                                        type="number"
+                                                        step="0.01"
+                                                        min="0"
+                                                        max="999.99"
+                                                        v-model="service.client_rate"
+                                                        @change="recalculateRates(service, service.client_rate, service.caregiver_rate)"
+                                                        class="money-input"
+                                                />
+                                            </td>
+                                            <td>
+                                                <b-form-select v-model="service.payer_id" class="payers" @input="changedPayer(service, service.payer_id)">
+                                                    <option :value="null">(Auto)</option>
+                                                    <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
+                                                </b-form-select>
+                                            </td>
+                                            <td v-if="allowQuickbooksMapping">
+                                                <b-form-select v-model="service.quickbooks_service_id" :disabled="disableQuickbooksMapping">
+                                                    <option value="">--None--</option>
+                                                    <option v-for="item in quickbooksServices" :value="item.id" :key="item.id">{{ item.name }}</option>
+                                                </b-form-select>
+                                            </td>
+                                            <td class="service-actions text-nowrap">
+                                                <b-btn size="xs" @click="removeService(index)" v-if="form.services.length > 1">
+                                                    <i class="fa fa-times"></i>
+                                                </b-btn>
+                                                <b-btn size="xs" variant="success" style="background-color: green;" @click="addService()" v-if="index === form.services.length - 1">
+                                                    <i class="fa fa-plus"></i>
+                                                </b-btn>
+                                            </td>
+                                        </tr>
+                                    </div>
                                     </tbody>
                                 </table>
                             </div>
@@ -480,6 +482,16 @@
                     </b-row>
                     <shift-evv-data-table v-if="shift.id" :shift="shift"></shift-evv-data-table>
                 </div> <!-- // end ! isClient -->
+
+                <edit-code-dropdowns
+                    v-if=" shift.id "
+                    class="my-3"
+                    :visit_edit_action_id=" form.visit_edit_action_id "
+                    :visit_edit_reason_id=" form.visit_edit_reason_id "
+                    :updateAction=" updateAction "
+                    :updateReason=" updateReason "
+                />
+
                 <b-row v-if="isClient">
                     <b-col lg="12" class="text-right mt-3">
                         <b-button variant="info" type="submit" @click="saveShift(false)">
@@ -487,7 +499,7 @@
                         </b-button>
                     </b-col>
                 </b-row>
-                <b-row v-else-if="!is_modal">
+                <b-row v-else-if=" !is_modal ">
                     <b-col lg="4">
                         <b-row><span><strong>Added:</strong>&nbsp;{{ shift.created_at ? formatDateTimeFromUTC(shift.created_at) : 'Unknown' }}</span></b-row>
                         <b-row>
@@ -725,6 +737,15 @@
 
         },
         methods: {
+
+            updateAction( action ){
+
+                this.form.visit_edit_action_id = action;
+            },
+            updateReason( reason ){
+
+                this.form.visit_edit_reason_id = reason;
+            },
             changedShift(shift) {
                 if (this.isRoot) {
                     // If we are not working from the SHR or other parent
@@ -878,6 +899,8 @@
                         'ally_fee': null,
                     },
                     quickbooks_service_id: shift.quickbooks_service_id || '',
+                    visit_edit_reason_id : shift.visit_edit_reason_id,
+                    visit_edit_action_id : shift.visit_edit_action_id
                 };
             },
             createIssue() {

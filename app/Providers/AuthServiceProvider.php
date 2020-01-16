@@ -123,6 +123,13 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
+        Gate::define( 'view-open-shifts', function ( User $user, $business ) {
+
+            if( ( is_office_user() || is_caregiver() ) && $business->has_open_shifts ) return true;
+
+            return false;
+        });
+
         Gate::define('view-caregiver-statements', function (User $user, Caregiver $caregiver) {
             return $user->role_type === 'admin'
                 || (
@@ -133,8 +140,7 @@ class AuthServiceProvider extends ServiceProvider
                 );
         });
 
-        Gate::define( 'view-reports', function ( User $user ) {
-
+        Gate::define('view-reports', function (User $user) {
             return $user->role_type === 'admin'
                 || (
                     $user->role_type === 'office_user'
@@ -142,9 +148,15 @@ class AuthServiceProvider extends ServiceProvider
                 );
         });
 
-        Gate::define( 'user_navigation', function ( User $user ) {
+        Gate::define('inactive_users', function (User $user) {
+            // Office users should be restricted from accessing
+            // the site if they are not active.
+            if ($user->role_type == 'office_user') {
+                return $user->active;
+            }
 
-            return ( !empty( $user->role ) && $user->active );
+            // Client and Caregivers should still be allowed to log in.
+            return true;
         });
     }
 }

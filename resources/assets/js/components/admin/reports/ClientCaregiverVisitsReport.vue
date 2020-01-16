@@ -56,6 +56,7 @@
 
 <script>
     export default {
+
         props: ['clients', 'caregivers', 'startDate', 'endDate'],
 
         data() {
@@ -89,7 +90,6 @@
         },
 
         created() {
-            this.fetchData();
         },
 
         methods: {

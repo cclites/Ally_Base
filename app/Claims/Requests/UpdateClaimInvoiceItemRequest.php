@@ -103,6 +103,9 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             'client_ltci_claim_number' => 'nullable',
             'client_hic' => 'nullable',
             'client_invoice_notes' => 'nullable',
+
+            'visit_edit_action_id' => 'nullable|integer',
+            'visit_edit_reason_id' => 'nullable|integer',
         ];
     }
 
@@ -169,6 +172,9 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
                     'shift_end_time',
                     'service_start_date',
                     'service_start_time',
+
+                    'visit_edit_action_id',
+                    'visit_edit_reason_id',
                 ])->toArray();
 
                 // convert dates and times
@@ -325,7 +331,7 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             $data['client_last_name'] = $client->last_name;
             $data['client_medicaid_id'] = $client->medicaid_id;
             $data['client_medicaid_diagnosis_codes'] = $client->medicaid_diagnosis_codes;
-            $data['client_case_manager'] = optional($client->caseManager)->name_last_first;
+            $data['client_case_manager'] = $client->case_manager;
             // TODO: how would we know to reload the client payer ?
             // $data['client_program_number'] = $clientPayer->program_number;
             // $data['client_cirts_number'] = $clientPayer->cirts_number;

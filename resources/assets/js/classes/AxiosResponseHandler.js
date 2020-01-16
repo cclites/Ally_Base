@@ -8,6 +8,7 @@ class AxiosResponseHandler {
     }
 
     handleResponse(response, alert = true) {
+
         this.response = response;
         if (alert && this.getMessage()) this.handleAlert('success', this.getMessage());
         if (this.hasRedirect()) this.handleRedirect();

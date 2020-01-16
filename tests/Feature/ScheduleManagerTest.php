@@ -91,6 +91,7 @@ class ScheduleManagerTest extends TestCase
         $data = array_merge(array_only($shift->toArray(), [
             'caregiver_id',
             'caregiver_rate',
+            'client_rate',
             'client_id', 
             'hours_type',
             'notes',

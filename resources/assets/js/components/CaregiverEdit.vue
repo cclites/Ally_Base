@@ -92,7 +92,7 @@
                         <date-picker id="application_date" v-model="form.application_date"></date-picker>
                     </b-form-group>
                     <b-form-group>
-                        <business-referral-source-select v-model="form.referral_source_id" source-type="caregiver" :caregiver="true"></business-referral-source-select>
+                        <business-referral-source-select v-model="form.referral_source_id" source-type="caregiver" :caregiver="true" :show-active-only="1"></business-referral-source-select>
                         <input-help :form="form" field="referred_by" text="Enter how the caregiver was referred." />
                     </b-form-group>
                 </b-col>
@@ -245,6 +245,13 @@
                         <b-button variant="info" @click="activateModal = true"><i class="fa fa-refresh"></i> Re-activate Caregiver</b-button>
                         <b-button variant="info" @click=" getDischarge() "><i class="fa fa-file mr-1"></i>Download Discharge Summary</b-button>
                     </template>
+                    <b-button variant="secondary"
+                        type="button"
+                        :href="`/business/impersonate/${caregiver.id}`"
+                        v-if="isAdmin"
+                    >
+                        Impersonate User
+                    </b-button>
                 </b-col>
             </b-row>
         </form>

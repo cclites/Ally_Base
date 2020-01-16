@@ -22,8 +22,6 @@
 
 <script>
 export default {
-    name: 'PinConfirmationModel',
-
     props: {
     },
 

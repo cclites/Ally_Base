@@ -51,12 +51,12 @@
 
                         <b-form-group label="Service Coordinator" class="f-1 mx-1">
 
-                            <b-form-select v-model="filters.caseManager" :disabled=" filters.userType === 'caregiver' ">
+                            <b-form-select v-model="filters.services_coordinator_id" :disabled=" filters.userType === 'caregiver' ">
                                 <template slot="first">
                                     <!-- this slot appears above the options from 'options' prop -->
                                 <option value="">All Service Coordinators</option>
                                 </template>
-                                <option :value="cm.id" v-for="cm in filteredCaseManagers" :key="cm.id">{{ cm.nameLastFirst }}</option>
+                                <option :value="sc.id" v-for="sc in filteredServiceCoordinators" :key="sc.id">{{ sc.nameLastFirst }}</option>
                             </b-form-select>
                         </b-form-group>
 
@@ -116,6 +116,10 @@
                     </div>
                     <div v-else> {{ data.item.county }} </div>
                 </template>
+
+                <template slot="service_coordinator" scope="row">
+                    {{ row.item.services_coordinator_name }}
+                </template>
                 <template slot="actions" scope="row">
 
                     <!-- We use click.stop here to prevent a 'row-clicked' event from also happening -->
@@ -163,7 +167,7 @@
                 modalDetails: { index:'', data:'' },
                 selectedItem: {},
                 users: [],
-                caseManagers: [],
+                servicesCoordinators: [],
                 loading: false,
                 statuses: {caregiver: [], client: []},
                 filters: new Form({
@@ -171,7 +175,7 @@
                     status: '',
                     search: '',
                     client_type: '',
-                    caseManager: '',
+                    services_coordinator_id: '',
                     userType: 'caregiver',
                     daysPassed : 1
                 }),
@@ -224,7 +228,7 @@
                             formatter: this.formatUppercase,
                         },
                         {
-                            key: 'case_manager_name',
+                            key: 'service_coordinator',
                             label: 'Service Coordinator',
                             sortable: true,
                         },
@@ -293,10 +297,10 @@
 
                 return `/business/${ this.filters.userType }s/paginate?json=1`;
             },
-            filteredCaseManagers() {
+            filteredServiceCoordinators() {
                 return (!this.filters.business_id)
-                    ? this.caseManagers
-                    : this.caseManagers.filter(x => x.business_ids.includes(this.filters.business_id));
+                    ? this.servicesCoordinators
+                    : this.servicesCoordinators.filter(x => x.business_ids.includes(this.filters.business_id));
             },
             statusEntity(){
 
@@ -335,7 +339,8 @@
                 if( this.filters.userType == 'client' ){
 
                     query += '&client_type=' + this.filters.client_type;
-                    query += '&case_manager_id=' + this.filters.caseManager;
+                    query += '&services_coordinator_id=' + this.filters.services_coordinator_id;
+                    query += '&services_coordinators=1';
                 }
 
                 return query;
@@ -351,7 +356,7 @@
             async loadOfficeUsers() {
 
                 const response = await axios.get(`/business/office-users`);
-                this.caseManagers = response.data;
+                this.servicesCoordinators = response.data;
             },
             capitalize( string ){
                 // this can be abstracted into a lodash utility mixin.. not sure if one exists yet havent looked
@@ -377,16 +382,13 @@
 
                 axios.get( this.paginatedEndpoint + this.listFilters + this.paginationControls )
                     .then( ({ data }) => {
-
-                        console.log( 'response: ', data );
                         this.totalRows = data.total;
 
                         if( this.filters.userType == 'client' ){
 
                             this.users = data.clients.map( client => {
-
                                 client.county = client.address ? client.address.county : '';
-                                client.case_manager_name = client.case_manager ? client.case_manager.name : null;
+                                client.services_coordinator_name = client.services_coordinator ? client.services_coordinator.name : null;
                                 return client;
                             }) || [];
                         } else this.users = data.results || [];

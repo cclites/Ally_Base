@@ -179,6 +179,11 @@ trait IsUserRole
         return $this->user->gender;
     }
 
+    public function getInitialedNameAttribute()
+    {
+        return substr( $this->user->firstname, 0, 1 ) . "." . $this->user->lastname;
+    }
+
     public function getFirstNameAttribute()
     {
         return $this->user->firstname;

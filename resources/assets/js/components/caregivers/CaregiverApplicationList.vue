@@ -40,7 +40,7 @@
             <b-col lg="2">
                 Filter:<br />
                 <b-button @click="reloadData" variant="info">
-                    Update
+                    Generate Report
                 </b-button>
             </b-col>
         </b-row>
@@ -96,18 +96,17 @@
     export default {
         props: {
             'applicationUrl': String,
-            'applications': Array,
         },
 
         data() {
             return {
-                items: this.applications,
+                items: [],
                 statuses: ['New', 'Open', 'Converted'],
                 start_date: "",
                 end_date: "",
                 status: 'Open',
                 archived: 0,
-                totalRows: this.applications.length,
+                totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
                 sortBy: null,

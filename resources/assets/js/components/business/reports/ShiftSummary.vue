@@ -33,7 +33,7 @@
                             </option>
                         </b-form-select>
                     </b-form-group>
-                    
+
                     <b-form-group label="&nbsp;" class="mb-2 mr-2">
                         <b-button variant="info" type="submit" :disabled="loading">Generate</b-button>
                     </b-form-group>
@@ -126,10 +126,6 @@
                         this.loading = false;
                     })
             },
-        },
-
-        created() {
-            this.fetch();
         },
 
         watch: {

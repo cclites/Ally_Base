@@ -106,7 +106,7 @@
         <div class="tab-pane active" id="profile" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <client-edit :client="{{ $client }}" :sales-people="{{ $salesPeople }}" last-status-date="{{ $lastStatusDate }}" :chain-client-type-settings="{{ $chainClientTypeSettings }}"></client-edit>
+                    <client-edit :client="{{ $client }}" :sales-people="{{ $salesPeople }}" last-status-date="{{ $lastStatusDate }}" :chain-client-type-settings="{{ $chainClientTypeSettings ? $chainClientTypeSettings : '{}' }}"></client-edit>
                 </div>
             </div>
         </div>
@@ -207,7 +207,7 @@
         </div>
         <div class="tab-pane" id="client_payment_history" role="tabpanel">
             <b-card title="Payment History">
-                <client-payment-history :client="{{ $client }}" :payments="{{ $client->payments OR "[]" }}">
+                <client-payment-history :client="{{ $client }}">
                     <template slot="actions" scope="data">
                         <a :href="'/business/client/payments/' + data.item.id" class="btn btn-secondary" target="_blank">
                             <i class="fa fa-external-link"></i> View

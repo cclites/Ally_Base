@@ -45,12 +45,12 @@
                 <b-row>
                     <b-col md="6" v-if="schedules.length > 0">
                         <div class="form-group" v-for="schedule in schedules" :key="schedule.id">
-                            <b-button variant="info" @click="clockIn(schedule)" :disabled="authInactive">Clock Into Your {{ formatTime(schedule.starts_at.date) }} Shift</b-button>
+                            <b-button variant="info" @click="clockIn(schedule)" :disabled="submitting || authInactive">Clock Into Your {{ formatTime(schedule.starts_at.date) }} Shift</b-button>
                         </div>
                     </b-col>
                     <b-col md="6" v-else>
                         <div class="form-group" v-if="form.client_id">
-                            <b-button variant="success" @click="clockInWithoutSchedule()" :disabled="authInactive">Clock in</b-button>
+                            <b-button variant="success" @click="clockInWithoutSchedule()" :disabled="submitting || authInactive">Clock in</b-button>
                         </div>
                     </b-col>
                     <b-col md="6">
@@ -62,7 +62,7 @@
                 <b-row v-if="form.client_id && schedules.length > 0">
                     <b-col md="12" class="mt-3 text-center text-small">
                         <div v-if="allowUnscheduledClockin">
-                            <b-button variant="success" @click="clockInWithoutSchedule()" :disabled="authInactive">Clock Into An Unscheduled Shift</b-button>
+                            <b-button variant="success" @click="clockInWithoutSchedule()" :disabled="submitting || authInactive">Clock Into An Unscheduled Shift</b-button>
                         </div>
                         <div v-else>
                             <b-button variant="link" @click="allowUnscheduledClockin = true">If you do not see your shift, Click Here.</b-button>
@@ -100,6 +100,7 @@
 
         data() {
             return {
+                submitting: false,
                 form: new Form({
                     client_id: "",
                     schedule_id: null,
@@ -283,12 +284,14 @@
             },
 
             clockInWithoutSchedule() {
+                this.submitting = true;
                 this.form.schedule_id = null;
                 this.loadLocation();
                 this.submitForm();
             },
 
             clockIn(schedule) {
+                this.submitting = true;
                 this.form.schedule_id = schedule.id;
                 this.loadLocation();
                 this.submitForm();
@@ -300,6 +303,7 @@
                     const response = await this.form.post('/clock-in');
                     if (response.data.stats) {
                         this.stats = response.data.stats;
+                        this.submitting = false;
                     }
                     else {
                         window.location = '/clocked-in';

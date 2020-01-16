@@ -17,14 +17,14 @@
                         <date-picker
                             v-model="end_date"
                             placeholder="End Date"
-                            class="mt-1"
+                            class="mt-1 mr-1"
                         >
                         </date-picker>&nbsp;
                         <b-form-select
                             id="business_id"
                             name="business_id"
-                            v-model="business_id"
-                            class="mt-1"
+                            v-model="filters.business_id"
+                            class="mt-1 mr-2"
                         >
                             <option value="">-- All Businesses</option>
                             <option v-for="business in businesses" :value="business.id" :key="business.id">{{ business.name }}</option>
@@ -32,8 +32,8 @@
                         <b-form-select
                             id="client_id"
                             name="client_id"
-                            v-model="client_id"
-                            class="mt-1"
+                            v-model="filters.client_id"
+                            class="mt-1 mr-2"
                         >
                             <option value="">-- All Clients</option>
                             <option v-for="client in clients" :value="client.id" :key="client.id">{{ client.name }}</option>
@@ -41,8 +41,8 @@
                         <b-form-select
                             id="caregiver_id"
                             name="caregiver_id"
-                            v-model="caregiver_id"
-                            class="mt-1"
+                            v-model="filters.caregiver_id"
+                            class="mt-1 mr-2"
                         >
                             <option value="">-- All Carevigers</option>
                             <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.name }}</option>
@@ -51,7 +51,7 @@
                         <b-button 
                             @click="toggle_statuses = !toggle_statuses" 
                             variant="secondary"
-                            class="mt-1"
+                            class="mt-1 mr-2"
                         >
                             Toggle Statuses
                         </b-button>&nbsp;
@@ -105,7 +105,7 @@
                         <th>{{ sum('caregiver_total') }}</th>
                         <th>{{ sum('provider_total') }}</th>
                         <th>{{ sum('ally_total') }}</th>
-                        <th colspan="2"></th>
+                        <th colspan="3"></th>
                     </template>
                     <template slot="actions" scope="data">
                         <b-btn variant="info" :href="`/business/shifts/${data.item.id}`" size="sm">
@@ -129,6 +129,7 @@
 <script>
     import FormatsNumbers from '../../mixins/FormatsNumbers';
     import FormatsDates from '../../mixins/FormatsDates';
+    import {Decimal} from "decimal.js";
 
     export default {
         mixins: [FormatsNumbers, FormatsDates],
@@ -136,9 +137,6 @@
         props: {
             start_at: {default: null},
             end_at: {default: null},
-            client_id: {default: ''},
-            business_id: {default: ''},
-            caregiver_id: {default: ''},
             selected_statuses: {default: []}
         },
 
@@ -241,7 +239,12 @@
                     //     label: 'EVV Verified',
                     //     sortable: true,
                     // }
-                ]
+                ],
+                filters: {
+                    client_id: '',
+                    business_id: '',
+                    caregiver_id: '',
+                }
             }
         },
 
@@ -255,23 +258,16 @@
         },
 
         mounted() {
-            this.loadItems();
             this.loadFilters();
         },
 
         methods: {
             sum(prop) {
-                let total = 0;
-                total = this.items.reduce((sum, item) => {                     
-                    let parsed = parseFloat(
-                        // remove commas
-                        item[prop].replace(/,/g, '')
-                    )
-                    
-                    return sum + parsed
-                }, total);
-                
-                return this.numberFormat(total);
+                let total = this.items.reduce((carry, item) => {
+                    return carry.add(new Decimal(item[prop].replace(/,/g, '')));
+                }, new Decimal(0.00));
+
+                return this.numberFormat(total.toString());
             },
             
             provider(id) {
@@ -312,9 +308,9 @@
                     status: this.selected_statuses
                 }
                 
-                if (this.business_id) params.business_id = this.business_id;
-                if (this.caregiver_id) params.caregiver_id = this.caregiver_id;
-                if (this.client_id) params.client_id = this.client_id;
+                if (this.filters.business_id) params.business_id = this.filters.business_id;
+                if (this.filters.caregiver_id) params.caregiver_id = this.filters.caregiver_id;
+                if (this.filters.client_id) params.client_id = this.filters.client_id;
                 
                 axios.get('/admin/reports/unsettled/data', {params})
                     .then(response => {

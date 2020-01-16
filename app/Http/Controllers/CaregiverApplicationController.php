@@ -47,9 +47,8 @@ class CaregiverApplicationController extends BusinessBaseController
             return $query->whereArchived($request->archived)->get();
         }
 
-        $applications = $query->whereStatus('Open')->whereArchived(0)->get();
         $applicationUrl = $this->businessChain()->getCaregiverApplicationUrl();
-        return view('caregivers.applications.index', compact('applicationUrl', 'applications'));
+        return view('caregivers.applications.index', compact('applicationUrl'));
     }
 
     /**

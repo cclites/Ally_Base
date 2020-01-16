@@ -38,18 +38,31 @@
                         <input-help :form="form" field="client_type" text="Select the type of payment the client will use."></input-help>
                         <b-form-text class="">NOTE: Changing the client type will change the 1099 settings.</b-form-text>
                     </b-form-group>
-                    <b-form-group label="Client Services Coordinator" label-for="case_manager">
+                    <b-form-group label="Client Services Coordinator" label-for="services_coordinator">
                         <b-form-select
-                                v-model="form.case_manager_id"
-                                id="case_manager_id"
-                                name="case_manager_id"
+                                v-model="form.services_coordinator_id"
+                                id="services_coordinator_id"
+                                name="services_coordinator_id"
                                 class="mr-2 mb-2"
                         >
                             <option :value="null">-- Client Services Coordinator --</option>
-                            <option :value="cm.id" v-for="cm in caseManagers" :key="cm.id">{{ cm.name }}</option>
+                            <option :value="sc.id" v-for="sc in servicesCoordinators" :key="sc.id">{{ sc.name }}</option>
                         </b-form-select>
-                        <input-help :form="form" field="case_manager_id" text="Select service coordinator for the client."></input-help>
+                        <input-help :form="form" field="services_coordinator_id" text="Select service coordinator for the client."></input-help>
                     </b-form-group>
+
+                    <b-form-group label="Client Case Manager" label-for="case_manager">
+                        <b-form-input
+                                v-model="form.case_manager"
+                                id="case_manager"
+                                name="case_manager"
+                                class="mr-2 mb-2"
+                        >
+                        </b-form-input>
+                        <input-help :form="form" field="case_manager" text="Enter Case Manager for the client."></input-help>
+                    </b-form-group>
+
+
                     <b-form-group label="Salesperson">
                         <b-form-select v-model="form.sales_person_id">
                             <option :value="null">None</option>
@@ -181,6 +194,7 @@
                     </b-form-group>
                 </b-col>
             </b-row>
+            <!------------------------------------->
             <b-row>
                 <b-col lg="6">
                     <b-form-group label="Date inquired about Service">
@@ -189,19 +203,15 @@
                     </b-form-group>
 
                     <b-form-group class="mb-2">
-                        <business-referral-source-select :businessId=" client.business_id " v-model="form.referral_source_id" source-type="client"></business-referral-source-select>
+                        <business-referral-source-select :businessId=" client.business_id " v-model="form.referral_source_id" source-type="client" :show-active-only="1"></business-referral-source-select>
                         <div class="d-flex justify-content-end">
                             <input-help :form="form" field="referral_source_id" text="Enter how the prospect was referred."/>
                         </div>
                     </b-form-group>
 
-                    <b-form-group>
-                        <b-form-checkbox id="ambulatory"
-                                         v-model="form.ambulatory"
-                                         :value="true"
-                                         :unchecked-value="false">
-                            Ambulatory
-                        </b-form-checkbox>
+                    <b-form-group label="Ambulatory">
+                        <b-form-select id="ambulatory" v-model="form.ambulatory" :options="clientAmbulatoryOptions">
+                        </b-form-select>
                     </b-form-group>
 
                     <b-form-group v-if="businessSendsSummaryEmails">
@@ -220,28 +230,24 @@
                             <input-help :form="form" field="receive_summary_email" text="An example of this email can be found under Settings > General > Shift Confirmations" class="ml-4"></input-help>
                         </div>
                     </b-form-group>
+                    <b-row>
+                        <b-col lg="4" v-if="canEdit1099">
+                            <b-form-group label="Send Caregiver 1099" label-class="required">
+                                <b-form-select v-model="form.send_1099">
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </b-form-select>
+                            </b-form-group>
+                        </b-col>
+                        <b-col lg="8" v-if="form.send_1099 == 'yes'">
+                            <b-form-group label="Caregiver 1099">
+                                <label>
+                                    1099s are being sent on behalf of {{ payerLabel }}. Contact Ally if you wish to change this.
+                                </label>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
                 </b-col>
-            </b-row>
-            <!------------------------------------->
-            <b-row >
-                <b-col lg="3" v-if="canEdit1099">
-                    <b-form-group label="Caregiver 1099" label-class="required">
-                        <b-form-select v-model="form.send_1099">
-                            <option value="yes">Yes</option>
-                            <option value="no">No</option>
-                        </b-form-select>
-                    </b-form-group>
-                </b-col>
-                <b-col lg="6" v-if="form.send_1099 == 'yes'">
-                    <b-form-group label="Caregiver 1099">
-                        <label>
-                            1099s are being sent on behalf of {{ payerLabel }}. Contact Ally if you wish to change this.
-                        </label>
-                    </b-form-group>
-                </b-col>
-            </b-row>
-            <!------------------------------------->
-            <b-row>
                 <b-col lg="6">
                     <b-form-group label="Service Start Date">
                         <date-picker id="service_start_date" v-model="form.service_start_date"></date-picker>
@@ -270,6 +276,7 @@
                     </b-form-group>
                 </b-col>
             </b-row>
+            <!------------------------------------->
             <b-row>
                 <b-col lg="6">
                     <b-form-group label="Created On" label-for="created_at">
@@ -398,6 +405,13 @@
                         <b-button variant="info" @click="activateModal = true"><i class="fa fa-refresh"></i> Re-activate Client</b-button>
                         <b-button variant="info" @click=" getDischarge() "><i class="fa fa-file mr-1"></i>Download Discharge Summary</b-button>
                     </template>
+                    <b-button variant="secondary"
+                        type="button"
+                        :href="`/business/impersonate/${client.id}`"
+                        v-if="isAdmin"
+                    >
+                        Impersonate User
+                    </b-button>
                 </b-col>
             </b-row>
         </form>
@@ -494,13 +508,14 @@
                     service_start_date: this.client.service_start_date ? this.formatDate(this.client.service_start_date) : '',
                     referral_source_id: this.client.referral_source_id ? this.client.referral_source_id : "",
                     diagnosis: this.client.diagnosis,
-                    ambulatory: !!this.client.ambulatory,
+                    ambulatory: this.client.ambulatory,
                     gender: this.client.gender,
                     hospital_name: this.client.hospital_name,
                     hospital_number: this.client.hospital_number,
                     avatar: this.client.avatar,
                     business_id: this.client.business_id,
-                    case_manager_id: this.client.case_manager_id,
+                    case_manager: this.client.case_manager ? this.client.case_manager : '',
+                    services_coordinator_id: this.client.services_coordinator_id,
                     hic: this.client.hic,
                     travel_directions: this.client.travel_directions,
                     caregiver_1099: this.client.caregiver_1099,
@@ -520,7 +535,7 @@
                 deactivateModal: false,
                 activateModal: false,
                 showReferralModal: false,
-                caseManagers: [],
+                servicesCoordinators: [],
                 sendEmailModal: false,
                 statusAliases: [],
                 localLastStatusDate: null,
@@ -622,7 +637,7 @@
 
             async loadOfficeUsers() {
                 const response = await axios.get(`/business/${this.client.business_id}/office-users`);
-                this.caseManagers = response.data;
+                this.servicesCoordinators = response.data;
             },
 
             checkForNoEmailDomain() {

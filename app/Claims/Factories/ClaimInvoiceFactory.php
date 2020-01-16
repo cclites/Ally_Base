@@ -20,6 +20,8 @@ use App\Billing\Service;
 use App\Billing\Payer;
 use App\Address;
 use App\Shift;
+use App\VisitEditAction;
+use App\VisitEditReason;
 
 class ClaimInvoiceFactory
 {
@@ -45,15 +47,12 @@ class ClaimInvoiceFactory
             'items.shift',
             'clientPayer',
 
-            'items.shift.client.caseManager',
             'items.shift.clientSignature',
             'items.shift.caregiverSignature',
 
             'items.shiftExpense.shift.caregiver',
-            'items.shiftExpense.shift.client.caseManager',
 
             'items.shiftService',
-            'items.shiftService.shift.client.caseManager',
             'items.shiftService.shift.clientSignature',
             'items.shiftService.shift.caregiverSignature',
         ]);
@@ -241,7 +240,7 @@ class ClaimInvoiceFactory
             'client_dob' => $client->date_of_birth,
             'client_medicaid_id' => $client->medicaid_id,
             'client_medicaid_diagnosis_codes' => $client->medicaid_diagnosis_codes,
-            'client_case_manager' => optional($client->caseManager)->name_last_first,
+            'client_case_manager' => $client->case_manager,
             'client_ltci_policy_number' => $client->getPolicyNumber(),
             'client_ltci_claim_number' => $client->getClaimNumber(),
             'client_hic' => $client->hic,
@@ -306,7 +305,7 @@ class ClaimInvoiceFactory
             'client_dob' => $client->date_of_birth,
             'client_medicaid_id' => $client->medicaid_id,
             'client_medicaid_diagnosis_codes' => $client->medicaid_diagnosis_codes,
-            'client_case_manager' => optional($client->caseManager)->name_last_first,
+            'client_case_manager' => $client->case_manager,
             'client_ltci_policy_number' => $client->getPolicyNumber(),
             'client_ltci_claim_number' => $client->getClaimNumber(),
             'client_hic' => $client->hic,
@@ -374,7 +373,7 @@ class ClaimInvoiceFactory
             'client_dob' => $client->date_of_birth,
             'client_medicaid_id' => $client->medicaid_id,
             'client_medicaid_diagnosis_codes' => $client->medicaid_diagnosis_codes,
-            'client_case_manager' => optional($client->caseManager)->name_last_first,
+            'client_case_manager' => $client->case_manager,
             'client_ltci_policy_number' => $client->getPolicyNumber(),
             'client_ltci_claim_number' => $client->getClaimNumber(),
             'client_hic' => $client->hic,
@@ -445,6 +444,8 @@ class ClaimInvoiceFactory
             'client_signature_id' => optional($shift->clientSignature)->id,
             'caregiver_signature_id' => optional($shift->caregiverSignature)->id,
             'is_overtime' => $shift->hours_type == 'default' ? false : true,
+            'visit_edit_action_id' => $shift->verified ? $shift->visit_edit_action_id : VisitEditAction::nonEvvDefault(),
+            'visit_edit_reason_id' => $shift->verified ? $shift->visit_edit_reason_id : VisitEditReason::nonEvvDefault(),
         ]);
     }
 
@@ -517,16 +518,13 @@ class ClaimInvoiceFactory
      */
     public function deleteClaimInvoice(ClaimInvoice $claim): void
     {
-        if ($claim->adjustments()->count() > 0) {
-            throw new CannotDeleteClaimInvoiceException('This claim has had adjustments applied.');
-        }
-
         if ($claim->hasBeenTransmitted()) {
             throw new CannotDeleteClaimInvoiceException('This claim has already been transmitted.');
         }
 
         try {
             \DB::beginTransaction();
+            $claim->adjustments()->forceDelete();
 
             foreach ($claim->items as $item) {
                 $item->claimable->delete();

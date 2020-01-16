@@ -94,7 +94,6 @@
 
         created() {
             this.loadCaregivers();
-            this.fetchData();
         },
 
         data() {

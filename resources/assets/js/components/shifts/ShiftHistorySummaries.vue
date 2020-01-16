@@ -18,7 +18,7 @@
                                 <tr>
                                     <th>Client</th>
                                     <th>Hours</th>
-                                    <th>Pre Ally</th>
+                                    <th v-if="isAdmin">Pre Ally</th>
                                     <th>Total</th>
                                     <!--<th>Caregiver</th>-->
                                     <!--<th>Registry</th>-->
@@ -30,7 +30,7 @@
                                 <tr v-for="item in clientCharges" :key="item.id">
                                     <td><a :href="'/business/clients/' + item.id">{{ item.name }}</a></td>
                                     <td>{{ item.hours }}</td>
-                                    <td>{{ moneyFormat(preAllyTotal(item)) }}</td>
+                                    <td v-if="isAdmin">{{ moneyFormat(preAllyTotal(item)) }}</td>
                                     <td>{{ moneyFormat(item.total) }}</td>
                                     <!--<td>{{ item.caregiver_total }}</td>-->
                                     <!--<td>{{ item.provider_total }}</td>-->
@@ -95,7 +95,7 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-row>
+        <b-row v-if="isAdmin">
             <b-col lg="6">
                 <b-card>
                     <table class="table table-bordered">
@@ -122,9 +122,10 @@
 
 <script>
     import FormatsNumbers from "../../mixins/FormatsNumbers";
+    import AuthUser from '../../mixins/AuthUser';
 
     export default {
-        mixins: [FormatsNumbers],
+        mixins: [FormatsNumbers, AuthUser],
 
         props: {
             clientCharges: Array,
