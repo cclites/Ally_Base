@@ -260,8 +260,8 @@ class PrintClaimInvoiceController extends BaseController
             'total_charge_change'    => explode( '.', $total_charge )[ 1 ] ?? '00', // 28 Total Charges => Sum of all charges on page (not claim total)
             'amount_paid_dollars'    => explode( '.', $amount_paid )[ 0 ], // 29 Amount Paid => Typically 0 or left blank
             'amount_paid_change'     => explode( '.', $amount_paid )[ 1 ] ?? '00', // 29 Amount Paid => Typically 0 or left blank
-            'blanace_due_dollars'    => explode( '.', $total_charge - $amount_paid )[ 0 ], // 30 Balance Due => Sum of charges minus payments (on page not claim total)
-            'blanace_due_change'     => explode( '.', $total_charge - $amount_paid )[ 1 ] ?? '00', // 30 Balance Due => Sum of charges minus payments (on page not claim total)
+            'balance_due_dollars'    => explode( '.', $total_charge - $amount_paid )[ 0 ], // 30 Balance Due => Sum of charges minus payments (on page not claim total)
+            'balance_due_change'     => explode( '.', $total_charge - $amount_paid )[ 1 ] ?? '00', // 30 Balance Due => Sum of charges minus payments (on page not claim total)
 
             // NEED TO CLARIFY
             'service_facility_line_1'       => $business->address1 . ' ' . $business->address2, // 32 Service Facility => Location Pull branch specific location info based off branch designation **THESE ARE THE SAME**
@@ -270,6 +270,10 @@ class PrintClaimInvoiceController extends BaseController
             'billing_provider_line_2'       => $business->city . ', ' . $business->state . ', ' . $business->zip, // 33 Billing Provider => Info Pull branch specific location info based off branch designation **THESE ARE THE SAME**
         ])
             ->needAppearances()
-            ->saveAs( "../resources/pdf_forms/cms1500/testingOutput$rndm.pdf" );
+            ->execute();
+            // ->saveAs( "../resources/pdf_forms/cms1500/testingOutput$rndm.pdf" );
+
+        $pdf->send( "testingOutput$rndm.pdf" );
+        dd( 'remaining here', $pdf );
     }
 }
