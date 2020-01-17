@@ -167,6 +167,7 @@ class CommunicationController extends Controller
                 ->betweenDates($request->start_date, $request->end_date)
                 ->withReplies($request->reply_only == 1 ? true : false)
                 ->withCount(['recipients', 'replies'])
+                ->withKeyword( $request->input( 'keyword', null ) )
                 ->latest()
                 ->get();
 

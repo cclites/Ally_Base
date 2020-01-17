@@ -184,6 +184,20 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
         return $query;
     }
 
+    /**
+     * match threads by keyword
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @param bool $onOff
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public function scopeWithKeyword($query, string $keyword = null )
+    {
+        if( empty( $keyword ) ) return $query;
+
+        return $query->where( 'message', 'LIKE', '%' . $keyword . '%' );
+    }
+
     // **********************************************************
     // OTHER FUNCTIONS
     // **********************************************************
