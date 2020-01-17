@@ -112,7 +112,22 @@
                         if (this.sync) {
                             self.events = cal.fullCalendar('clientEvents')
                         }
-                        self.$emit('event-render', ...args)
+                        self.$emit('event-render', ...args);
+
+                        const eventObj = args[0], $el = args[1];
+                        const spansMultipleDays = e => {
+                            if (!e.start || !e.end) {
+                                return false;
+                            }
+
+                            return e.start.format("D") !== e.end.format("D");
+                        };
+
+                        const isListView = $el.hasClass("fc-list-item");
+
+                        if (isListView && spansMultipleDays(eventObj)) {
+                            $el.closest('tr').hide();
+                        }
                     },
 
                     eventDestroy(event) {
