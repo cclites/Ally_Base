@@ -1,5 +1,5 @@
 <template>
-    <b-card header="Face Sheet Report"
+    <b-card :header="header_label"
             header-text-variant="white"
             header-bg-variant="info"
     >
@@ -57,7 +57,8 @@
                 clients: [],
                 loadingClients: false,
                 loadingCaregivers: false,
-                busy: false
+                busy: false,
+                header_label: _.startCase(this.role) + " Face Sheet Report",
             };
         },
         mounted() {
@@ -72,21 +73,19 @@
         },
         methods: {
             generateFaceSheet(){
-
                 let url = `/business/reports/face-sheet/${this.role}s/print/`;
 
                 if(this.role == 'client'){
                     url += this.client_id;
                 }
                 else{
-                    url += this.caregiver_id;
+                    url += this.caregiver_id + "/" + this.businesses;
                 }
 
                 window.location = url;
             },
 
             async fetchClients(){
-
                 this.loadingClients = true;
                 this.clients = [];
 
@@ -103,7 +102,6 @@
             },
 
             async fetchCaregivers(){
-
                 this.loadingCaregivers = true;
                 this.caregivers = [];
 

@@ -36,15 +36,15 @@
         <tr>
             <td>
                 {{-- Business Logo --}}
-                {{ $caregiver->businesses->first()->logo }}
+                {{ $business->logo }}
             </td>
             <td>{{-- Business Address --}}
-                {{ $caregiver->businesses->first()->name }}<br>
-                {{ $caregiver->businesses->first()->address1 }}<br>
-                @if($caregiver->businesses->first()->address2)
-                    {{$caregiver->businesses->first()->address2}}<br>
+                {{ $business->name }}<br>
+                {{ $business->address1 }}<br>
+                @if($business->address2)
+                    {{ $business->address2}}<br>
                 @endif
-                {{ $caregiver->businesses->first()->getCityStateZipAttribute() }}
+                {{ $business->getCityStateZipAttribute() }}
             </td>
         </tr>
     </table>

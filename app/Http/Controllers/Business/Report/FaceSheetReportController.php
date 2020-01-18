@@ -3,7 +3,7 @@
 
 namespace App\Http\Controllers\Business\Report;
 
-
+use App\Business;
 use App\Caregiver;
 use App\Client;
 use App\Responses\ErrorResponse;
@@ -39,14 +39,14 @@ class FaceSheetReportController
         );
     }
 
-    public function generateCaregiverFaceSheet(Caregiver $caregiver){
+    public function generateCaregiverFaceSheet(Caregiver $caregiver, Business $business){
 
         if(!$caregiver){
             return new ErrorResponse("404", 'You must select a caregiver.');
         }
 
         $caregiver = $caregiver->load(['addresses', 'businessChains', 'availability', 'skills']);
-        $html = response(view('business.caregivers.caregiver_face_sheet', ['caregiver'=>$caregiver]))->getContent();
+        $html = response(view('business.caregivers.caregiver_face_sheet', ['caregiver'=>$caregiver, 'business'=>$business]))->getContent();
         $snappy = \App::make('snappy.pdf');
 
         \Log::info(json_encode($caregiver->skills));
