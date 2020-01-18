@@ -615,13 +615,13 @@
                         name: 'Client Face Sheet',
                         url: 'reports/face-sheet?role=client',
                         description: 'Generate Client Face Sheet',
-                        category: 5,
+                        category: 2,
                         allowed: ['office_user'],
                     },
 
                     {
                         name: 'Caregiver Face Sheet',
-                        url: 'reports/face-sheet/role=caregiver',
+                        url: 'reports/face-sheet?role=caregiver',
                         description: 'Generate Caregiver Face Sheet',
                         category: 3,
                         allowed: ['office_user'],

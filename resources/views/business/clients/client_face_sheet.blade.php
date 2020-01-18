@@ -61,7 +61,7 @@
     <table class="client-info">
         <thead>
             <tr>
-                <th colspan="3">CLIENT INFO:</th>
+                <th colspan="3">CLIENT INFORMATION:</th>
             </tr>
         </thead>
         <tbody>

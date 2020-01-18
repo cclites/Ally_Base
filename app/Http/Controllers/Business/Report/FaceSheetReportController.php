@@ -45,9 +45,11 @@ class FaceSheetReportController
             return new ErrorResponse("404", 'You must select a caregiver.');
         }
 
-        $caregiver = $caregiver->load(['addresses', 'preferences', 'business']);
-        $html = response(view('business.caregivers.client_face_sheet', ['caregiver'=>$caregiver]))->getContent();
+        $caregiver = $caregiver->load(['addresses', 'businessChains', 'availability', 'skills']);
+        $html = response(view('business.caregivers.caregiver_face_sheet', ['caregiver'=>$caregiver]))->getContent();
         $snappy = \App::make('snappy.pdf');
+
+        \Log::info(json_encode($caregiver->skills));
 
         return new Response(
             $snappy->getOutputFromHtml($html),

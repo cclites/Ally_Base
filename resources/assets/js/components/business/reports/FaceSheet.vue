@@ -90,7 +90,7 @@
                 this.loadingClients = true;
                 this.clients = [];
 
-                await axios.get(this.url)
+                await axios.get(`/business/dropdown/clients?businesses=${this.businesses}`)
                     .then( ({ data }) => {
                     this.clients = data;
                 })
@@ -107,7 +107,7 @@
                 this.loadingCaregivers = true;
                 this.caregivers = [];
 
-                await axios.get(this.url)
+                await axios.get(`/business/dropdown/caregivers?business=${this.businesses}`)
                     .then( ({ data }) => {
                         this.caregivers = data;
                     })
