@@ -15,7 +15,6 @@
             background-color: #1e88e5;
             color: #fff;
         }
-
         .client-info, .client-info th, .client-info td,
         .contact-info, .contact-info th, .contact-info td,
         .profile-info, .profile-info th, .profile-info td,
@@ -30,17 +29,34 @@
             margin-bottom: 0px;
             font-size: 10px;
         }
-    </style>
 
-    {{-- Create a registry header --}}
+        .logo_header tr td{
+            width: 50%;
+            text-align: center;
+        }
+
+        .avatar{
+            text-align: center;
+            height: auto;
+        }
+
+        .avatar img{
+            height: 100px;
+        }
+
+        .heading span{
+            width: 48%;
+            display: inline-block;
+        }
+
+    </style>
 
     <table class="logo_header">
         <tr>
             <td>
-                {{-- Business Logo --}}
                 <img src="{{ $client->business->logo }}">
             </td>
-            <td>{{-- Business Address --}}
+            <td>
                 {{ $client->business->name }}<br>
                 {{ $client->business->address1 }}<br>
                 @if($client->business->address2)
@@ -53,8 +69,11 @@
 
     <hr>
 
-    <span>Client Data for {{ $client->nameLastFirst() }}</span>
-    <span class="avatar"><img src="{{ $client->avatar }}"></span>
+    <div class="heading">
+        <span>Client Data for {{ $client->nameLastFirst() }}</span>
+        <span class="avatar"><img src="{{ url($client->avatar) }}"></span>
+    </div>
+
 
     <hr>
 
@@ -76,7 +95,7 @@
                 </td>
                 <td>
                     <p>DOB:</p>
-                    {{ $client->date_of_birth }}
+                    {{ \Carbon\Carbon::parse( $client->date_of_birth )->format( 'm-d-Y' ) }}
                 </td>
             </tr>
         </tbody>
@@ -121,16 +140,12 @@
                     <p>Address 1:</p>
                     @if($client->billingAddress)
                         {{ $client->billingAddress->address1 }}
-                    @else
-                        &nbsp;
                     @endif
                 </td>
                 <td colspan="2">
                     <p>Address 1</p>
                     @if($client->evvAddress)
                         {{ $client->evvAddress->address1 }}
-                    @else
-                        &nbsp;
                     @endif
                 </td>
             </tr>
@@ -231,9 +246,11 @@
                     @endif
 
                     Pets in Home &nbsp;&nbsp; Type:
-                    @foreach($client->careDetails->pets as $pet)
+                    @if($client->careDetails && count($client->careDetails->pets))
+                        @foreach($client->careDetails->pets as $pet)
                         {{ $pet . "  "}}
-                    @endforeach
+                        @endforeach
+                     @endif
 
                 </td>
             </tr>

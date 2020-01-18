@@ -7,10 +7,6 @@
             margin-bottom: 20px;
         }
 
-        .address-info th{
-            width: 50%;
-        }
-
         th{
             background-color: #1e88e5;
             color: #fff;
@@ -30,15 +26,35 @@
             margin-bottom: 0px;
             font-size: 10px;
         }
+
+        .logo_header tr td{
+            width: 50%;
+            text-align: center;
+        }
+
+        .avatar{
+            text-align: center;
+            width: 50%;
+            height: auto;
+        }
+
+        .logo_header tr td,
+        .avatar img{
+            height: 100px;
+        }
+
+        .heading span{
+            width: 48%;
+            display: inline-block;
+        }
     </style>
 
     <table class="logo_header">
         <tr>
             <td>
-                {{-- Business Logo --}}
-                {{ $business->logo }}
+                <img src="{{ $business->logo }}" alt="{{ $business->name }}">
             </td>
-            <td>{{-- Business Address --}}
+            <td>
                 {{ $business->name }}<br>
                 {{ $business->address1 }}<br>
                 @if($business->address2)
@@ -51,8 +67,10 @@
 
     <hr>
 
-    <span>Caregiver Data for {{ $caregiver->nameLastFirst() }}</span>
-    <span class="avatar"><img src="{{ $caregiver->avatar }}"></span>
+    <div class="heading">
+        <span>Caregiver Data for {{ $caregiver->nameLastFirst() }}</span>
+        <span class="avatar"><img src="{{ url($caregiver->avatar) }}" alt="{{ $caregiver->avatar }}"></span>
+    </div>
 
     <hr>
 
@@ -70,7 +88,7 @@
                 </td>
                 <td>
                     <p>DOB:</p>
-                    {{ $caregiver->date_of_birth }}
+                    {{ \Carbon\Carbon::parse( $caregiver->date_of_birth )->format( 'm-d-Y' ) }}
                 </td>
                 <td>
                     <p>City:</p>
