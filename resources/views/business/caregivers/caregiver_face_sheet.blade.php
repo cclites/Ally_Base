@@ -50,26 +50,28 @@
     </style>
 
     <table class="logo_header">
-        <tr>
-            <td>
-                <img src="{{ $business->logo }}" alt="{{ $business->name }}">
-            </td>
-            <td>
-                {{ $business->name }}<br>
-                {{ $business->address1 }}<br>
-                @if($business->address2)
-                    {{ $business->address2}}<br>
-                @endif
-                {{ $business->getCityStateZipAttribute() }}
-            </td>
-        </tr>
+        <tbody>
+            <tr>
+                <td>
+                    <img src="{{ asset($business->logo) }}" alt="{{ $business->name }}">
+                </td>
+                <td>
+                    {{ $business->name }}<br>
+                    {{ $business->address1 }}<br>
+                    @if($business->address2)
+                        {{ $business->address2}}<br>
+                    @endif
+                    {{ $business->getCityStateZipAttribute() }}
+                </td>
+            </tr>
+        </tbody>
     </table>
 
     <hr>
 
     <div class="heading">
         <span>Caregiver Data for {{ $caregiver->nameLastFirst() }}</span>
-        <span class="avatar"><img src="{{ url($caregiver->avatar) }}" alt="{{ $caregiver->avatar }}"></span>
+        <span class="avatar"><img src="{{ asset($caregiver->avatar) }}" alt="{{ $caregiver->avatar }}"></span>
     </div>
 
     <hr>

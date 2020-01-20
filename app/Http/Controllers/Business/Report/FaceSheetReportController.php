@@ -49,6 +49,8 @@ class FaceSheetReportController
         $html = response(view('business.caregivers.caregiver_face_sheet', ['caregiver'=>$caregiver, 'business'=>$business]))->getContent();
         $snappy = \App::make('snappy.pdf');
 
+        \Log::info($html);
+
         return new Response(
             $snappy->getOutputFromHtml($html),
             200,
