@@ -131,6 +131,23 @@
                     </b-col>
                 </b-row>
 
+                <b-row v-if=" isOfficeUserOrAdmin " class="mt-2">
+
+                    <b-col>
+
+                        <b-form-group label="Admin Notes" label-for="admin_note">
+                            <b-textarea
+                                    id="admin_note"
+                                    name="admin_note"
+                                    :rows="3"
+                                    v-model="form.admin_note"
+                            >
+                            </b-textarea>
+                            <input-help :form="form" field="admin_note" text="For internal purposes, only you can see this"></input-help>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+
                 <div v-if="isOfficeUserOrAdmin">
                     <b-row class="mt-2">
                         <b-col lg="12">
@@ -899,6 +916,7 @@
                         'ally_fee': null,
                     },
                     quickbooks_service_id: shift.quickbooks_service_id || '',
+                    admin_note: shift.admin_note,
                     visit_edit_reason_id : shift.visit_edit_reason_id,
                     visit_edit_action_id : shift.visit_edit_action_id
                 };

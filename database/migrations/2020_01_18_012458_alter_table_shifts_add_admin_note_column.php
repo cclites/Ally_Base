@@ -13,7 +13,7 @@ class AlterTableShiftsAddAdminNoteColumn extends Migration
      */
     public function up()
     {
-        Schema::table( 'claimable_services', function ( Blueprint $table ) {
+        Schema::table( 'shifts', function ( Blueprint $table ) {
 
             $table->string( 'admin_note', 255 )->nullable();
         });
@@ -26,7 +26,7 @@ class AlterTableShiftsAddAdminNoteColumn extends Migration
      */
     public function down()
     {
-        Schema::table( 'claimable_services', function ( Blueprint $table ) {
+        Schema::table( 'shifts', function ( Blueprint $table ) {
 
             $table->dropColumn( 'admin_note' );
         });

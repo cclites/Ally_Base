@@ -322,6 +322,7 @@
         },
 
         async mounted() {
+
             this.$store.commit('filters/setBusiness', this.filters.business_id);
             this.loadFiltersFromStorage();
             this.setInitialFields();
@@ -338,7 +339,7 @@
                 servicesLoaded: 'filters/isServicesLoaded',
                 clientList: 'filters/clientList',
                 caregiverList: 'filters/caregiverList',
-                services: 'filters/serviceList',
+                services: 'filters/serviceList'
             }),
             clients() {
                 return this.clientList.filter(x => {
@@ -402,6 +403,16 @@
                         });
                     }
                 }
+
+                if( this.isOfficeUserOrAdmin ){
+
+                    fields.push({
+                        key: 'admin_note',
+                        formatter : v => v ? v.substring( 0, 12 ) + '...' : '',
+                        class: 'hidden-print'
+                    });
+                }
+
                 fields.push({
                     key: 'actions',
                     class: 'hidden-print'
@@ -443,6 +454,7 @@
                         'Services': item.services,
                         'status': item.status,
                         'business_id': item.business_id,
+                        'admin_note': item.admin_note,
                         '_rowVariant': this.getRowVariant(item),
                     };
                 });
@@ -591,6 +603,7 @@
 
                 axios.get(this.urlPrefix + 'shifts' + this.queryString)
                     .then(response => {
+
                         if (Array.isArray(response.data)) {
                             this.items.shifts = response.data;
                         }

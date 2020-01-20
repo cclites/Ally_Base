@@ -122,6 +122,15 @@
             </b-col>
         </b-row>
 
+        <b-row v-if=" isOfficeUserOrAdmin && shift.admin_note " class="mt-2 mb-4">
+
+            <b-col>
+
+                <h3>Admin Note:<small class="text-muted"> *only you can see this*</small></h3>
+                > {{ shift.admin_note }}
+            </b-col>
+        </b-row>
+
         <b-row class="mb-2">
             <b-col sm="6"><strong>Was this Shift Electronically Verified?</strong> {{ shift.verified ? 'Yes' : 'No' }}</b-col>
             <b-col sm="6" v-if="shift.verified"><strong>Verification Method:</strong> {{ evvMethod }}</b-col>
