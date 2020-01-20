@@ -126,7 +126,13 @@
                         const isListView = $el.hasClass("fc-list-item");
 
                         if (isListView && spansMultipleDays(eventObj)) {
-                            $el.closest('tr').hide();
+                            // only hide if NOT start day
+                            const today = new Date().getDate();
+                            const startDay = parseInt(eventObj.start.format("D"), 10);
+
+                            if (today !== startDay) {
+                                $el.closest("tr").hide();
+                            }
                         }
                     },
 
