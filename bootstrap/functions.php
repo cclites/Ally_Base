@@ -240,21 +240,21 @@ function is_office_user() {
 }
 
 /**
- * Check if the logged in user is a client
- *
- * @return bool
- */
-function is_client() {
-    return Auth::check() && Auth::user()->role_type === 'client';
-}
-
-/**
  * Check if the logged in user is a caregiver
  *
  * @return bool
  */
 function is_caregiver() {
     return Auth::check() && Auth::user()->role_type === 'caregiver';
+}
+
+/**
+ * Check if the logged in user is a client
+ *
+ * @return bool
+ */
+function is_client() {
+    return Auth::check() && Auth::user()->role_type === 'client';
 }
 
 if (! function_exists('activeBusiness')) {
@@ -265,7 +265,8 @@ if (! function_exists('activeBusiness')) {
      * @deprecated
      */
     function activeBusiness() {
-        if (Auth::check() && Auth::user()->role_type === 'caregiver') {
+
+        if ( is_caregiver() ) {
             return Auth::user()->role->businesses->first();
         }
 

@@ -50,7 +50,7 @@
     </div>
 </div>
 
-<div class="row">
+<div class="row" style="page-break-after: always;">
     <div class="col">
         <div class="pull-right" style="margin-right: 1rem;">&copy; {{ \Carbon\Carbon::now()->year }} Ally</div>
     </div>

@@ -313,6 +313,11 @@ class Caregiver extends AuditableModel implements
         return $this->hasMany(Payment::class);
     }
 
+    public function scheduleRequests()
+    {
+        return $this->hasMany( CaregiverScheduleRequest::class );
+    }
+
     public function phoneNumber()
     {
         return $this->hasOne(PhoneNumber::class, 'user_id', 'id')
@@ -533,6 +538,17 @@ class Caregiver extends AuditableModel implements
     }
 
     /**
+     * Remove all of the Caregiver's Schedule Requests
+     *
+     * @return void
+     */
+    public function removeOutstandingScheduleRequests()
+    {
+        $this->scheduleRequests()
+            ->delete();
+    }
+
+    /**
      * Aggregate schedules for this caregiver and return an array of events
      *
      * @param string|\DateTime $start
@@ -635,6 +651,23 @@ class Caregiver extends AuditableModel implements
         }
 
         return $this->clients()->where('client_id', $client)->exists();
+    }
+
+    /**
+     * first pass at the ability for features to be enabled/disabled based upon whether or not any of the associated businesses have the feature..
+     * 
+     * can be used in conjunction with the above relationship in code like " if( in_array( active_business() ) )
+     */
+    public function businessesWithOpenShiftsFeature()
+    {
+        $businesses = collect();
+
+        foreach( $this->businesses as $business ){
+
+            if( $business->has_open_shifts ) $businesses->push( $business );
+        }
+
+        return $businesses;
     }
 
     /**

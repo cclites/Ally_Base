@@ -118,6 +118,30 @@
                                         @endif
                                     </div>
                                 </div>
+
+                                @if( $shift->questions->count() > 0 )
+
+                                    <div class="row">
+
+                                        <div><strong>Shift Questions:</strong></div>
+
+                                        @foreach( $shift->questions as $question )
+
+                                            <div class="col-sm-6" style="margin-bottom: 12px">
+
+                                                <strong>{{ $question->question }}</strong>
+                                                @if( $question->pivot->answer )
+
+                                                    <p>{{ $question->pivot->answer }}</p>
+                                                @else
+
+                                                    <p style="color:grey">(Unanswered)</p>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+
                                 <div class="row">
                                     <div class="col-sm-12"><span style="font-weight: 500;">EVV</span></div>
                                     <div class="col-sm-6">

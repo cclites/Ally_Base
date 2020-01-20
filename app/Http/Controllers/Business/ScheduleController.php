@@ -4,19 +4,14 @@ namespace App\Http\Controllers\Business;
 
 use App\Billing\ClientRate;
 use App\Billing\ScheduleService;
-use App\Business;
-use App\Caregiver;
-use App\CaregiverLicense;
 use App\Exceptions\AutomaticCaregiverAssignmentException;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
 use App\Http\Requests\BulkDestroyScheduleRequest;
 use App\Http\Requests\BulkUpdateScheduleRequest;
-use App\Http\Requests\BusinessRequest;
 use App\Http\Requests\CreateScheduleRequest;
 use App\Http\Requests\PrintableScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
-use App\Notifications\Caregiver\CertificationExpiring;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
@@ -47,7 +42,7 @@ class ScheduleController extends BaseController
     public function events(Request $request)
     {
         $query = Schedule::forRequestedBusinesses()
-            ->with(['client', 'caregiver', 'shifts', 'services', 'service', 'carePlan', 'services.service'])
+            ->with(['client', 'caregiver', 'shifts', 'services', 'service', 'carePlan', 'services.service' ])
             ->ordered();
 
         // Filter by client or caregiver
@@ -65,7 +60,7 @@ class ScheduleController extends BaseController
         $end = Carbon::parse($request->input('end', 'First day of next month'));
         $schedules = $query->whereBetween('starts_at', [$start, $end])->get();
 
-        $events = new ScheduleEventsResponse($schedules);
+        $events = new ScheduleEventsResponse( $schedules );
         $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
 
         return [
@@ -635,7 +630,6 @@ class ScheduleController extends BaseController
                 if ($request->hours_type != Shift::HOURS_DEFAULT) {
                     throw new AutomaticCaregiverAssignmentException('Cannot create caregiver assignment because you are using HOL/OT rates.  If this is correct, you must assign the Caregiver manually from the Client\'s Caregivers & Rates tab.');
                 }
-
                 // Create default rates based on the rates in the request
                 ClientRate::add($client, [
                     'caregiver_id' => $request->caregiver_id,
@@ -648,7 +642,6 @@ class ScheduleController extends BaseController
                     'service_id' => null, // Set default rates for ALL services
                     'payer_id' => $request->payer_id,
                 ]);
-
             } else { // service breakout
                 // Create default rates for each *UNIQUE* service entry
                 $shouldBeServiceSpecific = $request->hasMultipleUniqueServices();
@@ -657,11 +650,9 @@ class ScheduleController extends BaseController
                     if (app(RateFactory::class)->matchingRateExists($client, Carbon::parse($request->starts_at)->toDateString(), $service['service_id'], $service['payer_id'], $request->caregiver_id)) {
                         throw new AutomaticCaregiverAssignmentException('Cannot create caregiver assignment because you have different rates for the same service/payer.  If this is correct, you must assign the Caregiver manually from the Client\'s Caregivers & Rates tab.');
                     }
-
                     if ($service['hours_type'] != Shift::HOURS_DEFAULT) {
                         throw new AutomaticCaregiverAssignmentException('Cannot create caregiver assignment because you are using HOL/OT rates.  If this is correct, you must assign the Caregiver manually from the Client\'s Caregivers & Rates tab.');
                     }
-
                     // Create default rates based on the rates in the request
                     ClientRate::add($client, [
                         'caregiver_id' => $request->caregiver_id,
@@ -679,10 +670,8 @@ class ScheduleController extends BaseController
                     $service['client_rate'] = null;
                 }
             }
-
             return true;
         }
-
         return false;
     }
 }

@@ -348,6 +348,16 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
         return $this->hasMany(ShiftStatusHistory::class);
     }
 
+    public function visitEditAction()
+    {
+        return $this->hasOne( VisitEditAction::class, 'id', 'visit_edit_action_id' );
+    }
+
+    public function visitEditReason()
+    {
+        return $this->hasOne( VisitEditReason::class, 'id', 'visit_edit_reason_id' );
+    }
+
     /**
      * A Shift can have many ClientGoals.
      *

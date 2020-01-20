@@ -103,6 +103,9 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             'client_ltci_claim_number' => 'nullable',
             'client_hic' => 'nullable',
             'client_invoice_notes' => 'nullable',
+
+            'visit_edit_action_id' => 'nullable|integer',
+            'visit_edit_reason_id' => 'nullable|integer',
         ];
     }
 
@@ -169,6 +172,9 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
                     'shift_end_time',
                     'service_start_date',
                     'service_start_time',
+
+                    'visit_edit_action_id',
+                    'visit_edit_reason_id',
                 ])->toArray();
 
                 // convert dates and times

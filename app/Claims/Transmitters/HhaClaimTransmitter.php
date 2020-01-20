@@ -10,6 +10,8 @@ use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimableService;
 use App\Claims\ClaimInvoice;
 use App\HhaFile;
+use App\VisitEditAction;
+use App\VisitEditReason;
 
 class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitterInterface
 {
@@ -150,9 +152,8 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             $service->checked_out_longitude, //    "Clock-Out Longitude",
             '', //    "Clock-Out EVV Other Info",
             $claim->name, //    "Invoice Number",
-            // TODO: implement reason codes:
-            $service->getHasEvv() ? '' : '910', //    "Visit Edit Reason Code",
-            $service->getHasEvv() ? '' : '14', //    "Visit Edit Action Taken",
+            $service->getHasEvv() ? $service->visitEditReason->code : VisitEditAction::nonEvvDefault(), //    "Visit Edit Reason Code",
+            $service->getHasEvv() ? $service->visitEditAction->code : VisitEditReason::nonEvvDefault(), //    "Visit Edit Action Taken",
             $service->caregiver_comments, //    "Notes",
             'N', //    "Is Deletion",
             $item->id, //    "Invoice Line Item ID",

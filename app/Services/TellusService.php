@@ -99,7 +99,6 @@ class TellusService
             throw new TellusApiException("Unexpected response code from Tellus, code: $httpCode.  Please try again.");
         }
 
-        \Log::info($response);
         $xml = new SimpleXMLElement($response);
         if (isset($xml->xsdValidation) && (string)$xml->xsdValidation == 'FAILED') {
             \Log::error("Tellus API XML Error:\r\n$response");
