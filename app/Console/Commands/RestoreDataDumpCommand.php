@@ -107,7 +107,9 @@ class RestoreDataDumpCommand extends Command
             throw new ProcessFailedException($process);
         }
 
-        if ($this->option('delete')) {
+        if ($this->option('keep')) {
+            // Don't discard files
+        } else {
             $this->info('Cleaning up files...');
             unlink($sqlFile);
             unlink($zipFile);
