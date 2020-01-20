@@ -13,6 +13,7 @@ use App\Traits\BelongsToOneChain;
  * @property string $phone
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @property boolean $active
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $client
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes

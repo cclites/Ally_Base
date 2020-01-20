@@ -42,7 +42,7 @@
                     </template>
 
                     <template slot="phone" scope="row">
-                        <b-form-input :value="row.item.phone" v-model="row.item.phone"></b-form-input>
+                        <mask-input :value="row.item.phone" v-model="row.item.phone" type="phone"></mask-input>
                     </template>
 
                     <template slot="actions" scope="row">
