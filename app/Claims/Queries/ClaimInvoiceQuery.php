@@ -5,7 +5,7 @@ namespace App\Claims\Queries;
 use Illuminate\Database\Eloquent\Model;
 use App\Billing\Queries\BaseQuery;
 use App\Claims\ClaimInvoiceType;
-use App\Billing\ClaimStatus;
+use App\Claims\ClaimStatus;
 use App\Claims\ClaimInvoice;
 use App\User;
 

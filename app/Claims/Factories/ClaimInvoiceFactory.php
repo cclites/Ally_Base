@@ -14,7 +14,7 @@ use App\Claims\ClaimableService;
 use App\Claims\ClaimInvoiceType;
 use App\Billing\ClientInvoice;
 use App\Billing\ClientPayer;
-use App\Billing\ClaimStatus;
+use App\Claims\ClaimStatus;
 use App\Claims\ClaimInvoice;
 use App\Billing\Service;
 use App\Billing\Payer;

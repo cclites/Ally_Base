@@ -13,8 +13,8 @@ use App\Contracts\BelongsToBusinessesInterface;
 use App\Traits\BelongsToOneBusiness;
 use Illuminate\Support\Collection;
 use App\Billing\ClientInvoice;
-use App\Billing\ClaimService;
-use App\Billing\ClaimStatus;
+use App\Claims\ClaimService;
+use App\Claims\ClaimStatus;
 use App\AuditableModel;
 use App\Billing\Payer;
 use Carbon\Carbon;
@@ -613,7 +613,7 @@ class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterfac
     /**
      * Set the status of the claim, and add to it's status history.
      *
-     * @param \App\Billing\ClaimStatus $status
+     * @param \App\Claims\ClaimStatus $status
      * @param array $otherUpdates
      */
     public function updateStatus(ClaimStatus $status, array $otherUpdates = []): void

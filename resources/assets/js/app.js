@@ -261,12 +261,10 @@ Vue.component('business-payer-list', require('./components/business/PayerList'))
 Vue.component('business-payer-modal', require('./components/business/PayerModal'));
 Vue.component('business-payer-rates-table', require('./components/business/PayerRatesTable'));
 Vue.component('business-salesperson-list', require('./components/business/sales_people/SalesPersonList.vue'));
-Vue.component('business-claims-ar', require('./components/business/BusinessClaimsAr'));
 Vue.component('business-disaster-plan-report', require('./components/business/reports/BusinessDisasterPlanReport'));
 Vue.component('business-communications-tab', require('./components/business/BusinessCommunicationsTab'));
 Vue.component('business-offline-invoice-ar', require('./components/business/BusinessOfflineInvoiceAr'));
 Vue.component('business-offline-ar-aging-report', require('./components/business/reports/BusinessOfflineArAgingReport'));
-Vue.component('business-claims-ar-aging-report', require('./components/business/reports/BusinessClaimsArAgingReport'));
 Vue.component('sales-people-commission-report', require('./components/business/reports/SalespersonCommissionReport'));
 Vue.component('business-account-setup-report', require('./components/business/reports/BusinessAccountSetupReport'));
 Vue.component('business-client-account-setup-report', require('./components/business/reports/BusinessClientAccountSetupReport'));

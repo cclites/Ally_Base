@@ -26,7 +26,6 @@ use Illuminate\Support\Collection;
  * @property float $amount_paid
  * @property bool $offline
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
- * @property-read \App\Billing\Claim $claim
  * @property-read \App\Client $client
  * @property-read \App\Billing\ClientPayer|null $clientPayer
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientInvoiceItem[] $items
@@ -106,11 +105,6 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
     function clientPayer()
     {
         return $this->belongsTo(ClientPayer::class);
-    }
-
-    public function claim()
-    {
-        return $this->hasOne(Claim::class);
     }
 
     public function claimInvoices()

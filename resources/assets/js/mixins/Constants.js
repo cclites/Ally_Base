@@ -106,19 +106,15 @@ export default {
                 { value: 'payer', text: 'Payer Group' },
             ],
             CLAIM_STATUSES: {
-                NOT_SENT: 'NOT_SENT',
                 CREATED: 'CREATED',
                 TRANSMITTED: 'TRANSMITTED',
-                RETRANSMITTED: 'RETRANSMITTED',
                 ACCEPTED: 'ACCEPTED',
                 REJECTED: 'REJECTED',
             },
             claimStatusOptions: [
                 { value: 'ACCEPTED', text: 'Accepted' },
                 { value: 'CREATED', text: 'Created' },
-                { value: 'NOT_SENT', text: 'Not Sent' },
                 { value: 'REJECTED', text: 'Rejected' },
-                { value: 'RETRANSMITTED', text: 'Re-Transmitted' },
                 { value: 'TRANSMITTED', text: 'Transmitted' },
             ],
             CLAIMABLE_TYPES: {

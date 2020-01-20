@@ -7,6 +7,7 @@ use App\Billing\Contracts\ChargeableInterface;
 use App\Billing\Exceptions\PayerAssignmentError;
 use App\Billing\Payments\Methods\Offline;
 use App\Business;
+use App\Claims\ClaimService;
 use App\Client;
 use App\Contracts\BelongsToChainsInterface;
 use App\Contracts\ContactableInterface;
