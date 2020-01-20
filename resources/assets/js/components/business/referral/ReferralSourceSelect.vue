@@ -52,6 +52,9 @@
             },
             filteredSources() {
 
+                //TODO: figure out what to do if the referral source is not
+                //      active, but linked to Client/CG
+
                 if(this.show_active_only === 1){
 
                     let filtered = this.referralSources.filter( function(x){

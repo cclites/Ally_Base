@@ -35,14 +35,14 @@
             <b-row>
 
                 <b-col lg="4">
-                    <b-form-group label="Date of Birth">
+                    <b-form-group label="Date of Birth" label-class="required">
                         <date-picker v-model="form.date_of_birth" />
                         <input-help :form="form" field="date_of_birth" text=""></input-help>
                     </b-form-group>
                 </b-col>
 
                 <b-col lg="4">
-                    <b-form-group label="Social Security Number">
+                    <b-form-group label="Social Security Number" label-class="required">
                         <mask-input type="ssn" v-model="form.ssn"></mask-input>
                         <input-help :form="form" field="ssn" text=""></input-help>
                     </b-form-group>
@@ -99,7 +99,7 @@
             <b-row>
 
                 <b-col lg="4">
-                    <b-form-group label="Home Phone">
+                    <b-form-group label="Primary Phone" label-class="required">
                         <mask-input v-model="form.home_phone" name="home_phone"></mask-input>
                         <input-help :form="form" field="home_phone" text=""></input-help>
                     </b-form-group>
@@ -164,7 +164,7 @@
             </b-row>
             <b-row>
                 <b-col lg="12">
-                    <b-form-group label="License Number (if applicable):">
+                    <b-form-group label="License Number (if CNA, LPN, or RN):">
                         <b-form-input v-model="form.license_number"></b-form-input>
                         <input-help :form="form" field="license_number" text=""></input-help>
                     </b-form-group>
@@ -172,7 +172,7 @@
             </b-row>
             <b-row>
                 <b-col lg="12">
-                    <b-form-group label="Healthcare Training School Name:">
+                    <b-form-group label="Healthcare Training School Name (if HHA):">
                         <b-form-input v-model="form.training_school"></b-form-input>
                         <input-help :form="form" field="training_school" text=""></input-help>
                     </b-form-group>
