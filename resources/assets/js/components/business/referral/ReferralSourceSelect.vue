@@ -17,7 +17,7 @@
         </b-col>
 
         <business-referral-source-modal
-            @saved="newReferralSource"
+            @saved="saved"
             v-model="showReferralModal" 
             :source="{}"
             :source-type="sourceType"
@@ -65,13 +65,12 @@
                 }else{
                     return this.referralSources;
                 }
-
-
             }
         },
 
         methods: {
-            newReferralSource(data) {
+            saved(data) {
+
                 if(data) {
                     this.showReferralModal = false;
                     this.referralSources.push(data);

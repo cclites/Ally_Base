@@ -427,14 +427,6 @@
                 Are you sure you wish to re-activate {{ this.client.name }}?
         </b-modal>
 
-        <!-- <client-referral-modal @saved="newrefsourcedata" v-model="showReferralModal" :source="{}"></client-referral-modal> -->
-
-        <business-referral-source-modal
-            @saved="savedReferralSource"
-            v-model="showReferralModal"
-            :source="{}"
-            source-type="client"
-        ></business-referral-source-modal>
 
         <discharge-summary-modal ref="dischargeSummaryModal" :client="client"></discharge-summary-modal>
 
