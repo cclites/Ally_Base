@@ -150,7 +150,7 @@
                         formatter: val => this.formatDateFromUTC(val)
                     },
                     created_by: { sortable: false },
-                    updated_at: {
+                    updated_by_timestamp: {
                         label: 'Modified On',
                         sortable: true,
                         formatter: val => val ? this.formatDateTimeFromUTC(val) : '-'

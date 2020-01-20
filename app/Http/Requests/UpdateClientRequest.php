@@ -11,6 +11,7 @@ use App\Rules\ValidSSN;
 use Illuminate\Validation\Rule;
 use App\Rules\ImageCropperUpload;
 use App\Client;
+use Carbon\Carbon;
 use When\Valid;
 
 class UpdateClientRequest extends BusinessRequest
@@ -83,7 +84,8 @@ class UpdateClientRequest extends BusinessRequest
                 $data['username'] = Client::getAutoUsername();
             }
         }
-        $data['updated_by'] = auth()->id();
+        $data[ 'updated_by'           ] = auth()->id();
+        $data[ 'updated_by_timestamp' ] = Carbon::now();
 
         return $data;
     }
