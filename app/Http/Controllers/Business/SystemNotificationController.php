@@ -97,7 +97,7 @@ class SystemNotificationController extends BaseController
     {
         $this->authorize('update', $notification);
 
-        if ($notification->acknowledge($request->input('notes', ''))) {
+        if ($notification->acknowledge()) {
             return new SuccessResponse('You have successfully acknowledged the notification.', [], route('business.notifications.index'));
         }
 
