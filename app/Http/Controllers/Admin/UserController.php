@@ -6,6 +6,8 @@ use App\Responses\SuccessResponse;
 use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateUserRequest;
+use App\Responses\ErrorResponse;
 
 class UserController extends Controller
 {
@@ -63,6 +65,7 @@ class UserController extends Controller
                         'chain_id' => optional($user->getChain())->id,
                         'chain_name' => optional($user->getChain())->name,
                         'payment_hold' => $user->payment_hold,
+                        'admin_note' => $user->admin_note,
                     ];
 
                     return $data;
@@ -127,9 +130,12 @@ class UserController extends Controller
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function update( UpdateUserRequest $request, User $user )
     {
-        //
+        $user->admin_note = $request->admin_note;
+        if( !$user->save() ) return new ErrorResponse( 500, 'unable to admin notes!' );
+
+        return new SuccessResponse( 'Successfully updated admin notes!' );
     }
 
     /**
