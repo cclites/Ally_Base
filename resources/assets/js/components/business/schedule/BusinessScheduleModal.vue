@@ -323,7 +323,7 @@
                                     Note: Because OT/HOL is selected, the rates have been re-calculated to match your settings.
                                 </b-alert>
                                 <div v-if="warnings && warnings.length">
-                                    <b-alert v-for="(warning, index) in warnings" :key="index" variant="warning" show>
+                                    <b-alert v-for="(warning, index) in warnings" :key="index" :variant="getVariantLevel(warning)" show>
                                         <strong>{{ warning.label }}:</strong> {{ warning.description }}
                                     </b-alert>
                                 </div>
@@ -669,6 +669,12 @@
         },
 
         methods: {
+            getVariantLevel(warning) {
+                if (warning.label === 'Caregiver Schedule Conflict') {
+                    return 'danger';
+                }
+                return 'warning';
+            },
 
             changedSchedule(schedule) {
                 // initiated from watcher
@@ -1102,7 +1108,7 @@
                     this.loadingQuickbooksConfig = false;
                 }
             },
-            
+
             caregiverAssignmentMode(newVal, oldVal) {
                 if (newVal) {
                     this.defaultRates = false;
