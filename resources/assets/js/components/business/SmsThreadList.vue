@@ -8,37 +8,69 @@
                 header-text-variant="white"
                 header-bg-variant="info"
         >
-            <div class="d-flex mb-2">
-                <div class="f-1 d-flex align-items-baseline flex-col">
+            <b-row>
+
+                <b-col sm="4">
+
                     <business-location-form-group
                             v-model="business_id"
                             :allow-all="true"
-                            class="mr-2 location_select"
+                            class="location_select"
                             label="Location"
                     />
-                    <b-form-group class="mr-2" label="Start Date">
+                </b-col>
+                <b-col sm="4">
+
+                    <b-form-group label="Start Date">
                         <date-picker ref="startDate"
-                                     v-model="start_date"
-                                     placeholder="Start Date">
+                                        v-model="start_date"
+                                        placeholder="Start Date">
                         </date-picker>
                     </b-form-group>
-                    <b-form-group class="mr-2" label="End Date">
+                </b-col>
+
+                <b-col sm="4">
+
+                    <b-form-group label="End Date">
                         <date-picker ref="endDate"
-                                     v-model="end_date"
-                                     placeholder="End Date">
+                                        v-model="end_date"
+                                        placeholder="End Date">
                         </date-picker>
                     </b-form-group>
-                    <b-form-group class="form-check mb-3" label="&nbsp;">
+                </b-col>
+
+                <b-col sm="12">
+
+                    <b-form-group label="Keyword Search" label-for="keyword">
+                        <b-form-input
+                            id="keyword"
+                            name="keyword"
+                            type="text"
+                            v-model="keyword"
+                        >
+                        </b-form-input>
+                    </b-form-group>
+                </b-col>
+
+                <b-col sm="12">
+
+                    <b-form-group class="form-check pull-right" label="&nbsp;">
+
                         <b-form-checkbox v-model="repliesOnly" value="1" unchecked-value="0">Show only threads with replies</b-form-checkbox>
                     </b-form-group>
-                    <b-form-group label="&nbsp;">
+                </b-col>
+            </b-row>
+            <b-row class="mb-4">
+
+                <b-col>
+
+                    <div class="pull-right">
+
+                        <b-btn variant="success" href="/business/communication/sms-other-replies" class="mr-2">View Other Replies</b-btn>
                         <b-btn variant="info" @click="fetch()" :disabled="busy">Generate</b-btn>
-                    </b-form-group>
-                </div>
-                <div class="ml-auto">
-                    <b-btn variant="success" href="/business/communication/sms-other-replies" class="ml-auto">View Other Replies</b-btn>
-                </div>
-            </div>
+                    </div>
+                </b-col>
+            </b-row>
 
             <b-table bordered striped hover show-empty
                      :items="items"
@@ -124,6 +156,7 @@ export default {
             ],
             start_date: moment().subtract(7, 'days').format('MM/DD/YYYY'),
             end_date: moment().format('MM/DD/YYYY'),
+            keyword: '',
             repliesOnly: 0,
             business_id: '',
         }
@@ -138,7 +171,7 @@ export default {
     methods: {
         fetch() {
             this.busy = true;
-            axios.get(`/business/communication/sms-threads?json=1&start_date=${this.start_date}&end_date=${this.end_date}&reply_only=${this.repliesOnly}&businesses=${this.business_id}&json=1`)
+            axios.get(`/business/communication/sms-threads?json=1&start_date=${this.start_date}&end_date=${this.end_date}&reply_only=${this.repliesOnly}&businesses=${this.business_id}&keyword=${this.keyword}&json=1`)
                 .then( ({ data }) => {
                     this.items = data;
                 })
