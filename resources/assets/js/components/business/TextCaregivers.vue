@@ -74,9 +74,8 @@
                                               :form="form"
                                               field="business_id">
                 </business-location-form-group>
-                <b-form-group label="Message" label-class="required">
-
-                    <b-textarea :rows="6" v-model="form.message" required :disabled="submitting" :state=" form.message.length <= 140 "></b-textarea>
+                <b-form-group label="Message" label-class="required" :state=" form.message.length <= 140 ">
+                    <b-textarea :rows="6" v-model="form.message" required :disabled="submitting"></b-textarea>
                     <input-help :form="form" field="Message" :text=" `Maximum 140 characters. Currently ${form.message.length}` "></input-help>
                 </b-form-group>
                 <b-form-group>
