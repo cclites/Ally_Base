@@ -112,7 +112,7 @@
                         if (this.sync) {
                             self.events = cal.fullCalendar('clientEvents')
                         }
-                        self.$emit('event-render', ...args,);
+                        self.$emit('event-render', ...args);
 
                         const eventObj = args[0], $el = args[1], view = args[2];
                         const spansMultipleDays = e => {
