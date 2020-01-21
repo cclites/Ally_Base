@@ -77,7 +77,7 @@
 
             <li class="nav-item">
                 <a
-                    @if( count( $client->user->userAdminNotesAsSubject ) > 0 )
+                    @if( count( $client->user->adminNotes ) > 0 )
 
                         class="nav-link admin_note_exists"
                     @else
@@ -245,9 +245,11 @@
         <div class="tab-pane" id="notifications" role="tabpanel">
             <notification-preferences :admin="true" :user="{{ $client->user }}" :notifications="{{ $notifications }}"></notification-preferences>
         </div>
+        @if(is_admin())
         <div class="tab-pane" id="admin_note" role="tabpanel">
             <user-admin-note :user="{{ $client->user }}"></user-admin-note>
         </div>
+        @endif
     </div>
 @endsection
 

@@ -32,7 +32,7 @@ class UserController extends Controller
                     'client.business.businessChain',
                     'officeUser',
                     'officeUser.businessChain',
-                    'userAdminNotesAsSubject'
+                    'adminNotes'
                 )
                 ->whereIn('role_type', ['client', 'caregiver', 'office_user'])
                 ->search($search);
@@ -64,7 +64,7 @@ class UserController extends Controller
                         'chain_id' => optional($user->getChain())->id,
                         'chain_name' => optional($user->getChain())->name,
                         'payment_hold' => $user->payment_hold,
-                        'admin_notes' => $user->userAdminNotesAsSubject,
+                        'admin_notes' => $user->adminNotes,
                     ];
 
                     return $data;

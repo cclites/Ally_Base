@@ -561,6 +561,8 @@ Route::group([
     Route::get('caregiver-1099/{caregiver}', 'Business\Caregiver1099Controller@index')->name('business-1099');
     Route::get('business-1099/download/{caregiver1099}', 'Business\Caregiver1099Controller@downloadPdf')->name('business-caregivers-1099-download');
     Route::get('impersonate/{user}', 'Admin\ImpersonateController@impersonate')->name('impersonate');
+
+    Route::resource('users/admin-notes', 'Admin\UserAdminNoteController');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['admin', 'office_user']], function () {
@@ -598,7 +600,6 @@ Route::group([
     Route::resource('caregivers', 'Admin\CaregiverController');
     Route::resource('failed_transactions', 'Admin\FailedTransactionController');
 
-    Route::resource('users/admin-notes', 'Admin\UserAdminNoteController');
     Route::resource('users', 'Admin\UserController');
     Route::get('charges', 'Admin\ChargesController@index')->name('charges');
     Route::post('charges/successful/{payment}', 'Admin\ChargesController@markSuccessful')->name('charges.mark_successful');

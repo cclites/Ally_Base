@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UserAdminNoteRequest;
+use App\Http\Requests\CreateUserAdminNoteRequest;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\User;
@@ -41,9 +41,11 @@ class UserAdminNoteController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store( UserAdminNoteRequest $request )
+    public function store(CreateUserAdminNoteRequest $request )
     {
-        if( !$note = UserAdminNote::create( $request->validated() ) ) return new ErrorResponse( 500, 'unable to create admin note!' );
+        if( !$note = UserAdminNote::create( $request->filtered() ) ) {
+            return new ErrorResponse( 500, 'unable to create admin note!' );
+        }
         $note = UserAdminNote::with( 'creator' )->find( $note->id );
         return new SuccessResponse( 'Successfully created admin note!', $note );
     }
@@ -77,12 +79,15 @@ class UserAdminNoteController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update( UserAdminNoteRequest $request, UserAdminNote $adminNote )
+    public function update(CreateUserAdminNoteRequest $request, UserAdminNote $adminNote )
     {
-        $adminNote->body = $request->body;
-        if( !$adminNote->save() ) return new ErrorResponse( 500, 'unable to update admin note!' );
-        return new SuccessResponse( 'Successfully updated admin note!', $adminNote->fresh() );
+        $data = array_only($request->filtered(), ['body']);
 
+        if ($adminNote->update($data)) {
+            return new SuccessResponse( 'Successfully updated admin note!', $adminNote->fresh()->load('creator') );
+        }
+
+        return new ErrorResponse( 500, 'unable to update admin note!' );
     }
 
     /**

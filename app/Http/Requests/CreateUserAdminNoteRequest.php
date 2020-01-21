@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserAdminNoteRequest extends FormRequest
+class CreateUserAdminNoteRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,9 +25,20 @@ class UserAdminNoteRequest extends FormRequest
     {
         return [
 
-            'creator_user_id' => 'required|exists:users,id',
             'subject_user_id' => 'required|exists:users,id',
             'body'            => 'required|string',
         ];
+    }
+
+    /**
+     * Filter the request data for processing.
+     *
+     * @return array
+     */
+    public function filtered(): array
+    {
+        $data = $this->validated();
+        $data['creator_user_id'] = auth()->user()->id;
+        return $data;
     }
 }

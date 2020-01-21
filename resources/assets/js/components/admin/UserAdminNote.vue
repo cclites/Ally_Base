@@ -5,9 +5,9 @@
             header-text-variant="white">
 
         <div class="d-flex flex-column">
+            <b-alert variant="warning">Notes are for internal admins only.</b-alert>
 
-
-            <b-form-group label="Admin Note" label-for="notes">
+            <b-form-group :label="headerText" label-for="notes">
 
                 <b-form-textarea
                     id="notes"
@@ -16,13 +16,16 @@
                     v-model="form.body"
                 >
                 </b-form-textarea>
-                <p>Notes for internal admin-use only</p>
             </b-form-group>
 
-            <b-form-group label="&nbsp;">
-                <b-btn variant="info" class="pull-right" @click="saveNote()" :disabled="form.busy">Save Note</b-btn>
-            </b-form-group>
+            <div class="d-flex">
+                <div class="ml-auto">
+                    <b-btn variant="info" class="mr-2" @click="saveNote()" :disabled="form.busy">{{ buttonText }}</b-btn>
+                    <b-btn v-if="form.id" variant="secondary" @click="cancel()" :disabled="form.busy">Cancel</b-btn>
+                </div>
+            </div>
 
+            <br/>
             <div class="table-responsive">
 
                 <b-table bordered striped hover show-empty
@@ -39,8 +42,7 @@
                         {{ row.item.creator.name }}
                     </template>
                     <template slot="body" scope="row">
-
-                        {{ noteBody( row.item.id ) }}
+                        {{ row.item.body }}
                     </template>
                     <template slot="actions" scope="row">
 
@@ -66,6 +68,14 @@
             user: ''
         },
 
+        computed: {
+            buttonText() {
+                return this.form.id ? 'Save Note' : 'Create Note';
+            },
+            headerText() {
+                return this.form.id ? 'Update Admin Note' : 'Add Admin Note';
+            },
+        },
         data() {
 
             return {
@@ -116,11 +126,10 @@
         },
 
         methods : {
-
-            noteBody( id ){
-
-                return this.notes.find( n => n.id == id ).body;
+            cancel() {
+                this.setForm({});
             },
+
             editNote( note ){
 
                 this.setForm( note );
@@ -130,16 +139,12 @@
                 console.log( 'the note deleting: ', note );
                 if( confirm( 'delete this note?' ) ){
 
-                    this.form.delete( `/admin/users/admin-notes/${note.id}` )
+                    this.form.delete( `/business/users/admin-notes/${note.id}` )
                         .then( res => {
-
-                            console.log( 'responses: ', res );
                             const index = this.notes.findIndex( n => n.id == note.id );
                             this.notes.splice( index, 1 );
                         })
                         .catch( err => {
-
-                            console.log( 'ERRORS!! ', err );
                         })
                 }
             },
@@ -161,15 +166,12 @@
 
                 if( !form.busy ){
 
-                    form.get( `/admin/users/admin-notes` )
+                    form.get( `/business/users/admin-notes` )
                         .then( res => {
 
-                            console.log( 'the response: ', res );
                             this.notes = res.data;
                         })
                         .catch( err => {
-
-                            console.log( 'errors tho: ', err );
                         })
                 }
             },
@@ -177,25 +179,20 @@
 
                 const action = this.form.id ? 'patch' : 'post';
 
-                this.form.submit( action, '/admin/users/admin-notes' + ( this.form.id ? `/${this.form.id}` : '' ) )
+                this.form.submit( action, '/business/users/admin-notes' + ( this.form.id ? `/${this.form.id}` : '' ) )
                     .then( res => {
 
-                        console.log( 'responses: ', res );
-                        console.log( 'has form id', this.form.id );
                         if( this.form.id ){
 
+                            console.log(res.data.data);
                             const index = this.notes.findIndex( n => n.id == this.form.id );
-                            console.log( 'inside has form id..', index );
-                            this.notes[ index ] = res.data.data;
+                            this.notes.splice(index, 1, res.data.data);
                         } else {
 
-                            console.log( 'strangely got here instead..' );
                             this.notes.push( res.data.data );
                         }
                     })
                     .catch( err => {
-
-                        console.log( 'ERRORS!! ', err );
                     })
                     .finally( () => this.setForm() );
             }

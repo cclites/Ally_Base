@@ -74,7 +74,7 @@
             </li>
             <li class="nav-item">
                 <a
-                @if( count( $caregiver->user->userAdminNotesAsSubject ) > 0 )
+                @if( count( $caregiver->user->adminNotes ) > 0 )
 
                     class="nav-link admin_note_exists"
                 @else
@@ -216,9 +216,11 @@
         <div class="tab-pane" id="tax_documents" role="tabpanel">
             <business-1099s-tab :caregiver="{{ $caregiver->id }}"></business-1099s-tab>
         </div>
+        @if(is_admin())
         <div class="tab-pane" id="admin_note" role="tabpanel">
             <user-admin-note :user="{{ $caregiver->user }}"></user-admin-note>
         </div>
+        @endif
     </div>
 @endsection
 
