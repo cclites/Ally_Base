@@ -4,6 +4,19 @@ namespace App\Traits;
 
 trait FullTextSearch
 {
+
+    /**
+     * how to add/remove the index in a migration:
+     *  - check out 2020_01_21_010325_alter_table_sms_threads_add_full_text_index for reference.php
+     * 
+     * how to use within a model:
+     *  - check out SmsThread.php
+     *  - must add $searchable array which includes all columns that will be full-searched
+     * 
+     * how to use within controller:
+     *  - checkout CommunicaionController@threadIndex, ->fullTextSearch( $request->input( 'keyword', null ) )
+    */
+
     /**
      * Replaces spaces with full text search wildcards
      *
@@ -40,8 +53,10 @@ trait FullTextSearch
      * @param string $term
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeFullTextSearch($query, $term)
+    public function scopeFullTextSearch($query, $term = null )
     {
+        if( !$term ) return $query;
+
         $columns = implode(',',$this->searchable);
 
         $query->whereRaw("MATCH ({$columns}) AGAINST (? IN BOOLEAN MODE)" , $this->fullTextWildcards($term));

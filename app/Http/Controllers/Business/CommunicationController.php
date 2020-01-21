@@ -163,14 +163,12 @@ class CommunicationController extends Controller
     public function threadIndex(Request $request)
     {
         if ($request->filled('json') && $request->wantsJson()) {
-            $query = SmsThread::forRequestedBusinesses()
+            $threads = SmsThread::forRequestedBusinesses()
                 ->betweenDates($request->start_date, $request->end_date)
                 ->withReplies($request->reply_only == 1 ? true : false)
-                ->withCount(['recipients', 'replies']);
-
-            if( $request->input( 'keyword', null ) ) $query->fullTextSearch( $request->input( 'keyword', null ) );
-
-            $threads = $query->latest()
+                ->withCount(['recipients', 'replies'])
+                ->fullTextSearch( $request->input( 'keyword', null ) )
+                ->latest()
                 ->get();
 
             return response()->json($threads);
