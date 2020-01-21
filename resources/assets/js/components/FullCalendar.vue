@@ -112,9 +112,9 @@
                         if (this.sync) {
                             self.events = cal.fullCalendar('clientEvents')
                         }
-                        self.$emit('event-render', ...args);
+                        self.$emit('event-render', ...args,);
 
-                        const eventObj = args[0], $el = args[1];
+                        const eventObj = args[0], $el = args[1], view = args[2];
                         const spansMultipleDays = e => {
                             if (!e.start || !e.end) {
                                 return false;
@@ -127,10 +127,11 @@
 
                         if (isListView && spansMultipleDays(eventObj)) {
                             // only hide if NOT start day
-                            const today = new Date().getDate();
-                            const startDay = parseInt(eventObj.start.format("D"), 10);
 
-                            if (today !== startDay) {
+                            const startDate = eventObj.start.format('LL');
+                            const selectedDate = view.calendar.currentDate.format('LL');
+
+                            if (startDate !== selectedDate) {
                                 $el.closest("tr").hide();
                             }
                         }
