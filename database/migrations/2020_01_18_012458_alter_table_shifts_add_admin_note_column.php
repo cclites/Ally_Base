@@ -15,7 +15,7 @@ class AlterTableShiftsAddAdminNoteColumn extends Migration
     {
         Schema::table( 'shifts', function ( Blueprint $table ) {
 
-            $table->string( 'admin_note', 255 )->nullable();
+            $table->text( 'admin_note' )->nullable();
         });
     }
 
