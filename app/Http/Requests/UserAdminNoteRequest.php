@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateUserRequest extends FormRequest
+class UserAdminNoteRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -13,7 +13,7 @@ class UpdateUserRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return is_admin();
     }
 
     /**
@@ -25,7 +25,9 @@ class UpdateUserRequest extends FormRequest
     {
         return [
 
-            'admin_note' => 'nullable|string|max:255',
+            'creator_user_id' => 'required|exists:users,id',
+            'subject_user_id' => 'required|exists:users,id',
+            'body'            => 'required|string',
         ];
     }
 }

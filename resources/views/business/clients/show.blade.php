@@ -77,7 +77,7 @@
 
             <li class="nav-item">
                 <a
-                    @if( $client->user->admin_note )
+                    @if( count( $client->user->userAdminNotesAsSubject ) > 0 )
 
                         class="nav-link admin_note_exists"
                     @else

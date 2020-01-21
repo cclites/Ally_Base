@@ -598,6 +598,7 @@ Route::group([
     Route::resource('caregivers', 'Admin\CaregiverController');
     Route::resource('failed_transactions', 'Admin\FailedTransactionController');
 
+    Route::resource('users/adminNotes', 'Admin\UserAdminNoteController');
     Route::resource('users', 'Admin\UserController');
     Route::get('charges', 'Admin\ChargesController@index')->name('charges');
     Route::post('charges/successful/{payment}', 'Admin\ChargesController@markSuccessful')->name('charges.mark_successful');
