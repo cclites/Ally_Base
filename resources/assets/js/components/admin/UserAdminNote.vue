@@ -130,7 +130,7 @@
                 console.log( 'the note deleting: ', note );
                 if( confirm( 'delete this note?' ) ){
 
-                    this.form.delete( `/admin/users/adminNotes/${note.id}` )
+                    this.form.delete( `/admin/users/admin-notes/${note.id}` )
                         .then( res => {
 
                             console.log( 'responses: ', res );
@@ -161,7 +161,7 @@
 
                 if( !form.busy ){
 
-                    form.get( `/admin/users/adminNotes` )
+                    form.get( `/admin/users/admin-notes` )
                         .then( res => {
 
                             console.log( 'the response: ', res );
@@ -177,7 +177,7 @@
 
                 const action = this.form.id ? 'patch' : 'post';
 
-                this.form.submit( action, '/admin/users/adminNotes' + ( this.form.id ? `/${this.form.id}` : '' ) )
+                this.form.submit( action, '/admin/users/admin-notes' + ( this.form.id ? `/${this.form.id}` : '' ) )
                     .then( res => {
 
                         console.log( 'responses: ', res );
