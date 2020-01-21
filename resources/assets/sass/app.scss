@@ -1856,3 +1856,16 @@ Animation Classes
   transform: translateX(10px);
   opacity: 0;
 }
+
+
+.admin_note_exists {
+
+  color: $primary;
+  border-color: $primary;
+}
+
+.active.admin_note_exists {
+
+  color: white;
+  background-color: $primary !important;
+}

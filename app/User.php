@@ -164,6 +164,11 @@ class User extends Authenticatable implements HasPaymentHold, Auditable, Belongs
         return $this->hasOne(Admin::class, 'id', 'id');
     }
 
+    public function adminNotes()
+    {
+        return $this->hasMany( UserAdminNote::class, 'subject_user_id', 'id' );
+    }
+
     public function caregiver()
     {
         return $this->hasOne(Caregiver::class, 'id', 'id');
