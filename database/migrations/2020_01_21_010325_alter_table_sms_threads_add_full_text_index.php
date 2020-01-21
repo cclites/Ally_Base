@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
 class AlterTableSmsThreadsAddFullTextIndex extends Migration
 {
@@ -13,7 +14,7 @@ class AlterTableSmsThreadsAddFullTextIndex extends Migration
      */
     public function up()
     {
-        DB::statement('ALTER TABLE sms_threads ADD FULLTEXT fulltext_index (message)');
+        if( !App::runningUnitTests() ) DB::statement('ALTER TABLE sms_threads ADD FULLTEXT fulltext_index (message);');
     }
 
     /**
@@ -23,6 +24,6 @@ class AlterTableSmsThreadsAddFullTextIndex extends Migration
      */
     public function down()
     {
-        DB::statement('ALTER TABLE sms_threads DROP INDEX fulltext_index');
+        if( !App::runningUnitTests() ) DB::statement('ALTER TABLE sms_threads DROP INDEX fulltext_index;');
     }
 }
