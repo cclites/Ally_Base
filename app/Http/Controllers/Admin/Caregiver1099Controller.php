@@ -18,6 +18,7 @@ use Illuminate\Http\Response;
 class Caregiver1099Controller extends Controller
 {
     protected $headerRow = [
+        'Created At',
         'Void (Enter 0 or 1)',
         'Corrected (Enter 0 or 1)',
         'Payer Name',
@@ -214,6 +215,7 @@ class Caregiver1099Controller extends Controller
                     'recipient_state' => strtoupper($cg1099->caregiver_state),
                     'recipient_zip' => $cg1099->caregiver_zip,
                     'payment_total' => $cg1099->payment_total,
+                    'created_at' => $cg1099->created_at->toDateString(),
                 ];
             });
 
@@ -245,6 +247,7 @@ class Caregiver1099Controller extends Controller
         foreach ($rows as $row) {
 
             $data = [
+                $row['created_at'],
                 0,
                 0,
                 $row['payer_name'],
