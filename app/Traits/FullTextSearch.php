@@ -17,6 +17,14 @@ trait FullTextSearch
      *  - checkout CommunicaionController@threadIndex, ->fullTextSearch( $request->input( 'keyword', null ) )
     */
 
+    function my_sanitize_string( $string )
+    {
+        $string = preg_replace( "/[^a-zA-Z0-9]/", "", $string );
+        $string = strip_tags( $string );
+        $string = addslashes( $string );
+        return filter_var( $string, FILTER_SANITIZE_STRING );
+    }
+
     /**
      * Replaces spaces with full text search wildcards
      *
@@ -27,7 +35,7 @@ trait FullTextSearch
     {
         // removing symbols used by MySQL
         $reservedSymbols = ['-', '+', '<', '>', '@', '(', ')', '~'];
-        $term = str_replace($reservedSymbols, '', $term);
+        $term = str_replace($reservedSymbols, '', $this->my_sanitize_string( $term ) );
 
         $words = explode(' ', $term);
 
