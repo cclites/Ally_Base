@@ -8,7 +8,7 @@
                  class="shift-table"
         >
             <template slot="Flags" scope="data">
-                <i v-for="flag in data.value" :class="flagIcons[flag]" :title="flagTypes[flag]" :style="`color: ${flagColors[flag]}`" v-b-tooltip.hover></i>
+                <i v-for=" ( flag, i ) in data.value" :key=" i " :class="flagIcons[flag]" :title="flagTypes[flag]" :style="`color: ${flagColors[flag]}`" v-b-tooltip.hover></i>
             </template>
             <template slot="Day" scope="data">
                 {{ data.value !== 'Total' ? dayFormat(data.value) : data.value }}
