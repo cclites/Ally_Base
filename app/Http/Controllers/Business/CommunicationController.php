@@ -181,7 +181,7 @@ class CommunicationController extends Controller
             return response()->json($threads);
         }
 
-        return view('business.communication.sms-thread-list', compact('threads'));
+        return view('business.communication.sms-thread-list');
     }
 
     /**
