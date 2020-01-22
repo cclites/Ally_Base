@@ -368,6 +368,7 @@
                     'Flags',
                     'Day',
                     'Time',
+                    'Scheduled Time',
                     'Hours',
                     'Services',
                     'Client',
@@ -455,6 +456,7 @@
                         'status': item.status,
                         'business_id': item.business_id,
                         'admin_note': item.admin_note,
+                        'Scheduled Time': item.scheduled_time_difference,
                         '_rowVariant': this.getRowVariant(item),
                     };
                 });

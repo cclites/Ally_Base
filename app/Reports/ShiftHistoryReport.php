@@ -32,6 +32,7 @@ class ShiftHistoryReport extends BusinessResourceReport
             'service',
             'services',
             'services.service',
+            'schedule',
 
             // TODO: Need to clean this up.  This is all required to properly
             // get the rates, and we still have n+1 issues with
