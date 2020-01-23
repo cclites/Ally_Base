@@ -119,9 +119,9 @@ class CaregiverYearlyEarnings extends BaseModel
             $errors[] = "Caregiver SSN Invalid";
         }
 
-        if (empty($this->caregiver->email) || $this->caregiver->hasNoEmail()) {
-            $errors[] = "Caregiver Email";
-        }
+//        if (empty($this->caregiver->email) || $this->caregiver->hasNoEmail()) {
+//            $errors[] = "Caregiver Email";
+//        }
 
         if (empty($this->caregiver->address)) {
             $errors[] = "Caregiver Address";
@@ -179,9 +179,9 @@ class CaregiverYearlyEarnings extends BaseModel
             $errors[] = "Client SSN Invalid";
         }
 
-        if (empty($this->client->email)) {
-            $errors[] = "Client Email";
-        }
+//        if (empty($this->client->email)) {
+//            $errors[] = "Client Email";
+//        }
 
         return $errors;
     }
