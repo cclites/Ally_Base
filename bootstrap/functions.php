@@ -413,6 +413,6 @@ if (! function_exists('valid_ssn')) {
      */
     function valid_ssn(?string $ssn): bool
     {
-        return preg_match('/^(?!666|000|9\d{2})\d{3}[- ]{0,1}(?!00)\d{2}[- ]{0,1}(?!0{4})\d{4}$/', $ssn);
+        return preg_match('/^(?!666|000\d{2})\d{3}[- ]{0,1}(?!00)\d{2}[- ]{0,1}(?!0{4})\d{4}$/', $ssn);
     }
 }
