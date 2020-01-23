@@ -335,6 +335,14 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     }
 
     /**
+     * Get string of starts_at date for json
+     */
+    public function startsAtString()
+    {
+        return (string) Carbon::parse($this->attributes['starts_at'], $this->getTimezone());
+    }
+
+    /**
      * Returns the first available connected shift that is currently
      * clocked in.
      *

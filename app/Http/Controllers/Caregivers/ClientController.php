@@ -93,6 +93,10 @@ class ClientController extends BaseController
             })->values();
         }
 
+        $schedules->map(function(Schedule $schedule) {
+            $schedule->start_date = $schedule->startsAtString();
+        });
+
         return $schedules;
     }
 
