@@ -174,7 +174,16 @@ class Caregiver extends AuditableModel implements UserRole, ReconcilableInterfac
 
     protected $table = 'caregivers';
     public $timestamps = false;
-    public $hidden = ['ssn'];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password', 'remember_token', 'ssn',
+    ];
+
     public $fillable = [
         'ssn',
         'bank_account_id',

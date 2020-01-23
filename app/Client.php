@@ -254,7 +254,16 @@ class Client extends AuditableModel implements
 
     protected $table = 'clients';
     public $timestamps = false;
-    public $hidden = ['ssn'];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password', 'remember_token', 'ssn',
+    ];
+
     public $dates = ['service_start_date', 'inquiry_date'];
     public $fillable = [
         'business_id',
