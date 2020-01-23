@@ -255,7 +255,7 @@ class PrintClaimInvoiceController extends BaseController
             'prior_authorization_number' => 'need to figure out', // TODO => need to figure this one out
 
             'federal_tax_id'         => $business->medicaid_npi_number, // 25 Federal Tax ID => same as 24.j Pull NPI based off of client branch location
-            'patient_account_number' => 'need to figure out', // TODO => 26 Patient Account Number => Pull based off of Ally assigned ID
+            'patient_account_number' => $claim->getName(), // 26 Patient Account Number => Invoice #
             'total_charge_dollars'   => explode( '.', $total_charge )[ 0 ], // 28
             'total_charge_change'    => explode( '.', $total_charge )[ 1 ] ?? '00', // 28 Total Charges => Sum of all charges on page (not claim total)
             'amount_paid_dollars'    => explode( '.', $amount_paid )[ 0 ], // 29 Amount Paid => Typically 0 or left blank
