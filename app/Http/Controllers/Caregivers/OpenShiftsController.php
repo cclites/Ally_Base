@@ -32,6 +32,7 @@ class OpenShiftsController extends BaseController
 
             if( $setting === Business::OPEN_SHIFTS_LIMITED ){
                 // check to see if you should only grab related caregiver-cients
+                dd( 'fuck nigga nation' );
 
                 $query->whereHas( 'client.rates', function ( $q ) use ( $caregiver ) {
 
