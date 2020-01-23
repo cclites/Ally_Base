@@ -403,3 +403,16 @@ if (! function_exists('dump_csv')) {
         return true;
     }
 }
+
+if (! function_exists('valid_ssn')) {
+    /**
+     * Check for valid SSN format.
+     *
+     * @param null|string $ssn
+     * @return bool
+     */
+    function valid_ssn(?string $ssn): bool
+    {
+        return preg_match('/^(?!666|000|9\d{2})\d{3}[- ]{0,1}(?!00)\d{2}[- ]{0,1}(?!0{4})\d{4}$/', $ssn);
+    }
+}

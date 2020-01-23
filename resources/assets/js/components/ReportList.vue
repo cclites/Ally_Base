@@ -162,14 +162,14 @@
                     },
                     {
                         name: 'Bad SSN Report (Clients)',
-                        url: 'reports/bad-ssn-report?type=clients',
+                        url: 'reports/bad-ssn-report/clients',
                         description: '',
                         category: 7,
                         allowed: ['admin'],
                     },
                     {
                         name: 'Bad SSN Report (Caregivers)',
-                        url: 'reports/bad-ssn-report?type=caregivers',
+                        url: 'reports/bad-ssn-report/caregivers',
                         description: '',
                         category: 7,
                         allowed: ['admin'],

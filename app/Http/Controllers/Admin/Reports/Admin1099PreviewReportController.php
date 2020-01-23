@@ -36,7 +36,7 @@ class Admin1099PreviewReportController extends Controller
                 $request->year,
                 $request->caregiver_id,
                 $request->client_id,
-                $request->business_id,
+                [$request->business_id],
                 $request->payer,
                 $createdStatus
             );

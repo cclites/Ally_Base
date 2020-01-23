@@ -139,7 +139,7 @@ class Caregiver1099Controller extends Controller
 
         if (strpos($caregiver1099->client_ssn, "#") !== false) {
             $this->validate($request, [
-                'client_ssn' => ['required', new ValidSSN()],
+                'client_ssn' => ['required', new ValidSSN(false)],
             ]);
             $caregiver1099->client_ssn = encrypt($caregiver1099->client_ssn);
         } else {
@@ -148,7 +148,7 @@ class Caregiver1099Controller extends Controller
 
         if (strpos($caregiver1099->caregiver_ssn, "#") !== false) {
             $this->validate($request, [
-                'caregiver_ssn' => ['required', new ValidSSN()],
+                'caregiver_ssn' => ['required', new ValidSSN(false)],
             ]);
             $caregiver1099->caregiver_ssn = encrypt($caregiver1099->caregiver_ssn);
         } else {
@@ -172,13 +172,14 @@ class Caregiver1099Controller extends Controller
     {
         $systemSettings = \DB::table('system_settings')->first();
 
+        dd('wtop');
         $caregiver1099s = $caregiver1099
             ->where('year', $year)
             ->whereNull('transmitted_at')
             ->with(['client', 'client.user'])
             ->get()
             ->map(function ($cg1099) use ($systemSettings) {
-                //$cg1099->update(['transmitted_at'=>\Carbon\Carbon::now(),'transmitted_by'=> auth()->user()->id]);
+//                $cg1099->update(['transmitted_at'=>\Carbon\Carbon::now(),'transmitted_by'=> auth()->user()->id]);
 
                 $payerTin = $cg1099->client_ssn ? decrypt($cg1099->client_ssn) : '';
                 $payerName = $cg1099->client_first_name . " " . $cg1099->client_last_name;

@@ -50,6 +50,14 @@
                         <template slot="client" scope="row">
                             <a :href="'/business/clients/' + row.item.client_id" target="_blank">{{ row.item.client }}</a>
                         </template>
+                        <template slot="caregiver_email" scope="row">
+                            {{ row.item.caregiver_email }}<br />
+                            {{ row.item.caregiver_phone }}
+                        </template>
+                        <template slot="client_email" scope="row">
+                            {{ row.item.client_email }}<br />
+                            {{ row.item.client_phone }}
+                        </template>
                     </b-table>
                 </b-col>
             </b-row>
@@ -141,15 +149,17 @@
                   {key: 'caregiver', label: 'Caregiver', sortable: true,},
                   {key: 'client', label: 'Client', sortable: true,},
                   {key: 'errors', label: 'Errors', sortable: true,},
+                  {key: 'client_email', label: 'Client Contact', sortable: false },
+                  {key: 'caregiver_email', label: 'Caregiver Contact', sortable: false },
               ],
           }
         },
         computed: {
             disableGenerate(){
-                if(this.form.business_id !== ""){
-                    return false;
-                }
-                return true;
+                // if(this.form.business_id !== ""){
+                //     return false;
+                // }
+                return false;
             }
         },
     }

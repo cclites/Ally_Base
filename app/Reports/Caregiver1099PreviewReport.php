@@ -13,7 +13,7 @@ class Caregiver1099PreviewReport extends BaseReport
      */
     public function __construct()
     {
-        $this->query = CaregiverYearlyEarnings::with(['client', 'caregiver', 'business'])
+        $this->query = CaregiverYearlyEarnings::with(['client', 'caregiver', 'business', 'client.phoneNumber', 'caregiver.phoneNumber'])
             ->select(['caregiver_yearly_earnings.*', 'c1099.id as caregiver_1099_id', 'c1099.payment_total as payment_total'])
             ->leftJoin('caregiver_1099s as c1099', function ($join) {
                 $join->on('caregiver_yearly_earnings.client_id', '=', 'c1099.client_id')
@@ -30,7 +30,7 @@ class Caregiver1099PreviewReport extends BaseReport
             ->overThreshold(Caregiver1099::THRESHOLD);
     }
 
-    public function applyFilters(string $year, ?string $caregiverId = null, ?string $clientId = null, ?string $businessId = null, ?string $payer = null, ?bool $created = null)
+    public function applyFilters(string $year, ?string $caregiverId = null, ?string $clientId = null, ?iterable $businesses = null, ?string $payer = null, ?bool $created = null)
     {
         $this->query->where('caregiver_yearly_earnings.year', $year)
             ->when($caregiverId, function ($q, $value) {
@@ -39,8 +39,8 @@ class Caregiver1099PreviewReport extends BaseReport
             ->when($clientId, function ($q, $value) {
                 $q->where('caregiver_yearly_earnings.client_id', $value);
             })
-            ->when($businessId, function ($q, $value) {
-                $q->where('caregiver_yearly_earnings.business_id', $value);
+            ->when($businesses, function ($q, iterable $value) {
+                $q->whereIn('caregiver_yearly_earnings.business_id', $value);
             })
             ->when($payer == Caregiver1099Payer::CLIENT(), function ($q) {
                 $q->whereUsesClientPayer();
@@ -81,7 +81,9 @@ class Caregiver1099PreviewReport extends BaseReport
                     'year' => $earnings->year,
                     'errors' => $earnings->getMissing1099Errors(),
                     'caregiver_email' => $earnings->caregiver->email,
-                    'client_email' => $earnings->client->email
+                    'caregiver_phone' => optional($earnings->caregiver->phoneNumber)->number,
+                    'client_email' => $earnings->client->email,
+                    'client_phone' => optional($earnings->client->phoneNumber)->number,
                 ];
             });
     }

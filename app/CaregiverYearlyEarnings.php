@@ -115,6 +115,8 @@ class CaregiverYearlyEarnings extends BaseModel
 
         if (empty($this->caregiver->ssn)) {
             $errors[] = "Caregiver SSN";
+        } else if (! valid_ssn($this->caregiver->ssn)) {
+            $errors[] = "Caregiver SSN Invalid";
         }
 
         if (empty($this->caregiver->email) || $this->caregiver->hasNoEmail()) {
@@ -173,7 +175,7 @@ class CaregiverYearlyEarnings extends BaseModel
 
         if (empty($this->client->ssn)) {
             $errors[] = "Client SSN";
-        } else if (strlen(str_replace('-', '', $this->client->ssn)) <> 9) {
+        } else if (! valid_ssn($this->client->ssn)) {
             $errors[] = "Client SSN Invalid";
         }
 
