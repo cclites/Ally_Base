@@ -172,7 +172,6 @@ class Caregiver1099Controller extends Controller
     {
         $systemSettings = \DB::table('system_settings')->first();
 
-        dd('wtop');
         $caregiver1099s = $caregiver1099
             ->where('year', $year)
             ->whereNull('transmitted_at')

@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Caregiver;
 use App\Caregiver1099;
+use App\Caregiver1099Payer;
 use Illuminate\Console\Command;
 
 class OnceDeleteMalformed1099s extends Command
@@ -41,7 +42,7 @@ class OnceDeleteMalformed1099s extends Command
     {
         $badIds = Caregiver1099::all()
             ->map(function (Caregiver1099 $item) {
-                if (! valid_ssn(decrypt($item->client_ssn))) {
+                if ($item->caregiver_1099_payer == Caregiver1099Payer::CLIENT() && ! valid_ssn(decrypt($item->client_ssn))) {
                     return $item->id;
                 }
                 if (! valid_ssn(decrypt($item->caregiver_ssn))) {
