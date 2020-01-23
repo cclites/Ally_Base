@@ -146,11 +146,11 @@
               }),
               fields: [
                   {key: 'location', label: 'Location', sortable: true,},
-                  {key: 'caregiver', label: 'Caregiver', sortable: true,},
                   {key: 'client', label: 'Client', sortable: true,},
-                  {key: 'errors', label: 'Errors', sortable: true,},
                   {key: 'client_email', label: 'Client Contact', sortable: false },
+                  {key: 'caregiver', label: 'Caregiver', sortable: true,},
                   {key: 'caregiver_email', label: 'Caregiver Contact', sortable: false },
+                  {key: 'errors', label: 'Errors', sortable: true,},
               ],
           }
         },
