@@ -155,6 +155,7 @@ Vue.component('bad-1099-report', require('./components/admin/reports/Bad1099Repo
 Vue.component('admin-registry-emails', require('./components/admin/AdminRegistryEmails.vue'));
 Vue.component('admin-1099-preview', require('./components/admin/reports/Admin1099PreviewReport'));
 Vue.component('ally-1099-preview', require('./components/admin/reports/Ally1099PayersPreviewReport'));
+Vue.component('admin-1099-not-elected-report', require('./components/admin/reports/Admin1099NotElectedReport'));
 Vue.component('caregiver-1099-edit-modal', require('./components/admin/taxes/Caregiver1099Edit'));
 Vue.component('admin-1099-actions', require('./components/admin/taxes/Admin1099.vue'));
 Vue.component('caregiver-1099-admin', require('./components/admin/taxes/Caregiver1099Admin.vue'));
