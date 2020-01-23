@@ -91,7 +91,7 @@
                 fields: {
                     payment_date: { label: 'Date Paid', sortable: true, formatter: x => this.formatDateFromUTC(x) },
                     amount: { sortable: true, formatter: x => this.moneyFormat(x) },
-                    status: { label: 'Payment Status', sortable: true, formatter: x => x ? 'Paid' : 'Failed' },
+                    status: { label: 'Payment Status', sortable: true },
                     invoices: { label: 'Related Invoices'},
                     actions: { sortable: false, class: 'hidden-print' },
                 },

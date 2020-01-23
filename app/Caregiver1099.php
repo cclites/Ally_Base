@@ -40,89 +40,13 @@ class Caregiver1099 extends BaseModel
         return $this->caregiver_city . ", " . $this->caregiver_state . " " . $this->caregiver_zip;
     }
 
-    public static function getErrors($cg1099){
-        $errors = [];
-
-        if(! $cg1099->client_first_name){
-            $errors[] = "Client First Name";
-        }
-
-        if(! $cg1099->client_last_name){
-            $errors[] = "Client Last Name";
-        }
-
-        if(! $cg1099->client_address1){
-            $errors[] = "Client Address";
-        }
-
-        if(! $cg1099->client_city){
-            $errors[] = "Client City";
-        }
-
-        if(! $cg1099->client_state){
-            $errors[] = "Client State";
-        }
-
-        if(! $cg1099->client_zip){
-            $errors[] = "Client Zip";
-        }
-
-        if(! $cg1099->client_ssn){
-            $errors[] = "Client Ssn";
-        }
-
-        if(! $cg1099->client_email){
-            $errors[] = "Client Email";
-        }
-
-        if($cg1099->caregiver_1099 === 'ally'){
-            return $errors;
-        }
-
-        if(! $cg1099->caregiver_first_name){
-            $errors[] = "Caregiver First Name";
-        }
-
-        if(! $cg1099->caregiver_last_name){
-            $errors[] = "Caregiver Last Name";
-        }
-
-        if(! $cg1099->caregiver_address1){
-            $errors[] = "Caregiver Address";
-        }
-
-        if(! $cg1099->caregiver_city){
-            $errors[] = "Caregiver City";
-        }
-
-        if(! $cg1099->caregiver_state){
-            $errors[] = "Caregiver State";
-        }
-
-        if(! $cg1099->caregiver_zip){
-            $errors[] = "Caregiver Zip";
-        }
-
-        if(! $cg1099->caregiver_ssn){
-            $errors[] = "Caregiver Ssn";
-        }
-
-        if(! $cg1099->caregiver_email){
-            $errors[] = "Caregiver Email";
-        }elseif(strpos($cg1099->caregiver_email, 'noemail') !== false){
-            $errors[] = "Caregiver has no Email";
-        }
-
-        return $errors;
-    }
-
     public function getFilledCaregiverPdf($maskPayerSsn = true, $maskRecipientSsn = true) : Pdf
     {
         $this->load("client");
 
         $systemSettings = \DB::table('system_settings')->first();
 
-        $pdf = new Pdf('../resources/pdf_forms/caregiver1099s/' . $this->year . '/1099-misc-full.pdf');
+        $pdf = new Pdf('../resources/pdf_forms/caregiver1099s/' . $this->year . '/cg-1099-b-2.pdf');
 
         $payerTin = $this->client_ssn ? decrypt($this->client_ssn) : '';
         $payerName = $this->client_first_name . " " . $this->client_last_name;
@@ -137,9 +61,8 @@ class Caregiver1099 extends BaseModel
             $caregiverTin = substr($caregiverTin, 0, 2) . "-" . substr($caregiverTin, 2, 7);
         }
 
-        if ($this->client->caregiver_1099 === 'ally') {
-            $payerName = $systemSettings->company_name;
-            $payerTin = $systemSettings->company_ein;
+        if ($this->caregiver_1099_payer == 'ally') {
+            $payerName = $this->client_first_name;
             $payerAddress3 = $systemSettings->company_city . ", " . $systemSettings->company_state . " " . $systemSettings->company_zip;
             $clAddress2 = $systemSettings->company_address2 ? $systemSettings->company_address2 . "\n" : '';
             $payerAddress = $payerName . "\n" . $systemSettings->company_address1 . "\n" . $clAddress2 . $payerAddress3;
@@ -150,35 +73,26 @@ class Caregiver1099 extends BaseModel
         }
 
         if ($maskRecipientSsn) {
-            $caregiverTin = '***-**-****';
+            $caregiverTin = '***-**-' . substr($caregiverTin . "", -4);
         }
 
         $pdf->fillForm([
             /** COPY B **/
-            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_1[0]' => $payerAddress,
+            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_1[0]' => strtoupper($payerAddress),
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
             'topmostSubform[0].CopyB[0].LeftColumn[0].f2_3[0]' => $caregiverTin, //recipient tin
-            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_4[0]' => $this->caregiver_first_name . " " . $this->caregiver_last_name, //recipient name
-            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_5[0]' => $this->caregiver_address1 . $caAddress2, //recipient street address
-            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_6[0]' => $this->caregiver_address3(), //recipient city, state, zip
+            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_4[0]' => strtoupper($this->caregiver_first_name . " " . $this->caregiver_last_name), //recipient name
+            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_5[0]' => strtoupper($this->caregiver_address1 . $caAddress2), //recipient street address
+            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_6[0]' => strtoupper($this->caregiver_address3()), //recipient city, state, zip
             'topmostSubform[0].CopyB[0].RightCol[0].f2_14[0]' => $paymentTotal,
 
-            /** COPY 1 **/
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_1[0]' => $payerAddress,
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_3[0]' => $caregiverTin, //recipient tin
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_4[0]' => $this->caregiver_first_name . " " . $this->caregiver_last_name, //recipient name
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_5[0]' => $this->caregiver_address1 . $caAddress2, //recipient street address
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_6[0]' => $this->caregiver_address3(), //recipient city, state, zip
-            'topmostSubform[0].Copy1[0].RightCol[0].f2_14[0]' => $paymentTotal,
-
             /** COPY 2 **/
-            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_1[0]' => $payerAddress,
+            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_1[0]' => strtoupper($payerAddress),
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
             'topmostSubform[0].Copy2[0].LeftColumn[0].f2_3[0]' => $caregiverTin, //recipient tin
-            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_4[0]' => $this->caregiver_first_name . " " . $this->caregiver_last_name, //recipient name
-            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_5[0]' => $this->caregiver_address1 . $caAddress2, //recipient street address
-            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_6[0]' => $this->caregiver_address3(), //recipient city, state, zip
+            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_4[0]' => strtoupper($this->caregiver_first_name . " " . $this->caregiver_last_name), //recipient name
+            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_5[0]' => strtoupper($this->caregiver_address1 . $caAddress2), //recipient street address
+            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_6[0]' => strtoupper($this->caregiver_address3()), //recipient city, state, zip
             'topmostSubform[0].Copy2[0].RightColumn[0].f2_14[0]' => $paymentTotal,
         ])->execute();
 

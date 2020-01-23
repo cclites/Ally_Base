@@ -20,6 +20,10 @@ class ProspectController extends BaseController
      */
     public function index(Request $request)
     {
+        if (empty($request->businesses) && auth()->user()->role_type == 'admin') {
+            return [];
+        }
+
         if ($request->expectsJson() && $request->filled('json')) {
             $query = Prospect::with('business')
                 ->forRequestedBusinesses()

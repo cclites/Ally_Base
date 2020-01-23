@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Caregiver1099;
 use App\Caregiver;
+use App\Caregiver1099Payer;
 use App\CaregiverYearlyEarnings;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -12,11 +13,13 @@ use App\Http\Requests\StoreCaregiver1099Request;
 use App\Http\Requests\UpdateCaregiver1099Request;
 use App\Http\Requests\Transmit1099Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class Caregiver1099Controller extends Controller
 {
     protected $headerRow = [
+        'Created At',
         'Void (Enter 0 or 1)',
         'Corrected (Enter 0 or 1)',
         'Payer Name',
@@ -137,7 +140,7 @@ class Caregiver1099Controller extends Controller
 
         if (strpos($caregiver1099->client_ssn, "#") !== false) {
             $this->validate($request, [
-                'client_ssn' => ['required', new ValidSSN()],
+                'client_ssn' => ['required', new ValidSSN(false)],
             ]);
             $caregiver1099->client_ssn = encrypt($caregiver1099->client_ssn);
         } else {
@@ -146,7 +149,7 @@ class Caregiver1099Controller extends Controller
 
         if (strpos($caregiver1099->caregiver_ssn, "#") !== false) {
             $this->validate($request, [
-                'caregiver_ssn' => ['required', new ValidSSN()],
+                'caregiver_ssn' => ['required', new ValidSSN(false)],
             ]);
             $caregiver1099->caregiver_ssn = encrypt($caregiver1099->caregiver_ssn);
         } else {
@@ -163,60 +166,62 @@ class Caregiver1099Controller extends Controller
     /**
      * Creates a csv file of 1099s for transmission
      *
-     * @param Transmit1099Request $request
+     * @param Request $request
+     * @param Caregiver1099 $caregiver1099
+     * @param $year
      * @return Response
      */
-    public function transmit(Caregiver1099 $caregiver1099, $year)
+    public function transmit(Request $request, Caregiver1099 $caregiver1099, $year)
     {
+        $maskRecipientSSN = $request->mask == 1;
+
         $systemSettings = \DB::table('system_settings')->first();
 
         $caregiver1099s = $caregiver1099
             ->where('year', $year)
             ->whereNull('transmitted_at')
-            ->with('client')
+            ->with(['client', 'client.user'])
             ->get()
-            ->map(function ($cg1099) use ($systemSettings) {
-                //$cg1099->update(['transmitted_at'=>\Carbon\Carbon::now(),'transmitted_by'=> auth()->user()->id]);
+            ->map(function ($cg1099) use ($systemSettings, $maskRecipientSSN) {
+//                $cg1099->update(['transmitted_at'=>\Carbon\Carbon::now(),'transmitted_by'=> auth()->user()->id]);
 
-                $payerTin = $cg1099->client_ssn ? decrypt($cg1099->client_ssn) : '';
+                $payerTin = $this->ensureSsnFormat($cg1099->client_ssn ? decrypt($cg1099->client_ssn) : '');
                 $payerName = $cg1099->client_first_name . " " . $cg1099->client_last_name;
                 $payerAddress = $cg1099->client_address1 . ($cg1099->client_address2 ? ", " . $cg1099->client_address2 : '');
                 $payerCity = $cg1099->client_city;
                 $payerState = $cg1099->client_state;
                 $payerZip = $cg1099->client_zip;
-                $payerPhone = $cg1099->client_phone;
+                $payerPhone = $cg1099->client->user->getDefaultPhoneAttribute();
                 $caregiverTin = decrypt($cg1099->caregiver_ssn);
 
-                if ($cg1099->uses_ein_number) {
-                    $caregiverTin = str_replace("-", "", $caregiverTin);
-                    $caregiverTin = substr($caregiverTin, 0, 2) . "-" . substr($caregiverTin, 2, 7);
+                if ($maskRecipientSSN) {
+                    $caregiverTin = '***-**-*' . substr($caregiverTin, strlen($caregiverTin) - 4, 4);
+                } else {
+                    $caregiverTin = $this->ensureSsnFormat($caregiverTin);
                 }
 
-                if ($cg1099->client->caregiver_1099 === 'ally') {
+                if ($cg1099->caregiver_1099_payer == Caregiver1099Payer::ALLY()) {
                     $payerName = $systemSettings->company_name;
                     $payerTin = $systemSettings->company_ein;
-                    $payerCity = $systemSettings->company_city;
-                    $payerState = $systemSettings->company_state;
-                    $payerZip = $systemSettings->company_zip;
-                    $payerAddress = $systemSettings->company_address1 . ($systemSettings->company_address2 ? ", " . $systemSettings->company_address2 : '');
                     $payerPhone = $systemSettings->company_contact_phone;
                 }
 
                 return [
-                    'payer_name' => $payerName,
-                    'payer_address' => $payerAddress,
-                    'payer_city' => $payerCity,
-                    'payer_state' => $payerState,
+                    'payer_name' => strtoupper($payerName),
+                    'payer_address' => strtoupper($payerAddress),
+                    'payer_city' => strtoupper($payerCity),
+                    'payer_state' => strtoupper($payerState),
                     'payer_zip' => $payerZip,
                     'payer_phone' => $payerPhone,
                     'payer_tin' => $payerTin,
                     'recipient_tin' => $caregiverTin,
-                    'recipient_name' => $cg1099->caregiver_first_name . " " . $cg1099->caregiver_last_name,
-                    'recipient_address' => $cg1099->caregiver_address1 . "\n" . filled($cg1099->caregiver_address2),
-                    'recipient_city' => $cg1099->caregiver_city,
-                    'recipient_state' => $cg1099->caregiver_state,
+                    'recipient_name' => strtoupper($cg1099->caregiver_first_name . " " . $cg1099->caregiver_last_name),
+                    'recipient_address' => strtoupper($cg1099->caregiver_address1 . "\n" . filled($cg1099->caregiver_address2)),
+                    'recipient_city' => strtoupper($cg1099->caregiver_city),
+                    'recipient_state' => strtoupper($cg1099->caregiver_state),
                     'recipient_zip' => $cg1099->caregiver_zip,
                     'payment_total' => $cg1099->payment_total,
+                    'created_at' => $cg1099->created_at->toDateString(),
                 ];
             });
 
@@ -227,6 +232,16 @@ class Caregiver1099Controller extends Controller
             'Content-Disposition' => 'attachment; filename="Transmission.csv"',
         ]);
 
+    }
+
+    public function ensureSsnFormat(string $ssn) : string
+    {
+        if (strlen($ssn) < 9) {
+            return '';
+        }
+
+        $ssn = str_replace('-', '', $ssn);
+        return substr($ssn, 0, 3) . '-' . substr($ssn, 3, 2) . '-' . substr($ssn, 5, 4);
     }
 
     /**
@@ -248,6 +263,7 @@ class Caregiver1099Controller extends Controller
         foreach ($rows as $row) {
 
             $data = [
+                $row['created_at'],
                 0,
                 0,
                 $row['payer_name'],
