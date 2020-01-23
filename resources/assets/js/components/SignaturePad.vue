@@ -172,9 +172,9 @@
     }
     .actions {
         position: relative;
-        bottom: 35px;
+        bottom: 65px;
     }
-    @media screen and (max-width: 600px) {    
+    @media screen and (max-width: 600px) {
         .landscape-warning {
             visibility: visible;
         }
