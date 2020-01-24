@@ -38,19 +38,17 @@ class WebClockInTest extends TestCase
     }
 
     /** @test */
-    function a_caregiver_can_only_see_schedules_to_clock_in_that_are_within_two_hours_before_or_after_the_current_time()
-    {
-        $s1 = $this->createSchedule(Carbon::now(), '09:02:00', 1);
-        $s2 = $this->createSchedule(Carbon::now(), '13:58:00', 1);
-
-        $s3 = $this->createSchedule(Carbon::now(), '08:58:00', 1);
-        $s4 = $this->createSchedule(Carbon::now(), '14:02:00', 1);
+    public function a_caregiver_can_only_see_schedules_to_clock_in_that_start_on_current_day() {
+        $today = Carbon::now();
+        $s1 = $this->createSchedule($today, '09:02:00', 1);
+        $s2 = $this->createSchedule($today, '13:58:00', 10);
+        $s3 = $this->createSchedule(Carbon::tomorrow(), '14:02:00', 1);
 
         $this->get("/caregiver/schedules/{$this->client->id}")
             ->assertJsonFragment(['id' => $s1->id])
             ->assertJsonFragment(['id' => $s2->id])
+            ->assertJsonFragment(['start_date' => $today->toDateString() ." 09:02:00"])
             ->assertJsonMissing(['id' => $s3->id])
-            ->assertJsonMissing(['id' => $s4->id])
             ->assertJsonCount(2);
     }
 

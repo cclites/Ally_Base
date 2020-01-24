@@ -71,8 +71,9 @@ class ClientController extends BaseController
      */
     public function currentSchedules(Client $client)
     {
-        $start = new Carbon('-2 hours', Timezone::getTimezone($client->business_id));
-        $end = new Carbon('+2 hours', Timezone::getTimezone($client->business_id));
+        $now = Carbon::now();
+        $start = $now->copy()->startOfDay();
+        $end = $now->copy()->endOfDay();
 
         $schedules = Schedule::forClient($client->id)
             ->forCaregiver($this->caregiver()->id)
@@ -82,7 +83,6 @@ class ClientController extends BaseController
 
         // Sort schedules by closest starts_at
         if ($schedules->count() > 1) {
-            $now = Carbon::now();
             $schedules = $schedules->sort(function($a, $b) use ($now) {
                 $diffA = $now->diffInSeconds($a->starts_at);
                 $diffB = $now->diffInSeconds($b->starts_at);
