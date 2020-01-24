@@ -125,7 +125,7 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
     /**
      * Get the related Shift.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function visitEditReason()
     {
@@ -135,7 +135,7 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
     /**
      * Get the related Shift.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function visitEditAction()
     {

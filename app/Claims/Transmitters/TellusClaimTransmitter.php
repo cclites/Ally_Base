@@ -243,10 +243,10 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'UserField1' => $claim->id, // OPTIONAL
             'UserField2' => $item->id, // OPTIONAL
             'UserField3' => $service->visit_start_time->setTimezone($business->timezone)->format($this->timeFormat), // OPTIONAL
-            'ReasonCode1' => $this->tcLookup( 'ReasonCode', $service->visitEditReason->code ),
+            'ReasonCode1' => empty($service->visitEditReason) ? '' : $this->tcLookup( 'ReasonCode', $service->visitEditReason->code ),
             // 'ReasonCode2' => $this->tcLookup( 'ReasonCode', $service->visit_edit_action ), // no tellus does not take the action
-            // 'ReasonCode3' => '', // OPTIONAL && TODO
-            // 'ReasonCode4' => '', // OPTIONAL && TODO
+            // 'ReasonCode3' => '', // OPTIONAL
+            // 'ReasonCode4' => '', // OPTIONAL
             'TimeZone' => $this->tcLookup('TimeZone', $this->getBusinessTimezone($business)),
             'VisitNote' => $service->caregiver_comments ?? '', // OPTIONAL
             'EndAddress1' => $service->address1, // OPTIONAL
@@ -255,8 +255,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'EndState' => $service->state, // OPTIONAL
             'EndZip' => $service->zip, // OPTIONAL
             'VisitStatus' => $this->tcLookup('VisitStatus', 'COMP'), // OPTIONAL, Hardcoded to 'Completed' on purpose
-            // 'MissedVisitReason'      => $this->tcLookup( 'MissedVisitReason', 'PCAN' ), // OPTIONAL, TODO
-            // 'MissedVisitActionTaken' => $this->tcLookup( 'MissedVisitActionTaken', 'SCHS' ), // OPTIONAL, TODO
+            // 'MissedVisitReason'      => '', // OPTIONAL
+            // 'MissedVisitActionTaken' => '', // OPTIONAL
             // 'InvoiceUnits'           => '', // OPTIONAL && TODO
             // 'InvoiceAmount'          => '13.37', // OPTIONAL && TODO
             'ScheduledEndLatitude' => '',
