@@ -158,7 +158,6 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             'N', //    "Is Deletion",
             $item->id, //    "Invoice Line Item ID",
             'N', //    "Missed Visit",
-            // TODO: implement reason codes?
             '', //    "Missed Visit Reason Code",
             '', //    "Missed Visit Action Taken Code",
             $service->getHasEvv() ? '' : 'Y', //    "Timesheet Required",
