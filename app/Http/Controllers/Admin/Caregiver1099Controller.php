@@ -89,7 +89,8 @@ class Caregiver1099Controller extends Controller
     public function store(StoreCaregiver1099Request $request)
     {
         /** @var \App\CaregiverYearlyEarnings $earnings */
-        $earnings = CaregiverYearlyEarnings::where('business_id', $request->business_id)
+        $earnings = CaregiverYearlyEarnings::with('client', 'caregiver')
+            ->where('business_id', $request->business_id)
             ->where('client_id', $request->client_id)
             ->where('caregiver_id', $request->caregiver_id)
             ->where('year', $request->year)
@@ -97,6 +98,11 @@ class Caregiver1099Controller extends Controller
 
         if (empty($earnings)) {
             return new ErrorResponse(500, 'Could not find earnings data for this caregiver and client.');
+        }
+
+        if ($earnings->client->caregiver_1099 == Caregiver1099Payer::CLIENT() && $earnings->client->caregiver_1099) {
+            // override payer ot ally (just this once)
+            $earnings->client->caregiver_1099 = Caregiver1099Payer::ALLY();
         }
 
         if ($errors = $earnings->getMissing1099Errors()) {
