@@ -203,8 +203,6 @@ class PrintClaimInvoiceController extends BaseController
             }
         }
 
-        $rndm = rand( 10000, 99999 );
-
         $pdf = new Pdf( $pdf );
         $pdf->fillForm([
 
@@ -271,9 +269,7 @@ class PrintClaimInvoiceController extends BaseController
         ])
             ->needAppearances()
             ->execute();
-            // ->saveAs( "../resources/pdf_forms/cms1500/testingOutput$rndm.pdf" );
 
-        $pdf->send( "testingOutput$rndm.pdf" );
-        dd( 'remaining here', $pdf );
+        $pdf->send( "cms-1500.pdf" );
     }
 }
