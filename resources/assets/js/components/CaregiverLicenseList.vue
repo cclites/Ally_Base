@@ -13,8 +13,6 @@
                 <b-form-checkbox class="m-0 vertical-center" v-model=" hide_inapplicables ">Hide any expirations inapplicable to the caregiver</b-form-checkbox>
             </b-col>
             <b-col lg="6" class="text-right d-flex justify-content-end align-items-center">
-
-                <p class="mb-0">Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results</p>
                 <b-btn :disabled=" loading || updateList.length == 0 " class="ml-3" @click=" saveLicenses() " variant="success">Save Expirations</b-btn>
             </b-col>
         </b-row>
@@ -26,8 +24,7 @@
                 :fields="fields"
                 :current-page="currentPage"
                 :filter="filter"
-                :sort-by.sync="sortBy"
-                :sort-desc.sync="sortDesc"
+                sort-by="name"
             >
 
                 <template slot="name" scope="row">
@@ -98,8 +95,6 @@
         <b-row class="align-items-center">
 
             <b-col lg="12" class="text-right d-flex justify-content-end align-items-center">
-
-                <p class="mb-0">Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results</p>
                 <b-btn :disabled=" loading || updateList.length == 0 " class="ml-3" @click=" saveLicenses() " variant="success">Save Expirations</b-btn>
             </b-col>
         </b-row>
@@ -115,14 +110,9 @@
 
         data() {
             return {
-
                 hide_inapplicables : true,
                 updateList : [],
                 loading: false,
-                perPage: 25,
-                currentPage: 1,
-                sortBy: null,
-                sortDesc: false,
                 filter: null,
                 fields: [
                     {
@@ -163,12 +153,6 @@
         },
 
         computed: {
-
-            totalRows(){
-
-                return this.chainExpirations.length || 0;
-            },
-
             alreadyCreating(){
 
                 return !!this.chainExpirations.find( exp => exp.isNew );
