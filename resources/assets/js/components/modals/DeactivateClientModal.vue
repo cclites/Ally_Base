@@ -15,6 +15,17 @@
                     </div>
                 </b-col>
             </b-row>
+
+            <b-row>
+                <b-col class="text-center">
+                    <div v-if="open_invoice_count > 0">This client has <span class="text-danger">{{ open_invoice_count }}</span>
+                        open invoices.
+                    </div>
+                    <div v-else class="text-success">
+                        They have no open invoices.
+                    </div>
+                </b-col>
+            </b-row>
             <b-row>
                 <b-col lg="6">
                     <b-form-group label-for="inactive_at" class="mt-4">
@@ -126,7 +137,8 @@
                     client: [],
                     caregiver: []
                 },
-                deactivateModal: false
+                deactivateModal: false,
+                open_invoice_count: 0,
             }
         },
 
@@ -144,6 +156,9 @@
 
             archiveClient () {
 
+                if ( ! confirm('This will prevent any charges or deposits from being completed. Please be sure to check that there are no outstanding invoices or payments.')) {
+                    return;
+                }
                 let url = `/business/clients/${this.client.id}/deactivate`;
                 this.form.submit ('post', url);
             },
@@ -153,7 +168,14 @@
             axios.get(`/business/settings/deactivation-reasons?business_id=${this.client.business_id}`)
                 .then( ({ data }) => {
                     this.deactivationReasons = data;
-                });
+                })
+                .catch(() => {});
+
+            axios.get(`/business/clients/${this.client.id}/open-invoices`)
+                .then( ({ data }) => {
+                    this.open_invoice_count = data.open_invoice_count;
+                })
+                .catch(() => {});
         },
     }
 </script>

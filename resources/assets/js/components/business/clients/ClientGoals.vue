@@ -4,7 +4,12 @@
         header-text-variant="white"
         header-bg-variant="info"
         >
-        <b-btn variant="info" class="mb-2" @click="showModal()">Add Goal</b-btn>
+
+        <div>
+            <b-btn variant="info" class="mb-2" @click="showModal()">Add Goal</b-btn>
+            <b-btn @click="generatePdf()" variant="primary" class="float-right"><i class="fa fa-print"></i> Print</b-btn>
+        </div>
+
 
         <div class="table-responsive">
             <b-table bordered striped hover show-empty
@@ -184,8 +189,6 @@
                 this.form.submit(method, url)
                     .then( ({ data }) => {
                         window.location.reload();
-                        //this.updateGoals(data.data);
-                        //this.clientGoalModal = false;
                     });
             },
 
@@ -200,7 +203,11 @@
 
             goalUrl(goal) {
                 return this.url + '/' + goal.id;
-            }
+            },
+
+            generatePdf(){
+                window.location = this.url + '/print';
+            },
         }
     }
 </script>

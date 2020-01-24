@@ -29,7 +29,7 @@ class CaregiverApplicationController extends BusinessBaseController
     {
         $query = $this->businessChain()
             ->caregiverApplications()
-            ->ordered();
+            ->orderBy('created_at', 'DESC');
 
         if ($request->expectsJson()) {
             $timezone = $this->businessChain()->businesses()->first()->timezone ?? 'America/New_York';

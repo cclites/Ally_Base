@@ -369,6 +369,23 @@
                 </b-col>
             </b-row>
 
+            <b-row>
+
+                <b-col>
+
+                    <h5><strong>Visit Edit Reasons</strong></h5>
+
+                    <edit-code-dropdowns
+                        v-if="item.id"
+                        class="my-3"
+                        :visit_edit_action_id=" form.visit_edit_action_id "
+                        :visit_edit_reason_id=" form.visit_edit_reason_id "
+                        :updateAction=" updateAction "
+                        :updateReason=" updateReason "
+                    />
+                </b-col>
+            </b-row>
+
             <h5><strong>Client Information</strong></h5>
             <b-row>
                 <b-col lg="6">
@@ -951,6 +968,8 @@
                     client_signature_id: '',
                     caregiver_signature_id: '',
                     is_overtime: false,
+                    visit_edit_action_id : '',
+                    visit_edit_reason_id : ''
                 }),
             };
         },
@@ -973,6 +992,14 @@
         },
 
         methods: {
+
+            updateAction( action ){
+
+                this.form.visit_edit_action_id = action;
+            },
+            updateReason( reason ){
+                this.form.visit_edit_reason_id = reason;
+            },
             save() {
                 if (this.item.id) {
                     this.form.patch(`/business/claims/${this.claim.id}/item/${this.item.id}`)

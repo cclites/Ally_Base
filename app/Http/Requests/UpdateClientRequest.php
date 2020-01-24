@@ -11,6 +11,7 @@ use App\Rules\ValidSSN;
 use Illuminate\Validation\Rule;
 use App\Rules\ImageCropperUpload;
 use App\Client;
+use Carbon\Carbon;
 use When\Valid;
 
 class UpdateClientRequest extends BusinessRequest
@@ -33,14 +34,15 @@ class UpdateClientRequest extends BusinessRequest
             'date_of_birth' => 'nullable|date',
             'business_fee' => 'nullable|numeric',
             'client_type' => 'required',
-            'case_manager_id' => 'nullable',
+            'case_manager' => 'nullable|string|max:100',
+            'services_coordinator_id' => 'nullable',
             'ssn' => ['nullable', new ValidSSN()],
             'gender' => 'nullable|in:M,F',
             'agreement_status' => 'required',
             'inquiry_date' => 'nullable|date',
             'service_start_date' => 'nullable|date',
             'diagnosis' => 'nullable|string|max:100',
-            'ambulatory' => 'nullable|boolean',
+            'ambulatory' => ['nullable','string', Rule::in(Client::AMBULATORY_OPTIONS)],
             'hospital_name' => 'nullable|string|max:100',
             'hospital_number' => 'nullable|string|max:25',
             'avatar' => ['nullable', new ImageCropperUpload()],
@@ -82,7 +84,8 @@ class UpdateClientRequest extends BusinessRequest
                 $data['username'] = Client::getAutoUsername();
             }
         }
-        $data['updated_by'] = auth()->id();
+        $data[ 'updated_by'           ] = auth()->id();
+        $data[ 'updated_by_timestamp' ] = Carbon::now();
 
         return $data;
     }

@@ -136,10 +136,15 @@
                         formatter: (value) => { return value ? 'Verified' : 'Unverified'; }
                     },
                     {
+                        key: 'admin_note',
+                        class: 'hidden-print',
+                        label: 'Admin Note',
+                    },
+                    {
                         key: 'actions',
                         class: 'hidden-print',
                         label: ' ',
-                    }
+                    },
                 ],
                 client_id: '',
                 start_date: moment().startOf('month').format('MM/DD/YYYY'),

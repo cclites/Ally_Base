@@ -48,6 +48,9 @@ class CaregiverController extends BaseController
      */
     public function index(Request $request)
     {
+        if (empty($request->businesses) && auth()->user()->role_type == 'admin') {
+            return [];
+        }
 
         if ($request->expectsJson()) {
             $query = Caregiver::with('businesses')
@@ -273,6 +276,10 @@ class CaregiverController extends BaseController
             return new ErrorResponse(400, 'You cannot archive this caregiver because they have an active shift clocked in.');
         }
 
+        if($caregiver->getUnpaidInvoicesCount() > 0){
+            return new ErrorResponse(400, 'Warning: This caregiver has an outstanding invoice or payment and cannot be deactivated. Contact Ally support with any questions.');
+        }
+
         try {
             $inactive_at = request('inactive_at') ? Carbon::parse(request('inactive_at')) : Carbon::now();
         } catch (\Exception $ex) {
@@ -293,6 +300,7 @@ class CaregiverController extends BaseController
         if ($caregiver->update($data)) {
 
             $caregiver->unassignFromFutureSchedules();
+            $caregiver->removeOutstandingScheduleRequests();
 
             \DB::commit();
             return new SuccessResponse('The caregiver has been archived.', [], route('business.caregivers.index'));
@@ -537,5 +545,22 @@ class CaregiverController extends BaseController
 
         $filePath = $caregiver->id . '-' . 'deactivation-details-' . Carbon::now()->format('m-d-Y');
         return $pdf->stream( $filePath . '.pdf' );
+    }
+
+    /**
+     * Check if the Caregiver has open (unpaid) invoices.
+     *
+     * @param Caregiver $caregiver
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function openInvoices(Caregiver $caregiver)
+    {
+        $count = $caregiver->getUnpaidInvoicesCount();
+
+        return response()->json([
+            'caregiver_id' => $caregiver->id,
+            'open_invoice_count' => $caregiver->getUnpaidInvoicesCount(),
+            'has_open_invoices' => $count > 0
+        ]);
     }
 }

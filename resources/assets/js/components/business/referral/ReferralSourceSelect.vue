@@ -17,7 +17,7 @@
         </b-col>
 
         <business-referral-source-modal
-            @saved="newReferralSource"
+            @saved="saved"
             v-model="showReferralModal" 
             :source="{}"
             :source-type="sourceType"
@@ -29,14 +29,15 @@
     export default {
         name: "ReferralSourceSelect",
 
-        props: ['value', 'sourceType', 'businessId', 'caregiver'],
+        props: ['value', 'sourceType', 'businessId', 'caregiver', 'showActiveOnly'],
 
         data() {
 
             return {
                 showReferralModal : false,
-                referralSources   : null,
-                business_id       : this.businessId || ''
+                referralSources   : [],
+                business_id       : this.businessId || '',
+                show_active_only : this.showActiveOnly || 0,
             }
         },
 
@@ -50,12 +51,29 @@
                 }
             },
             filteredSources() {
-                return this.referralSources;
+
+                //TODO: figure out what to do if the referral source is not
+                //      active, but linked to Client/CG
+
+                if(this.show_active_only === 1){
+
+                    let filtered = this.referralSources.filter( function(x){
+
+                        if(x.active === 1){
+                            return x;
+                        }
+                    });
+
+                    return filtered;
+                }else{
+                    return this.referralSources;
+                }
             }
         },
 
         methods: {
-            newReferralSource(data) {
+            saved(data) {
+
                 if(data) {
                     this.showReferralModal = false;
                     this.referralSources.push(data);

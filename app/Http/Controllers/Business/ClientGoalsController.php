@@ -9,6 +9,8 @@ use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
 use App\Client;
 use App\ClientGoal;
+use Illuminate\Http\Response;
+use Barryvdh\Snappy\PdfWrapper;
 
 class ClientGoalsController extends BaseController
 {
@@ -99,5 +101,28 @@ class ClientGoalsController extends BaseController
         }
 
         return new ErrorResponse(500, 'The goal could not be deleted.');
+    }
+
+    /**
+     * Download PDF for summary of client goals.
+     *
+     * @param $client
+     * @return Response
+     */
+    public function generatePdf($client)
+    {
+        $client = Client::where('id', $client)->with(['goals'])->get()->first();
+
+        $html = response(view('print.business.client_goals', ['client'=>$client]))->getContent();
+
+        $snappy = \App::make('snappy.pdf');
+        return new Response(
+            $snappy->getOutputFromHtml($html),
+            200,
+            array(
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="'.standard_filename($client->name, 'goals', 'pdf').'"'
+            )
+        );
     }
 }

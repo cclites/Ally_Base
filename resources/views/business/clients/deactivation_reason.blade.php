@@ -36,6 +36,8 @@
                 <br>
             <strong>By:</strong> {{ $deactivatedBy }}
                 <br>
+            <strong>Start of Care: </strong> {{ \Carbon\Carbon::parse( $client->service_start_date )->format( 'm-d-Y' ) }}
+                <br>
             <strong>Total Lifetime Hours:</strong> {{ $totalLifetimeHours }}
                 <br>
             <strong>Total Lifetime Shifts:</strong> {{ $totalLifetimeShifts }}

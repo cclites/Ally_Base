@@ -323,7 +323,7 @@
                                     Note: Because OT/HOL is selected, the rates have been re-calculated to match your settings.
                                 </b-alert>
                                 <div v-if="warnings && warnings.length">
-                                    <b-alert v-for="(warning, index) in warnings" :key="index" variant="warning" show>
+                                    <b-alert v-for="(warning, index) in warnings" :key="index" :variant="getVariantLevel(warning)" show>
                                         <strong>{{ warning.label }}:</strong> {{ warning.description }}
                                     </b-alert>
                                 </div>
@@ -473,10 +473,11 @@
     import { mapGetters } from 'vuex';
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import AuditsTable from '../../../components/AuditsTable';
+    import ScheduleMethods from '../../../mixins/ScheduleMethods';
 
     export default {
         components: {ScheduleGroupModal, ConfirmationModal, AuditsTable},
-        mixins: [FormatsNumbers, RateCodes, ShiftServices, FormatsDates, FormatsStrings],
+        mixins: [FormatsNumbers, RateCodes, ShiftServices, FormatsDates, FormatsStrings, ScheduleMethods],
 
         props: {
             model: Boolean,
@@ -499,10 +500,6 @@
             return {
                 activeTab: 0,
                 submitting: false,
-                startDate: "",
-                startTime: "",
-                endTime: "",
-                endDate: "",
                 scheduleModal: this.model,
                 form: new Form(),
                 copiedSchedule: {},
@@ -672,6 +669,12 @@
         },
 
         methods: {
+            getVariantLevel(warning) {
+                if (warning.label === 'Caregiver Schedule Conflict') {
+                    return 'danger';
+                }
+                return 'warning';
+            },
 
             changedSchedule(schedule) {
                 // initiated from watcher
@@ -961,32 +964,6 @@
                 }
             },
 
-            getDuration() {
-                if (this.endTime && this.startTime) {
-                    if (this.startTime === this.endTime) {
-                        return 1440; // have 12:00am to 12:00am = 24 hours
-                    }
-                    let start = moment(this.startDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm');
-                    let end = moment(this.startDate + ' ' + this.endTime, 'MM/DD/YYYY HH:mm');
-                    if (start && end) {
-                        if (end.isBefore(start)) {
-                            end = end.add(1, 'days');
-                        }
-                        let diff = end.diff(start, 'minutes');
-                        if (diff) {
-                            return parseInt(diff);
-                        }
-                    }
-                }
-                return null;
-            },
-
-            getStartsAt() {
-                if (this.startDate && this.startTime) {
-                    return moment(this.startDate + ' ' + this.startTime, 'MM/DD/YYYY HH:mm').format();
-                }
-                return null;
-            },
 
             refreshEvents() {
                 this.$emit('refresh-events');
@@ -1131,7 +1108,7 @@
                     this.loadingQuickbooksConfig = false;
                 }
             },
-            
+
             caregiverAssignmentMode(newVal, oldVal) {
                 if (newVal) {
                     this.defaultRates = false;

@@ -102,7 +102,26 @@ class AssignCaregiverFromScheduleTest extends TestCase
         $this->assertCount(1, ClientRate::all());
         $newRate = ClientRate::first();
         $this->assertEquals($data['payer_id'], $newRate->payer_id);
-        $this->assertEquals($data['service_id'], $newRate->service_id);
+    }
+
+    /** @test */
+    function it_should_create_a_default_rate_for_all_services_when_there_is_only_one_service()
+    {
+        $this->actingAs($this->officeUser->user);
+
+        $clientPayer = factory(ClientPayer::class)->create();
+        $data = $this->makeSchedule(Carbon::today(), '03:00:00', 4, [
+            'fixed_rates' => 0,
+            'caregiver_rate' => 15.00,
+            'client_rate' => 20.00,
+            'payer_id' => $clientPayer->payer->id,
+        ]);
+        $this->submitCreateForm($data)
+            ->assertStatus(201);
+
+        $this->assertCount(1, ClientRate::all());
+        $newRate = ClientRate::first();
+        $this->assertEquals(null, $newRate->service_id);
     }
 
     /** @test */

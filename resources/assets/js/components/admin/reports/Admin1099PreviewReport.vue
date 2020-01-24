@@ -98,20 +98,31 @@
                                 <i class="fa fa-exclamation-triangle mr-2"></i>
                             </b-btn>
 
-                            <b-btn v-if="row.item.caregiver_1099_id"
-                                   @click="edit(row.item.caregiver_1099_id)"
-                                   class="btn btn-secondary"
-                                   title="Edit 1099"
-                            >
-                                <i class="fa fa-edit mr-2"></i>
-                            </b-btn>
-                            <b-btn v-if="row.item.caregiver_1099_id"
-                                   @click="downloadPdf(row.item.caregiver_1099_id)"
-                                   class="btn btn-secondary"
-                                   title="Download PDF"
-                            >
-                                <i class="fa fa-print mr-2"></i>
-                            </b-btn>
+                            <div v-if="row.item.caregiver_1099_id">
+                                <b-btn
+                                       @click="edit(row.item.caregiver_1099_id)"
+                                       class="btn btn-secondary"
+                                       title="Edit 1099"
+                                >
+                                    <i class="fa fa-edit mr-2"></i>
+                                </b-btn>
+                                <b-btn
+                                       @click="downloadPdf(row.item.caregiver_1099_id, 'caregiver')"
+                                       class="btn btn-danger"
+                                       title="Download Caregiver PDF"
+                                >
+                                    <i class="fa fa-print mr-2"></i>
+                                </b-btn>
+
+                                <b-btn
+                                       @click="downloadPdf(row.item.caregiver_1099_id, 'client')"
+                                       class="btn btn-success"
+                                       title="Download Client PDF"
+                                >
+                                    <i class="fa fa-print mr-2"></i>
+                                </b-btn>
+                            </div>
+
                         </template>
                     </b-table>
                 </b-col>
@@ -293,8 +304,8 @@
                 });
             },
 
-            downloadPdf(id){
-                window.location = '/admin/business-1099/download/' + id;
+            downloadPdf(id, type){
+                window.location = "/admin/business-1099/download/" + type + "/" + id;
             },
 
             showErrors(row){

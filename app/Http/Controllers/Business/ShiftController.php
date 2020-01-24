@@ -148,7 +148,7 @@ class ShiftController extends BaseController
             return new ErrorResponse(400, 'The registry fee must be a positive number.');
         }
 
-        $data = $request->getShiftArray($shift->status, $shift->checked_in_method, $shift->checked_out_method);
+        $data = $request->getShiftArray($shift->status, $shift->checked_in_method, $shift->checked_out_method );
 
         $allQuestions = $shift->business->questions()->forType($shift->client->client_type)->get();
         if ($allQuestions->count() > 0) {
@@ -302,7 +302,7 @@ class ShiftController extends BaseController
         $this->authorize('read', $shift);
 
         // Load needed relationships
-        $shift->load('activities', 'issues', 'schedule', 'client', 'caregiver', 'caregiverSignature', 'clientSignature', 'business');
+        $shift->load('activities', 'issues', 'schedule', 'client', 'caregiver', 'caregiverSignature', 'clientSignature', 'business', 'visitEditAction', 'visitEditReason' );
 
         $timezone = $this->business()->timezone;
         $override_ally_logo = $this->business()->logo;

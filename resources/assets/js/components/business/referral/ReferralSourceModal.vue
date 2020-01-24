@@ -26,9 +26,10 @@
                                 <b-form-input v-model="form.contact_name" type="text" />
                                 <input-help :form="form" field="contact_name"></input-help>
                             </b-form-group>
+
                             <b-form-group v-if=" !form.id " label="Phone Number" label-for="phone" :key=" 'five' ">
 
-                                <b-form-input v-model="form.phone" type="text" />
+                                <mask-input v-model="form.phone" type="phone" />
                                 <input-help :form="form" field="phone"></input-help>
                             </b-form-group>
 
@@ -49,7 +50,7 @@
                             </b-form-group>
                             <b-form-group v-if=" form.is_company " label="Work Phone" label-for="work_phone" :key=" 'four' ">
 
-                                <b-form-input v-model="form.work_phone" type="text" />
+                                <mask-input v-model="form.work_phone" type="phone" />
                                 <input-help :form="form" field="work_phone"></input-help>
                             </b-form-group>
                         </transition-group>
@@ -122,6 +123,7 @@
                 let method = this.form.id ? 'patch' : 'post';
                 this.form.submit( method, url )
                     .then(response => {
+
                         this.$emit('saved', response.data.data);
                         this.showModal=false;
                     })

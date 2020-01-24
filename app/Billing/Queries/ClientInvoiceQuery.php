@@ -4,7 +4,7 @@
 namespace App\Billing\Queries;
 
 
-use App\Billing\ClaimStatus;
+use App\Claims\ClaimStatus;
 use App\Billing\ClientInvoice;
 use App\Billing\Payer;
 use App\BusinessChain;

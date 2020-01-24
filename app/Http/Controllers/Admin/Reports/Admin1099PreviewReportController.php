@@ -28,7 +28,7 @@ class Admin1099PreviewReportController extends Controller
             ]);
 
             $createdStatus = $request->created == '1' ? true : false;
-            if (empty($request->created)) {
+            if ($request->created === null) {
                 $createdStatus = null;
             }
 
@@ -36,7 +36,7 @@ class Admin1099PreviewReportController extends Controller
                 $request->year,
                 $request->caregiver_id,
                 $request->client_id,
-                $request->business_id,
+                [$request->business_id],
                 $request->payer,
                 $createdStatus
             );

@@ -62,6 +62,7 @@ class UpdateBusinessRequest extends BusinessRequest
             'auto_confirm_unmodified_shifts' => 'required|bool',
             'auto_confirm_verified_shifts' => 'required|bool',
             'enable_client_onboarding' => 'required|bool',
+            'open_shifts_setting' => 'required|string',
             'hha_username' => 'nullable|string|max:255',
             'hha_password' => 'nullable',
             'tellus_username' => 'nullable|string|max:255',

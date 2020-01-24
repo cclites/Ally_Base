@@ -27,6 +27,14 @@ $factory->define(Schedule::class, function(Faker $faker) {
         }
     }
 
+    $caregiverRate = $faker->randomFloat(2, 10, 25);
+    $providerRate = $faker->randomFloat(2, 5, 10);
+    // TODO: Use an actual rate calculator to get the proper ally fee
+    $clientRate = add(
+        add($caregiverRate, $providerRate),
+        multiply(add($caregiverRate, $providerRate), 0.06)
+    );
+
     return [
         'client_id' => $client->id,
         'business_id' => $client->business_id,
@@ -34,8 +42,9 @@ $factory->define(Schedule::class, function(Faker $faker) {
         'starts_at' => $starts_at,
         'weekday' => $starts_at->format('w'),
         'duration' => $faker->randomElement([60, 60, 90, 120, 120, 150, 180, 240, 300, 480, 480, 720, 1440]),
-        'caregiver_rate' => $faker->randomFloat(2, 10, 25),
-        'provider_fee' => $faker->randomFloat(2, 5, 10),
+        'caregiver_rate' => $caregiverRate,
+        'provider_fee' => $providerRate,
+        'client_rate' => $clientRate,
         'fixed_rates' => 0,
         'hours_type' => 'default',
         'status' => Schedule::OK,

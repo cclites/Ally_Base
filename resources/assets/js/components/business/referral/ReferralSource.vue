@@ -42,7 +42,7 @@
                     </template>
 
                     <template slot="phone" scope="row">
-                        <b-form-input :value="row.item.phone" v-model="row.item.phone"></b-form-input>
+                        <mask-input :value="row.item.phone" v-model="row.item.phone" type="phone"></mask-input>
                     </template>
 
                     <template slot="actions" scope="row">
@@ -135,8 +135,8 @@
                 form.submit(method, url)
                     .then(response => {
 
-                        console.log( 'response: ', response );
-                        console.log( 'method: ', method );
+                        //console.log( 'response: ', response );
+                        //console.log( 'method: ', method );
 
                         if(method === 'post'){
                             resourceData.id = response.data.data.id;
@@ -198,7 +198,6 @@
 
         watch: {
             value(val) {
-                console.log("watching val");
                 this.items = this.source.contacts;
                 this.showModal = val;
             },

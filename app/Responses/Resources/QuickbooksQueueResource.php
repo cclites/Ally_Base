@@ -1,7 +1,7 @@
 <?php
 namespace App\Responses\Resources;
 
-use App\Billing\ClaimStatus;
+use App\Claims\ClaimStatus;
 use App\QuickbooksInvoiceStatus;
 use Illuminate\Http\Resources\Json\Resource;
 

@@ -4,9 +4,10 @@ class Form {
     /**
      * Create a new Form instance.
      *
+     * Passing in options can probably be extended to be a lot cooler.. maybe a deconstructed object.. let me know your thoughts
      * @param {object} data
      */
-    constructor(data) {
+    constructor(data, alertOnSuccess = true ) {
         this.originalData = data;
 
         for (let field in data) {
@@ -16,7 +17,7 @@ class Form {
         this.handler = new AxiosResponseHandler();
         this.resetOnSuccess = false;
         this.alertOnResponse = true;
-        this.alertOnSucess = true;
+        this.alertOnSuccess = alertOnSuccess;
         this.errorMods = 0;
         this.hideErrors = [];
         this.busy = false;
@@ -159,6 +160,7 @@ class Form {
         this.hasBeenSubmitted = true;
         const verb = method.toLowerCase();
         let Form = this;
+
         return new Promise((resolve, reject) => {
             axios[verb](url, this.data(multipart))
                 .then(response => {

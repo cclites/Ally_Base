@@ -22,7 +22,7 @@
                 @if($business->address2)
                     {{ $business->address2 }}<br>
                 @endif
-                {{ $business->city }}, {{ $business->state }} {{ $business->zip }}
+                {{ $business->city ? $business->city . ', ' : '' }} {{ $business->state }} {{ $business->zip }}
             </div>
             <div class="col-sm-4">
                 <h2>Yearly Summary Report</h2>

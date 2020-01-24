@@ -6,6 +6,7 @@ use App\Billing\Payer;
 use App\Billing\Payment;
 use App\Business;
 use App\Client;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class PaymentQuery extends BaseQuery
@@ -42,6 +43,24 @@ class PaymentQuery extends BaseQuery
         $this->where('success', true)
             ->where('created_at', '>=', '2019-01-01 00:00:00') // Prevent pre-migration missing applications from showing as available payments
             ->whereRaw('(SELECT COALESCE(SUM(amount_applied), 0) FROM invoice_payments WHERE payment_id = payments.id) < payments.amount');
+
+        return $this;
+    }
+
+    /**
+     * Get all payments for a calendar year.
+     *
+     * @param int $year
+     * @return $this
+     */
+    public function forYear(int $year) : self
+    {
+        $range = [
+            Carbon::parse("$year/01/01 00:00:01"),
+            Carbon::parse("$year/12/31 23:59:59")
+        ];
+
+        $this->whereBetween('created_at', $range);
 
         return $this;
     }

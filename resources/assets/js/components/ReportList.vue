@@ -162,14 +162,14 @@
                     },
                     {
                         name: 'Bad SSN Report (Clients)',
-                        url: 'reports/bad-ssn-report?type=clients',
+                        url: 'reports/bad-ssn-report/clients',
                         description: '',
                         category: 7,
                         allowed: ['admin'],
                     },
                     {
                         name: 'Bad SSN Report (Caregivers)',
-                        url: 'reports/bad-ssn-report?type=caregivers',
+                        url: 'reports/bad-ssn-report/caregivers',
                         description: '',
                         category: 7,
                         allowed: ['admin'],
@@ -434,7 +434,7 @@
                     },
                     {
                         name: 'Client Service Coordinators',
-                        url: 'reports/case-manager',
+                        url: 'reports/services-coordinator',
                         description: 'Shows all clients each service coordinator is assigned',
                         category: 2,
                         allowed: ['office_user'],
@@ -532,13 +532,6 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
-                    // {
-                    //     name: 'Claims AR Aging',
-                    //     url: 'reports/claims-ar-aging',
-                    //     description: 'Claims AR Aging Report',
-                    //     category: 5,
-                    //     allowed: ['office_user'],
-                    // },
                     {
                         name: 'Offline AR Aging',
                         url: 'reports/offline-ar-aging',

@@ -243,6 +243,10 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     const TYPE_FRANCHISOR = 'Franchisor';
     const TYPE_REGISTRY = 'Registry';
 
+    const OPEN_SHIFTS_DISABLED = 'off';
+    const OPEN_SHIFTS_LIMITED = 'limited';
+    const OPEN_SHIFTS_UNLIMITED = 'unlimited';
+
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////
@@ -551,6 +555,8 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
         return false;
     }
 
+
+
     /**
      * Save a new Chargeable instance to the database
      */
@@ -805,6 +811,11 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     public function getNpiNumber(): ?string
     {
         return $this->medicaid_npi_number;
+    }
+
+    public function getHasOpenShiftsAttribute()
+    {
+        return $this->open_shifts_setting != self::OPEN_SHIFTS_DISABLED;
     }
 
     /**

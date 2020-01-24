@@ -3,7 +3,7 @@
 namespace App\Claims\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Billing\ClaimService;
+use App\Claims\ClaimService;
 use App\Rules\ValidEnum;
 
 class UpdateClaimInvoiceRequest extends FormRequest

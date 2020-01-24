@@ -3,12 +3,16 @@
                 header-bg-variant="info"
                 header-text-variant="white">
 
-            <div>
+            <p>
                 If you do not see a 1099 listed, your client did not elect provide you with one. This is common and okay.
                 In that case, to report your income, please see your
                 <a href="/caregiver/deposits">Year Summary Report on your Pay Statements Screen</a> and fill out a
                 <a href="https://www.irs.gov/pub/irs-pdf/f1040sc.pdf" target="_blank">Schedule C</a> from the IRS.
-            </div>
+            </p>
+
+            <p>
+                1099 totals do not include expenses, mileage, deductions, adjustments, etc.
+            </p>
 
             <hr>
 
@@ -58,7 +62,7 @@
 
         methods:{
             load1099s(){
-                axios.get('/caregiver/caregiver-1099/' + this.caregiver)
+                axios.get('caregiver/caregiver-1099/' + this.caregiver)
                     .then(response => {
                         this.items = response.data;
                         this.fields = Object.keys(this.items);

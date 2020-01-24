@@ -7,11 +7,13 @@ use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Exceptions\MissingTimezoneException;
 use App\Data\ScheduledRates;
+use App\Scheduling\OpenShiftRequestStatus;
 use App\Scheduling\RuleParser;
 use App\Shifts\RateFactory;
 use App\Shifts\ScheduleConverter;
 use App\Traits\BelongsToOneBusiness;
 use Carbon\Carbon;
+use DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
@@ -127,6 +129,31 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         static::addGlobalScope('hasClient', function ($builder) {
             $builder->has('client');
         });
+
+        static::updating( function( $schedule ){
+
+            $original = $schedule->getOriginal();
+            $dirty = $schedule->getDirty();
+
+            if( !empty( $original[ 'caregiver_id' ] ) && array_key_exists( 'caregiver_id', $dirty ) && $dirty[ 'caregiver_id' ] !== $original[ 'caregiver_id' ] ){
+                // this covers a change from cg->cg as well as a change from cg->null
+
+                // this is apparently more efficient than $model->relationship->contains in eloquent
+                DB::table( 'caregiver_schedule_requests' )
+                    ->where( 'caregiver_id', $original[ 'caregiver_id' ] )
+                    ->where( 'schedule_id', $schedule->id )
+                    ->update([ 'status' => OpenShiftRequestStatus::REQUEST_DENIED() ]);
+
+                // if theres a new cg, update their request if exists
+                if( !empty( $dirty[ 'caregiver_id' ] ) ){
+
+                    DB::table( 'caregiver_schedule_requests' )
+                        ->where( 'caregiver_id', $dirty[ 'caregiver_id' ] )
+                        ->where( 'schedule_id', $schedule->id )
+                        ->update([ 'status' => OpenShiftRequestStatus::REQUEST_APPROVED() ]);
+                }
+            }
+        });
     }
 
     ///////////////////////////////////////
@@ -211,9 +238,42 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         return $this->belongsTo(ScheduleGroup::class, 'group_id');
     }
 
+    public function scheduleRequests()
+    {
+        return $this->hasMany( CaregiverScheduleRequest::class );
+    }
+
     ///////////////////////////////////////////
     /// Mutators
     ///////////////////////////////////////////
+
+
+    public function setStartsAtAttribute($value) {
+        if ($value instanceof \DateTimeInterface && $this->business) {
+            $value->setTimezone(new \DateTimeZone($this->business->timezone));
+        }
+        $this->attributes['starts_at'] = $value;
+    }
+
+    ///////////////////////////////////////////
+    /// Instance Methods
+    ///////////////////////////////////////////
+
+    /**
+     * gets the latest shift request for a given caregiver, or null if there is none
+     */
+    public function latestRequestFor( $caregiver_id )
+    {
+        return $this->scheduleRequests()->where( 'caregiver_id', $caregiver_id )->first();
+    }
+
+    /**
+     * is this the only criteria?
+     */
+    public function getIsOpenAttribute()
+    {
+        return $this->caregiver_id === null;
+    }
 
     /**
      * Get whether of not the schedule will be converted by
@@ -250,13 +310,6 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         return Carbon::parse($this->attributes['starts_at'], $this->getTimezone());
     }
 
-    public function setStartsAtAttribute($value) {
-        if ($value instanceof \DateTimeInterface && $this->business) {
-            $value->setTimezone(new \DateTimeZone($this->business->timezone));
-        }
-        $this->attributes['starts_at'] = $value;
-    }
-
     /**
      * Returns the first available connected shift that is currently
      * clocked in.
@@ -276,10 +329,6 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
     {
         return $this->getShiftStatus();
     }
-
-    ///////////////////////////////////////////
-    /// Instance Methods
-    ///////////////////////////////////////////
 
     /**
      * @param iterable $services
@@ -327,7 +376,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
             return self::UNCONFIRMED;
         }
         // Suppress missed clock in status for now
-//        return $this->starts_at->isPast() ? self::MISSED_CLOCK_IN : self::SCHEDULED;
+        // return $this->starts_at->isPast() ? self::MISSED_CLOCK_IN : self::SCHEDULED;
         return self::SCHEDULED;
     }
 
@@ -825,6 +874,35 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
         $from = Carbon::parse($fromDate, $timezone)->subHour();
 
         $query->where('starts_at', '>=', $from);
+    }
+
+    /**
+     * Get only schedules that are open, without a caregiver
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return void
+     */
+    public function scopeWhereOpen($query)
+    {
+        $query->whereDoesntHave( 'caregiver' )->whereHas( 'client' );
+    }
+
+    /**
+     * Get only schedules that start between now and 31 days from now
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $timezone
+     * @param string $start
+     * @param string $end
+     * @return void
+     */
+    public function scopeInTheNextMonth($query, $timezone )
+    {
+        $query->whereBetween( 'starts_at', [
+
+            Carbon::parse( 'now', $timezone ),
+            Carbon::parse( 'today +31 days', $timezone )
+        ]);
     }
 
     /**

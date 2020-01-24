@@ -19,6 +19,11 @@
             <template slot="from_number" scope="row">
                 {{ formatPhone(row.item.from_number) }}
             </template>
+            <template slot="actions" scope="row">
+
+                <a :href=" `/business/communication/sms-threads/${row.item.continued_thread_id}` " v-if=" row.item.continued_thread_id " target="_blank">continued</a>
+                <b-button variant="info" @click=" replyText( row.item ) " v-else>Reply</b-button>
+            </template>
         </b-table>
         <b-row>
             <b-col lg="6" >
@@ -28,6 +33,8 @@
                 Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
             </b-col>
         </b-row>
+
+        <business-sms-reply-modal v-model=" replyModalOpen " :data=" activeReply " @continuedThread=" continuedThread "></business-sms-reply-modal>
     </div>
 </template>
 
@@ -47,6 +54,9 @@ export default {
     },
 
     data: () => ({
+
+        activeReply : {},
+        replyModalOpen : false,
         busy: false,
         perPage: 50,
         currentPage: 1,
@@ -76,6 +86,12 @@ export default {
                 sortable: true,
                 tdClass: 'text-nowrap',
             },
+            {
+                label: 'Actions',
+                key: 'actions',
+                sortable: false,
+                tdClass: 'text-nowrap',
+            },
         ],
     }),
 
@@ -86,6 +102,12 @@ export default {
     },
 
     methods: {
+
+        continuedThread({ new_thread_id, reply_id }){
+
+            let reply = this.replies.find( r => r.id == reply_id );
+            reply.continued_thread_id = new_thread_id;
+        },
         formatPhone(phone) {
             if (! phone) {
                 return '';
@@ -104,6 +126,11 @@ export default {
             }
             return `/business/caregivers/${user.id}`;
         },
+        replyText( reply ){
+
+            this.replyModalOpen = true;
+            this.activeReply = reply;
+        }
     },
 
     mounted() {

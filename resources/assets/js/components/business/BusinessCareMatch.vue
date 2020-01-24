@@ -235,9 +235,10 @@
     import FormatsDistance from "../../mixins/FormatsDistance";
     import Languages from "../../classes/Languages";
     import Constants from '../../mixins/Constants';
+    import ScheduleMethods from '../../mixins/ScheduleMethods';
 
     export default {
-        mixins: [Constants, FormatsNumbers, FormatsDistance],
+        mixins: [Constants, FormatsNumbers, FormatsDistance, ScheduleMethods],
 
         props: {
             clients: Array,
@@ -257,9 +258,6 @@
                 preferences: false,
                 existing: false,
                 excludesOvertime: false,
-                startDate: null,
-                startTime: null,
-                endTime: null,
                 radius: 10,
                 rating: 3,
                 radiusEnabled: false,
@@ -352,19 +350,6 @@
                     })
             },
 
-            setDataFromSchedule()
-            {
-                if (!this.schedule) return;
-
-                let startsAt = moment(this.schedule.starts_at, 'YYYY-MM-DD HH:mm:ss');
-                console.log(startsAt);
-
-                this.clientId = this.schedule.client_id;
-                this.startDate = startsAt.format('MM/DD/YYYY');
-                this.startTime = startsAt.format('HH:mm');
-                this.endTime = moment(startsAt).add(this.schedule.duration, 'minutes').format('HH:mm');
-            },
-
             makeForm() {
                 return new Form({
                     starts_at: this.getStartsAt(),
@@ -391,31 +376,6 @@
 
             async submitForm() {
                 await this.getMatches();
-            },
-
-            getDuration() {
-                if (this.endTime && this.startTime) {
-                    if (this.startTime === this.endTime) {
-                        return 1440; // have 12:00am to 12:00am = 24 hours
-                    }
-                    let start = moment('09/21/2018 ' + this.startTime, 'MM/DD/YYYY HH:mm');
-                    let end = moment('09/21/2018 ' + this.endTime, 'MM/DD/YYYY HH:mm');
-                    console.log(start, end);
-                    if (start && end) {
-                        if (end.isBefore(start)) {
-                            end = end.add(1, 'days');
-                        }
-                        let diff = end.diff(start, 'minutes');
-                        if (diff) {
-                            return parseInt(diff);
-                        }
-                    }
-                }
-                return 0;
-            },
-
-            getStartsAt() {
-                return this.startDate && this.startTime ? `${this.startDate} ${this.startTime}` : null;
             }
         },
 

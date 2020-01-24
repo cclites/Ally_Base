@@ -73,6 +73,19 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
         </li>
+        @if( is_admin() )
+
+            <li class="nav-item">
+                <a
+                    @if( count( $client->user->adminNotes ) > 0 )
+
+                        class="nav-link admin_note_exists"
+                    @else
+
+                        class="nav-link"
+                    @endif data-toggle="tab" href="#admin_note" role="tab">Admin Notes</a>
+            </li>
+        @endif
     </ul>
 
     <!-- Smaller device tabs -->
@@ -96,7 +109,8 @@
                 <a class="dropdown-item" data-toggle="tab" href="#preferences" role="tab">Preferences</a>
                 <a class="dropdown-item" data-toggle="tab" href="#insurance_service_auth" role="tab">Insurance & Service Auths</a>
                 <a class="dropdown-item" data-toggle="tab" href="#misc" role="tab">Misc</a>
-                <a class="dropdown-item" data-toggle="tab" href="#notifications" role="tab">Notifications</a>    
+                <a class="dropdown-item" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
+                @if( is_admin() ) <a class="dropdown-item" data-toggle="tab" href="#admin_note" role="tab">Admin Notes</a> @endif
             </div>
         </li>
     </ul>
@@ -207,7 +221,7 @@
         </div>
         <div class="tab-pane" id="client_payment_history" role="tabpanel">
             <b-card title="Payment History">
-                <client-payment-history :client="{{ $client }}" :payments="{{ $client->payments OR "[]" }}">
+                <client-payment-history :client="{{ $client }}">
                     <template slot="actions" scope="data">
                         <a :href="'/business/client/payments/' + data.item.id" class="btn btn-secondary" target="_blank">
                             <i class="fa fa-external-link"></i> View
@@ -231,6 +245,11 @@
         <div class="tab-pane" id="notifications" role="tabpanel">
             <notification-preferences :admin="true" :user="{{ $client->user }}" :notifications="{{ $notifications }}"></notification-preferences>
         </div>
+        @if(is_admin())
+        <div class="tab-pane" id="admin_note" role="tabpanel">
+            <user-admin-note :user="{{ $client->user }}"></user-admin-note>
+        </div>
+        @endif
     </div>
 @endsection
 

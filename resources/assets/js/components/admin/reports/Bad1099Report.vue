@@ -20,6 +20,8 @@
 
             <b-form-group label="&nbsp;" class="mr-2">
                 <b-btn variant="info" @click="generate()" :disabled="disableGenerate">Generate</b-btn>
+                <b-button variant="info" @click="copy()"><i class="fa fa-copy mr-1"></i>Copy Emails to Clipboard</b-button>
+                <input id="emailString" v-model="emails">
             </b-form-group>
         </b-row>
 
@@ -47,6 +49,14 @@
                         </template>
                         <template slot="client" scope="row">
                             <a :href="'/business/clients/' + row.item.client_id" target="_blank">{{ row.item.client }}</a>
+                        </template>
+                        <template slot="caregiver_email" scope="row">
+                            {{ row.item.caregiver_email }}<br />
+                            {{ row.item.caregiver_phone }}
+                        </template>
+                        <template slot="client_email" scope="row">
+                            {{ row.item.client_email }}<br />
+                            {{ row.item.client_phone }}
                         </template>
                     </b-table>
                 </b-col>
@@ -85,11 +95,36 @@
                     .then( ({ data }) => {
                         this.items = data;
                         this.totalRows = this.items.length;
+                        this.storeEmailAddresses();
                     })
                     .catch(e => {})
                     .finally(() => {
                         this.busy = false;
                     })
+            },
+
+            copy(){
+                var copyText = document.querySelector("#emailString");
+                copyText.select();
+                document.execCommand("copy");
+                alerts.addMessage('success', "Emails copied to clipboard");
+            },
+
+            storeEmailAddresses(){
+
+                let emailString = "";
+
+                this.items.forEach(function(item){
+                    if(item.errors && item.errors.includes('Client') && !emailString.includes(item.client_email)){
+                        emailString += (',' + item.client_email);
+                    }
+
+                    if(item.errors && item.errors.includes('Caregiver')  && !emailString.includes(item.caregiver_email)){
+                        emailString += (',' + item.caregiver_email);
+                    }
+                });
+
+                this.emails = emailString.substr(1);
             },
         },
         data(){
@@ -103,6 +138,7 @@
               busy: false,
               emptyText: "No records to display",
               selected: '',
+              emails: '',
               form: new Form({
                   'year': '2019',
                   'business_id': '',
@@ -110,18 +146,20 @@
               }),
               fields: [
                   {key: 'location', label: 'Location', sortable: true,},
-                  {key: 'caregiver', label: 'Caregiver', sortable: true,},
                   {key: 'client', label: 'Client', sortable: true,},
+                  {key: 'client_email', label: 'Client Contact', sortable: false },
+                  {key: 'caregiver', label: 'Caregiver', sortable: true,},
+                  {key: 'caregiver_email', label: 'Caregiver Contact', sortable: false },
                   {key: 'errors', label: 'Errors', sortable: true,},
               ],
           }
         },
         computed: {
             disableGenerate(){
-                if(this.form.business_id !== ""){
-                    return false;
-                }
-                return true;
+                // if(this.form.business_id !== ""){
+                //     return false;
+                // }
+                return false;
             }
         },
     }
@@ -131,5 +169,11 @@
     #year{
         position: relative;
         bottom: 5px;
+    }
+
+    #emailString{
+        position: absolute;
+        z-index: -100;
+        left: 99999px;
     }
 </style>
