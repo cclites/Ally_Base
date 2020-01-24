@@ -19,6 +19,7 @@ use Illuminate\Http\Response;
 class Caregiver1099Controller extends Controller
 {
     protected $headerRow = [
+        'Table Id',
         'Created At',
         'Void (Enter 0 or 1)',
         'Corrected (Enter 0 or 1)',
@@ -195,7 +196,7 @@ class Caregiver1099Controller extends Controller
                 $caregiverTin = decrypt($cg1099->caregiver_ssn);
 
                 if ($maskRecipientSSN) {
-                    $caregiverTin = '***-**-*' . substr($caregiverTin, strlen($caregiverTin) - 4, 4);
+                    $caregiverTin = '***-**-' . substr($caregiverTin, strlen($caregiverTin) - 4, 4);
                 } else {
                     $caregiverTin = $this->ensureSsnFormat($caregiverTin);
                 }
@@ -221,7 +222,8 @@ class Caregiver1099Controller extends Controller
                     'recipient_state' => strtoupper($cg1099->caregiver_state),
                     'recipient_zip' => $cg1099->caregiver_zip,
                     'payment_total' => $cg1099->payment_total,
-                    'created_at' => $cg1099->created_at->toDateString(),
+                    'created_at' => $cg1099->created_at->setTimezone(config('ally.local_timezone'))->toDateString(),
+                    'id' => $cg1099->id,
                 ];
             });
 
@@ -263,6 +265,7 @@ class Caregiver1099Controller extends Controller
         foreach ($rows as $row) {
 
             $data = [
+                $row['id'],
                 $row['created_at'],
                 0,
                 0,
