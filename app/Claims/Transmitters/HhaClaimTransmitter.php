@@ -2,6 +2,7 @@
 
 namespace App\Claims\Transmitters;
 
+use App\Claims\ClaimInvoiceHhaFile;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Contracts\ClaimTransmitterInterface;
 use App\Services\HhaExchangeService;
@@ -9,7 +10,6 @@ use App\Claims\ClaimInvoiceType;
 use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimableService;
 use App\Claims\ClaimInvoice;
-use App\HhaFile;
 use App\VisitEditAction;
 use App\VisitEditReason;
 
@@ -96,7 +96,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             // create new HhaFile for the Claim
             $claim->hhaFiles()->create([
                 'filename' => substr($filename, 0, strlen($filename) - 4),
-                'status' => HhaFile::STATUS_PENDING,
+                'status' => ClaimInvoiceHhaFile::STATUS_PENDING,
             ]);
 
             return true;
