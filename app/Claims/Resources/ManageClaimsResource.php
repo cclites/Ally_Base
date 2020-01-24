@@ -48,7 +48,7 @@ class ManageClaimsResource extends Resource
 
             'invoice_id' => $this->resource->clientInvoices->count() > 1 ? '-' : $this->resource->clientInvoices[0]->id,
             'invoice_name' => $this->resource->clientInvoices->count() > 1 ? '-' : $this->resource->clientInvoices[0]->name,
-            'invoice_date' => $this->resource->clientInvoices->count() > 1 ? null : optional($this->resource->clientInvoices[0]->created_at)->toDateString(),
+            'invoice_date' => $this->resource->clientInvoices->count() > 1 ? null : $this->resource->clientInvoices[0]->created_at->toDateTimeString(),
             'invoice_amount' => $invoiceAmount,
             'amount_mismatch' => $this->resource->hasAmountMismatch(),
             'invoices' => $this->resource->clientInvoices->map(function (ClientInvoice $invoice) {
