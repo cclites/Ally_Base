@@ -252,7 +252,7 @@ class PrintClaimInvoiceController extends BaseController
             'condition_related_to_auto_accident'  => 'n', // options: [ y, n ] **ALWAYS NO**
             'condition_related_to_other_accident' => 'n', // options: [ y, n ] **ALWAYS NO**
 
-            'prior_authorization_number' => 'need to figure out', // TODO => need to figure this one out
+            'prior_authorization_number' => '', // TODO => need to figure this one out.. if we even need it at all
 
             'federal_tax_id'         => $business->medicaid_npi_number, // 25 Federal Tax ID => same as 24.j Pull NPI based off of client branch location
             'patient_account_number' => $claim->getName(), // 26 Patient Account Number => Invoice #
