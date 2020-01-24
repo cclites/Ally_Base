@@ -243,7 +243,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'UserField1' => $claim->id, // OPTIONAL
             'UserField2' => $item->id, // OPTIONAL
             'UserField3' => $service->visit_start_time->setTimezone($business->timezone)->format($this->timeFormat), // OPTIONAL
-            'ReasonCode1' => $this->tcLookup( 'ReasonCode', $service->visitEditReason->code ),
+            'ReasonCode1' => empty($service->visitEditReason) ? '' : $this->tcLookup( 'ReasonCode', $service->visitEditReason->code ),
             // 'ReasonCode2' => $this->tcLookup( 'ReasonCode', $service->visit_edit_action ), // no tellus does not take the action
             // 'ReasonCode3' => '', // OPTIONAL && TODO
             // 'ReasonCode4' => '', // OPTIONAL && TODO

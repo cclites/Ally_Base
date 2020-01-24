@@ -152,8 +152,8 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             $service->checked_out_longitude, //    "Clock-Out Longitude",
             '', //    "Clock-Out EVV Other Info",
             $claim->name, //    "Invoice Number",
-            $service->getHasEvv() ? $service->visitEditReason->code : VisitEditAction::nonEvvDefault(), //    "Visit Edit Reason Code",
-            $service->getHasEvv() ? $service->visitEditAction->code : VisitEditReason::nonEvvDefault(), //    "Visit Edit Action Taken",
+            $this->getVisitEditReason($service), //    "Visit Edit Reason Code",
+            $this->getVisitEditAction($service), //    "Visit Edit Action Taken",
             $service->caregiver_comments, //    "Notes",
             'N', //    "Is Deletion",
             $item->id, //    "Invoice Line Item ID",
@@ -169,6 +169,44 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             '', //    "User Field 4",
             '', //    "User Field 5",
         ];
+    }
+
+    /**
+     * Get the visit edit reason code for the Claimable Service.
+     *
+     * @param ClaimableService $service
+     * @return string
+     */
+    public function getVisitEditReason(ClaimableService $service) : string
+    {
+        if (filled($service->visitEditReason)) {
+            return $service->visitEditReason->code;
+        }
+
+        if (! $service->getHasEvv()) {
+            return VisitEditReason::nonEvvDefault();
+        }
+
+        return '';
+    }
+
+    /**
+     * Get the visit edit action code for the Claimable Service.
+     *
+     * @param ClaimableService $service
+     * @return string
+     */
+    public function getVisitEditAction(ClaimableService $service) : string
+    {
+        if (filled($service->visitEditAction)) {
+            return $service->visitEditAction->code;
+        }
+
+        if (! $service->getHasEvv()) {
+            return VisitEditAction::nonEvvDefault();
+        }
+
+        return '';
     }
 
     /**
