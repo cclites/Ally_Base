@@ -21,7 +21,7 @@ class ProfileTest extends TestCase
         parent::setUp();
 
         // Log exceptions to stderr
-        Log::useFiles('php://stderr');
+        \Config::set('logging.default', 'stderr');
 
         $this->client = factory(Client::class)->create();
     }
