@@ -13,6 +13,9 @@
                 <li @click="download1099( year, false )">
                     1099 Export CSV (Show full recipient SSN)
                 </li>
+                <li @click="download1099( year, false, true )">
+                    1099 Export CSV - Grouped Ally Payer (Show full recipient SSN)
+                </li>
                 <li @click="getEmails( year, 'caregiver')">
                     Get a list of all Caregiver Emails that were in this 1099
                 </li>
@@ -64,9 +67,12 @@
         mounted(){
         },
         methods: {
-            download1099(year, mask){
+            download1099(year, mask, grouped){
 
                 let url = '/admin/business-1099/transmit/' + year + '?mask=' + (mask ? '1' : '0');
+                if (grouped) {
+                    url = `/admin/business-1099/export-ally-grouped/${year}?mask=0`;
+                }
 
                 axios.get(url)
                     .then(response => {

@@ -664,6 +664,7 @@ Route::group([
 
     Route::get('/business-1099/user-emails/{year}/{role}', 'Admin\Admin1099Controller@UserEmailsList')->name('business-1099-transmit');
     Route::get('business-1099/transmit/{year}', 'Admin\Caregiver1099Controller@transmit')->name('business-1099-transmit');
+    Route::get('business-1099/export-ally-grouped/{year}', 'Admin\Caregiver1099Controller@exportAllyGrouped')->name('business-1099.export-ally-grouped');
     Route::get('admin-1099', 'Admin\Caregiver1099Controller@admin')->name('admin-1099');
     Route::patch('business-1099-settings/{business}', 'Business\SettingController@updateBusiness1099Settings')->name('business-1099-settings');
     Route::patch('chain-1099-settings/{chainClientTypeSettings}', 'Admin\ChainSettingsController@update')->name('chain-settings');
