@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "928ec6a8a458e62504dc106af210a27d",
+    "content-hash": "aea49a31245787966e66fcd6a4bb8d9b",
     "packages": [
         {
             "name": "barryvdh/laravel-snappy",
@@ -1423,7 +1423,7 @@
             "time": "2018-06-13T13:22:40+00:00"
         },
         {
-            "name": "jeremeamia/SuperClosure",
+            "name": "jeremeamia/superclosure",
             "version": "2.4.0",
             "source": {
                 "type": "git",
@@ -6208,16 +6208,16 @@
         },
         {
             "name": "barryvdh/laravel-ide-helper",
-            "version": "dev-master",
+            "version": "v2.6.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/barryvdh/laravel-ide-helper.git",
-                "reference": "75149ddb1f649344fb2b269dbd0fb4413e81baf2"
+                "reference": "b91b959364d97af658f268c733c75dccdbff197e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/barryvdh/laravel-ide-helper/zipball/75149ddb1f649344fb2b269dbd0fb4413e81baf2",
-                "reference": "75149ddb1f649344fb2b269dbd0fb4413e81baf2",
+                "url": "https://api.github.com/repos/barryvdh/laravel-ide-helper/zipball/b91b959364d97af658f268c733c75dccdbff197e",
+                "reference": "b91b959364d97af658f268c733c75dccdbff197e",
                 "shasum": ""
             },
             "require": {
@@ -6227,14 +6227,14 @@
                 "illuminate/console": "^5.5|^6",
                 "illuminate/filesystem": "^5.5|^6",
                 "illuminate/support": "^5.5|^6",
-                "php": ">=7.2"
+                "php": ">=7"
             },
             "require-dev": {
                 "illuminate/config": "^5.5|^6",
                 "illuminate/view": "^5.5|^6",
-                "mockery/mockery": "^1.3",
-                "orchestra/testbench": "^3|^4",
-                "phpro/grumphp": "^0.17.1",
+                "phpro/grumphp": "^0.14",
+                "phpunit/phpunit": "4.*",
+                "scrutinizer/ocular": "~1.1",
                 "squizlabs/php_codesniffer": "^3"
             },
             "type": "library",
@@ -6275,7 +6275,7 @@
                 "phpstorm",
                 "sublime"
             ],
-            "time": "2020-01-12T17:24:10+00:00"
+            "time": "2019-10-30T20:53:27+00:00"
         },
         {
             "name": "barryvdh/reflection-docblock",
@@ -8796,8 +8796,7 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "sentry/sentry": 20,
-        "sentry/sentry-laravel": 20,
-        "barryvdh/laravel-ide-helper": 20
+        "sentry/sentry-laravel": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

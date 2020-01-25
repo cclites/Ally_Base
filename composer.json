@@ -37,12 +37,12 @@
         "sentry/sentry": "2.0.0-beta1@dev",
         "sentry/sentry-laravel": "1.0.0-beta3@dev",
         "tplaner/when": "^2.1",
-        "twilio/sdk": "^5.14",
+        "twilio/sdk": "^5.42",
         "ua-parser/uap-php": "^3.5"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.2",
-        "barryvdh/laravel-ide-helper": "dev-master",
+        "barryvdh/laravel-ide-helper": "^2.6",
         "filp/whoops": "~2.0",
         "fzaninotto/faker": "~1.8",
         "laravel/homestead": "^6.1",
