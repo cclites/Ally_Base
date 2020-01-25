@@ -6,7 +6,6 @@ use App\Address;
 use App\Audit;
 use App\Billing\BusinessInvoiceItem;
 use App\Billing\CaregiverInvoiceItem;
-use App\Billing\ClaimPayment;
 use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
 use App\Billing\ClientPayer;
@@ -171,7 +170,6 @@ class ClearSensitiveData extends Command
             $this->scrubModel(ClaimableExpense::class);
             $this->scrubModel(ClaimRemit::class);
             $this->scrubModel(ClaimAdjustment::class);
-            $this->scrubModel(ClaimPayment::class);
             $this->scrubModel(BusinessChain::class);
             $this->scrubModel(Business::class);
             $this->scrubModel(BusinessInvoiceItem::class);
