@@ -14,7 +14,9 @@ class ConvertPayerAssignmentsToClientPayerAssignments extends Migration
     public function up()
     {
         Schema::table('client_invoices', function (Blueprint $table) {
-            $table->dropForeign(['payer_id']);
+            if (\DB::getDriverName() != 'sqlite') {
+                $table->dropForeign(['payer_id']);
+            }
             $table->dropColumn(['payer_id']);
         });
 

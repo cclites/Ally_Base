@@ -13,9 +13,11 @@ class FixTimesheetEntriesFkToCascade extends Migration
      */
     public function up()
     {
-        Schema::table('timesheet_entries', function (Blueprint $table) {
-            $table->dropForeign('fk_timesheet_entries_timesheet_id');
-        });
+        if (\DB::getDriverName() != 'sqlite') {
+            Schema::table('timesheet_entries', function (Blueprint $table) {
+                $table->dropForeign('fk_timesheet_entries_timesheet_id');
+            });
+        }
 
         Schema::table('timesheet_entries', function (Blueprint $table) {
             $table->foreign('timesheet_id', 'fk_timesheet_entries_timesheet_id')

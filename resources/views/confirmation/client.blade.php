@@ -8,7 +8,7 @@
     <client-confirmation token="{{ $token }}"
                          :client="{{ $client }}"
                          phone-number="{{ $phoneNumber }}"
-                         :address="{{ $client->evvAddress OR '{}' }}"
+                         :address="{{ $client->evvAddress ?? '{}' }}"
                          terms-url="{{ $termsUrl }}"
                          terms="{{ $terms }}"
     >

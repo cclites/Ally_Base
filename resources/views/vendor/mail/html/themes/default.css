@@ -7,7 +7,7 @@ body, body *:not(html):not(style):not(br):not(tr):not(code) {
 
 body {
     background-color: #f5f8fa;
-    color: #222;
+    color: #74787E;
     height: 100%;
     hyphens: auto;
     line-height: 1.4;
@@ -40,7 +40,7 @@ a img {
 /* Typography */
 
 h1 {
-    color: #111;
+    color: #2F3133;
     font-size: 19px;
     font-weight: bold;
     margin-top: 0;
@@ -48,7 +48,7 @@ h1 {
 }
 
 h2 {
-    color: #111;
+    color: #2F3133;
     font-size: 16px;
     font-weight: bold;
     margin-top: 0;
@@ -56,7 +56,7 @@ h2 {
 }
 
 h3 {
-    color: #111;
+    color: #2F3133;
     font-size: 14px;
     font-weight: bold;
     margin-top: 0;
@@ -64,6 +64,7 @@ h3 {
 }
 
 p {
+    color: #74787E;
     font-size: 16px;
     line-height: 1.5em;
     margin-top: 0;
@@ -217,28 +218,31 @@ img {
     -webkit-text-size-adjust: none;
 }
 
-.button-green {
-    background-color: #26c6da;
-    border-top: 10px solid #26c6da;
-    border-right: 18px solid #26c6da;
-    border-bottom: 10px solid #26c6da;
-    border-left: 18px solid #26c6da;
+.button-blue,
+.button-primary {
+    background-color: #3097D1;
+    border-top: 10px solid #3097D1;
+    border-right: 18px solid #3097D1;
+    border-bottom: 10px solid #3097D1;
+    border-left: 18px solid #3097D1;
 }
 
-.button-blue {
-    background-color: #1e88e5;
-    border-top: 10px solid #1e88e5;
-    border-right: 18px solid #1e88e5;
-    border-bottom: 10px solid #1e88e5;
-    border-left: 18px solid #1e88e5;
+.button-green,
+.button-success {
+    background-color: #2ab27b;
+    border-top: 10px solid #2ab27b;
+    border-right: 18px solid #2ab27b;
+    border-bottom: 10px solid #2ab27b;
+    border-left: 18px solid #2ab27b;
 }
 
-.button-red {
-    background-color: #bf2b36;
-    border-top: 10px solid #bf2b36;
-    border-right: 18px solid #bf2b36;
-    border-bottom: 10px solid #bf2b36;
-    border-left: 18px solid #bf2b36;
+.button-red,
+.button-error {
+    background-color: #bf5329;
+    border-top: 10px solid #bf5329;
+    border-right: 18px solid #bf5329;
+    border-bottom: 10px solid #bf5329;
+    border-left: 18px solid #bf5329;
 }
 
 /* Panels */

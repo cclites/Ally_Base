@@ -139,7 +139,7 @@
                 <div class="col-lg-6 col-sm-12">
                     <payment-method title="Primary Payment Method"
                                     source="primary"
-                                    :method="{{ $client->defaultPayment OR '{}' }}"
+                                    :method="{{ $client->defaultPayment ?? '{}' }}"
                                     :client="{{ $client }}"
                                     payment-type-message="{{ $defaultPaymentTypeMessage }}"
                                     role="{{ auth()->user()->role_type }}"
@@ -149,7 +149,7 @@
                 <div class="col-lg-6 col-sm-12">
                     <payment-method title="Backup Payment Method"
                                     source="backup"
-                                    :method="{{ $client->backupPayment OR '{}' }}"
+                                    :method="{{ $client->backupPayment ?? '{}' }}"
                                     :client="{{ $client }}"
                                     payment-type-message="{{ $backupPaymentTypeMessage }}"
                                     role="{{ auth()->user()->role_type }}"
@@ -211,7 +211,7 @@
         </div>
         <div class="tab-pane" id="client_invoice_history" role="tabpanel">
             <b-card title="Invoice History">
-                <client-invoice-history :client="{{ $client }}" :invoices="{{ $invoices OR "[]" }}">
+                <client-invoice-history :client="{{ $client }}" :invoices="{{ $invoices ?? "[]" }}">
                     <template slot="actions" scope="data">
                         <a :href="'/business/client/invoices/' + data.item.id" class="btn btn-secondary" target="_blank">
                             <i class="fa fa-external-link"></i> View

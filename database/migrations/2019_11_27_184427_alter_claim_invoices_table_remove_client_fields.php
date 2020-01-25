@@ -13,9 +13,11 @@ class AlterClaimInvoicesTableRemoveClientFields extends Migration
      */
     public function up()
     {
-        Schema::table('claim_invoices', function (Blueprint $table) {
-            $table->dropForeign(['client_invoice_id']);
-        });
+        if (\DB::getDriverName() != 'sqlite') {
+            Schema::table('claim_invoices', function (Blueprint $table) {
+                $table->dropForeign(['client_invoice_id']);
+            });
+        }
 
         Schema::table('claim_invoices', function (Blueprint $table) {
             $table->unsignedInteger('client_id')->nullable()->change();
@@ -32,9 +34,11 @@ class AlterClaimInvoicesTableRemoveClientFields extends Migration
             ]);
         });
 
-        Schema::table('claimable_services', function (Blueprint $table) {
-            $table->dropForeign(['caregiver_id']);
-        });
+        if (\DB::getDriverName() != 'sqlite') {
+            Schema::table('claimable_services', function (Blueprint $table) {
+                $table->dropForeign(['caregiver_id']);
+            });
+        }
 
         Schema::table('claimable_services', function (Blueprint $table) {
             $table->dropColumn([

@@ -90,7 +90,7 @@
                 <div class="col-lg-6 col-sm-12">
                     <payment-method title="Primary Payment Method"
                                     source="primary"
-                                    :method="{{ $user->role->defaultPayment OR '{}' }}"
+                                    :method="{{ $user->role->defaultPayment ?? '{}' }}"
                                     :client="{{ $user->role }}"
                                     payment-type-message="{{ $payment_type_message['default'] }}"
                                     role="{{ auth()->user()->role_type }}"
@@ -100,7 +100,7 @@
                 <div class="col-lg-6 col-sm-12">
                     <payment-method title="Backup Payment Method"
                                     source="backup"
-                                    :method="{{ $user->role->backupPayment OR '{}' }}"
+                                    :method="{{ $user->role->backupPayment ?? '{}' }}"
                                     :client="{{ $user->role }}"
                                     payment-type-message="{{ $payment_type_message['backup'] }}"
                                     role="{{ auth()->user()->role_type }}"
