@@ -102,7 +102,7 @@ class Caregiver1099Controller extends Controller
             return new ErrorResponse(500, 'Could not find earnings data for this caregiver and client.');
         }
 
-        if ($earnings->client->caregiver_1099 == Caregiver1099Payer::CLIENT() && $earnings->client->caregiver_1099) {
+        if ($earnings->client->caregiver_1099 == Caregiver1099Payer::CLIENT() && $request->override_payer_to_ally) {
             // override payer ot ally (just this once)
             $earnings->client->caregiver_1099 = Caregiver1099Payer::ALLY();
         }
