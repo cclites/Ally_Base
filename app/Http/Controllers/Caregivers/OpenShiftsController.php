@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Caregivers;
 
+use App\Address;
 use App\Business;
 use App\Responses\ErrorResponse;
 use App\Schedule;
@@ -46,7 +47,7 @@ class OpenShiftsController extends BaseController
                 ->get();
 
             $schedules = $query->get()
-                ->filter( function( Schedule $schedule ) use( $caregivers_schedule ){
+                ->filter( function( Schedule $schedule ) use ( $caregivers_schedule ){
 
                     $schedule_start = $schedule->starts_at;
                     $schedule_end   = $schedule->getEndDateTime();
@@ -69,16 +70,19 @@ class OpenShiftsController extends BaseController
 
                     if( $pass ) return $schedule;
                 })
-                ->map( function( Schedule $schedule ) {
+                ->map( function( Schedule $schedule ) use ( $caregiver ){
+                    // TODO => turn this into a resource and have it be used in the Business\OpenShiftsController as well
 
                     return [
 
-                        'id'         => $schedule->id,
-                        'start'      => $schedule->starts_at->copy()->format( \DateTime::ISO8601 ),
-                        'client'     => $schedule->client->nameLastFirst(),
-                        'client_id'  => $schedule->client->id,
-                        'start_time' => $schedule->starts_at->copy()->format('g:i A'),
-                        'end_time'   => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A')
+                        'id'             => $schedule->id,
+                        'start'          => $schedule->starts_at->copy()->format( \DateTime::ISO8601 ),
+                        'client'         => $schedule->client->lastname,
+                        'client_id'      => $schedule->client->id,
+                        'start_time'     => $schedule->starts_at->copy()->format('g:i A'),
+                        'distance'       => $schedule->client->evvAddress ? $caregiver->address->distanceToAddress( $schedule->client->evvAddress ) : null,
+                        'end_time'       => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A'),
+                        'requests_count' => null
                     ];
             });
 

@@ -12,6 +12,9 @@
                     <p class="m-0" v-if=" role_type == 'office_user' "><small>
                         Check Settings > General for open shifts settings for your business
                     </small></p>
+                    <p class="m-0" v-else><small>
+                        Turn phone sideways for best view
+                    </small></p>
                 </div>
 
                 <button typwe="button" class="close" @click=" toggleOpenShiftsModal() " style="cursor:pointer">
@@ -128,9 +131,9 @@
                         shouldShow : true,
                     },
                     {
-                        key        : 'status',
-                        label      : 'Status',
-                        sortable   : true,
+                        key        : this.role_type == 'caregiver' ? 'distance' : 'status',
+                        label      : this.role_type == 'caregiver' ? 'Dist.' : 'Status',
+                        sortable   : this.role_type == 'caregiver' ? true : false,
                         shouldShow : true,
                     }
                 ]
