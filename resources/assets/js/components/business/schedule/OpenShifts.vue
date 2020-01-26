@@ -27,53 +27,51 @@
             <schedule-requests :selected-schedule-id=" selectedScheduleId " v-if=" selectedScheduleId " @request-response=" requestResponded " class="mb-5" key="uno"></schedule-requests>
         </transition-group>
 
-        <div v-show="! loading" class="table-responsive">
+        <ally-table id="open-shifts" :columns=" fields " :items=" aggEvents " sort-by="start" :perPage=" 1000 " :isBusy=" form.busy " v-show="! loading">
 
-            <ally-table id="open-shifts" :columns=" fields " :items=" aggEvents " sort-by="start" :perPage=" 1000 " :isBusy=" form.busy ">
+            <template slot="start" scope="data">
 
-                <template slot="start" scope="data">
+                {{ ( data.item ? formatDateFromUTC( data.item.start ) + ' ' : '' ) + ( data.item ? data.item.start_time + '-' : '' ) + ( data.item ? data.item.end_time : '' ) }}
+            </template>
+            <template slot="client" scope="data">
 
-                    {{ ( data.item ? formatDateFromUTC( data.item.start ) + ' ' : '' ) + ( data.item ? data.item.start_time + '-' : '' ) + ( data.item ? data.item.end_time : '' ) }}
-                </template>
-                <template slot="client" scope="data">
+                <a v-if=" role_type == 'office_user' " :href=" '/business/clients/' + data.item.client_id " target="_blank">{{ data.item.client }}</a>
+                <p v-else>{{ data.item.client }}</p>
+            </template>
+            <template slot="actions" scope="data">
 
-                    <a v-if=" role_type == 'office_user' " :href=" '/business/clients/' + data.item.client_id " target="_blank">{{ data.item.client }}</a>
-                    <p v-else>{{ data.item.client }}</p>
-                </template>
-                <template slot="actions" scope="data">
+                <transition mode="out-in" name="slide-fade">
 
-                    <transition mode="out-in" name="slide-fade">
+                    <div v-if=" !hasRequest( data.item.request_status ) " class="d-flex" key="first-block">
 
-                        <div v-if=" !hasRequest( data.item.request_status ) " class="d-flex" key="first-block">
+                        <b-button variant="success" size="sm" class="f-1 mr-1" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.UNINTERESTED ) " key="request">Not Interested</b-button>
+                        <b-button variant="primary" size="sm" class="f-1 ml-1" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.PENDING ) " key="request">Request Shift</b-button>
+                    </div>
 
-                            <b-button variant="success" size="sm" class="f-1 mr-1" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.UNINTERESTED ) " key="request">Not Interested</b-button>
-                            <b-button variant="primary" size="sm" class="f-1 ml-1" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.PENDING ) " key="request">Request Shift</b-button>
-                        </div>
+                    <div v-if=" hasRequest( data.item.request_status ) " class="" key="second-block">
 
-                        <div v-if=" hasRequest( data.item.request_status ) " class="" key="second-block">
+                        <b-button variant="danger" size="sm" class="btn-block" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.CANCELLED ) " key="rescind">Cancel Request</b-button>
+                    </div>
+                </transition>
+            </template>
+            <template slot="requests_count" scope="data">
 
-                            <b-button variant="danger" size="sm" class="btn-block" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.CANCELLED ) " key="rescind">Cancel Request</b-button>
-                        </div>
-                    </transition>
-                </template>
-                <template slot="requests_count" scope="data">
+                <transition mode="out-in" name="slide-fade">
 
-                    <transition mode="out-in" name="slide-fade">
+                    <div class="text-center" key="requestcontainerone" v-if=" !currentlySelected( data.item.id ) ">
 
-                        <div class="text-center" key="requestcontainerone" v-if=" !currentlySelected( data.item.id ) ">
+                        <a href="#" @click.prevent=" showRequestModal( data.item.id ) " class="w-100 text-center" key="showit">{{ data.item.requests_count + ", Click to View" }}</a>
+                    </div>
+                    <div class="text-center" key="requestcontainertwo" v-else>
 
-                            <a href="#" @click.prevent=" showRequestModal( data.item.id ) " class="w-100 text-center" key="showit">{{ data.item.requests_count + ", Click to View" }}</a>
-                        </div>
-                        <div class="text-center" key="requestcontainertwo" v-else>
+                        <a href="#" @click=" selectedScheduleId = null " class="w-100 text-center text-danger">{{ "Click to Hide" }}</a>
+                    </div>
+                </transition>
+            </template>
 
-                            <a href="#" @click=" selectedScheduleId = null " class="w-100 text-center text-danger">{{ "Click to Hide" }}</a>
-                        </div>
-                    </transition>
-                </template>
+            <template slot="status" scope="data">Open</template>
+        </ally-table>
 
-                <template slot="status" scope="data">Open</template>
-            </ally-table>
-        </div>
         <template slot="modal-footer">
 
             <div class="d-flex w-100 justify-content-end">
