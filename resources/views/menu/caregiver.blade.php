@@ -11,10 +11,10 @@
         <i class="fa fa-calendar"></i><span class="hide-menu">Schedule</span>
     </a>
 </li>
-@can( 'view-open-shifts', [ activeBusiness() ])
+@if( true && Auth::user()->can( 'view-open-shifts', [ activeBusiness() ] ) )
 
     <open-shifts-side-menu-icon business="{{ activeBusiness() ?? null }}"></open-shifts-side-menu-icon>
-@endcan
+@endif
 <li>
 </li>
 @if (activeBusiness() && activeBusiness()->allows_manual_shifts)
