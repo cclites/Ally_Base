@@ -4,13 +4,13 @@
 
         <template slot="modal-header">
 
-            <div class="d-flex w-100 justify-content-between">
+            <div class="d-flex w-100 justify-content-between align-items-center">
 
-                <h3>Open Shifts</h3>
+                <h5 class="m-0 modal-title">Open Shifts</h5>
 
-                <b-button variant="default" @click=" toggleOpenShiftsModal() " style="cursor:pointer">
+                <button typwe="button" class="close" @click=" toggleOpenShiftsModal() ">
                     &times;
-                </b-button>
+                </button>
             </div>
         </template>
 
@@ -62,7 +62,7 @@
 
                     <div class="text-center">
 
-                        <a href="#" @click.prevent=" showRequestModal( data.item.id ) " v-if=" data.item.requests_count > 0 " class="w-100 text-center">{{ data.item.requests_count }}</a>
+                        <a href="#" @click.prevent=" showRequestModal( data.item.id ) " v-if=" data.item.requests_count > 0 " class="w-100 text-center">{{ data.item.requests_count + ", Click to View" }}</a>
                         <span v-else>0</span>
                     </div>
                 </template>
