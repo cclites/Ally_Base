@@ -222,8 +222,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ServiceZip' => $service->zip,
             'VisitId' => $item->id,
             'ServiceCode' => $service->service_code,
-            'ServiceCodeMod1' => '', // OPTIONAL
-            'ServiceCodeMod2' => '', // OPTIONAL
+            'ServiceCodeMod1' => $service->service_code_mod1 ?? null, // OPTIONAL
+            'ServiceCodeMod2' => $service->service_code_mod2 ?? null, // OPTIONAL
             'DiagnosisCode1' => $diagnosisCodes[0],
             'DiagnosisCode2' => $diagnosisCodes[1], // OPTIONAL && TODO
             'DiagnosisCode3' => $diagnosisCodes[2], // OPTIONAL && TODO
