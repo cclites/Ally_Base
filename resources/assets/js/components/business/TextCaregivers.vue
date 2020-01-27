@@ -196,20 +196,11 @@ export default {
         async submit()
         {
             this.form.clearError();
-            let hasErrors = false;
 
             if (this.selectedUsers.length == 0 && ! this.form.all) {
                 this.form.addError('recipients', 'You must add at least one recipient.');
-                hasErrors = true;
+                return;
             }
-
-            if (this.form.message.length > 140 ) {
-
-                this.form.addError( 'Message', 'A maximum character count of 140 is applied to text messages' );
-                hasErrors = true;
-            }
-
-            if( hasErrors ) return;
 
             let confirmMessage = 'Are you sure you wish to send this text message to the ' + this.selectedUsers.length + ' selected recipients?';
             if (this.form.all) {
