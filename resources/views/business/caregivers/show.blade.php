@@ -213,10 +213,10 @@
         <div class="tab-pane" id="restrictions" role="tabpanel">
             <business-caregiver-restrictions-tab :caregiver="{{ $caregiver }}"></business-caregiver-restrictions-tab>
         </div>
+        @if(is_admin())
         <div class="tab-pane" id="tax_documents" role="tabpanel">
             <business-1099s-tab :caregiver="{{ $caregiver->id }}"></business-1099s-tab>
         </div>
-        @if(is_admin())
         <div class="tab-pane" id="admin_note" role="tabpanel">
             <user-admin-note :user="{{ $caregiver->user }}"></user-admin-note>
         </div>
