@@ -54,6 +54,8 @@ export default {
 
             // remove all marks within row from notification icon
             this.updateCount( -schedule.requests_count );
+
+            this.selectedScheduleId = null;
         },
         showRequestModal( schedule_id ){
 

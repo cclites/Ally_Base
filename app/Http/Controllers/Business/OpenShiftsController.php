@@ -17,7 +17,10 @@ class OpenShiftsController extends BaseController
         if( request()->filled( 'json' ) ){
 
             $results = Schedule::forRequestedBusinesses()
-                ->whereHas( 'scheduleRequests' )
+                ->whereHas( 'scheduleRequests', function( $q ){
+
+                    return $q->whereActive();
+                })
                 ->with([ 'client', 'scheduleRequests' => function( $q ){
 
                     return $q->whereActiveOrUninterested();
