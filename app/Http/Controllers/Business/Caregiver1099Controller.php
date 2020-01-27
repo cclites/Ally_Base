@@ -66,11 +66,6 @@ class Caregiver1099Controller extends Controller
      */
     public function downloadPdf(Caregiver1099 $caregiver1099)
     {
-        if (!is_admin()) {
-            // Office users to not have access to this tab.
-            abort(403);
-        }
-
         $this->authorize('read', $caregiver1099);
 
         $document = $caregiver1099->getFilledCaregiverPdf(true, true);
