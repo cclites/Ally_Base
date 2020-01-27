@@ -10,7 +10,7 @@ use App\Schedule;
 
 class OpenShiftRequestAccepted extends BaseNotification
 {
-    const DISABLED = true;
+    const DISABLED = false;
 
     /**
      * The label of the notification (used for preferences).
