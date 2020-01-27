@@ -9,5 +9,5 @@
 @endsection
 
 @section('content')
-    <caregiver-anniversary-report :users="{{ $users }}" />
+    <caregiver-anniversary-report />
 @endsection
