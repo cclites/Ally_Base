@@ -22,7 +22,6 @@
                 :busy="loading"
                 :items=" filteredExpirations "
                 :fields="fields"
-                :current-page="currentPage"
                 :filter="filter"
                 sort-by="name"
             >

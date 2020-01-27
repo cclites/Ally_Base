@@ -96,7 +96,7 @@ Route::group([
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('client.invoices.show');
 
     /* Caregiver 1099s */
-    Route::get('client/client-1099/{client}', 'Clients\Caregiver1099Controller@index')->name('client-caregiver-1099');
+    Route::get('client/client-1099', 'Clients\Caregiver1099Controller@index')->name('client-caregiver-1099');
     Route::get('client/client-1099/download/{caregiver1099}', 'Clients\Caregiver1099Controller@downloadPdf')->name('client-1099-download');
 });
 
@@ -149,7 +149,7 @@ Route::group([
     Route::get('tasks/{task}', 'Caregivers\TasksController@show');
     Route::patch('tasks/{task}', 'Caregivers\TasksController@update');
 
-    Route::get('caregiver/caregiver-1099/{caregiver}', 'Caregivers\Caregiver1099Controller@index')->name('caregiver-1099-view');
+    Route::get('caregiver/caregiver-1099', 'Caregivers\Caregiver1099Controller@index')->name('caregiver-1099-view');
     Route::get('caregiver/caregiver-1099/download/{caregiver1099}', 'Caregivers\Caregiver1099Controller@downloadPdf')->name('caregivers-1099-download');
 });
 
@@ -549,6 +549,8 @@ Route::group([
     Route::post('offline-invoice-ar/{invoice}/pay', 'Business\OfflineInvoiceArController@pay')->name('offline-invoice-ar.pay');
 
     /* Caregiver 1099s */
+    Route::get('client-1099/{client}', 'Business\Client1099Controller@index')->name('client-1099.index');
+    Route::get('client-1099/download/{caregiver1099}', 'Business\Client1099Controller@download')->name('client-1099.download');
     Route::get('caregiver-1099/{caregiver}', 'Business\Caregiver1099Controller@index')->name('business-1099');
     Route::get('business-1099/download/{caregiver1099}', 'Business\Caregiver1099Controller@downloadPdf')->name('business-caregivers-1099-download');
     Route::get('impersonate/{user}', 'Admin\ImpersonateController@impersonate')->name('impersonate');

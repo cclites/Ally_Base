@@ -73,6 +73,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#tax_documents" role="tab">Tax Documents</a>
+        </li>
         @if( is_admin() )
 
             <li class="nav-item">
@@ -110,6 +113,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#insurance_service_auth" role="tab">Insurance & Service Auths</a>
                 <a class="dropdown-item" data-toggle="tab" href="#misc" role="tab">Misc</a>
                 <a class="dropdown-item" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
+                <a class="dropdown-item" data-toggle="tab" href="#tax_documents" role="tab">Tax Documents</a>
                 @if( is_admin() ) <a class="dropdown-item" data-toggle="tab" href="#admin_note" role="tab">Admin Notes</a> @endif
             </div>
         </li>
@@ -244,6 +248,9 @@
         </div>
         <div class="tab-pane" id="notifications" role="tabpanel">
             <notification-preferences :admin="true" :user="{{ $client->user }}" :notifications="{{ $notifications }}"></notification-preferences>
+        </div>
+        <div class="tab-pane" id="tax_documents" role="tabpanel">
+            <business-client-1099s-tab :client="{{ $client->id }}" />
         </div>
         @if(is_admin())
         <div class="tab-pane" id="admin_note" role="tabpanel">

@@ -1,22 +1,24 @@
 <?php
 
-namespace App\Http\Controllers\Clients;
+namespace App\Http\Controllers\Business;
 
 use App\Http\Controllers\Controller;
 use App\Caregiver1099Payer;
 use App\Caregiver1099;
+use App\Client;
 
-class Caregiver1099Controller extends Controller
+class Client1099Controller extends Controller
 {
     /**
      * Display a listing of the resource for a single caregiver
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @param Client $client
+     * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function index()
+    public function index(Client $client)
     {
-        /** @var \App\Client $client */
-        $client = auth()->user()->role;
+        $this->authorize('read', $client);
 
         $data = $client->caregiver1099s()
             ->with('caregiver')
@@ -39,11 +41,11 @@ class Caregiver1099Controller extends Controller
      * @param Caregiver1099 $caregiver1099
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function downloadPdf(Caregiver1099 $caregiver1099)
+    public function download(Caregiver1099 $caregiver1099)
     {
         $this->authorize('read', $caregiver1099);
 
-        $document = $caregiver1099->getFilledClientPdf(false, false);
+        $document = $caregiver1099->getFilledClientPdf(true, true);
 
         $filename = "{$caregiver1099->client_first_name} {$caregiver1099->client_last_name} - {$caregiver1099->caregiver_first_name} {$caregiver1099->caregiver_last_name} {$caregiver1099->year} 1099.pdf";
 

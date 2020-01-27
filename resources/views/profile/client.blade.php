@@ -120,7 +120,7 @@
             </div>
         </div>
         <div class="tab-pane" id="tax_documents" role="tabpanel">
-            <client-1099s-tab :client="{{ $user->id }}"></client-1099s-tab>
+            <client-1099s-tab />
         </div>
     </div>
 @endsection

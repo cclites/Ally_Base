@@ -1,20 +1,17 @@
 <template>
     <b-card header="Tax Documents"
-            header-bg-variant="info"
-            header-text-variant="white"
+        header-bg-variant="info"
+        header-text-variant="white"
     >
-        <b-alert show variant="info">
-            1099 totals do not include expenses, mileage, deductions, adjustments, etc.
-        </b-alert>
         <div v-if="items.length" class="table-responsive">
             <b-table
-                    bordered striped hover show-empty
-                    :items="items"
-                    :fields="fields"
-                    sort-by="year"
+                bordered striped hover show-empty
+                :items="items"
+                :fields="fields"
+                sort-by="year"
             >
                 <template slot="actions" scope="row">
-                    <a :href="`/client/client-1099/download/${row.item.id}`">Download 1099</a>
+                    <a :href="`/business/client-1099/download/${row.item.id}`">Download 1099</a>
                 </template>
             </b-table>
         </div>
@@ -23,14 +20,19 @@
         </div>
 
         <hr>
-        <b-alert show variant="info">Note: 2018 and prior years would have been mailed to you and are not available
-            electronically.
-        </b-alert>
+        <b-alert show variant="info">Note: 2018 and prior years would have been mailed to you and are not available electronically.</b-alert>
     </b-card>
 </template>
 
 <script>
     export default {
+        props: {
+            client: {
+                type: [Number, String],
+                required: true,
+            }
+        },
+
         data() {
             return {
                 items: [],
@@ -48,7 +50,7 @@
 
         methods:{
             fetch(){
-                axios.get('/client/client-1099')
+                axios.get(`/business/client-1099/${this.client}`)
                     .then(response => {
                         this.items = response.data;
                     })
@@ -58,7 +60,3 @@
         }
     }
 </script>
-
-<style scoped>
-
-</style>

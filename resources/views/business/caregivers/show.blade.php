@@ -68,10 +68,10 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#restrictions" role="tab">Restrictions</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#tax_documents" role="tab">Tax Documents</a>
+        </li>
         @if(is_admin())
-            <li class="nav-item">
-                <a class="nav-link" data-toggle="tab" href="#tax_documents" role="tab">Tax Documents</a>
-            </li>
             <li class="nav-item">
                 <a
                 @if( count( $caregiver->user->adminNotes ) > 0 )
@@ -109,8 +109,8 @@
                 <a class="dropdown-item" data-toggle="tab" href="#misc" role="tab">Misc.</a>
                 <a class="dropdown-item" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
                 <a class="dropdown-item" data-toggle="tab" href="#restrictions" role="tab">Restrictions</a>
+                <a class="dropdown-item" data-toggle="tab" href="#tax_documents" role="tab">Tax Documents</a>
                 @if( is_admin() )
-                    <a class="dropdown-item" data-toggle="tab" href="#tax_documents" role="tab">Tax Documents</a>
                     <a class="dropdown-item" data-toggle="tab" href="#admin_note" role="tab">Admin Notes</a>
                 @endif
             </div>
@@ -214,7 +214,7 @@
             <business-caregiver-restrictions-tab :caregiver="{{ $caregiver }}"></business-caregiver-restrictions-tab>
         </div>
         <div class="tab-pane" id="tax_documents" role="tabpanel">
-            <business-1099s-tab :caregiver="{{ $caregiver->id }}"></business-1099s-tab>
+            <business-caregivers-1099s-tab :caregiver="{{ $caregiver->id }}" />
         </div>
         @if(is_admin())
         <div class="tab-pane" id="admin_note" role="tabpanel">
