@@ -696,10 +696,10 @@ class ReportsController extends BaseController
         $type = strtolower($request->type) == 'clients' ? 'clients' : 'caregivers';
 
         if($type == 'clients') {
-            return Client::forRequestedBusinesses()->get();
+            return $this->addCityAndPhone(Client::forRequestedBusinesses()->get());
         }
 
-        return Caregiver::forRequestedBusinesses()->get();
+        return $this->addCityAndPhone(Caregiver::forRequestedBusinesses()->get());
     }
 
     /**
@@ -1070,11 +1070,11 @@ class ReportsController extends BaseController
 
         $prospects = Prospect::select([
                 'id',
-                'business_id', 
+                'business_id',
                 'firstname',
                 'lastname',
                 'closed_loss',
-                'closed_win', 
+                'closed_win',
                 'referred_by',
                 'referral_source_id',
                 'had_assessment_scheduled',
@@ -1151,5 +1151,19 @@ class ReportsController extends BaseController
             $groupedByDate[$date] = $total;
         }
         return $groupedByDate;
+    }
+
+    /**
+     * @param $clients
+     *
+     * @return mixed
+     */
+    protected function addCityAndPhone($clients) {
+        $clients->map(function ($client) {
+            $client->city = $client->user->addresses[0]->city ?? 'Unknown';
+            $client->phone = $client->user->phoneNumbers[0]->national_number ?? 'Unknown';
+        });
+
+        return $clients;
     }
 }

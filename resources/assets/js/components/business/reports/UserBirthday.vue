@@ -55,6 +55,18 @@
                         sortable: true,
                         shouldShow: true,
                     },
+                    {
+                        key: 'city',
+                        label: 'City',
+                        sortable: true,
+                        shouldShow: true,
+                    },
+                    {
+                        key: 'phone',
+                        label: 'Phone',
+                        sortable: true,
+                        shouldShow: true,
+                    },
                 ],
             };
         },
