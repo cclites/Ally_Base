@@ -645,7 +645,7 @@ Route::group([
     Route::get('reports/paid-billed-audit-report', 'Admin\Report\PaidBilledAuditReportController@index')->name('reports.paid_billed_audit_report');
     Route::get('reports/bad-ssn-report/{type}', 'Admin\Reports\AdminBadSsnReportController@index')->name('reports.bad_ssn_report');
     Route::get('reports/bad-1099-report', 'Admin\Reports\AdminBad1099ReportController@index')->name('reports.bad_1099_report');
-
+    Route::get('reports/1099-not-elected', 'Admin\Reports\Admin1099NotElectedReportController@index')->name('reports.1099_not_elected');
 
     /* Caregiver 1099 preview related */
     Route::get('admin-1099-actions', 'Admin\Admin1099Controller@index')->name('admin-1099-actions');
@@ -657,12 +657,14 @@ Route::group([
     /* Caregiver 1099s */
     Route::get('business-1099', 'Admin\Caregiver1099Controller@index')->name('business-1099');
     Route::get('business-1099/edit/{caregiver1099}', 'Admin\Caregiver1099Controller@edit')->name('business-1099-edit');
-    Route::get('business-1099/download/{caregiver1099}', 'Admin\Caregiver1099Controller@downloadPdf')->name('business-1099-download');
+    Route::get('business-1099/download/caregiver/{caregiver1099}', 'Caregivers\Caregiver1099Controller@downloadPdf');
+    Route::get('business-1099/download/client/{caregiver1099}', 'Clients\Caregiver1099Controller@downloadPdf');
     Route::post('business-1099/create', 'Admin\Caregiver1099Controller@store')->name('business-1099-create');
     Route::patch('business-1099/{caregiver1099}', 'Admin\Caregiver1099Controller@update')->name('business-1099-update');
 
     Route::get('/business-1099/user-emails/{year}/{role}', 'Admin\Admin1099Controller@UserEmailsList')->name('business-1099-transmit');
     Route::get('business-1099/transmit/{year}', 'Admin\Caregiver1099Controller@transmit')->name('business-1099-transmit');
+    Route::get('business-1099/export-ally-grouped/{year}', 'Admin\Caregiver1099Controller@exportAllyGrouped')->name('business-1099.export-ally-grouped');
     Route::get('admin-1099', 'Admin\Caregiver1099Controller@admin')->name('admin-1099');
     Route::patch('business-1099-settings/{business}', 'Business\SettingController@updateBusiness1099Settings')->name('business-1099-settings');
     Route::patch('chain-1099-settings/{chainClientTypeSettings}', 'Admin\ChainSettingsController@update')->name('chain-settings');

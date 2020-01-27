@@ -340,7 +340,7 @@
             needsTwoAdls(){
 
                 if( !this.shift ) return null;
-                return [ 'medicaid', 'ltci' ].includes( this.shift.client.client_type.toLowerCase() );
+                return ![ 'private_pay' ].includes( this.shift.client.client_type.toLowerCase() );
             }
         },
     }

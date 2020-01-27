@@ -10,11 +10,11 @@
         <h5><b>Requests</b></h5>
         <div class="d-flex align-items-center mt-4">
 
-            <div class="text-uppercase font-bold f-1">Caregiver Name</div>
-            <div class="text-uppercase font-bold f-1">Request Date</div>
-            <div class="text-uppercase font-bold f-1">CG Worked with Client Prev.?</div>
-            <div class="text-uppercase font-bold f-1">Status</div>
-            <div class="text-uppercase font-bold f-1" style="min-width: 300px">Actions</div>
+            <div class="font-bold f-1">Caregiver Name</div>
+            <div class="font-bold f-1">Request Date</div>
+            <div class="font-bold f-2">CG Worked with Client Prev.?</div>
+            <div class="font-bold f-1 text-center">Status</div>
+            <div class="font-bold f-1 text-center" style="min-width: 300px">Actions</div>
         </div>
         <div v-if=" !loading ">
 
@@ -22,9 +22,9 @@
 
                 <div class="f-1">{{ request.nameLastFirst }}</div>
                 <div class="f-1">{{ formatDateFromUTC( request.created_at ) }}</div>
-                <div class="f-1">{{ request.caregiverClientRelationshipExists ? 'yes' : 'no' }}</div>
-                <div class="f-1">{{ request.status }}</div>
-                <div class="f-1" style="min-width: 300px">
+                <div class="f-2">{{ request.caregiverClientRelationshipExists ? 'Yes' : 'No' }}</div>
+                <div class="f-1 text-right">{{ request.status | capitalize }}</div>
+                <div class="f-1 text-right" style="min-width: 300px">
 
                     <transition name="slide-fade" mode="out-in" v-if=" request.status == 'pending' ">
 

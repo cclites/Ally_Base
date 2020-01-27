@@ -2,53 +2,52 @@
 
 namespace App\Http\Controllers\Admin\Reports;
 
+use App\Business;
 use App\Http\Controllers\Controller;
+use App\Reports\Admin1099NotElectedReport;
 use App\Reports\Caregiver1099PreviewReport;
 use Illuminate\Http\Request;
 
-class Admin1099PreviewReportController extends Controller
+class Admin1099NotElectedReportController extends Controller
 {
     /**
      * Get the admin 1099 preview report.
      *
      * @param Request $request
-     * @param Caregiver1099PreviewReport $report
+     * @param Admin1099NotElectedReport $report
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\JsonResponse|\Illuminate\View\View
      */
-    public function index(Request $request, Caregiver1099PreviewReport $report)
+    public function index(Request $request, Admin1099NotElectedReport $report)
     {
         if (filled($request->json)) {
             $request->validate([
                 'year' => 'required',
-                'business_id' => 'required|numeric',
+                'business_id' => 'nullable|numeric',
                 'payer' => 'nullable|in:ally,client',
                 'client_id' => 'nullable|numeric',
                 'caregiver_id' => 'nullable|numeric',
-                'created' => 'nullable|in:1,0',
             ]);
 
-            $createdStatus = $request->created == '1' ? true : false;
-            if ($request->created === null) {
-                $createdStatus = null;
+            if (empty($request->business_id)) {
+                $businesses = Business::pluck('id');
+            } else {
+                $businesses = [$request->business_id];
             }
 
             $report->applyFilters(
                 $request->year,
                 $request->caregiver_id,
                 $request->client_id,
-                [$request->business_id],
-                $request->payer,
-                $createdStatus
+                $businesses,
+                $request->payer
             );
 
-            $results = $report->rows();
-
-            return response()->json($results);
+            return response()->json($report->rows());
         }
 
         return view_component(
-            'admin-1099-preview',
-            '1099 Preview Report',
+            'admin-1099-not-elected-report',
+            '1099 Caregivers Not Elected Report',
             [],
             [
                 'Home' => route('home'),

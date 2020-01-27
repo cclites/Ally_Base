@@ -129,16 +129,16 @@
                                 <input-help :form="businessSettings" field="calendar_next_day_threshold"
                                             text="When an shift’s end time crosses midnight, show the shift across both days in the calendar."></input-help>
                             </b-form-group>
-                            <b-form-group label="Enable Open Shift Feature" label-for="open_shifts_setting">
+                            <b-form-group label="Enable Open Shift Feature" label-for="open_shifts_setting" v-if="false">
                                 <b-form-select id="open_shifts_setting"
                                                v-model="businessSettings.open_shifts_setting"
                                 >
                                     <option :value=" 'off' ">Off</option>
-                                    <!-- <option :value=" 'unlimited' ">On - Caregivers see all open shifts for all clients</option> -->
-                                    <option :value=" 'limited' ">On - Caregivers see open shifts for only their assigned clients</option>
+                                    <option :value=" 'unlimited' ">On - Caregivers see all open shifts for all clients</option>
+                                    <option :value=" 'limited' ">On - Caregivers see open shifts for only their clients</option>
                                 </b-form-select>
                                 <input-help :form="businessSettings" field="open_shifts_setting"
-                                            text="Enable the ability for Caregivers to see and apply for open shifts themselves. Whether for clients they are currently assigned to or optionally for all clients as well."></input-help>
+                                            text="Enable the ability for Caregivers to volunteer for open shifts. Whether for clients they are currently referred to or optionally for all clients as well."></input-help>
                             </b-form-group>
                             <b-form-group label="Logo" label-for="logo">
                                 <image-cropper

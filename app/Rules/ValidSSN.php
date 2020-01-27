@@ -11,8 +11,9 @@ class ValidSSN implements Rule
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($allowMasked = true)
     {
+        $this->allowMaskedInput = $allowMasked;
     }
 
     /**
@@ -24,7 +25,12 @@ class ValidSSN implements Rule
      */
     public function passes($attribute, $value)
     {
-        $pattern = '/(\d{3}|\*{3})-(\d{2}|\*{2})-(\d{4}|\*{4})/';
+        if ($this->allowMaskedInput) {
+            $pattern = '/(\d{3}|\*{3})-(\d{2}|\*{2})-(\d{4}|\*{4})/';
+        } else {
+            $pattern = '/^(?!666|000|9\d{2})\d{3}[- ]{0,1}(?!00)\d{2}[- ]{0,1}(?!0{4})\d{4}$/';
+        }
+
         return preg_match($pattern, $value);
     }
 

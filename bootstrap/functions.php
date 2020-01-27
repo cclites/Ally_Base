@@ -426,3 +426,16 @@ if (! function_exists('standard_filename')) {
         return strtolower(str_slug("{$subject} {$documentName}{$date}")) . ".{$extension}";
     }
 }
+
+if (! function_exists('valid_ssn')) {
+    /**
+     * Check for valid SSN format.
+     *
+     * @param null|string $ssn
+     * @return bool
+     */
+    function valid_ssn(?string $ssn): bool
+    {
+        return preg_match('/^(?!666|000\d{2})\d{3}[- ]{0,1}(?!00)\d{2}[- ]{0,1}(?!0{4})\d{4}$/', $ssn);
+    }
+}

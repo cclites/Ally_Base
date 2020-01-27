@@ -1,7 +1,7 @@
 <template>
 
     <li style="cursor: pointer">
-        <a href="" @click.prevent=" toggleOpenShiftsModal " aria-expanded="false" style="position:relative">
+        <a href="javascript:void()" @click.prevent=" toggleOpenShiftsModal " aria-expanded="false" style="position:relative">
 
             <i class="fa fa-hand-paper-o"></i><span class="hide-menu">Open Shifts</span>
             <span class="badge badge-danger badge-notifications" v-if=" total > 0">{{ total }}</span>

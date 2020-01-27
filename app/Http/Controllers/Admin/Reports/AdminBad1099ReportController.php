@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin\Reports;
 
+use App\Business;
 use App\Reports\Caregiver1099PreviewReport;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -20,10 +21,12 @@ class AdminBad1099ReportController extends Controller
         if ($request->json == 1) {
             $request->validate([
                 'year' => 'required|numeric',
-                'business_id' => 'required|numeric',
+                'business_id' => 'nullable|numeric',
             ]);
 
-            $report->applyFilters($request->year, null, null, $request->business_id);
+            $businesses = $request->business_id ? [$request->business_id] : Business::pluck('id');
+
+            $report->applyFilters($request->year, null, null, $businesses);
 
             $results = $report->rows()->map(function ($item) {
                 return [
@@ -33,6 +36,10 @@ class AdminBad1099ReportController extends Controller
                     'client_id' => $item['client_id'],
                     'location' => $item['business_name'],
                     'errors' => $item['errors'] ? implode(", ", $item['errors']) : false,
+                    'caregiver_email' => $item['caregiver_email'],
+                    'caregiver_phone' => $item['caregiver_phone'],
+                    'client_email' => $item['client_email'],
+                    'client_phone' => $item['client_phone'],
                 ];
             })
             ->filter(function ($item) {
