@@ -262,6 +262,33 @@
                 </b-col>
             </b-row>
             <b-row>
+
+                <b-col lg="6">
+                    <b-form-group label="Service Code Mod 1" label-for="service_code_mod1">
+                        <b-form-input
+                            v-model="form.service_code_mod1"
+                            id="service_code_mod1"
+                            name="service_code_mod1"
+                            type="text"
+                            :disabled="form.busy"
+                        />
+                        <input-help :form="form" field="service_code_mod1" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+                <b-col lg="6">
+                    <b-form-group label="Service Code Mod 2" label-for="service_code_mod2">
+                        <b-form-input
+                            v-model="form.service_code_mod2"
+                            id="service_code_mod2"
+                            name="service_code_mod2"
+                            type="text"
+                            :disabled="form.busy"
+                        />
+                        <input-help :form="form" field="service_code_mod2" text=""></input-help>
+                    </b-form-group>
+                </b-col>
+            </b-row>
+            <b-row>
                 <b-col lg="3">
                     <b-form-group label="Start Date" label-for="service_start_date" label-class="required">
                         <date-picker v-model="form.service_start_date" id="service_start_date" :disabled="form.busy" />
@@ -944,6 +971,8 @@
                     service_id: '',
                     service_name: '',
                     service_code: '',
+                    service_code_mod1: '',
+                    service_code_mod2: '',
                     activities: '',
                     caregiver_comments: '',
 
@@ -1074,6 +1103,8 @@
 
                 this.form.service_name = service.name;
                 this.form.service_code = service.code;
+                this.form.service_code_mod1 = service.mod1;
+                this.form.service_code_mod2 = service.mod2;
             },
         },
 

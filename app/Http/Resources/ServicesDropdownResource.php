@@ -19,6 +19,8 @@ class ServicesDropdownResource extends ResourceCollection
                 'id' => $row->id,
                 'name' => $row->name,
                 'code' => $row->code,
+                'mod1' => $row->mod1,
+                'mod2' => $row->mod2,
                 'display' => $row->name . ' ' . $row->code,
             ];
         })

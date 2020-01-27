@@ -27,6 +27,8 @@ class CreateServiceRequest extends FormRequest
         return [
             'name' => 'required|string|max:70',
             'code' => 'nullable|string|max:10',
+            'mod1' => 'nullable|string|max:10',
+            'mod2' => 'nullable|string|max:10',
             'default' => 'nullable|boolean',
         ];
     }

@@ -198,8 +198,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'SourceSystem' => $this->tcLookup('SourceSystem', 'ALLY'),
             'Jurisdiction' => $this->tcLookup('Jurisdiction', $service->state),
             'Payer' => $this->tcLookup('Payer', $claim->payer_code),
-            'Plan' => $this->tcLookup('Plan', $claim->plan_code), // FMSP is only Acceptable Value
-            // 'Program'                => $this->tcLookup('Program', 'PACE'), // OPTIONAL, PACE is only Acceptable Value
+            'Plan' => $this->tcLookup('Plan', $claim->plan_code),
+            // 'Program'                => $this->tcLookup('Program', 'PACE'), // OPTIONAL
             'DeliverySystem' => $this->tcLookup('DeliverySystem', 'MCOR'), // FFFS or MCOR.. no way to derive this from our system yet.
             'ProviderName' => $business->name,
             'ProviderMedicaidId' => $business->medicaid_id,
