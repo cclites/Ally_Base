@@ -55,7 +55,7 @@
     <table class="logo_header">
         <tr>
             <td>
-                <img src="{{ asset($client->business->logo) }}" alt="{{ $client->business->name }}">
+                <img src="../storage/logos/{{ $client->business->logo }}" alt="{{ $client->business->name }}">
             </td>
             <td>
                 {{ $client->business->name }}<br>
@@ -67,15 +67,12 @@
             </td>
         </tr>
     </table>
-
     <hr>
 
     <div class="heading">
         <span>Client Data for {{ $client->nameLastFirst() }}</span>
         <span class="avatar"><img src="{{ asset($client->avatar) }}"></span>
     </div>
-
-
     <hr>
 
     <table class="client-info">

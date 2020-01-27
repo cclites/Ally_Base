@@ -53,7 +53,7 @@
         <tbody>
             <tr>
                 <td>
-                    <img src="{{ asset($business->logo) }}" alt="{{ $business->name }}">
+                    <img src="../storage/logos/{{ $business->logo }}" alt="{{ $business->name }}">
                 </td>
                 <td>
                     {{ $business->name }}<br>
