@@ -45,6 +45,8 @@ class ClaimInvoiceItemResource extends Resource
             'rate' => number_format($this->resource->rate, 2),
             'units' => number_format($this->resource->units, 2),
             'summary' => $this->resource->claimable->getName(),
+            'service_code_mod1' => $this->resource->claimable->service_code_mod1,
+            'service_code_mod2' => $this->resource->claimable->service_code_mod2,
             'start_time' => optional($this->resource->claimable->getStartTime())->toDateTimeString(),
             'end_time' => optional($this->resource->claimable->getEndTime())->toDateTimeString(),
             'caregiver_name' => $this->resource->getCaregiverName(),
