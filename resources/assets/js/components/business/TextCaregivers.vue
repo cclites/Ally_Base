@@ -69,7 +69,7 @@
                     </div>
                     <input-help :form="form" field="recipients" text=""></input-help>
                 </b-form-group>
-                <business-location-form-group label="From Number (This is the number Caregivers will receive the txt message from and reply to)"
+                <business-location-form-group label="From Number (This is the number Caregivers will receive the text message from and reply to)"
                                               v-model="form.business_id"
                                               :form="form"
                                               field="business_id">
@@ -77,20 +77,21 @@
                 <b-form-group
                     label="Message"
                     label-class="required"
-                    :invalid-feedback="invalidFeedback"
                     :valid-feedback="validFeedback"
                 >
                     <b-textarea
+                        id="message-text"
                         :rows="6"
                         v-model="form.message"
                         required
                         :disabled="submitting"
                         :state="state"
                     ></b-textarea>
-                    <input-help :form="form" field="message" :text=" `${form.message.length}/155 character limit` "></input-help>
+                    <input-help :form="form" field="message" :text=" `${form.message.length}/${maxLength} character limit` " :class=" form.message.length < maxLength ? 'text-warning' : 'text-danger' "></input-help>
+                    <b-form-invalid-feedback id="message-text-feedback" :class=" form.message.length < maxLength ? 'text-warning' : 'text-danger' ">{{ invalidFeedback }}</b-form-invalid-feedback>
                 </b-form-group>
                 <b-form-group>
-                    <b-button variant="info" type="submit" :disabled="submitting || !state">
+                    <b-button variant="info" type="submit" :disabled="submitting || form.message.length >= maxLength">
                         <i class="fa fa-spin fa-spinner" v-if="submitting"></i> Send Message
                     </b-button>
                 </b-form-group>
@@ -122,6 +123,9 @@ export default {
 
     data() {
         return {
+
+            maxLength : 290,
+            warningLength: 155,
             'selectedUsers': [],
             'form': new Form({
                 can_reply: 1,
@@ -141,7 +145,7 @@ export default {
 
         state(){
 
-            return this.form.message.length >= 0 && this.form.message.length <= 155;
+            return this.form.message.length >= 0 && this.form.message.length <= this.warningLength;
         },
         validFeedback(){
 
@@ -149,9 +153,13 @@ export default {
         },
         invalidFeedback() {
 
-            if ( this.form.message.length >= 155 ) {
+            if ( this.form.message.length >= this.maxLength ) {
 
-                return 'YOUR CAREGIVERS MAY NOT RECEIVE THIS MESSAGE: Please consider limiting your SMS message to 155 characters or less.  You are above that limit and it may make your text message not readable.  The message will be split by many cell phone carriers and run the risk of not being received at all.  This is not an Ally limitation; We just want to ensure your messages are readable and received by all.';
+                return `This message exceeds the ${this.maxLength} character limit.`;
+            }
+            if ( this.form.message.length >= this.warningLength ) {
+
+                return `YOUR CAREGIVERS MAY NOT RECEIVE THIS MESSAGE: Please consider limiting your SMS message to ${this.warningLength} characters or less.  You are above that limit and it may make your text message not readable.  The message will be split by many cell phone carriers and run the risk of not being received at all.  This is not an Ally limitation; We just want to ensure your messages are readable and received by all.`;
             }
 
             return '';
