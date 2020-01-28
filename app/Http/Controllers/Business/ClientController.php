@@ -463,7 +463,7 @@ class ClientController extends BaseController
 
         $data = $request->validated();
 
-        if ($client->user()->update($data)) {
+        if ($client->user->update($data)) {
             return new SuccessResponse('Client\'s notification options have been updated.');
         }
 
