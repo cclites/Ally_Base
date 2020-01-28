@@ -29,7 +29,7 @@ class CreateTableSystemSettings extends Migration
 
         DB::table('system_settings')->insert([
             'company_address1' => '1554 Paoli Pike Suite 251',
-            'company_city' => 'West Chest',
+            'company_city' => 'West Chester',
             'company_state' => 'PA',
             'company_zip' => '19380',
             'company_name' => 'JTR Solutions LLC',

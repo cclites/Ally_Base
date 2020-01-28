@@ -4,6 +4,7 @@ namespace App;
 
 use App\Audit;
 use App\Billing\BillingCalculator;
+use App\Billing\ClientInvoice;
 use App\Billing\ClientPayer;
 use App\Billing\ClientRate;
 use App\Billing\FeeOverrideRule;
@@ -12,6 +13,7 @@ use App\Billing\Payment;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\Methods\CreditCard;
 use App\Billing\Payments\PaymentMethodType;
+use App\Billing\Queries\ClientInvoiceQuery;
 use App\Businesses\Timezone;
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Billing\Contracts\ChargeableInterface;
@@ -40,7 +42,6 @@ use App\BusinessCommunications;
 use App\SalesPerson;
 use Illuminate\Database\Eloquent\Model;
 
-
 /**
  * App\Client
  *
@@ -60,7 +61,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Carbon\Carbon|null $service_start_date
  * @property string|null $referral
  * @property string|null $diagnosis
- * @property int|null $ambulatory
+ * @property string|null $ambulatory
  * @property string|null $import_identifier
  * @property string|null $ltci_name
  * @property string|null $ltci_address
@@ -81,7 +82,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $onboarding_step
  * @property int|null $hourly_rate_id
  * @property int|null $fixed_rate_id
- * @property int|null $case_manager_id
  * @property string|null $hic;
  * @property string|null $travel_directions;
  * @property \Carbon\Carbon|null $created_at
@@ -136,7 +136,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Shift[] $shifts
  * @property-read \App\User $user
- * @property-read \App\User $case_manager
  * @property-read \App\User $creator
  * @property-read \App\User $updator
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client active()
@@ -185,7 +184,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereReferralSourceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereServiceStartDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereSsn($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereCaseManagerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereServicesCoordinatorId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereHIC($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereTravelDirections($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client whereCreatedBy($value)
@@ -199,7 +198,7 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Eloquent
  * @property-read string $masked_ssn
  * @property null|string $w9_ssn
- * @property-read \App\OfficeUser|null $caseManager
+ * @property-read \App\OfficeUser|null $servicesCoordinator
  * @property-read mixed $masked_name
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientPayer[] $payers
  * @property-read \App\Billing\ClientPayer $primaryPayer
@@ -228,6 +227,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read mixed $setup_status
  * @property-read string $setup_url
  * @property-read mixed $status_alias_id
+ * @property-read string $case_manager
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\UserNotificationPreferences[] $notificationPreferences
  * @property-read \App\QuickbooksCustomer|null $quickbooksCustomer
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientAuthorization[] $serviceAuthorizations
@@ -254,8 +254,17 @@ class Client extends AuditableModel implements
 
     protected $table = 'clients';
     public $timestamps = false;
-    public $hidden = ['ssn'];
-    public $dates = ['service_start_date', 'inquiry_date'];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password', 'remember_token', 'ssn',
+    ];
+
+    public $dates = ['service_start_date', 'inquiry_date', 'updated_by_timestamp'];
     public $fillable = [
         'business_id',
         'business_fee',
@@ -304,10 +313,11 @@ class Client extends AuditableModel implements
         'travel_directions',
         'created_by',
         'updated_by',
+        'updated_by_timestamp',
         'disaster_code_plan',
         'disaster_planning',
         'caregiver_1099',
-        'case_manager_id',
+        'services_coordinator_id',
         'discharge_reason',
         'discharge_condition',
         'discharge_goals_eval',
@@ -318,6 +328,7 @@ class Client extends AuditableModel implements
         'quickbooks_customer_id',
         'send_1099',
         'can_edit_send_1099',
+        'case_manager'
     ];
 
     ///////////////////////////////////////////
@@ -337,6 +348,15 @@ class Client extends AuditableModel implements
     const SETUP_CREATED_ACCOUNT = 'created_account'; // step 3
     const SETUP_ADDED_PAYMENT = 'added_payment'; // step 4 (complete)
 
+    const AMBULATORY_INDEPENDENT = 'independent';
+    const AMBULATORY_VISUAL = 'visual';
+    const AMBULATORY_PHYSICAL = 'physical';
+    const AMBULATORY_OPTIONS = [
+        self::AMBULATORY_INDEPENDENT,
+        self::AMBULATORY_VISUAL,
+        self::AMBULATORY_PHYSICAL
+    ];
+
     /**
      * The notification classes related to this user role.
      *
@@ -353,9 +373,9 @@ class Client extends AuditableModel implements
     // made this a relationship method so it can be eager loaded
     public function paymentLogs()
     {
-        return $this->hasMany( PaymentLog::class, 'payment_method_id', 'default_payment_id' )
-            ->where( 'payment_method_type', $this->default_payment_type )
-            ->orderBy( 'created_at', 'desc' );
+        return $this->hasMany(PaymentLog::class, 'payment_method_id', 'default_payment_id')
+            ->where('payment_method_type', $this->default_payment_type)
+            ->orderBy('created_at', 'desc');
     }
 
     public function creator()
@@ -435,9 +455,14 @@ class Client extends AuditableModel implements
                     ]);
     }
 
-    public function caseManager()
+    /**
+     * Get the client services coordinator relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function servicesCoordinator()
     {
-        return $this->belongsTo('App\OfficeUser', 'case_manager_id');
+        return $this->belongsTo(OfficeUser::class, 'services_coordinator_id');
     }
 
     /**
@@ -594,7 +619,8 @@ class Client extends AuditableModel implements
         return $this->belongsTo(QuickbooksCustomer::class);
     }
 
-    public function salesperson(){
+    public function salesperson()
+    {
         return $this->hasOne(SalesPerson::class, 'id', 'sales_person_id', $this->sales_person_id);
     }
 
@@ -603,7 +629,8 @@ class Client extends AuditableModel implements
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function caregiver1099s(){
+    public function caregiver1099s()
+    {
         return $this->hasMany(Caregiver1099::class);
     }
 
@@ -632,13 +659,13 @@ class Client extends AuditableModel implements
 
     public function getPaymentErrorsAttribute()
     {
-        $most_recent = optional( $this->paymentLogs->groupBy( 'batch_id' )->first() )->first();
+        $most_recent = optional($this->paymentLogs->groupBy('batch_id')->first())->first();
 
-        if( $most_recent && $most_recent->exception ){
+        if ($most_recent && $most_recent->exception) {
             // error_message is the most descriptive, but the last string in the exception is still a viable fallback in case the error_message is null
 
-            $exception = explode( '\\', $most_recent->exception );
-            $specific_infraction = empty( $most_recent->error_message ) ? $exception[ count( $exception ) - 1 ] : $most_recent->error_message;
+            $exception = explode('\\', $most_recent->exception);
+            $specific_infraction = empty($most_recent->error_message) ? $exception[ count($exception) - 1 ] : $most_recent->error_message;
 
             return 'Outstanding Client Payer Issue - ' . $specific_infraction;
         }
@@ -907,8 +934,7 @@ class Client extends AuditableModel implements
             if ($override = FeeOverrideRule::lookup($this->business_id, $this->getPaymentType())) {
                 return $override->getRate();
             }
-        }
-        catch (Billing\Exceptions\PaymentMethodError $ex) {
+        } catch (Billing\Exceptions\PaymentMethodError $ex) {
         }
 
         if ($payer = $this->primaryPayer) {
@@ -1012,12 +1038,35 @@ class Client extends AuditableModel implements
     public function auditTrail()
     {
         $audits = Audit::where('new_values', 'like', '%"client_id":' . $this->id . '%')
-                 ->orWhere(function($q){
+                 ->orWhere(function ($q) {
                      $q->whereIn('auditable_type', ['App\User', 'clients'])
                          ->where('auditable_id', $this->id);
                  })
                 ->get();
         return $audits;
+    }
+
+    /**
+     * Get the URL to the Clients edit profile page.
+     *
+     * @return string
+     */
+    public function getProfileUrl() : string
+    {
+        return route('business.clients.show', $this->id);
+    }
+
+    /**
+     * Get number of unpaid invoices for the Client.
+     *
+     * @return int
+     */
+    public function getUnpaidInvoicesCount() : int
+    {
+        return (new ClientInvoiceQuery())
+            ->forClient($this->id, false)
+            ->notPaidInFull()
+            ->count();
     }
 
     // **********************************************************

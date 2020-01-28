@@ -13,6 +13,8 @@ use App\Billing\Service;
 use App\AuditableModel;
 use Carbon\Carbon;
 use App\Shift;
+use App\VisitEditAction;
+use App\VisitEditReason;
 use Packages\GMaps\GeocodeCoordinates;
 
 /**
@@ -118,6 +120,26 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
     public function shift()
     {
         return $this->belongsTo(Shift::class);
+    }
+
+    /**
+     * Get the related Shift.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function visitEditReason()
+    {
+        return $this->hasOne(VisitEditReason::class, 'id', 'visit_edit_reason_id');
+    }
+
+    /**
+     * Get the related Shift.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function visitEditAction()
+    {
+        return $this->hasOne(VisitEditAction::class, 'id', 'visit_edit_action_id');
     }
 
     /**

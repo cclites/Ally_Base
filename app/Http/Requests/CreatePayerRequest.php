@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Billing\Claim;
-use App\Billing\ClaimService;
+use App\Claims\ClaimService;
 use App\Rules\ValidEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Payer;

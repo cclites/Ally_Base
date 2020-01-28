@@ -40,6 +40,7 @@ use App\Reports\EVVReport;
 use App\CustomField;
 use App\OfficeUser;
 use Illuminate\Support\Facades\Gate;
+use Twilio\Rest\Taskrouter\V1\Workspace\TaskQueue\TaskQueuesStatisticsInstance;
 
 class ReportsController extends BaseController
 {
@@ -566,7 +567,7 @@ class ReportsController extends BaseController
     private function clientShiftGroups(Business $business, array $data)
     {
         return $business->shifts()
-            ->with('activities', 'client', 'caregiver')
+            ->with('activities', 'client', 'caregiver', 'questions')
             ->whereBetween('checked_in_time', [Carbon::parse($data['start_date']), Carbon::parse($data['end_date'])])
             ->when(isset($data['client_id']) && $data['client_id'], function ($query) use ($data) {
                 return $query->where('client_id', $data['client_id']);
@@ -599,20 +600,65 @@ class ReportsController extends BaseController
             ->groupBy('client_id');
     }
 
-    public function caseManager()
+    /**
+     * Client Services Coordinators Report
+     *
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function servicesCoordinator(Request $request)
     {
-        $clients = Client::forRequestedBusinesses()
-            ->whereNotNull('case_manager_id')
-            ->with('caseManager')
-            ->with(['notes' => function($query) {
-                return $query->where('type', 'phone');
-            }])
+        if ($request->wantsJson() && filled($request->input('json'))) {
+            $data = Client::forRequestedBusinesses()
+                ->with(['servicesCoordinator', 'business'])
+                ->with(['notes' => function($query) {
+                    return $query->where('type', 'phone')
+                        ->latest();
+                }])
+                ->whereHas('servicesCoordinator')
+                ->when($request->services_coordinator_id, function ($q, $value) {
+                    $q->where('services_coordinator_id', $value);
+                })
+                ->when($request->client_id, function ($q, $value) {
+                    $q->where('id', $value);
+                })
+                ->when($request->client_status, function ($q, $value) {
+                    $q->whereHas('user', function ($q) use ($value) {
+                        $q->where('active', $value);
+                    });
+                })
+                ->get()
+                ->map(function (\App\Client $client) {
+                    $lastClientNote = $client->notes->first();
+                    return [
+                        'office_location' => $client->business->name,
+                        'services_coordinator' => $client->servicesCoordinator->nameLastFirst,
+                        'client_id' => $client->id,
+                        'client_name' => $client->nameLastFirst,
+                        'profile_url' => $client->getProfileUrl(),
+                        'client_status' => $client->active,
+                        'days_since_contact' => $lastClientNote ? Carbon::now()->diffInDays($lastClientNote->created_at) : '-',
+                    ];
+                })
+                ->filter(function ($data) use ($request) {
+                    if (filled($request->days_since_contact) && is_numeric($request->days_since_contact)) {
+                        return $data['days_since_contact'] != '-' &&
+                            intval($data['days_since_contact']) <= intval($request->days_since_contact);
+                    }
+
+                    return true;
+                })
+                ->values();
+
+            return response()->json($data);
+        }
+
+        $servicesCoordinators = OfficeUser::forRequestedBusinesses()
+            ->whereHas('assignedClients')
+            ->with('user')
             ->get();
-        $ids = $clients->pluck('case_manager_id');
-        $caseManagers = OfficeUser::forRequestedBusinesses()
-            ->whereIn('id', $ids)
-            ->get();
-        return view('business.reports.case_manager', compact('caseManagers', 'clients'));
+
+        return view('business.reports.services_coordinator', compact('servicesCoordinators'));
     }
 
     /**

@@ -13,7 +13,7 @@ use App\Claims\Queries\ClaimInvoiceQuery;
 use App\Responses\SuccessResponse;
 use App\Responses\ErrorResponse;
 use App\Billing\ClientInvoice;
-use App\Billing\ClaimStatus;
+use App\Claims\ClaimStatus;
 use App\Claims\ClaimInvoice;
 use Illuminate\Http\Request;
 

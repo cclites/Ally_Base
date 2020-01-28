@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Business;
 
 use App\Billing\Claim;
-use App\Billing\ClaimService;
-use App\Billing\ClaimStatus;
+use App\Claims\ClaimService;
+use App\Claims\ClaimStatus;
 use App\Billing\ClientInvoice;
 use App\Billing\Exceptions\ClaimTransmissionException;
 use App\Billing\Queries\OfflineClientInvoiceQuery;

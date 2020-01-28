@@ -5,7 +5,7 @@ namespace App\Reports;
 use App\Billing\Queries\OnlineClientInvoiceQuery;
 use Illuminate\Support\Collection;
 use App\Billing\ClientInvoice;
-use App\Billing\ClaimStatus;
+use App\Claims\ClaimStatus;
 use App\Claims\ClaimInvoice;
 
 class InvoiceSummaryByClientTypeReport extends BaseReport

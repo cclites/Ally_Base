@@ -62,6 +62,11 @@ class ShiftHistoryItemResource extends Resource
             'flags' => $shift->flags,
             'created_at' => optional($shift->created_at)->toDateTimeString(),
             'services' => $this->mapServices($shift),
+
+            'admin_note' => ( is_admin() || is_office_user() ) ? $shift->admin_note : null,
+
+            'visit_edit_reason_id' => optional( $shift->visitEditReason )->formatted_name,
+            'visit_edit_action_id' => optional( $shift->visitEditAction )->formatted_name,
         ];
     }
 

@@ -228,6 +228,17 @@
         async mounted() {
             this.loading = true;
             await this.fetchClients();
+
+            let autoLoad = false;
+            var urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('filter')) {
+                this.form.invoice_id = urlParams.get('filter');
+            }
+
+            if (autoLoad) {
+                this.loadItems();
+            }
+
             this.loading = false;
         },
 

@@ -1,8 +1,8 @@
 <template>
     <div>
-        <b-row v-for="section in sections" :key="section.name">
+        <b-row v-for="section in sections" :key="section.name" class="mb-3">
             <b-col>
-                <h4>{{ section.name }}</h4>
+                <h4 class="text-blue">{{ section.name }}</h4>
                 <p v-for="field in section.fields" v-if="answerExists(field.key)" :key="field.key">
                     <span class="title">{{ field.title ? field.title : uppercaseWords(field.key) + ':' }} </span>
                     <span class="answer" v-if="field.formatter">
@@ -61,12 +61,13 @@
 
         data() {
             return {
+                section: '',
                 sections: [
                     {
                         name: 'General',
                         fields: [
                             {
-                              key: 'height',
+                                key: 'height',
                             },
                             {
                                 key: 'weight',
@@ -195,7 +196,7 @@
                             },
                         ]
                     },
-                ]
+                ],
             }
         },
 
@@ -208,14 +209,13 @@
             answer(key) {
                 return this.careDetails[key];
             },
-
-        }
+        },
     }
 </script>
 
 <style scoped>
     h4 {
-        text-decoration: underline;
+        /*text-decoration: underline;*/
     }
     .badge-success {
         background-color: forestgreen;

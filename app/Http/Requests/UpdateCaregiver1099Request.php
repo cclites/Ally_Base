@@ -46,6 +46,7 @@ class UpdateCaregiver1099Request extends FormRequest
             'caregiver_city' => 'required|string',
             'caregiver_state' => 'required|string',
             'caregiver_zip' => 'required|string',
+            'payment_total' => 'required'
         ];
     }
 }

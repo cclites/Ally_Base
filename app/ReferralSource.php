@@ -13,6 +13,7 @@ use App\Traits\BelongsToOneChain;
  * @property string $phone
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
+ * @property boolean $active
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $client
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
@@ -146,6 +147,8 @@ class ReferralSource extends AuditableModel implements BelongsToChainsInterface
                 $set[$key]['web_address'] = $item[ 'web_address' ];
                 $set[$key]['is_company'] = $item[ 'is_company' ];
                 $set[$key]['work_phone'] = $item[ 'work_phone' ];
+                $set[$key]['active'] = $item[ 'active' ];
+
             }else{
                 if($item['active']){
                     $set[$key]['contact_name'] .= $item['contact_name'] . ", ";

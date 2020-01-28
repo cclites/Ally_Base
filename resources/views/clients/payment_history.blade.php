@@ -4,6 +4,6 @@
 
 @section('content')
     <b-card title="Payment History">
-        <client-payment-history :client="{{ $client }}" :payments="{{ $payments }}"></client-payment-history>
+        <client-payment-history :client="{{ $client }}"></client-payment-history>
     </b-card>
 @endsection

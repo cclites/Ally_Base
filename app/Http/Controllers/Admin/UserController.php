@@ -31,7 +31,8 @@ class UserController extends Controller
                     'client',
                     'client.business.businessChain',
                     'officeUser',
-                    'officeUser.businessChain'
+                    'officeUser.businessChain',
+                    'adminNotes'
                 )
                 ->whereIn('role_type', ['client', 'caregiver', 'office_user'])
                 ->search($search);
@@ -63,6 +64,7 @@ class UserController extends Controller
                         'chain_id' => optional($user->getChain())->id,
                         'chain_name' => optional($user->getChain())->name,
                         'payment_hold' => $user->payment_hold,
+                        'admin_notes' => $user->adminNotes,
                     ];
 
                     return $data;
@@ -127,9 +129,9 @@ class UserController extends Controller
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function update( Request $request, User $user )
     {
-        //
+
     }
 
     /**

@@ -47,7 +47,7 @@
                     <td>{{ application.zip }}</td>
                 </tr>
                 <tr v-if="application.home_phone">
-                    <td>Home Phone:</td>
+                    <td>Primary Phone:</td>
                     <td>{{ application.home_phone }}</td>
                 </tr>
                 <tr v-if="application.emergency_contact_name">

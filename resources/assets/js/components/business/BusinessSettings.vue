@@ -129,6 +129,17 @@
                                 <input-help :form="businessSettings" field="calendar_next_day_threshold"
                                             text="When an shift’s end time crosses midnight, show the shift across both days in the calendar."></input-help>
                             </b-form-group>
+                            <b-form-group label="Enable Open Shift Feature" label-for="open_shifts_setting" v-if="false">
+                                <b-form-select id="open_shifts_setting"
+                                               v-model="businessSettings.open_shifts_setting"
+                                >
+                                    <option :value=" 'off' ">Off</option>
+                                    <option :value=" 'unlimited' ">On - Caregivers see all open shifts for all clients</option>
+                                    <option :value=" 'limited' ">On - Caregivers see open shifts for only their clients</option>
+                                </b-form-select>
+                                <input-help :form="businessSettings" field="open_shifts_setting"
+                                            text="Enable the ability for Caregivers to volunteer for open shifts. Whether for clients they are currently referred to or optionally for all clients as well."></input-help>
+                            </b-form-group>
                             <b-form-group label="Logo" label-for="logo">
                                 <image-cropper
                                     v-model="businessSettings.logo"
@@ -137,7 +148,7 @@
                                     :default-image="defaultInvoiceLogo"
                                     cropperPadding="100"
                                 />
-                                <input-help :form="businessSettings" field="logo" text="Customize the logo that displays on reports, invoices and claims."></input-help>
+                                <input-help :form="businessSettings" field="logo" text="Customize the logo that displays on invoices, pay statements and claims."></input-help>
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -708,6 +719,7 @@
                     auto_confirm_unmodified_shifts: business.auto_confirm_unmodified_shifts,
                     auto_confirm_verified_shifts: business.auto_confirm_verified_shifts,
                     enable_client_onboarding: business.enable_client_onboarding,
+                    open_shifts_setting: business.open_shifts_setting,
                     hha_username: business.hha_username,
                     hha_password: business.hha_password ? '********' : '',
                     tellus_username: business.tellus_username,

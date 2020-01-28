@@ -16,7 +16,7 @@ class RestoreDataDumpCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'db:restore-dump {--content_id= : The confluence content ID where the database dumps are stored.} {--zip_password= : The password of the encrypted zip file containing the dump.} {--delete : Delete the downloaded files after restore.}';
+    protected $signature = 'db:restore-dump {--content_id= : The confluence content ID where the database dumps are stored.} {--zip_password= : The password of the encrypted zip file containing the dump.} {--keep : Keep the downloaded files after restore.}';
 
     /**
      * The console command description.
@@ -65,7 +65,7 @@ class RestoreDataDumpCommand extends Command
         }
 
         $choices = $attachments->pluck(['filename'])->toArray();
-        $choice = $this->choice('Which dump would you like to restore?', $choices, count($choices)-1);
+        $choice = $this->choice('Which dump would you like to restore?', $choices, 0);
 
         $attachment = $attachments->where('filename', '=', $choice)->first();
         $zipFile = $attachment['filename'];
@@ -78,6 +78,7 @@ class RestoreDataDumpCommand extends Command
 
         $this->info("Unzipping $zipFile...");
         $process = new Process(['unzip', '-o', '-P', $zipPassword, $zipFile]);
+        $process->setTimeout(1200); // this can take a while
         $process->run();
         if (! $process->isSuccessful()) {
             throw new ProcessFailedException($process);
@@ -94,6 +95,7 @@ class RestoreDataDumpCommand extends Command
 
         $this->info("Dropping existing database...");
         $process = new Process("mysql -u $databaseUser --password=$databasePassword -h $host -P $port -Nse  'drop database if exists $databaseName; create database $databaseName'");
+        $process->setTimeout(1200); // this can take a while
         $process->run();
         if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
@@ -107,7 +109,9 @@ class RestoreDataDumpCommand extends Command
             throw new ProcessFailedException($process);
         }
 
-        if ($this->option('delete')) {
+        if ($this->option('keep')) {
+            // Don't discard files
+        } else {
             $this->info('Cleaning up files...');
             unlink($sqlFile);
             unlink($zipFile);

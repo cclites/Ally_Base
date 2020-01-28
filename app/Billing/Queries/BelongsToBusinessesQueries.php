@@ -17,7 +17,7 @@ trait BelongsToBusinessesQueries
 
     function forRequestedBusinesses(array $businessIds = null, User $authorizedUser = null): self
     {
-        parent::forRequstedBusinesses($businessIds, $authorizedUser);
+        parent::forRequestedBusinesses($businessIds, $authorizedUser);
 
         return $this;
     }

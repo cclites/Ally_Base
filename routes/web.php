@@ -81,8 +81,6 @@ Route::group([
     Route::get('unconfirmed-shifts/{shift}', 'Clients\UnconfirmedShiftsController@show')->name('client.unconfirmed-shifts.show');
     Route::post('shift-history/approve', 'Clients\ShiftController@approveWeek');
     Route::get('shift-history/{week?}', 'Clients\ShiftController@index')->name('client.shift-history');
-    Route::get('payment-history/{id}/print', 'Clients\PaymentHistoryController@printDetails');
-    Route::resource('payment-history', 'Clients\PaymentHistoryController');
     Route::post('/profile/payment/{type}', 'ProfileController@paymentMethod');
     Route::delete('/profile/payment/{type}', 'ProfileController@destroyPaymentMethod');
     Route::get('payment-type', 'Clients\UnconfirmedShiftsController@getPaymentType')->name('client.payment_type');
@@ -92,6 +90,7 @@ Route::group([
     Route::delete('contacts/{clientContact}', 'Clients\ClientContactController@destroy');
     Route::patch('contacts/{clientContact}/priority', 'Clients\ClientContactController@raisePriority');
     Route::get('client/payments', 'Clients\PaymentController@index')->name('client.payments');
+    Route::get('client/payment-summary/print', 'Clients\PaymentController@printSummary')->name('client.payment-summary.print');
     Route::get('client/payments/{payment}/{view?}', 'Clients\PaymentController@show')->name('client.payments.show');
     Route::get('client/invoices', 'Clients\InvoiceController@index')->name('client.invoices');
     Route::get('client/invoices/{invoice}/{view?}', 'Clients\InvoiceController@show')->name('client.invoices.show');
@@ -129,6 +128,9 @@ Route::group([
 
     Route::get('shifts/{shift}', 'Caregivers\ShiftController@show')->name('caregivers.shift.show');
 
+    Route::post( 'schedule/requests/{schedule}', 'Caregivers\CaregiverScheduleRequestController@store' )->name( 'schedule.request.store' );
+
+    Route::get( 'schedule/open-shifts', 'Caregivers\OpenShiftsController@index' )->name('schedule.open-shifts');
     Route::get('schedule', 'Caregivers\ScheduleController@index')->name('schedule');
     Route::get('schedule/events', 'Caregivers\ScheduleController@events')->name('schedule.events');
     Route::resource('timesheets', 'Caregivers\TimesheetController');
@@ -194,6 +196,7 @@ Route::group([
     Route::get('caregivers/paginate', 'Business\PaginatedCaregiverController@index')->name('caregivers.paginate');
     Route::get('caregivers/avery-labels', 'Business\AveryLabelController@index');
     Route::resource('caregivers', 'Business\CaregiverController');
+    Route::get('caregivers/{caregiver}/open-invoices', 'Business\CaregiverController@openInvoices')->name('caregivers.open-invoices');
     Route::post('caregivers/{caregiver}/reactivate', 'Business\CaregiverController@reactivate')->name('caregivers.reactivate');
     Route::post('caregivers/{caregiver}/address/{type}', 'Business\CaregiverController@address')->name('caregivers.address');
     Route::post('caregivers/{caregiver}/phone/{type}', 'Business\CaregiverController@phone')->name('caregivers.phone');
@@ -218,6 +221,9 @@ Route::group([
     Route::patch('caregivers/{caregiver}/office-locations', 'Business\CaregiverController@updateOfficeLocations');
     Route::patch('caregivers/{caregiver}/meta', 'Business\CaregiverMetaController@update')->name('caregivers.meta.update');
 
+    Route::get('clients/{client}/open-invoices', 'Business\ClientController@openInvoices')->name('caregivers.open-invoices');
+
+    Route::get('clients/{client}/medications/print', 'Business\ClientMedicationController@generatePdf');
     Route::resource('clients/{client}/medications', 'Business\ClientMedicationController');
     Route::patch('clients/{client}/meta', 'Business\ClientMetaController@update')->name('clients.meta.update');
 
@@ -234,8 +240,12 @@ Route::group([
     Route::resource('clients', 'Business\ClientController');
     Route::put('clients/{client}/ltci', 'Business\ClientController@ltci')->name('clients.ltci');
     Route::resource('clients/{client}/care-plans', 'Business\ClientCarePlanController');
+    Route::get('clients/{client}/goals/print', 'Business\ClientGoalsController@generatePdf');
     Route::resource('clients/{client}/goals', 'Business\ClientGoalsController');
+
     Route::post('clients/{client}/care-details', 'Business\ClientCareDetailsController@update')->name('clients.care-details.update');
+    Route::get('clients/{client}/care-details/pdf', 'Business\ClientCareDetailsController@generatePdf')->name('clients.care-details.generate-pdf');
+
     Route::post('clients/{client}/skilled-nursing-poc', 'Business\SkilledNursingPocController@update')->name('clients.skilled-nursing-poc.update');
     Route::get('clients/{client}/skilled-nursing-poc/print', 'Business\SkilledNursingPocController@generatePdf')->name('clients.skilled-nursing-poc.generate-pdf');
     Route::post('clients/{client}/exclude-caregiver', 'Business\ClientExcludedCaregiverController@store')->name('clients.exclude-caregiver');
@@ -292,6 +302,8 @@ Route::group([
     Route::post('clients/{client}/narrative', 'Business\ClientNarrativeController@store')->name('clients.narrative.store');
     Route::delete('clients/{client}/narrative/{narrative}', 'Business\ClientNarrativeController@destroy')->name('clients.narrative.store');
     Route::post('clients/{client}/notification-preferences', 'Business\ClientController@updateNotificationPreferences');
+    Route::get('clients/{client}/payment-history', 'Business\Clients\ClientPaymentsController@index');
+    Route::get('clients/{client}/payment-history/print', 'Business\Clients\ClientPaymentsController@print');
 
     Route::get('/settings/sms-autoresponse/{businessId}', 'Business\BusinessCommunicationSettingsController@show');
     Route::post('/settings/sms-autoresponse/{businessId}', 'Business\BusinessCommunicationSettingsController@store');
@@ -347,7 +359,7 @@ Route::group([
     Route::post('reports/client-referral-sources', 'Business\Report\ClientReferralSourcesController@index');
     Route::get('reports/caregiver-referral-sources', 'Business\Report\CaregiverReferralSourcesController@index')->name('reports.caregiver_referral_sources');
     Route::post('reports/caregiver-referral-sources', 'Business\Report\CaregiverReferralSourcesController@index');
-    Route::get('reports/case-manager', 'Business\ReportsController@caseManager')->name('reports.case_manager');
+    Route::get('reports/services-coordinator', 'Business\ReportsController@servicesCoordinator')->name('reports.services_coordinator');
     Route::get('reports/caregiver-shifts', 'Business\ReportsController@caregiverShifts')->name('reports.caregiver_shifts');
 
     Route::get('reports/client-shifts', 'Business\ReportsController@clientShifts')->name('reports.client_shifts');
@@ -419,6 +431,10 @@ Route::group([
     Route::patch('authorization/{auth}', 'Business\ClientAuthController@update');
     Route::delete('authorization/{auth}', 'Business\ClientAuthController@destroy');
 
+    Route::get('schedule/requests/{schedule?}', 'Business\CaregiverScheduleRequestController@index' )->name( 'schedule.requests.index' );
+    Route::patch('schedule/requests/{caregiverScheduleRequest}/{schedule}', 'Business\CaregiverScheduleRequestController@update' )->name( 'schedule.requests.update' );
+
+    Route::get('schedule/open-shifts', 'Business\OpenShiftsController@index')->name('schedule.open-shifts');
     Route::post('schedule/warnings', 'Business\ScheduleController@warnings')->name('schedule.warnings');
     Route::post('schedule/print', 'Business\ScheduleController@print')->name('printable.schedule');
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
@@ -503,15 +519,6 @@ Route::group([
 
     Route::resource('payers', 'Business\PayerController');
 
-    /* Claims & AR */
-    // Route::get('reports/claims-ar-aging', 'Business\Report\BusinessClaimsArAgingReportController@index')->name('reports.claims-ar-aging');
-    // Route::get('claims-ar', 'Business\ClaimsController@index')->name('claims-ar');
-    // Route::post('claims-ar/{invoice}/transmit', 'Business\ClaimsController@transmitInvoice')->name('claims-ar.transmit');
-    // Route::post('claims-ar/{invoice}/pay', 'Business\ClaimsController@pay')->name('claims-ar.pay');
-    // Route::get('claims-ar/invoices/{claim}/{view?}', 'Business\ClaimInvoiceController@show')->name('claims.invoice.show');
-    // Route::patch('claims-ar/{invoice}/update-missing-fields', 'Business\ClaimsController@updateMissingFields')->name('claims.update-missing-fields');
-    // Route::get('claims-ar/claim-results/{claim}/{service}', 'Business\ClaimsController@claimResults')->name('claims-ar.claim-results');
-
     /* New Claims & AR */
     Route::post('grouped-claims', 'Business\Claims\GroupedClaimsController@store')->name('claims-create-grouped');
     Route::get('claims-create', 'Business\Claims\CreateClaimsController@index')->name('claims-create');
@@ -548,6 +555,8 @@ Route::group([
     Route::get('caregiver-1099/{caregiver}', 'Business\Caregiver1099Controller@index')->name('business-1099');
     Route::get('business-1099/download/{caregiver1099}', 'Business\Caregiver1099Controller@downloadPdf')->name('business-caregivers-1099-download');
     Route::get('impersonate/{user}', 'Admin\ImpersonateController@impersonate')->name('impersonate');
+
+    Route::resource('users/admin-notes', 'Admin\UserAdminNoteController');
 });
 
 Route::group(['middleware' => ['auth', 'roles'], 'roles' => ['admin', 'office_user']], function () {
@@ -639,7 +648,7 @@ Route::group([
     Route::get('reports/paid-billed-audit-report', 'Admin\Report\PaidBilledAuditReportController@index')->name('reports.paid_billed_audit_report');
     Route::get('reports/bad-ssn-report/{type}', 'Admin\Reports\AdminBadSsnReportController@index')->name('reports.bad_ssn_report');
     Route::get('reports/bad-1099-report', 'Admin\Reports\AdminBad1099ReportController@index')->name('reports.bad_1099_report');
-
+    Route::get('reports/1099-not-elected', 'Admin\Reports\Admin1099NotElectedReportController@index')->name('reports.1099_not_elected');
 
     /* Caregiver 1099 preview related */
     Route::get('admin-1099-actions', 'Admin\Admin1099Controller@index')->name('admin-1099-actions');
@@ -651,12 +660,14 @@ Route::group([
     /* Caregiver 1099s */
     Route::get('business-1099', 'Admin\Caregiver1099Controller@index')->name('business-1099');
     Route::get('business-1099/edit/{caregiver1099}', 'Admin\Caregiver1099Controller@edit')->name('business-1099-edit');
-    Route::get('business-1099/download/{caregiver1099}', 'Admin\Caregiver1099Controller@downloadPdf')->name('business-1099-download');
+    Route::get('business-1099/download/caregiver/{caregiver1099}', 'Caregivers\Caregiver1099Controller@downloadPdf');
+    Route::get('business-1099/download/client/{caregiver1099}', 'Clients\Caregiver1099Controller@downloadPdf');
     Route::post('business-1099/create', 'Admin\Caregiver1099Controller@store')->name('business-1099-create');
     Route::patch('business-1099/{caregiver1099}', 'Admin\Caregiver1099Controller@update')->name('business-1099-update');
 
     Route::get('/business-1099/user-emails/{year}/{role}', 'Admin\Admin1099Controller@UserEmailsList')->name('business-1099-transmit');
     Route::get('business-1099/transmit/{year}', 'Admin\Caregiver1099Controller@transmit')->name('business-1099-transmit');
+    Route::get('business-1099/export-ally-grouped/{year}', 'Admin\Caregiver1099Controller@exportAllyGrouped')->name('business-1099.export-ally-grouped');
     Route::get('admin-1099', 'Admin\Caregiver1099Controller@admin')->name('admin-1099');
     Route::patch('business-1099-settings/{business}', 'Business\SettingController@updateBusiness1099Settings')->name('business-1099-settings');
     Route::patch('chain-1099-settings/{chainClientTypeSettings}', 'Admin\ChainSettingsController@update')->name('chain-settings');
@@ -721,7 +732,6 @@ Route::group([
     Route::delete('invoices/caregivers/{invoice}', 'Admin\DepositInvoiceController@destroyCaregiverInvoice');
     Route::get('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@showBusinessInvoice');
     Route::delete('invoices/businesses/{invoice}', 'Admin\DepositInvoiceController@destroyBusinessInvoice');
-    // Route::get('invoices/claims/{claim}', 'Admin\ClaimInvoiceController@show');
 
     Route::get('communication-log', 'Admin\CommunicationLogController@index')->name('communication-log');
     Route::get('communication-log/{log}', 'Admin\CommunicationLogController@show')->name('communication-log.show');

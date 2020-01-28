@@ -38,7 +38,8 @@
                         <span v-if="['caregiver', 'client'].includes(row.item.role_type)">
                             <b-btn size="sm" @click="addHold(row.item)" variant="danger" v-if="!row.item.payment_hold">Add Hold</b-btn>
                             <b-btn size="sm" @click="removeHold(row.item)" variant="primary" v-else>Remove Hold</b-btn>
-                            <b-btn size="sm" :href="`/business/${row.item.role_type}s/${row.item.id}`">Edit</b-btn>
+                            <b-btn size="sm" :href="`/business/${row.item.role_type}s/${row.item.id}`" target="_blank">Edit</b-btn>
+                            <b-btn size="sm" :variant=" adminNoteClass( row.item.admin_notes ) " :href="`/business/${row.item.role_type}s/${row.item.id}#admin_note`" target="_blank">Admin Note</b-btn>
                         </span>
                         <b-btn size="sm" :href="'/admin/impersonate/' + row.item.id">Impersonate</b-btn>
                     </template>
@@ -136,6 +137,12 @@
         },
 
         methods: {
+
+            adminNoteClass( notes ){
+
+                if( notes && notes.length > 0 ) return 'primary';
+                return 'secondary';
+            },
             loadTable() {
                 this.$refs.table.refresh()
             },

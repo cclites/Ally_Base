@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Requests;
 
+use App\Rules\PhonePossible;
 use Illuminate\Foundation\Http\FormRequest;
 use App\ReferralSource;
 
@@ -21,7 +22,7 @@ class UpdateReferralSourceRequest extends FormRequest
         return [
             'organization' => 'nullable',
             'contact_name' => 'nullable',
-            'phone' => 'nullable|max:32',
+            'phone' => ['nullable', new PhonePossible()],
             'active' => 'boolean',
             'type' => 'required|in:'. join(',', ReferralSource::validTypes()),
 

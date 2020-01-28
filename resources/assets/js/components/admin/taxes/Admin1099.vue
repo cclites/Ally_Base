@@ -64,6 +64,12 @@
                         disabled: false,
                     },
                     {
+                        name: 'Caregivers Not Elected Report',
+                        description: "Lists Caregivers eligible for 1099s for Client's not elected to send.",
+                        url: 'reports/1099-not-elected',
+                        disabled: false,
+                    },
+                    {
                         name: 'Ally 1099 Payer Info',
                         description: 'Download Transmission Report and Client/CG Emails',
                         url: 'admin-1099',

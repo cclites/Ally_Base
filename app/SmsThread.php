@@ -4,6 +4,7 @@ namespace App;
 
 use App\Contracts\BelongsToBusinessesInterface;
 use App\Traits\BelongsToOneBusiness;
+use App\Traits\FullTextSearch;
 use App\Traits\ScrubsForSeeding;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -38,7 +39,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class SmsThread extends BaseModel implements BelongsToBusinessesInterface
 {
-    use BelongsToOneBusiness;
+    use BelongsToOneBusiness, FullTextSearch;
 
     /**
      * The attributes that should not be mass assignable.
@@ -60,6 +61,13 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
      * @var array
      */
     protected $appends = ['unique_recipient_count', 'unread_replies_count'];
+
+    /**
+     * The columns of the full text index
+     */
+    protected $searchable = [
+        'message'
+    ];
 
     // **********************************************************
     // RELATIONSHIPS
@@ -172,14 +180,13 @@ class SmsThread extends BaseModel implements BelongsToBusinessesInterface
      * Get the threads that have replies.
      *
      * @param \Illuminate\Database\Query\Builder $query
+     * @param bool $onOff
      * @return \Illuminate\Database\Query\Builder
      */
     public function scopeWithReplies($query, bool $onOff = false)
     {
         if ($onOff) {
-            return $query->whereHas('replies', function ($q) {
-                $q->whereNotNull('id');
-            });
+            return $query->whereHas('replies');
         }
 
         return $query;

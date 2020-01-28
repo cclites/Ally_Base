@@ -70,8 +70,6 @@ class SkilledNursingPocController extends BaseController
         $client->skilledNursingPoc->mobility = implode(",", $client->skilledNursingPoc->mobility);
         $client->skilledNursingPoc->mental_status = implode(",", $client->skilledNursingPoc->mental_status);
 
-        \Log::info($client);
-
         $image = asset('/images/background1.jpg');
 
         $html = response(view('poc.poc', ['client'=>$client, 'image'=>$image]))->getContent();

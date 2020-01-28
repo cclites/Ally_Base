@@ -110,9 +110,11 @@ class Deposit extends AuditableModel implements BelongsToBusinessesInterface
         }
 
         $date = $this->created_at->copy()->subWeek();
+        $start = $date->setIsoDate($date->year, $date->weekOfYear);
+        $end = $start->copy()->addDays(6);
         return [
-            'start' => $date->setIsoDate($date->year, $date->weekOfYear)->toDateString(),
-            'end' => $date->setIsoDate($date->year, $date->weekOfYear, 7)->toDateString()
+            'start' => $start->toDateString(),
+            'end' => $end->toDateString()
         ];
     }
 

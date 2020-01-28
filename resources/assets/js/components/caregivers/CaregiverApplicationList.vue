@@ -104,7 +104,7 @@
                 statuses: ['New', 'Open', 'Converted'],
                 start_date: "",
                 end_date: "",
-                status: 'Open',
+                status: '',
                 archived: 0,
                 totalRows: 0,
                 perPage: 15,
