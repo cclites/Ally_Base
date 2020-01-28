@@ -77,6 +77,8 @@ class Knowledge extends BaseModel
      */
     public static function boot()
     {
+        parent::boot();
+
         // create the slug automatically
         static::saving(function (Knowledge $item) {
             if (is_null($item->slug)) {

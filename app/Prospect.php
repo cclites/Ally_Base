@@ -101,6 +101,8 @@ class Prospect extends AuditableModel implements BelongsToBusinessesInterface
      */
     public static function boot()
     {
+        parent::boot();
+
         // Add global scope to remove revised shifts from results
         static::addGlobalScope('ignore_clients', function ($builder) {
             $builder->whereNull('client_id');
