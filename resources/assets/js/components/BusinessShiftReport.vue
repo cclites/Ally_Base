@@ -599,12 +599,6 @@
             },
 
             loadData() {
-
-                if( !moment( this.filters.start_date, 'MM/DD/YYYY', true ).isValid() || !moment( this.filters.end_date, 'MM/DD/YYYY', true ).isValid() ){
-
-                    alerts.addMessage( 'error', 'Start Date and End Date are required!' );
-                    return;
-                }
                 this.loadingShifts = true;
 
                 axios.get(this.urlPrefix + 'shifts' + this.queryString)

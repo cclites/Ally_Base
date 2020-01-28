@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Business\Report;
 
 use App\Client;
 use App\Http\Controllers\Business\BaseController;
-use App\Http\Requests\ShiftHistoryReportRequest;
 use App\Http\Resources\ClientDropdownResource;
 use App\Http\Resources\ShiftHistoryItemResource;
 use App\Reports\ShiftHistoryReport;
@@ -23,7 +22,7 @@ class ShiftHistoryReportController extends BaseController
      * @return ShiftsReport|ErrorResponse|\Illuminate\Contracts\View\Factory|\Illuminate\Support\Collection|\Illuminate\View\View|void
      * @throws \Exception
      */
-    public function index( Request $request, ShiftHistoryReport $report)
+    public function index(Request $request, ShiftHistoryReport $report)
     {
         $timezone = auth()->user()->role->getTimezone();
 
