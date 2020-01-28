@@ -8,7 +8,7 @@ use App\Jobs\SendTextMessage;
 use App\PhoneNumber;
 use App\Schedule;
 
-class OpenShiftRequestAccepted extends BaseNotification
+class OpenShiftRequested extends BaseNotification
 {
     const DISABLED = false;
 
@@ -17,14 +17,14 @@ class OpenShiftRequestAccepted extends BaseNotification
      *
      * @var string
      */
-    const TITLE = 'Get notified when a request for an open shift is accepted';
+    const TITLE = 'Get alerted when a caregiver applies for an open shift';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    const MESSAGE = 'Shift Request ACCEPTED! You will now work: #DATE#-#CLNAME# in zip #ZIP#. If you need to cancel, please call the office immediately.';
+    const MESSAGE = 'Shift Requested! #DATE#-#CLNAME# in zip #ZIP# for #CGNAME#';
 
     /**
      * The related schedule.
@@ -34,11 +34,18 @@ class OpenShiftRequestAccepted extends BaseNotification
     protected $schedule;
 
     /**
+     * The related caregiver.
+     *
+     * @var \App\Caregiver
+     */
+    protected $caregiver;
+
+    /**
      * The action text.
      *
      * @var string
      */
-    protected $action = 'View Client Schedule';
+    protected $action = 'View Schedule';
 
     /**
      * Create a new notification instance.
@@ -46,11 +53,12 @@ class OpenShiftRequestAccepted extends BaseNotification
      * @var \App\Schedule $schedule
      * @return void
      */
-    public function __construct( $schedule )
+    public function __construct( $schedule, $caregiver )
     {
         parent::__construct();
         $this->schedule = $schedule;
-        $this->url = route('business.clients.schedule', ['client' => $this->schedule->client]);
+        $this->caregiver = $caregiver;
+        $this->url = route( 'business.schedule.index', ['client' => $this->schedule->client]);
     }
 
     /**
@@ -62,6 +70,7 @@ class OpenShiftRequestAccepted extends BaseNotification
     {
         $message = str_replace( '#DATE#', $this->schedule->getStartDateTime()->format( 'm/d@g:iA' ), static::MESSAGE );
         $message = str_replace( '#CLNAME#', $this->schedule->client->initialedName, $message );
+        $message = str_replace( '#CGNAME#', $this->caregiver->initialedName, $message );
         return str_replace( '#ZIP#', $this->schedule->client->evvAddress->zip ?? null, $message );
     }
 

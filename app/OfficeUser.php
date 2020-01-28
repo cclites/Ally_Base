@@ -98,6 +98,7 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
         \App\Notifications\Business\FailedCharge::class, // TODO: implement trigger
         \App\Notifications\Business\ClientBirthday::class,
         \App\Notifications\Business\NoProspectContact::class, // TODO: implement trigger
+        \App\Notifications\Business\OpenShiftRequested::class,
     ];
 
     ///////////////////////////////////////////

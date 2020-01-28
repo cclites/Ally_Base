@@ -8,6 +8,8 @@ use App\Responses\SuccessResponse;
 use App\Schedule;
 use App\Scheduling\OpenShiftRequestStatus;
 use Illuminate\Http\Request;
+use App\Notifications\Business\OpenShiftRequested;
+
 
 class CaregiverScheduleRequestController extends BaseController
 {
@@ -41,11 +43,17 @@ class CaregiverScheduleRequestController extends BaseController
             $new_request->business_id  = $schedule->business_id;
             $new_request->client_id    = $schedule->client_id;
             $new_request->save();
+
+            if( $request->status == OpenShiftRequestStatus::REQUEST_PENDING() ) \Notification::send( $schedule->business->notifiableUsers(), new OpenShiftRequested( $schedule, $caregiver ) );
+
             return new SuccessResponse( "Schedule requested.", [ 'status' => $request->status, 'new_request' => $new_request ]);
         } else {
 
             $outstanding_request->update([ 'status' => $request->status ]);
             $outstanding_request->touch();
+
+            if( $request->status == OpenShiftRequestStatus::REQUEST_PENDING() ) \Notification::send( $schedule->business->notifiableUsers(), new OpenShiftRequested( $schedule, $caregiver ) );
+
             return new SuccessResponse( "Schedule request updated", [ 'status' => $request->status, 'new_request' => null ]);
         }
     }
