@@ -8,6 +8,7 @@ use App\Business;
 use App\Client;
 use App\Billing\Payment;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * Class SinglePaymentProcessor

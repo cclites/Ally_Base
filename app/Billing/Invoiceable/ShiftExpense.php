@@ -10,6 +10,7 @@ use App\Client;
 use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 /**
  * Class ShiftExpense

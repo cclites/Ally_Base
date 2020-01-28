@@ -12,6 +12,7 @@ use App\Claims\ClaimableService;
 use App\Claims\ClaimInvoice;
 use App\VisitEditAction;
 use App\VisitEditReason;
+use Illuminate\Support\Str;
 
 class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitterInterface
 {

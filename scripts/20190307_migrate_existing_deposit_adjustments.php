@@ -8,7 +8,7 @@ use App\Billing\CaregiverInvoice;
 use App\Billing\CaregiverInvoiceItem;
 use App\Billing\Queries\DepositQuery;
 use Carbon\Carbon;
-
+use Illuminate\Support\Str;
 
 $query = app(DepositQuery::class);
 $deposits = $query->hasAmountAvailable()->where('notes', 'NOT LIKE', 'BANK ERROR%')->get();
@@ -16,7 +16,7 @@ $deposits = $query->hasAmountAvailable()->where('notes', 'NOT LIKE', 'BANK ERROR
 DB::beginTransaction();
 
 /** @var \App\Billing\Deposit $deposit */
-foreach($deposits as $deposit) {
+foreach ($deposits as $deposit) {
     $amount = $deposit->amount;
     $notes = $deposit->notes;
     if ($deposit->deposit_type === "business") {
