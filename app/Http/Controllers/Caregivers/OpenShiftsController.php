@@ -80,7 +80,7 @@ class OpenShiftsController extends BaseController
                         'client'         => $schedule->client->lastname,
                         'client_id'      => $schedule->client->id,
                         'start_time'     => $schedule->starts_at->copy()->format('g:i A'),
-                        'distance'       => $schedule->client->evvAddress ? $caregiver->address->distanceToAddress( $schedule->client->evvAddress ) : null,
+                        'distance'       => ( $schedule->client->evvAddress && $caregiver->address ) ? $caregiver->address->distanceToAddress( $schedule->client->evvAddress ) : null,
                         'end_time'       => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A'),
                         'requests_count' => null
                     ];
