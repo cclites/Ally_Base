@@ -53,7 +53,7 @@
         <tbody>
             <tr>
                 <td>
-                    <img src="../storage/logos/{{ $business->logo }}" alt="{{ $business->name }}">
+                    <img src="{{ $business->logo }}" alt="{{ $business->name }}">
                 </td>
                 <td>
                     {{ $business->name }}<br>
@@ -71,7 +71,7 @@
 
     <div class="heading">
         <span>Caregiver Data for {{ $caregiver->nameLastFirst() }}</span>
-        <span class="avatar"><img src="{{ asset($caregiver->avatar) }}" alt="{{ $caregiver->avatar }}"></span>
+        <span class="avatar"><img src="{{ $caregiver->avatar }}" alt="{{ $caregiver->avatar }}"></span>
     </div>
 
     <hr>

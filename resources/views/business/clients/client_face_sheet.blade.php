@@ -31,20 +31,20 @@
         }
 
         .logo_header tr td{
-            width: 50%;
             text-align: center;
         }
 
         .avatar{
             text-align: center;
-            width: 50%;
-            height: auto;
+            /*width: 50%;
+            height: auto;*/
         }
 
         .logo_header tr td,
         .avatar img{
-            height: 100px;
+            /*height: 100px;*/
         }
+
         .heading span{
             width: 48%;
             display: inline-block;
@@ -55,7 +55,7 @@
     <table class="logo_header">
         <tr>
             <td>
-                <img src="../storage/logos/{{ $client->business->logo }}" alt="{{ $client->business->name }}">
+                <img src="{{ $client->business->logo }}" alt="{{ $client->business->name }}">
             </td>
             <td>
                 {{ $client->business->name }}<br>
@@ -71,7 +71,7 @@
 
     <div class="heading">
         <span>Client Data for {{ $client->nameLastFirst() }}</span>
-        <span class="avatar"><img src="{{ asset($client->avatar) }}"></span>
+        <span class="avatar"><img src="{{ $client->avatar }}"></span>
     </div>
     <hr>
 
