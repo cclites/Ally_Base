@@ -6,6 +6,7 @@ use App\Http\Requests\AccountSetup\Clients\ClientStep1Request;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use App\Traits\Request\PaymentMethodRequest;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use App\Client;
@@ -166,13 +167,13 @@ class ClientSetupController extends Controller
 
         $termsFile = 'terms-inc.html';
         $termsUrl = url($termsFile);
-        $terms = str_after(file_get_contents($termsFile), '<body>');
-        $terms = str_before($terms, '</body>');
+        $terms = Str::after(file_get_contents($termsFile), '<body>');
+        $terms = Str::before($terms, '</body>');
         if (file_exists(public_path('terms-inc-' . $client->business_id . '.html'))) {
             $termsFile = 'terms-inc-' . $client->business_id . '.html';
             $termsUrl = url('terms-inc-' . $client->business_id . '.html');
-            $terms = str_after(file_get_contents($termsFile), '<body>');
-            $terms = str_before($terms, '</body>');
+            $terms = Str::after(file_get_contents($termsFile), '<body>');
+            $terms = Str::before($terms, '</body>');
         }
 
         return response()->json(['terms' => $terms, 'terms_url' => $termsUrl]);
@@ -232,7 +233,7 @@ class ClientSetupController extends Controller
         if (!File::exists($dir)) {
             File::makeDirectory($dir, 493, true);
         }
-        $filename = str_slug($client->id . ' ' . $client->name.' Client Agreement').'.pdf';
+        $filename = Str::slug($client->id . ' ' . $client->name.' Client Agreement').'.pdf';
         $filePath = $dir . '/' . $filename;
         if (File::exists($filePath)) {
             if (config('app.env') != 'production') {

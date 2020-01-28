@@ -29,7 +29,9 @@ class MakeApplicationsOwnedByChain extends Migration
 
         Schema::table('caregiver_applications', function (Blueprint $table) {
             $table->unsignedInteger('chain_id')->nullable(false)->change();
-            $table->dropForeign(['business_id']);
+            if (\DB::getDriverName() != 'sqlite') {
+                $table->dropForeign(['business_id']);
+            }
             $table->dropColumn('business_id');
         });
     }

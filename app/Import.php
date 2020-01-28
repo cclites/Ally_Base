@@ -18,6 +18,14 @@ namespace App;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Import whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Import whereUserId($value)
  * @mixin \Eloquent
+ * @property string|null $type
+ * @property-read int|null $audits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Note[] $notes
+ * @property-read int|null $notes_count
+ * @property-read int|null $shifts_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Import newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Import newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Import query()
  */
 class Import extends AuditableModel
 {

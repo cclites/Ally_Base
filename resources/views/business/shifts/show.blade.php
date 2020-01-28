@@ -21,8 +21,8 @@
                     :shift="{{ $shift }}"
                     :caregiver="{{ $shift->caregiver }}"
                     :client="{{ $shift->client }}"
-                    :activities="{{ $activities OR '[]' }}"
-                    :issues="{{ $shift->issues OR '[]' }}"
+                    :activities="{{ $activities ?? '[]' }}"
+                    :issues="{{ $shift->issues ?? '[]' }}"
                     :admin="{{ (int) is_admin() }}"
                 ></business-shift>
             </b-card>

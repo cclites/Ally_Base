@@ -238,6 +238,47 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Client query()
+ * @property string|null $medicaid_plan_id
+ * @property string|null $medicaid_payer_id
+ * @property \Illuminate\Support\Carbon|null $updated_by_timestamp
+ * @property int|null $services_coordinator_id
+ * @property string $send_1099
+ * @property int $can_edit_send_1099
+ * @property-read int|null $addresses_count
+ * @property-read int|null $agreement_status_history_count
+ * @property-read int|null $audits_count
+ * @property-read int|null $bank_accounts_count
+ * @property-read int|null $care_plans_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Caregiver1099[] $caregiver1099s
+ * @property-read int|null $caregiver1099s_count
+ * @property-read int|null $caregivers_count
+ * @property-read int|null $contacts_count
+ * @property-read int|null $credit_cards_count
+ * @property-read int|null $documents_count
+ * @property-read int|null $excluded_caregivers_count
+ * @property-read mixed $initialed_name
+ * @property-read mixed $payment_errors
+ * @property-read int|null $goals_count
+ * @property-read int|null $medications_count
+ * @property-read int|null $meta_count
+ * @property-read int|null $narrative_count
+ * @property-read int|null $notes_count
+ * @property-read int|null $notification_preferences_count
+ * @property-read int|null $notifications_count
+ * @property-read int|null $payers_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\PaymentLog[] $paymentLogs
+ * @property-read int|null $payment_logs_count
+ * @property-read int|null $payments_count
+ * @property-read int|null $phone_numbers_count
+ * @property-read int|null $rates_count
+ * @property-read \App\SalesPerson $salesperson
+ * @property-read int|null $schedules_count
+ * @property-read int|null $service_authorizations_count
+ * @property-read int|null $setup_status_history_count
+ * @property-read int|null $shifts_count
+ * @property-read \App\SkilledNursingPoc $skilledNursingPoc
+ * @property-read \App\StatusAlias $statusAlias
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Client inactive()
  */
 class Client extends AuditableModel implements
     UserRole,

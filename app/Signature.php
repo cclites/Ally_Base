@@ -22,6 +22,11 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Signature whereSignableType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Signature whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property string|null $meta_type
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Signature newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Signature newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Signature query()
  */
 class Signature extends AuditableModel
 {

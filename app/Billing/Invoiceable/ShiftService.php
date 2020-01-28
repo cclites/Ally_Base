@@ -48,6 +48,16 @@ use Illuminate\Support\Collection;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftService whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\InvoiceableModel withMeta()
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientInvoiceItem[] $clientInvoiceItems
+ * @property-read int|null $client_invoice_items_count
+ * @property-read int|null $meta_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftService forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftService forCaregivers($caregiverIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftService forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftService newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftService newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftService query()
  */
 class ShiftService extends InvoiceableModel
 {

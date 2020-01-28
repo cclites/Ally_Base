@@ -17,7 +17,7 @@ class ReportsTest extends TestCase
     protected $officeUser;
     protected $business;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
 

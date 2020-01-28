@@ -29,6 +29,10 @@ use App\AuditableModel;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TransactionRefund whereRefundedTransactionId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TransactionRefund whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\TransactionRefund newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\TransactionRefund newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\TransactionRefund query()
  */
 class TransactionRefund extends AuditableModel
 {

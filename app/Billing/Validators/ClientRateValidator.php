@@ -55,8 +55,8 @@ class ClientRateValidator
     /**
      * @return string|null
      */
-    public function getErrorMessage(): ?string {
-        return $this->error;
+    public function getErrorMessage(): string {
+        return $this->error ?: '';
     }
 
     /**

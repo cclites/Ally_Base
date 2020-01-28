@@ -68,8 +68,8 @@
             },
 
             formatShiftTime(schedule) {
-                let start = moment(schedule.starts_at.date).format('h:mm');
-                let end = moment(schedule.starts_at.date).add(schedule.duration, 'minutes').format('h:mm');
+                let start = moment(schedule.starts_at).format('h:mm');
+                let end = moment(schedule.starts_at).add(schedule.duration, 'minutes').format('h:mm');
                 return start + '-' + end;
             },
         },

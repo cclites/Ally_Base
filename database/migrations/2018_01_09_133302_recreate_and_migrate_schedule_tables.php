@@ -19,12 +19,16 @@ class RecreateAndMigrateScheduleTables extends Migration
 
         // Delete schedule_id foreign key(s)
         Schema::table('shifts', function (Blueprint $table) {
-            $table->dropForeign('shifts_schedule_id_foreign');
+            if (\DB::getDriverName() != 'sqlite') {
+                $table->dropForeign('shifts_schedule_id_foreign');
+            }
             $table->dropColumn('schedule_id');
         });
-        Schema::table('schedule_activities', function (Blueprint $table) {
-            $table->dropForeign('fk_schedule_activities_schedule_id');
-        });
+        if (\DB::getDriverName() != 'sqlite') {
+            Schema::table('schedule_activities', function (Blueprint $table) {
+                $table->dropForeign('fk_schedule_activities_schedule_id');
+            });
+        }
         DB::statement('DELETE FROM schedule_activities WHERE 1'); // delete all schedule activities (not used at this time)
 
         // Create new schedules table

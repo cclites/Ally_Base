@@ -6,6 +6,7 @@ use App\Client;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Str;
 
 class ClientStatsController extends Controller
 {
@@ -16,7 +17,7 @@ class ClientStatsController extends Controller
             ->filter()
             ->map(function ($item) {
                 return [
-                    'name' => title_case(str_replace('_', ' ', $item)),
+                    'name' => Str::title(str_replace('_', ' ', $item)),
                     'id' => $item
                 ];
             });

@@ -17,7 +17,7 @@
                 header-bg-variant="info"
             >
                 <business-shift
-                    :activities="{{ $activities OR '[]' }}">
+                    :activities="{{ $activities ?? '[]' }}">
                 </business-shift>
             </b-card>
         </div>

@@ -20,7 +20,7 @@ Route::view('check-my-time', 'check-my-time');
 Route::get('/{business}/caregiver-application/create', 'CaregiverApplicationController@oldRedirect');
 Route::get('/confirm-shifts/{token}', 'ConfirmShiftsController@confirmToken')->name('token-confirm-shifts');
 Route::get('/confirm-shifts/all/{token}', 'ConfirmShiftsController@confirmAllWithToken')->name('token-confirm-all-shifts');
-Route::redirect('/twilio/incoming', url('/api/telefony/sms/incoming'))->name('twilio.incoming');
+Route::permanentRedirect('/twilio/incoming', url('/api/telefony/sms/incoming'))->name('twilio.incoming');
 
 Route::get('/account-setup/clients/{token}', 'ClientSetupController@show')->name('setup.clients');
 Route::post('/account-setup/clients/{token}/step1', 'ClientSetupController@step1');

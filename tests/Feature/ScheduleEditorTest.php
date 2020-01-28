@@ -21,7 +21,7 @@ class ScheduleEditorTest extends TestCase
     /** @var ScheduleEditor */
     private $editor;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
         $this->editor = new ScheduleEditor();

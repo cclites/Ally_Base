@@ -4,6 +4,7 @@ namespace App\Billing\Queries;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Arr;
 
 abstract class BaseQuery extends Builder
 {
@@ -74,7 +75,7 @@ abstract class BaseQuery extends Builder
      */
     public function __call($method, $parameters)
     {
-        $resetOnMethods = array_except($this->passthru, ['exists', 'doesntExist', 'getConnection']);
+        $resetOnMethods = Arr::except($this->passthru, ['exists', 'doesntExist', 'getConnection']);
         $result = parent::__call($method, $parameters);
         if (in_array($method, $resetOnMethods)) {
             $this->newQuery();

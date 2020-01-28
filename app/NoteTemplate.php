@@ -30,6 +30,10 @@ use App\Traits\BelongsToOneBusiness;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\NoteTemplate whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\NoteTemplate whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\NoteTemplate newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\NoteTemplate newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\NoteTemplate query()
  */
 class NoteTemplate extends AuditableModel implements BelongsToBusinessesInterface
 {

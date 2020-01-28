@@ -48,8 +48,8 @@ class CreateClaimInvoicesTables extends Migration
         Schema::create('claim_invoice_items', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('claim_invoice_id');
-            $table->nullableMorphs('invoiceable'); // links to the original invoiceable item from the Client Invoice.
-            $table->morphs('claimable'); // links to the new, editable claimable object
+            $table->nullableMorphs('invoiceable', 'claim_invoice_items_invoiceable_id_invoiceable_type_index'); // links to the original invoiceable item from the Client Invoice.
+            $table->morphs('claimable', 'claim_invoice_items_claimable_id_claimable_type_index'); // links to the new, editable claimable object
             $table->decimal('rate', 9, 2);
             $table->decimal('units', 9, 2);
             $table->decimal('amount', 9, 2);

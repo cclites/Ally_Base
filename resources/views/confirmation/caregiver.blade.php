@@ -8,7 +8,7 @@
     <caregiver-confirmation token="{{ $token }}"
                          :caregiver="{{ $caregiver }}"
                          phone-number="{{ $phoneNumber }}"
-                         :address="{{ $address OR '{}' }}"
+                         :address="{{ $address ?? '{}' }}"
                          terms-url="{{ $termsUrl }}"
     >
     </caregiver-confirmation>

@@ -17,7 +17,7 @@ class ManageTasksTest extends TestCase
 {
     use RefreshDatabase, CreatesBusinesses;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
         $this->createBusinessWithUsers();

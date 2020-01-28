@@ -5,6 +5,7 @@ namespace Tests;
 use App\Caregiver;
 use App\PhoneNumber;
 use Illuminate\Foundation\Testing\TestResponse;
+use Illuminate\Support\Str;
 
 trait FakesTwilioWebhooks
 {
@@ -19,9 +20,9 @@ trait FakesTwilioWebhooks
     public function generateWebhook(string $to, string $from, string $message)
     {
         return [
-            'MessageSid' => str_random(34),
+            'MessageSid' => Str::random(34),
             'AccountSid' => config('services.twilio.sid'),
-            'MessagingServiceSid' => str_random(34),
+            'MessagingServiceSid' => Str::random(34),
             'From' => PhoneNumber::formatE164($from),
             'To' => PhoneNumber::formatE164($to),
             'Body' => $message,
@@ -51,7 +52,7 @@ trait FakesTwilioWebhooks
         }
 
         if (empty($message)) {
-            $message = str_random(100);
+            $message = Str::random(100);
         }
 
         $data = $this->generateWebhook($to, $from, $message);

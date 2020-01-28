@@ -8,7 +8,26 @@ use Carbon\Carbon;
 
 /**
  * Class OfflineInvoicePayment
+ *
  * @package App\Billing
+ * @property int $id
+ * @property int $client_invoice_id
+ * @property string $payment_date
+ * @property float $amount
+ * @property string|null $type
+ * @property string|null $description
+ * @property string|null $reference
+ * @property string|null $notes
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read int|null $audits_count
+ * @property-read \App\Billing\ClientInvoice $invoice
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\OfflineInvoicePayment newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\OfflineInvoicePayment newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\OfflineInvoicePayment query()
+ * @mixin \Eloquent
  */
 class OfflineInvoicePayment extends AuditableModel implements PaymentInterface
 {

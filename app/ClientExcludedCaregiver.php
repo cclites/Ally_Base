@@ -21,6 +21,12 @@ namespace App;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientExcludedCaregiver whereNote($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientExcludedCaregiver whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property string|null $reason
+ * @property string|null $effective_at
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientExcludedCaregiver newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientExcludedCaregiver newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientExcludedCaregiver query()
  */
 class ClientExcludedCaregiver extends AuditableModel
 {

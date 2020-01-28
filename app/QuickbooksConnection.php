@@ -6,6 +6,44 @@ use App\Services\QuickbooksOnlineService;
 use Crypt;
 use QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2AccessToken;
 
+/**
+ * App\QuickbooksConnection
+ *
+ * @property int $id
+ * @property int $business_id
+ * @property string|null $company_name
+ * @property mixed|null $access_token
+ * @property int $is_desktop
+ * @property string|null $desktop_api_key
+ * @property string $name_format
+ * @property string $fee_type_lead_agency
+ * @property string $fee_type_ltci
+ * @property string $fee_type_medicaid
+ * @property string $fee_type_private_pay
+ * @property string $fee_type_va
+ * @property int|null $shift_service_id
+ * @property int|null $adjustment_service_id
+ * @property int|null $refund_service_id
+ * @property int|null $mileage_service_id
+ * @property int|null $expense_service_id
+ * @property int $allow_shift_overrides
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $last_connected_at
+ * @property-read \App\QuickbooksService $adjustmentService
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read int|null $audits_count
+ * @property-read \App\Business $business
+ * @property-read \App\QuickbooksService $expenseService
+ * @property-read \App\QuickbooksService $mileageService
+ * @property-read \App\QuickbooksService $refundService
+ * @property-read \App\QuickbooksService $shiftService
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\QuickbooksConnection newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\QuickbooksConnection newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\QuickbooksConnection query()
+ * @mixin \Eloquent
+ */
 class QuickbooksConnection extends AuditableModel
 {
     /**

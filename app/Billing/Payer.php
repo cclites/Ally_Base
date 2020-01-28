@@ -64,6 +64,12 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer whereWeekStart($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payer whereZip($value)
  * @mixin \Eloquent
+ * @property string|null $email
+ * @property string|null $transmission_method
+ * @property string|null $payer_code
+ * @property string|null $plan_code
+ * @property-read int|null $audits_count
+ * @property-read int|null $rates_count
  */
 class Payer extends AuditableModel implements BelongsToChainsInterface, ContactableInterface
 {

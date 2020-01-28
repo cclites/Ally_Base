@@ -4,6 +4,7 @@ use Faker\Generator as Faker;
 use App\NoteTemplate;
 use App\Business;
 use App\OfficeUser;
+use Illuminate\Support\Str;
 
 $factory->define(NoteTemplate::class, function (Faker $faker) {
     return [
@@ -11,9 +12,9 @@ $factory->define(NoteTemplate::class, function (Faker $faker) {
             return factory(Business::class)->create()->id;
         },
         'note' => $faker->paragraph,
-        'short_name' => str_limit($faker->sentence, 32),
+        'short_name' => Str::limit($faker->sentence, 32),
         'active' => $faker->boolean,
-        'created_by' => function() {
+        'created_by' => function () {
             return factory(OfficeUser::class)->create()->id;
         }
     ];

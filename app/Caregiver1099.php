@@ -7,6 +7,47 @@ use App\Services\TaxDocumentPrinter;
 use App\Traits\BelongsToOneBusiness;
 use mikehaertl\pdftk\Pdf;
 
+/**
+ * App\Caregiver1099
+ *
+ * @property int $id
+ * @property int $year
+ * @property int|null $caregiver_id
+ * @property int|null $client_id
+ * @property int|null $business_id
+ * @property string|null $client_first_name
+ * @property string|null $client_last_name
+ * @property mixed|null $client_ssn
+ * @property string|null $client_address1
+ * @property string|null $client_address2
+ * @property string|null $client_city
+ * @property string|null $client_state
+ * @property string|null $client_zip
+ * @property string|null $caregiver_first_name
+ * @property string|null $caregiver_last_name
+ * @property mixed|null $caregiver_ssn
+ * @property string|null $caregiver_address1
+ * @property string|null $caregiver_address2
+ * @property string|null $caregiver_city
+ * @property string|null $caregiver_state
+ * @property string|null $caregiver_zip
+ * @property float $payment_total
+ * @property string $created_by
+ * @property int|null $modified_by
+ * @property string|null $caregiver_1099_payer
+ * @property string|null $transmitted_at
+ * @property int|null $transmitted_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Business $business
+ * @property-read \App\Caregiver|null $caregiver
+ * @property-read \App\Client $client
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver1099 newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver1099 newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver1099 query()
+ * @mixin \Eloquent
+ */
 class Caregiver1099 extends BaseModel implements BelongsToBusinessesInterface
 {
     use BelongsToOneBusiness;

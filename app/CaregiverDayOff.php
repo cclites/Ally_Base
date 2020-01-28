@@ -4,6 +4,24 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\CaregiverDayOff
+ *
+ * @property int $id
+ * @property int $caregiver_id
+ * @property string $start_date
+ * @property string $description
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $end_date
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverDayOff newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverDayOff newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverDayOff query()
+ * @mixin \Eloquent
+ */
 class CaregiverDayOff extends AuditableModel
 {
     /**

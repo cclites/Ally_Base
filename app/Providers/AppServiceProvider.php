@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Schema;
 use App\Services\SFTPReaderReaderWriter;
 use App\Services\DummySFTPReaderWriter;
 use App\Contracts\SFTPReaderWriterInterface;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -114,9 +115,9 @@ class AppServiceProvider extends ServiceProvider
 
         // force rool url if using ngrok
         $appUrl = config('app.url');
-        if (str_contains($appUrl, 'ngrok.io')) {
+        if (Str::contains($appUrl, 'ngrok.io')) {
             \URL::forceRootUrl(config('app.url'));
-            if (str_contains(config('app.url'), 'https://')) {
+            if (Str::contains(config('app.url'), 'https://')) {
                 \URL::forceScheme('https');
             }
         }

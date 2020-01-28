@@ -6,6 +6,26 @@ use App\Claims\ClaimInvoice;
 use App\Claims\Contracts\TransmissionFileInterface;
 use Carbon\Carbon;
 
+/**
+ * App\ClaimInvoiceTellusFile
+ *
+ * @property int $id
+ * @property int $claim_invoice_id
+ * @property string $filename
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read int|null $audits_count
+ * @property-read \App\Claims\ClaimInvoice $claimInvoice
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClaimInvoiceTellusFileResult[] $results
+ * @property-read int|null $results_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClaimInvoiceTellusFile newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClaimInvoiceTellusFile newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClaimInvoiceTellusFile query()
+ * @mixin \Eloquent
+ */
 class ClaimInvoiceTellusFile extends AuditableModel implements TransmissionFileInterface
 {
     /**

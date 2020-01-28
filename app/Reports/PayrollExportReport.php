@@ -4,6 +4,7 @@ namespace App\Reports;
 
 use App\Shift;
 use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 class PayrollExportReport extends BaseReport
@@ -273,7 +274,7 @@ class PayrollExportReport extends BaseReport
     public function toCsv() : string
     {
         $rows = $this->rows()->map(function ($item) {
-            return array_merge(array_except($item, [
+            return array_merge(Arr::except($item, [
                 'caregiver_first_name',
                 'caregiver_last_name'
             ]), [
