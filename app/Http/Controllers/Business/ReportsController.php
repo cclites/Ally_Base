@@ -688,7 +688,13 @@ class ReportsController extends BaseController
     {
         $type = $request->type == 'clients' ? 'clients' : 'caregivers';
         $type = ucfirst($type);
-        return view('business.reports.user_birthday', compact('type'));
+
+        $clients =  Client::forRequestedBusinesses()->get();
+        $clientTypes = $clients->map(function ($client) {
+            return $client->client_type;
+        })->unique()->values();
+
+        return view('business.reports.user_birthday', compact('type', 'clientTypes'));
     }
 
     public function userBirthdayData(Request $request)
@@ -696,7 +702,19 @@ class ReportsController extends BaseController
         $type = strtolower($request->type) == 'clients' ? 'clients' : 'caregivers';
 
         if($type == 'clients') {
-            return $this->addCityAndPhone(Client::forRequestedBusinesses()->get());
+            $clients =  $this->addCityAndPhone(Client::forRequestedBusinesses()->get());
+
+            // Filter by client type, if exists
+            $clientType = $request->clientType ?? 'All';
+            if($clientType == 'All') {
+                return $clients;
+            }
+
+            $filteredClients = $clients->filter(function ($value) use ($clientType) {
+                return $value->client_type  == $clientType;
+            });
+
+            return $filteredClients->values();
         }
 
         return $this->addCityAndPhone(Caregiver::forRequestedBusinesses()->get());

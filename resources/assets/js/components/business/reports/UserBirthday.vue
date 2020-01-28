@@ -3,10 +3,18 @@
     <b-card :title="`${type} Birthday`">
 
         <b-row class="filter justify-content-between align-items-center">
-
-            <b-form-checkbox v-model="showEmpty" :value="true" :unchecked-value="false" class="d-flex align-items-center">
-                Show {{type}} without birthdays
-            </b-form-checkbox>
+            <b-col cols="3">
+                <b-form-checkbox v-model="showEmpty" :value="true" :unchecked-value="false" class="d-flex align-items-center">
+                    Show {{type}} without birthdays
+                </b-form-checkbox>
+            </b-col>
+            <b-col cols="3">
+                <label>Client Types:<b-form-select class="form-group-label "  v-if="type === 'Clients'" v-model="selectedClients" >
+                    <option value="All">All</option>
+                    <option v-for="option in clientTypes" :value="option" :key="option.id" >{{ option }}</option>
+                </b-form-select>
+                </label>
+            </b-col>
 
             <b-button @click=" fetch() " variant="info">Generate Report</b-button>
         </b-row>
@@ -35,12 +43,17 @@
                 type: String,
                 required: true,
             },
+            clientTypes: {
+                type: Array,
+                required: false
+            }
         },
 
         data() {
             return {
                 loading: false,
                 showEmpty: true,
+                selectedClients: 'All',
                 data: [],
                 fields: [
                     {
@@ -93,7 +106,7 @@
                 this.loading = true;
 
                 try {
-                    const {data} = await axios.get(`/business/reports/data/birthdays?type=${this.type}`);
+                    const {data} = await axios.get(`/business/reports/data/birthdays?type=${this.type}&clientType=${this.selectedClients}`);
                     this.data = data;
                     this.loading = false
                 }catch (e) {
