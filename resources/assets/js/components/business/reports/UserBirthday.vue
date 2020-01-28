@@ -8,8 +8,8 @@
                     Show {{type}} without birthdays
                 </b-form-checkbox>
             </b-col>
-            <b-col cols="3">
-                <label>Client Types:<b-form-select class="form-group-label "  v-if="type === 'Clients'" v-model="selectedClients" >
+            <b-col cols="3" v-if="type === 'Clients'">
+                <label>Client Types:<b-form-select class="form-group-label " v-model="selectedClients" >
                     <option value="All">All</option>
                     <option v-for="option in clientTypes" :value="option" :key="option.id" >{{ option }}</option>
                 </b-form-select>
