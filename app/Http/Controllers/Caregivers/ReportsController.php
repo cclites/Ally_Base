@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Str;
 
 class ReportsController extends BaseController
 {
@@ -142,7 +143,7 @@ class ReportsController extends BaseController
                         'ally_pct' => AllyFeeCalculator::getPercentage($shift->client, null),
                         'shift_total' => number_format($shift->costs()->getTotalCost(), 2),
                         'confirmed' => $shift->statusManager()->isConfirmed(),
-                        'status' => $shift->status ? title_case(preg_replace('/_/', ' ', $shift->status)) : '',
+                        'status' => $shift->status ? Str::title(preg_replace('/_/', ' ', $shift->status)) : '',
                         'EVV' => $shift->verified,
                     ])->toArray();
 

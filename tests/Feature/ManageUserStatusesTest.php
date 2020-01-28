@@ -19,7 +19,7 @@ class ManageUserStatusTest extends TestCase
     public $officeUser;
     public $chain;
     
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
     

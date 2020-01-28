@@ -7,6 +7,7 @@ use App\Traits\BelongsToBusinesses;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
 
 /**
  * App\Prospect
@@ -192,7 +193,7 @@ class Prospect extends AuditableModel implements BelongsToBusinessesInterface
                 'email' => $this->email ?: (new Client)->getAutoEmail(),  // temporary until we have their ID below
                 'date_of_birth' => $this->date_of_birth,
                 'client_type' => $this->client_type,
-                'password' => bcrypt(str_random(32)),
+                'password' => bcrypt(Str::random(32)),
             ]);
 
             if (!$this->email) {

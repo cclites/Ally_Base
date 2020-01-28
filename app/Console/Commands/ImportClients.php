@@ -12,6 +12,7 @@ use App\ClientContact;
 use App\EmergencyContact;
 use App\StatusAlias;
 use App\User;
+use Illuminate\Support\Str;
 
 class ImportClients extends BaseImport
 {
@@ -88,7 +89,7 @@ class ImportClients extends BaseImport
             'username' => $this->resolve('Email', $row),
             'email' => $this->resolve('Email', $row),
             'client_type_descriptor' => $this->resolve('Client Type Descriptor', $row),
-            'password' => bcrypt(str_random(12)),
+            'password' => bcrypt(Str::random(12)),
             'active' => $statusAlias ? $statusAlias->active : $this->resolve('Active', $row),
             'business_id' => $this->business()->id,
             'hic' => $this->resolve('HIC', $row),
@@ -101,7 +102,7 @@ class ImportClients extends BaseImport
             return false;
         }
         else if (!$data['email']) {
-            $data['username'] = str_slug($data['firstname'] . $data['lastname'] . mt_rand(100,9999));
+            $data['username'] = Str::slug($data['firstname'] . $data['lastname'] . mt_rand(100,9999));
 
         }
 
@@ -221,10 +222,10 @@ class ImportClients extends BaseImport
      */
     protected function resolveClientType(int $row, $cellValue)
     {
-        if (ends_with($cellValue, ['LTC', 'LTCI'])) {
+        if (Str::endsWith($cellValue, ['LTC', 'LTCI'])) {
             return 'LTCI';
         }
-        if (ends_with($cellValue, 'Private Pay')) {
+        if (Str::endsWith($cellValue, 'Private Pay')) {
             return 'private_pay';
         }
         return strtolower($cellValue);

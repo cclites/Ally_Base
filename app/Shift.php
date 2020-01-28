@@ -37,6 +37,7 @@ use App\Events\ShiftDeleted;
 use Illuminate\Support\Collection;
 use App\Data\ScheduledRates;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 /**
  * App\Shift
@@ -932,7 +933,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
                 'name' => 'Other Expenses',
                 'units' => 1,
                 'rate' => $this->other_expenses,
-                'notes' => str_limit($this->other_expenses_desc, 253, '..'),
+                'notes' => Str::limit($this->other_expenses_desc, 253, '..'),
             ]);
         } elseif ($this->other_expenses < 0) {
             return ShiftExpense::create([
@@ -940,7 +941,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
                 'name' => 'Expense Adjustment',
                 'units' => 1,
                 'rate' => $this->other_expenses,
-                'notes' => str_limit($this->other_expenses_desc, 253, '..'),
+                'notes' => Str::limit($this->other_expenses_desc, 253, '..'),
             ]);
         }
         return null;
@@ -1070,7 +1071,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
             return null;
         }
 
-        return str_limit($this->activities->implode('name', ', '), 252);
+        return Str::limit($this->activities->implode('name', ', '), 252);
     }
 
     /**

@@ -18,7 +18,7 @@ class CarePlansTest extends TestCase
     public $officeUser;
     public $activities;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
 

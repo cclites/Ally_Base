@@ -74,6 +74,7 @@ use App\User;
 use Carbon\Carbon;
 use Crypt;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 class ClearSensitiveData extends Command
 {
@@ -268,7 +269,7 @@ class ClearSensitiveData extends Command
     public function scrubModel(string $class) : void
     {
         $query = call_user_func("{$class}::getScrubQuery");
-        $objectName = str_replace('_', ' ', snake_case(str_plural(class_basename($class))));
+        $objectName = str_replace('_', ' ', Str::snake(Str::plural(class_basename($class))));
 
         $this->startProgress(
             "Cleaning $objectName...",

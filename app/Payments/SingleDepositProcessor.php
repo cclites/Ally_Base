@@ -65,7 +65,7 @@ class SingleDepositProcessor
             'rate' => $amount,
             'total' => $amount,
             'date' => new Carbon(),
-            'notes' => str_limit($notes, 250),
+            'notes' => Str::limit($notes, 250),
         ]));
 
         return $invoice;
@@ -111,7 +111,7 @@ class SingleDepositProcessor
             'rate' => $amount,
             'total' => $amount,
             'date' => new Carbon(),
-            'notes' => str_limit($notes, 250),
+            'notes' => Str::limit($notes, 250),
         ]));
 
         return $invoice;

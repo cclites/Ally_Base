@@ -27,3 +27,4 @@ db-dump.sh
 logs.sh
 tellus.sh
 /testing.txt
+.phpunit.result.cache

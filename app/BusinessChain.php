@@ -5,6 +5,7 @@ use App\Billing\Payer;
 use App\Billing\Service;
 use App\Traits\ScrubsForSeeding;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 
 /**
@@ -79,7 +80,7 @@ class BusinessChain extends AuditableModel
 
     public static function generateSlug($name)
     {
-        return str_slug(
+        return Str::slug(
             str_replace('&', ' and ', $name)
         );
     }

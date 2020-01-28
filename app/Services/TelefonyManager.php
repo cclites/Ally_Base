@@ -32,7 +32,7 @@ class TelefonyManager
             })
             ->first();
 
-        Cache::put('telefony_client_' . $national_number, $client, 2);
+        Cache::put('telefony_client_' . $national_number, $client, 2 * 60);
         return $client;
     }
 

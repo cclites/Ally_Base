@@ -112,7 +112,7 @@ class ShiftExpense extends InvoiceableModel
      */
     public function getItemNotes(): ?string
     {
-        return str_limit($this->notes, 252);
+        return Str::limit($this->notes, 252);
     }
 
     /**

@@ -11,6 +11,7 @@ use App\Traits\BelongsToOneBusiness;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 /**
  * \App\Billing\Invoiceable\ShiftAdjustment
@@ -169,7 +170,7 @@ class ShiftAdjustment extends InvoiceableModel
      */
     public function getItemNotes(): ?string
     {
-        return str_limit($this->notes, 252);
+        return Str::limit($this->notes, 252);
     }
 
     /**

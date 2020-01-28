@@ -4,6 +4,7 @@ namespace App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use Illuminate\Support\Str;
 
 /**
  * App\ClientReferralServiceAgreement
@@ -78,7 +79,7 @@ class ClientReferralServiceAgreement extends BaseModel
         if (!File::exists($dir)) {
             File::makeDirectory($dir, 493, true);
         }
-        $filename = str_slug($this->client->id . ' ' . $this->client->name.' Referral Service Agreement').'.pdf';
+        $filename = Str::slug($this->client->id . ' ' . $this->client->name.' Referral Service Agreement').'.pdf';
         $filePath = $dir . '/' . $filename;
         if (config('app.env') == 'local') {
             if (File::exists($filePath)) {

@@ -3,6 +3,7 @@ namespace App\Auditing;
 
 use Auth;
 use Illuminate\Contracts\Auth\Authenticatable;
+use phpDocumentor\Reflection\Types\Integer;
 
 class UserResolver implements \OwenIt\Auditing\Contracts\UserResolver
 {
@@ -16,10 +17,10 @@ class UserResolver implements \OwenIt\Auditing\Contracts\UserResolver
     {
         if ($user = Auth::user()) {
             if ($user->isImpersonating()) {
-                $user = Auth::user()->impersonator();
+               $user = Auth::user()->impersonator();
             }
         }
 
-        return $user instanceof Authenticatable ? $user->getAuthIdentifier() : null;
+        return $user instanceof Authenticatable ? $user : null;
     }
 }

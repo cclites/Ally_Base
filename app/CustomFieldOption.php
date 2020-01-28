@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class CustomFieldOption extends BaseModel
 {   
@@ -102,7 +103,7 @@ class CustomFieldOption extends BaseModel
      */
     public static function getValueFromLabel(string $label) : string
     {
-        return snake_case(preg_replace('/[^A-Za-z0-9]/', '', $label));
+        return Str::snake(preg_replace('/[^A-Za-z0-9]/', '', $label));
     }
 
     /**

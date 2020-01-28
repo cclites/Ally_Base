@@ -16,7 +16,7 @@ class ProfileTest extends TestCase
     protected $caregiver;
     protected $officeUser;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
 

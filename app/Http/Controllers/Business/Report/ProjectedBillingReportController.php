@@ -8,6 +8,7 @@ use App\Reports\ProjectedBillingReport;
 use App\Http\Controllers\Controller;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ProjectedBillingReportController extends Controller
 {
@@ -85,7 +86,7 @@ class ProjectedBillingReportController extends Controller
             ->map(function ($item) {
                 return [
                     'id' => $item,
-                    'name' => title_case(str_replace('_', ' ', $item)),
+                    'name' => Str::title(str_replace('_', ' ', $item)),
                 ];
             })
             ->sortBy('name')

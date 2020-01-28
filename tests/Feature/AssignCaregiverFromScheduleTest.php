@@ -18,7 +18,7 @@ class AssignCaregiverFromScheduleTest extends TestCase
 {
     use RefreshDatabase, CreatesBusinesses, CreatesSchedules;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
 

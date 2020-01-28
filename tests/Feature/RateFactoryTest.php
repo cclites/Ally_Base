@@ -45,7 +45,7 @@ class RateFactoryTest extends TestCase
      */
     public $rateFactory;
 
-    function setUp()
+    function setUp() : void
     {
         parent::setUp();
 

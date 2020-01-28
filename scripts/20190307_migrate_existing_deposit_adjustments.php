@@ -35,7 +35,7 @@ foreach($deposits as $deposit) {
             'rate' => $amount,
             'total' => $amount,
             'date' => new Carbon(),
-            'notes' => str_limit($notes, 250),
+            'notes' => Str::limit($notes, 250),
         ]));
         $invoice->addDeposit($deposit, $amount);
     } else {
@@ -51,7 +51,7 @@ foreach($deposits as $deposit) {
             'rate' => $amount,
             'total' => $amount,
             'date' => new Carbon(),
-            'notes' => str_limit($notes, 250),
+            'notes' => Str::limit($notes, 250),
         ]));
         $invoice->addDeposit($deposit, $amount);
     }

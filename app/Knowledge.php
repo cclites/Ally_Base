@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 /**
  * App\Knowledge
@@ -185,7 +186,7 @@ class Knowledge extends BaseModel
      */
     public static function uniqueSlug($title, $ignoreId)
     {
-        $slug = str_slug($title);
+        $slug = Str::slug($title);
         $index = 1;
 
         while (true) {
@@ -194,7 +195,7 @@ class Knowledge extends BaseModel
             }
 
             $index++;
-            $slug = str_slug($title) . $index;
+            $slug = Str::slug($title) . $index;
         }
 
         return $slug;

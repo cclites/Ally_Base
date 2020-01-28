@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\CaregiverApplication;
 use App\PhoneNumber;
 use App\SmsThread;
+use Illuminate\Support\Str;
 use Tests\FakesTwilioWebhooks;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -37,7 +38,7 @@ class TriggerNotificationsTest extends TestCase
     public $business;
     public $officeUser;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
 
@@ -704,7 +705,7 @@ class TriggerNotificationsTest extends TestCase
         $thread = SmsThread::create(array_merge([
             'business_id' => $this->business->id,
             'from_number' => PhoneNumber::formatNational($this->business->outgoing_sms_number),
-            'message' => str_random(10),
+            'message' => Str::random(10),
             'can_reply' => true,
             'sent_at' => Carbon::now(),
         ]));

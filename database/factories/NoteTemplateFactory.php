@@ -11,7 +11,7 @@ $factory->define(NoteTemplate::class, function (Faker $faker) {
             return factory(Business::class)->create()->id;
         },
         'note' => $faker->paragraph,
-        'short_name' => str_limit($faker->sentence, 32),
+        'short_name' => Str::limit($faker->sentence, 32),
         'active' => $faker->boolean,
         'created_by' => function() {
             return factory(OfficeUser::class)->create()->id;

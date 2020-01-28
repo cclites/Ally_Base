@@ -9,6 +9,7 @@ use App\EmergencyContact;
 use App\Note;
 use App\PhoneNumber;
 use App\User;
+use Illuminate\Support\Str;
 
 class ImportGenerationsCaregivers extends BaseImport
 {
@@ -54,7 +55,7 @@ class ImportGenerationsCaregivers extends BaseImport
                 $data['ssn'] = str_pad(str_replace('-', '', $this->getValue($objPHPExcel, 'SSN', $row)), 9, '0', STR_PAD_LEFT);
                 $data['title'] = $this->getValue($objPHPExcel, 'Classification', $row);
                 $data['date_of_birth'] = filter_date($this->getValue($objPHPExcel, 'Date of Birth', $row));
-                $data['password'] = bcrypt(str_random(12));
+                $data['password'] = bcrypt(Str::random(12));
                 $data['hire_date'] = filter_date($this->getValue($objPHPExcel, 'Hire Date', $row));
                 $data['gender'] = strtoupper(substr($this->getValue($objPHPExcel, 'Gender', $row), 0, 1));
                 $addressData['address1'] = $this->getValue($objPHPExcel, 'Address1', $row);

@@ -40,6 +40,7 @@ use App\Reports\EVVReport;
 use App\CustomField;
 use App\OfficeUser;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Twilio\Rest\Taskrouter\V1\Workspace\TaskQueue\TaskQueuesStatisticsInstance;
 
 class ReportsController extends BaseController
@@ -549,7 +550,7 @@ class ReportsController extends BaseController
                        'ally_pct'        => AllyFeeCalculator::getPercentage($shift->client, null),
                        'shift_total'     => number_format($shift->costs()->getTotalCost(), 2),
                        'confirmed'       => $shift->statusManager()->isConfirmed(),
-                       'status'          => $shift->status ? title_case(preg_replace('/_/', ' ',
+                       'status'          => $shift->status ? Str::title(preg_replace('/_/', ' ',
                            $shift->status)) : '',
                        'EVV'             => $shift->verified,
                    ])->toArray();
@@ -1003,7 +1004,7 @@ class ReportsController extends BaseController
             ->pluck('client_type')
             ->map(function($item) {
                 return [
-                    'name' => title_case(str_replace('_', ' ', $item)),
+                    'name' => Str::title(str_replace('_', ' ', $item)),
                     'id' => $item
                 ];
             });

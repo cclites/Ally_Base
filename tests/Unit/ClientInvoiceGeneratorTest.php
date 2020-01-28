@@ -25,7 +25,7 @@ class ClientInvoiceGeneratorTest extends TestCase
      */
     private $validator;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
         $this->client = new Client();

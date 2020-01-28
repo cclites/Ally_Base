@@ -25,7 +25,7 @@ class WebClockInTest extends TestCase
     use CreatesSchedules;
     use CreatesShifts;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
         $this->createBusinessWithUsers(true);

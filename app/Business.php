@@ -23,6 +23,7 @@ use App\Traits\ScrubsForSeeding;
 use Crypt;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 /**
  * App\Business
@@ -1037,14 +1038,14 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
             return;
         }
 
-        if (starts_with($value, config('app.url'))) {
+        if (Str::startsWith($value, config('app.url'))) {
             return;
         }
 
         $base64Data = str_replace('data:image/png;base64,', '', $value);
         $base64Data = str_replace(' ', '+', $base64Data);
 
-        $filename = 'logos/' . $this->id . '_' . str_slug($this->name) . '.png';
+        $filename = 'logos/' . $this->id . '_' . Str::slug($this->name) . '.png';
 
         if (\Storage::disk('public')->put($filename, base64_decode($base64Data))) {
             $this->attributes['logo'] = $filename;

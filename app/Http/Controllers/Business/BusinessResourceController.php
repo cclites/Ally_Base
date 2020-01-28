@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use App\Responses\ErrorResponse;
 use Illuminate\Http\Request;
@@ -99,7 +100,7 @@ class BusinessResourceController extends BaseController
             ->map(function ($group) {
                 $data = (array) $group->first();
                 return array_merge(
-                    array_except($data, 'business_id'),
+                    Arr::except($data, 'business_id'),
                     ['businesses' => $group->map(function ($item) {
                         return $item->business_id;
                     })]
