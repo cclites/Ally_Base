@@ -566,9 +566,11 @@ class ReportsController extends BaseController
 
     private function clientShiftGroups(Business $business, array $data)
     {
+        $start = Carbon::createFromFormat( 'Y-m-d', Carbon::parse($data['start_date'])->format( 'Y-m-d' ), $business->getTimezone() )->startOfDay()->setTimezone( 'UTC' );
+        $end = Carbon::createFromFormat( 'Y-m-d', Carbon::parse($data['end_date'])->format( 'Y-m-d' ), $business->getTimezone() )->endOfDay()->setTimezone( 'UTC' );
         return $business->shifts()
             ->with('activities', 'client', 'caregiver', 'questions')
-            ->whereBetween('checked_in_time', [Carbon::parse($data['start_date']), Carbon::parse($data['end_date'])])
+            ->whereBetween('checked_in_time', [ $start, $end ])
             ->when(isset($data['client_id']) && $data['client_id'], function ($query) use ($data) {
                 return $query->where('client_id', $data['client_id']);
             })
