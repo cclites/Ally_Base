@@ -34,6 +34,13 @@ class OpenShiftRequestAccepted extends BaseNotification
     protected $schedule;
 
     /**
+     * The related business.
+     *
+     * @var \App\Business
+     */
+    protected $business;
+
+    /**
      * The action text.
      *
      * @var string
@@ -46,10 +53,11 @@ class OpenShiftRequestAccepted extends BaseNotification
      * @var \App\Schedule $schedule
      * @return void
      */
-    public function __construct( $schedule )
+    public function __construct( $schedule, $business )
     {
         parent::__construct();
         $this->schedule = $schedule;
+        $this->business = $business;
         $this->url = route('business.clients.schedule', ['client' => $this->schedule->client]);
     }
 
@@ -74,7 +82,7 @@ class OpenShiftRequestAccepted extends BaseNotification
      */
     public function toSms($notifiable)
     {
-        return $this->toSmsFromBusiness( $notifiable, $this->client->business );
+        return $this->toSmsFromBusiness( $notifiable, $this->business );
     }
 
     /**
