@@ -7,6 +7,37 @@ use App\Scheduling\OpenShiftRequestStatus;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * App\CaregiverScheduleRequest
+ *
+ * @property int $id
+ * @property int $business_id
+ * @property int $client_id
+ * @property int $caregiver_id
+ * @property int $schedule_id
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \App\Business $business
+ * @property-read \App\Caregiver $caregiver
+ * @property-read \App\Client $client
+ * @property-read \App\Schedule $schedule
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverScheduleRequest forOpenSchedules()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverScheduleRequest forSchedulesInTheNextMonth($timezone)
+ * @method static bool|null forceDelete()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverScheduleRequest newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverScheduleRequest newQuery()
+ * @method static \Illuminate\Database\Query\Builder|\App\CaregiverScheduleRequest onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverScheduleRequest query()
+ * @method static bool|null restore()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverScheduleRequest whereActive()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverScheduleRequest whereActiveOrUninterested()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverScheduleRequest wherePending()
+ * @method static \Illuminate\Database\Query\Builder|\App\CaregiverScheduleRequest withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|\App\CaregiverScheduleRequest withoutTrashed()
+ * @mixin \Eloquent
+ */
 class CaregiverScheduleRequest extends Pivot
 {
     use SoftDeletes;

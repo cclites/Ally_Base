@@ -28,6 +28,10 @@ use App\Traits\BelongsToOneBusiness;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\RateCode query()
  */
 class RateCode extends AuditableModel implements BelongsToBusinessesInterface
 {

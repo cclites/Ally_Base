@@ -7,6 +7,30 @@ use App\Traits\BelongsToOneBusiness;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\CommunicationLog
+ *
+ * @property int $id
+ * @property string $channel
+ * @property string|null $subject
+ * @property string|null $to
+ * @property string|null $from
+ * @property string $body
+ * @property string|null $error
+ * @property string $preview
+ * @property string|null $sent_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CommunicationLog forChannel($channel)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CommunicationLog newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CommunicationLog newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CommunicationLog query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CommunicationLog whereSentBetween($start, $end)
+ * @mixin \Eloquent
+ */
 class CommunicationLog extends AuditableModel
 {
     /**

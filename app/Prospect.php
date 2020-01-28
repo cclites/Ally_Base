@@ -85,6 +85,17 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereZip($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect withConverted()
  * @mixin \Eloquent
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read int|null $audits_count
+ * @property-read int|null $notes_count
+ * @method static bool|null forceDelete()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect newQuery()
+ * @method static \Illuminate\Database\Query\Builder|\App\Prospect onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect query()
+ * @method static bool|null restore()
+ * @method static \Illuminate\Database\Query\Builder|\App\Prospect withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|\App\Prospect withoutTrashed()
  */
 class Prospect extends AuditableModel implements BelongsToBusinessesInterface
 {

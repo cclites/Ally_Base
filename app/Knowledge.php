@@ -35,6 +35,12 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge whereYoutubeId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge withKeyword($keyword)
  * @mixin \Eloquent
+ * @property-read int|null $attachments_count
+ * @property-read int|null $roles_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge query()
  */
 class Knowledge extends BaseModel
 {

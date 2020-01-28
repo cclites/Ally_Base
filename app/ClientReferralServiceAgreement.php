@@ -48,6 +48,9 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereTerminationNotice($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientReferralServiceAgreement query()
  */
 class ClientReferralServiceAgreement extends BaseModel
 {

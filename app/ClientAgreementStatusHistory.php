@@ -16,6 +16,9 @@ namespace App;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientAgreementStatusHistory whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientAgreementStatusHistory whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientAgreementStatusHistory newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientAgreementStatusHistory newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientAgreementStatusHistory query()
  */
 class ClientAgreementStatusHistory extends BaseModel
 {

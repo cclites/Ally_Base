@@ -20,6 +20,9 @@ use App\CustomField;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientMeta whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientMeta whereValue($value)
  * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientMeta newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientMeta newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientMeta query()
  */
 class ClientMeta extends BaseModel
 {

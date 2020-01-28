@@ -2,6 +2,52 @@
 
 namespace App;
 
+/**
+ * App\SkilledNursingPoc
+ *
+ * @property int $id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property int $client_id
+ * @property string|null $certification_start
+ * @property string|null $certification_end
+ * @property int|null $medical_record_number
+ * @property string|null $provider_number
+ * @property string|null $principal_diagnosis_icd_cm
+ * @property string|null $principal_diagnosis
+ * @property string|null $principal_diagnosis_date
+ * @property string|null $surgical_procedure_icd_cm
+ * @property string|null $surgical_procedure
+ * @property string|null $surgical_procedure_date
+ * @property string|null $other_diagnosis_icd_cm
+ * @property string|null $other_diagnosis
+ * @property string|null $other_diagnosis_date
+ * @property string|null $other_diagnosis_icd_cm1
+ * @property string|null $other_diagnosis1
+ * @property string|null $other_diagnosis_date1
+ * @property string|null $other_diagnosis_icd_cm2
+ * @property string|null $other_diagnosis2
+ * @property string|null $other_diagnosis_date2
+ * @property string|null $physician_name
+ * @property string|null $physician_address
+ * @property string|null $physician_phone
+ * @property string|null $orders
+ * @property string|null $mental_status
+ * @property string|null $prognosis
+ * @property string|null $functional
+ * @property string|null $functional_other
+ * @property string|null $mobility
+ * @property string|null $mobility_instructions
+ * @property string|null $mobility_other
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read int|null $audits_count
+ * @property-read \App\Client $client
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SkilledNursingPoc newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SkilledNursingPoc newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SkilledNursingPoc query()
+ * @mixin \Eloquent
+ */
 class SkilledNursingPoc extends AuditableModel
 {
     /**

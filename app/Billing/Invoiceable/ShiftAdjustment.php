@@ -43,6 +43,13 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\InvoiceableModel whereMeta($key, $delimiter = null, $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\InvoiceableModel withMeta()
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @property-read int|null $client_invoice_items_count
+ * @property-read int|null $meta_count
+ * @property-read \App\Billing\Payer|null $payer
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment forCaregivers($caregiverIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  */
 class ShiftAdjustment extends InvoiceableModel
 {

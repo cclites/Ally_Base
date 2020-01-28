@@ -23,6 +23,9 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadRecipient whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadRecipient whereUserId($value)
  * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadRecipient newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadRecipient newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadRecipient query()
  */
 class SmsThreadRecipient extends BaseModel
 {

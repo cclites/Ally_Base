@@ -44,6 +44,14 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoiceItem whereTotal($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoiceItem whereUnits($value)
  * @mixin \Eloquent
+ * @property int $was_split
+ * @property-read int|null $audits_count
+ * @property-read \App\Shift $shift
+ * @property-read \App\Billing\Invoiceable\ShiftExpense $shiftExpense
+ * @property-read \App\Billing\Invoiceable\ShiftService $shiftService
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoiceItem newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoiceItem newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoiceItem query()
  */
 class ClientInvoiceItem extends BaseInvoiceItem
 {

@@ -25,6 +25,9 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Eloquent
  * @property-read \App\Client $client
  * @property-read void $is_owner
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientNarrative newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientNarrative newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientNarrative query()
  */
 class ClientNarrative extends Model
 {

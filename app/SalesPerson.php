@@ -5,6 +5,30 @@ namespace App;
 use App\Traits\BelongsToOneBusiness;
 use App\Contracts\BelongsToBusinessesInterface;
 
+/**
+ * App\SalesPerson
+ *
+ * @property int $id
+ * @property int $business_id
+ * @property string $email
+ * @property string $firstname
+ * @property string $lastname
+ * @property int $active
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Business $business
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clients
+ * @property-read int|null $clients_count
+ * @property-read mixed $name_last_first
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SalesPerson forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SalesPerson forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SalesPerson newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SalesPerson newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SalesPerson query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SalesPerson whereActive()
+ * @mixin \Eloquent
+ */
 class SalesPerson extends BaseModel implements BelongsToBusinessesInterface
 {
     use BelongsToOneBusiness;

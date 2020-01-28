@@ -7,6 +7,33 @@ use Illuminate\Support\Str;
 use function Sentry\addBreadcrumb;
 
 
+/**
+ * App\SystemNotification
+ *
+ * @property int $id
+ * @property int $user_id
+ * @property string|null $key
+ * @property string|null $message
+ * @property string|null $action
+ * @property string|null $action_url
+ * @property string|null $reference_type
+ * @property string|null $reference_id
+ * @property string|null $acknowledged_at
+ * @property string|null $notes
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $event_id
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read int|null $audits_count
+ * @property-read string $title
+ * @property-read \App\SystemNotification|null $reference
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemNotification newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemNotification newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemNotification notAcknowledged()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemNotification query()
+ * @mixin \Eloquent
+ */
 class SystemNotification extends AuditableModel
 {
     /**

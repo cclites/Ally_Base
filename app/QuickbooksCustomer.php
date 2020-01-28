@@ -2,6 +2,26 @@
 
 namespace App;
 
+/**
+ * App\QuickbooksCustomer
+ *
+ * @property int $id
+ * @property int $business_id
+ * @property string $customer_id
+ * @property string $name
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read int|null $audits_count
+ * @property-read \App\Business $business
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $client
+ * @property-read int|null $client_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\QuickbooksCustomer newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\QuickbooksCustomer newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\QuickbooksCustomer query()
+ * @mixin \Eloquent
+ */
 class QuickbooksCustomer extends AuditableModel
 {
     /**

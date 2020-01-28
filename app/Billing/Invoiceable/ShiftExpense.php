@@ -14,8 +14,34 @@ use Illuminate\Support\Str;
 
 /**
  * Class ShiftExpense
+ *
  * @package App\Billing\Invoiceable
  * @property \App\Shift $shift
+ * @property int $id
+ * @property int $shift_id
+ * @property string $name
+ * @property float $units
+ * @property float $rate
+ * @property float|null $ally_fee
+ * @property string|null $notes
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read int|null $audits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientInvoiceItem[] $clientInvoiceItems
+ * @property-read int|null $client_invoice_items_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Invoiceable\InvoiceableMeta[] $meta
+ * @property-read int|null $meta_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftExpense forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftExpense forCaregivers($caregiverIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftExpense forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftExpense newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftExpense newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftExpense query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\InvoiceableModel whereMeta($key, $delimiter = null, $value = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\InvoiceableModel withMeta()
+ * @mixin \Eloquent
  */
 class ShiftExpense extends InvoiceableModel
 {

@@ -47,6 +47,35 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BusinessChain whereZip($value)
  * @mixin \Eloquent
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverApplication[] $caregiverApplications
+ * @property int $calendar_week_start
+ * @property-read int|null $audits_count
+ * @property-read int|null $businesses_count
+ * @property-read int|null $caregiver_applications_count
+ * @property-read int|null $caregivers_count
+ * @property-read \App\ChainClientTypeSettings $clientTypeSettings
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\DeactivationReason[] $deactivationReasons
+ * @property-read int|null $deactivation_reasons_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ExpirationType[] $expirationTypes
+ * @property-read int|null $expiration_types_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\CustomField[] $fields
+ * @property-read int|null $fields_count
+ * @property-read mixed $all_deactivation_reasons
+ * @property-read mixed $caregiver_deactivation_reasons
+ * @property-read string $city_state_zip
+ * @property-read mixed $client_deactivation_reasons
+ * @property-read string|null $street_address
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Payer[] $payers
+ * @property-read int|null $payers_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ReferralSource[] $referralSources
+ * @property-read int|null $referral_sources_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Service[] $services
+ * @property-read int|null $services_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\StatusAlias[] $statusAliases
+ * @property-read int|null $status_aliases_count
+ * @property-read int|null $users_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BusinessChain newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BusinessChain newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BusinessChain query()
  */
 class BusinessChain extends AuditableModel
 {

@@ -24,6 +24,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Query\Builder|\App\FailedTransaction withTrashed()
  * @method static \Illuminate\Database\Query\Builder|\App\FailedTransaction withoutTrashed()
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\FailedTransaction newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\FailedTransaction newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\FailedTransaction query()
  */
 class FailedTransaction extends AuditableModel
 {

@@ -24,6 +24,11 @@ use App\Data\ScheduledRates;
  * @property-read \App\Schedule $schedule
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @property-read \App\Billing\Service $service
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ScheduleService newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ScheduleService newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ScheduleService query()
  */
 class ScheduleService extends AuditableModel
 {

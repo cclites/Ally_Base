@@ -135,6 +135,10 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientOnboarding whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientOnboarding whereWeight($value)
  * @mixin \Eloquent
+ * @property-read int|null $activities_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientOnboarding newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientOnboarding newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientOnboarding query()
  */
 class ClientOnboarding extends BaseModel
 {
