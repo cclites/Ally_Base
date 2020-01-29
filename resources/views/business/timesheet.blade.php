@@ -4,8 +4,8 @@
 
 @section('content')
     <business-timesheet 
-        :activities="{{ $activities OR '[]' }}"
-        :timesheet="{{ $timesheet OR '{}' }}"
-        :caregivers="{{ $caregivers OR '[]' }}"
+        :activities="{{ $activities ?? '[]' }}"
+        :timesheet="{{ $timesheet ?? '{}' }}"
+        :caregivers="{{ $caregivers ?? '[]' }}"
     ></business-timesheet>
 @endsection

@@ -6,6 +6,38 @@ use Illuminate\Database\Eloquent\Model;
 use App\Contracts\BelongsToChainsInterface;
 use App\Traits\BelongsToOneChain;
 
+/**
+ * App\CustomField
+ *
+ * @property int $id
+ * @property int $chain_id
+ * @property string $user_type
+ * @property string $key
+ * @property string $label
+ * @property string $type
+ * @property int $required
+ * @property string|null $default_value
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\BusinessChain $businessChain
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverMeta[] $caregivers
+ * @property-read int|null $caregivers_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientMeta[] $clients
+ * @property-read int|null $clients_count
+ * @property-read string $default
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\CustomFieldOption[] $options
+ * @property-read int|null $options_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CustomField forAuthorizedChain(\App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CustomField forCaregivers()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CustomField forChain($chain)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CustomField forChains($chains)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CustomField forClients()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CustomField newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CustomField newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CustomField query()
+ * @mixin \Eloquent
+ */
 class CustomField extends BaseModel implements BelongsToChainsInterface
 {
     use BelongsToOneChain;

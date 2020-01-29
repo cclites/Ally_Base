@@ -40,6 +40,8 @@ use Carbon\CarbonPeriod;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientAuthorization query()
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientAuthorization effectiveDuringRange(\Carbon\Carbon $start, \Carbon\Carbon $end)
  */
 class ClientAuthorization extends AuditableModel
 {

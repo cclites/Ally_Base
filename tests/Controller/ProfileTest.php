@@ -16,12 +16,12 @@ class ProfileTest extends TestCase
     protected $caregiver;
     protected $officeUser;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
 
         // Log exceptions to stderr
-        Log::useFiles('php://stderr');
+        \Config::set('logging.default', 'stderr');
 
         $this->client = factory(Client::class)->create();
     }

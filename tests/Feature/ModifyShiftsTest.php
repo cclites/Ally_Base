@@ -21,7 +21,7 @@ class ModifyShiftsTest extends TestCase
      */
     private $shift;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
 

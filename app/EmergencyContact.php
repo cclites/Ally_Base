@@ -27,6 +27,10 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\EmergencyContact whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\EmergencyContact whereUserId($value)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\EmergencyContact newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\EmergencyContact newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\EmergencyContact query()
  */
 class EmergencyContact extends AuditableModel
 {

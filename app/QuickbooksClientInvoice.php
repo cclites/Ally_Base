@@ -6,6 +6,31 @@ use App\Billing\ClientInvoice;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\QuickbooksClientInvoice
+ *
+ * @property int $id
+ * @property int|null $business_id
+ * @property int $client_invoice_id
+ * @property string|null $qb_online_id
+ * @property string|null $qb_desktop_id
+ * @property string|null $errors
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read int|null $audits_count
+ * @property-read \App\Billing\ClientInvoice $clientInvoice
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\QuickbooksClientInvoiceStatusHistory[] $statuses
+ * @property-read int|null $statuses_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\QuickbooksClientInvoice forBusiness($businessId)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\QuickbooksClientInvoice newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\QuickbooksClientInvoice newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\QuickbooksClientInvoice query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\QuickbooksClientInvoice withStatus(\App\QuickbooksInvoiceStatus $status)
+ * @mixin \Eloquent
+ */
 class QuickbooksClientInvoice extends AuditableModel
 {
     /**

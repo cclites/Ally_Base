@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Auth;
 use Closure;
+use Illuminate\Support\Str;
 
 class RestrictMobileAppToCaregivers
 {
@@ -19,7 +20,7 @@ class RestrictMobileAppToCaregivers
         if (is_mobile_app()
             && Auth::check()
             && Auth::user()->role_type !== 'caregiver'
-            && !str_contains($request->getUri(), 'logout')
+            && !Str::contains($request->getUri(), 'logout')
         ) {
             return response(view('errors.mobile_app_restricted'));
         }

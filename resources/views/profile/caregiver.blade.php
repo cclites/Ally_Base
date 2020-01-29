@@ -83,7 +83,7 @@
                     <div class="card">
                         <div class="card-header bg-info text-white">Bank Account</div>
                         <div class="card-body">
-                            <bank-account-form :account="{{ $user->role->bankAccount OR '{}' }}" 
+                            <bank-account-form :account="{{ $user->role->bankAccount ?? '{}' }}" 
                                 :submit-url="'{{ '/profile/bank-account' }}'" 
                                 :readonly="authInactive" />
                         </div>
@@ -105,7 +105,7 @@
             </div>
         </div>
         <div class="tab-pane" id="tax_documents" role="tabpanel">
-            <caregiver-1099s-tab :caregiver="{{ $user->id }}"></caregiver-1099s-tab>
+            <caregiver-1099s-tab />
         </div>
     </div>
 @endsection

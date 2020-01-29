@@ -87,7 +87,8 @@ class PhoneService
             $this->logCommunication($this->from, $to, $message);
 
             if (empty($this->client)) {
-                return Log::info("Send Text Message to: {$to}\r\nFrom: {$this->from}\r\nBody: {$message}");
+                Log::info("Send Text Message to: {$to}\r\nFrom: {$this->from}\r\nBody: {$message}");
+                return null;
             }
             $message = $this->client->messages->create($to, ['from' => $this->from, 'body' => $message]);
 
@@ -97,11 +98,15 @@ class PhoneService
             if( strpos( $ex->getMessage(), 'blacklist') !== false ){
                 // if this is a blacklist error..
 
-                $this->log->update([ 'error' => 'Blacklisted Phone Number' ]);
+                if ($this->log) {
+                    $this->log->update([ 'error' => 'Blacklisted Phone Number' ]);
+                }
             } elseif (strpos($ex->getMessage(), 'not a valid phone number') !== false) {
                 //if this is not a valid phone number
 
-                $this->log->update(['error' => 'Invalid phone number']);
+                if ($this->log) {
+                    $this->log->update(['error' => 'Invalid phone number']);
+                }
             } else {
                 // else pass along to log to sentry..
 

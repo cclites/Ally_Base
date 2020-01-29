@@ -5,6 +5,21 @@ namespace App\Billing;
 use App\Billing\Payments\PaymentMethodType;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Billing\FeeOverrideRule
+ *
+ * @property int $id
+ * @property int|null $business_id
+ * @property int|null $client_id
+ * @property string $payment_method_type
+ * @property float $rate
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\FeeOverrideRule newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\FeeOverrideRule newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\FeeOverrideRule query()
+ * @mixin \Eloquent
+ */
 class FeeOverrideRule extends Model
 {
     /**

@@ -25,6 +25,9 @@ namespace App;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientPreferences newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientPreferences newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientPreferences query()
+ * @property-read int|null $audits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClientEthnicityPreference[] $ethnicities
+ * @property-read int|null $ethnicities_count
  */
 class ClientPreferences extends AuditableModel
 {

@@ -26,6 +26,15 @@ use Illuminate\Support\Facades\Crypt;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientMedication whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientMedication whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property mixed|null $description
+ * @property mixed|null $side_effects
+ * @property mixed|null $notes
+ * @property mixed|null $tracking
+ * @property bool $was_changed
+ * @property-read \App\Client $client
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientMedication newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientMedication newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientMedication query()
  */
 class ClientMedication extends BaseModel
 {

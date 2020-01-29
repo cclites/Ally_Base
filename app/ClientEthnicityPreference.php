@@ -4,6 +4,17 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\ClientEthnicityPreference
+ *
+ * @property int $id
+ * @property int $client_id
+ * @property string $ethnicity
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientEthnicityPreference newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientEthnicityPreference newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientEthnicityPreference query()
+ * @mixin \Eloquent
+ */
 class ClientEthnicityPreference extends Model
 {
     /**

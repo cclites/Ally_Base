@@ -9,7 +9,7 @@
 
 @section('content')
     @if(is_admin_now())
-        <admin-business-select :business="{{ $active_business OR '{}' }}"></admin-business-select>
+        <admin-business-select :business="{{ $active_business ?? '{}' }}"></admin-business-select>
     @endif
     @if($active_business)
         <client-list></client-list>

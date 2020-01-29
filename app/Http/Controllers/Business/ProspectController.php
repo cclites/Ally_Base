@@ -8,6 +8,7 @@ use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ProspectController extends BaseController
 {
@@ -111,7 +112,7 @@ class ProspectController extends BaseController
     {
         $this->authorize('update', $prospect);  // Eventually this should also check 'create' client
 
-        $username = $prospect->email ?? str_slug($prospect->name) . mt_rand(10,999);
+        $username = $prospect->email ?? Str::slug($prospect->name) . mt_rand(10,999);
         if (!$client = $prospect->convert($username)) {
             return new ErrorResponse(400, 'The client record could not be created.');
         }

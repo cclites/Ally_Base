@@ -15,7 +15,7 @@
 
     <div class="row">
         <div class="col-lg-6">
-            <clock-in :selected-schedule="{{ $schedule OR '{}' }}"></clock-in>
+            <clock-in :selected-schedule="{{ $schedule ?? '{}' }}"></clock-in>
         </div>
     </div>
 @endsection

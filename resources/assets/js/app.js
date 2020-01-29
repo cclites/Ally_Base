@@ -161,7 +161,8 @@ Vue.component('admin-1099-actions', require('./components/admin/taxes/Admin1099.
 Vue.component('caregiver-1099-admin', require('./components/admin/taxes/Caregiver1099Admin.vue'));
 Vue.component('caregiver-1099s-tab', require('./components/caregivers/Caregiver1099sTab'));
 Vue.component('client-1099s-tab', require('./components/clients/Client1099sTab'));
-Vue.component('business-1099s-tab', require('./components/business/caregivers/Caregiver1099sTab'));
+Vue.component('business-caregivers-1099s-tab', require('./components/business/caregivers/Caregiver1099sTab'));
+Vue.component('business-client-1099s-tab', require('./components/business/clients/Client1099sTab'));
 Vue.component('admin-system-settings', require('./components/admin/AdminSystemSettings'));
 Vue.component('business-1099-settings', require('./components/business/settings/Business1099Settings'));
 Vue.component('chain-1099-settings', require('./components/admin/settings/Chain1099Settings'));

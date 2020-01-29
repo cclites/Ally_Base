@@ -66,7 +66,7 @@ abstract class BusinessRequest extends FormRequest
      *
      * @return array
      */
-    protected function validationData()
+    public function validationData()
     {
         return $this->addBusinessInput($this->all());
     }

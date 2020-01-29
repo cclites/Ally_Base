@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\DeactivationReason;
 use App\UserNotificationPreferences;
 use App\SetupStatusHistory;
+use Illuminate\Support\Str;
 use org\apache\maven\POM\_4_0_0\Build;
 
 trait IsUserRole
@@ -124,7 +125,7 @@ trait IsUserRole
      */
     public function getRoleType()
     {
-        return snake_case(class_basename(get_called_class()));
+        return Str::snake(class_basename(get_called_class()));
     }
 
     ///////////////////////////////////////////
@@ -240,7 +241,7 @@ trait IsUserRole
             return;
         }
 
-        if (starts_with($value, config('app.url'))) {
+        if (Str::startsWith($value, config('app.url'))) {
             return;
         }
 

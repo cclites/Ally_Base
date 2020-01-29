@@ -26,7 +26,7 @@ class InvoiceableQueryTest extends TestCase
     /** @var InvoiceableQuery */
     private $query;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
         $this->invoiceableClass = Shift::class;

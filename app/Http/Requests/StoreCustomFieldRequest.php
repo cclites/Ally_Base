@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Support\Str;
+
 class StoreCustomFieldRequest extends UpdateCustomFieldRequest
 {
     /**
@@ -12,7 +14,7 @@ class StoreCustomFieldRequest extends UpdateCustomFieldRequest
     public function filtered()
     {
         $data = parent::filtered();
-        $data['key'] = preg_replace('/[^A-Za-z0-9]/', '', snake_case($data['label']));
+        $data['key'] = preg_replace('/[^A-Za-z0-9]/', '', Str::snake($data['label']));
         return $data;
     }
 }

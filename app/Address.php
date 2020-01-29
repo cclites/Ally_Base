@@ -45,6 +45,13 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Address whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Address whereZip($value)
  * @mixin \Eloquent
+ * @property string|null $notes
+ * @property-read int|null $audits_count
+ * @property-read string $city_state_zip
+ * @property-read string|null $street_address
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Address newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Address newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Address query()
  */
 class Address extends AuditableModel
 {

@@ -6,7 +6,7 @@
     <caregiver-timesheet
         :timesheet="{{ $timesheet }}"
         :cg="{{ $caregiver }}" 
-        :activities="{{ $activities OR '[]' }}"
-        :caregivers="{{ $caregivers OR '[]' }}"
+        :activities="{{ $activities ?? '[]' }}"
+        :caregivers="{{ $caregivers ?? '[]' }}"
     ></caregiver-timesheet>
 @endsection

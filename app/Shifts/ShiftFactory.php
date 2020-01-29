@@ -13,6 +13,7 @@ use App\Shift;
 use App\Shifts\Contracts\ShiftDataInterface;
 use App\Shifts\Data\ClockData;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Arr;
 
 /**
  * Class ShiftFactory
@@ -119,7 +120,7 @@ class ShiftFactory implements Arrayable
 
         if ($schedule->services->count()) {
             $self->withServices($schedule->services->map(function(ScheduleService $service) use ($schedule, $clockIn) {
-                $serviceData = array_except($service->toArray(), ['id', 'schedule_id', 'updated_at', 'created_at']);
+                $serviceData = Arr::except($service->toArray(), ['id', 'schedule_id', 'updated_at', 'created_at']);
                 $rates = self::resolveRates(clone $clockIn, $service->getRates(), $schedule->client_id, $schedule->caregiver_id, $service->service_id, $service->payer_id);
                 $serviceData = array_merge($serviceData, [
                     'client_rate' => $rates->clientRate(),

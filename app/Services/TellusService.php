@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contracts\SFTPReaderWriterInterface;
 use App\ClaimInvoiceTellusFile;
+use Illuminate\Support\Str;
 use SimpleXMLElement;
 use DOMDocument;
 
@@ -106,7 +107,7 @@ class TellusService
             throw new TellusValidationException('Claim file did not pass remote XML validation.');
         }
 
-        if (!str_contains($response, 'Successfully submitted for processing')) {
+        if (!Str::contains($response, 'Successfully submitted for processing')) {
             throw new TellusApiException("Unexpected response from Tellus.  Please try again.");
         }
 
@@ -286,7 +287,7 @@ class TellusService
      */
     public function getResultFilePath(string $filename)
     {
-        if (str_contains($this->endpoint, 'edi.stg.4tellus.net')) {
+        if (Str::contains($this->endpoint, 'edi.stg.4tellus.net')) {
             // using staging server - should check test directory
             return $this->getSftpPath("local/outbound/test/{$filename}");
         }
@@ -305,7 +306,7 @@ class TellusService
     {
         $root = str_replace('{username}', strtolower($this->username), config('services.tellus.sftp_directory'));
 
-        $root = ends_with($root, '/') ? $root : $root . '/';
+        $root = Str::endsWith($root, '/') ? $root : $root . '/';
 
         return $root . $filename;
     }

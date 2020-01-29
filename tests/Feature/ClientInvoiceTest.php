@@ -32,7 +32,7 @@ class ClientInvoiceTest extends TestCase
     /** @var ClientInvoiceGenerator */
     private $invoicer;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
 

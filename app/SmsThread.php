@@ -36,6 +36,18 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereSentAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property int|null $user_id
+ * @property-read int|null $unread_replies_count
+ * @property-read int|null $recipients_count
+ * @property-read int|null $replies_count
+ * @property-read \App\User|null $sender
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SmsThreadReply[] $unreadReplies
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread betweenDates($start, $end)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread fullTextSearch($term = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThread withReplies($onOff = false)
  */
 class SmsThread extends BaseModel implements BelongsToBusinessesInterface
 {

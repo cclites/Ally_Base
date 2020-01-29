@@ -34,6 +34,12 @@ use Carbon\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry whereTimesheetId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property float|null $provider_fee
+ * @property-read int|null $activities_count
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TimesheetEntry query()
  */
 class TimesheetEntry extends AuditableModel
 {

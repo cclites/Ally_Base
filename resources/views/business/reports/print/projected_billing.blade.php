@@ -26,7 +26,7 @@
                     @foreach ($clientTypeStats as $type)
                         <tr>
                             <td class="w-50">
-                                <i class="fa fa-chevron-right mr-1"></i>{{ title_case(data_get($type, 'name')) }}:
+                                <i class="fa fa-chevron-right mr-1"></i>{{ Str::title(data_get($type, 'name')) }}:
                             </td>
                             <td class="w-50">${{ number_format(data_get($type, 'projected_billing'), 2) }}</td>
                         </tr>

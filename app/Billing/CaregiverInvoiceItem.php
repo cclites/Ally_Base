@@ -6,6 +6,30 @@ use App\Billing\Contracts\InvoiceableInterface;
 use Illuminate\Database\Eloquent\Model;
 
 
+/**
+ * App\Billing\CaregiverInvoiceItem
+ *
+ * @property int $id
+ * @property int $invoice_id
+ * @property string|null $invoiceable_type
+ * @property int|null $invoiceable_id
+ * @property string|null $group
+ * @property string $name
+ * @property float $units
+ * @property float $rate
+ * @property float $total
+ * @property string|null $date
+ * @property string|null $notes
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read int|null $audits_count
+ * @property-read \App\Billing\CaregiverInvoice $invoice
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $invoiceable
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\CaregiverInvoiceItem newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\CaregiverInvoiceItem newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\CaregiverInvoiceItem query()
+ * @mixin \Eloquent
+ */
 class CaregiverInvoiceItem extends BaseInvoiceItem
 {
     protected $casts = [

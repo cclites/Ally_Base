@@ -55,6 +55,37 @@ use Illuminate\Database\Eloquent\Builder;
  * @property-read mixed $masked_name
  * @property-read mixed $updated_at
  * @property-read \App\PhoneNumber $smsNumber
+ * @property int|null $default_business_id
+ * @property string $timezone
+ * @property int $views_reports
+ * @property-read int|null $addresses_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $assignedClients
+ * @property-read int|null $assigned_clients_count
+ * @property-read int|null $audits_count
+ * @property-read int|null $bank_accounts_count
+ * @property-read int|null $businesses_count
+ * @property-read int|null $credit_cards_count
+ * @property-read \App\DeactivationReason $deactivationReason
+ * @property-read \App\Business|null $defaultBusiness
+ * @property-read int|null $documents_count
+ * @property-read mixed $deactivation_reason_id
+ * @property-read mixed $initialed_name
+ * @property-read mixed $reactivation_date
+ * @property-read mixed $setup_status
+ * @property-read mixed $status_alias_id
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\UserNotificationPreferences[] $notificationPreferences
+ * @property-read int|null $notification_preferences_count
+ * @property-read int|null $phone_numbers_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SetupStatusHistory[] $setupStatusHistory
+ * @property-read int|null $setup_status_history_count
+ * @property-read \App\StatusAlias $statusAlias
+ * @property-read int|null $tasks_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser doesntHaveEmail()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser hasEmail()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser inactive()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OfficeUser query()
  */
 class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInterface, HasTimezone
 {

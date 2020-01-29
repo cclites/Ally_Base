@@ -14,7 +14,9 @@ class AlterTasksTableChangeAssignedUserIdForeignKey extends Migration
     public function up()
     {
         Schema::table('tasks', function (Blueprint $table) {
-            $table->dropForeign(['assigned_user_id']);
+            if (\DB::getDriverName() != 'sqlite') {
+                $table->dropForeign(['assigned_user_id']);
+            }
             $table->foreign('assigned_user_id')->references('id')->on('users');
         });
     }

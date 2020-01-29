@@ -47,7 +47,7 @@ class InvoicePaymentTest extends TestCase
      */
     protected $methodFactory;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
 

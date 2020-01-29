@@ -15,7 +15,7 @@ class CaregiverTest extends TestCase
 
     public $caregiver;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
         $this->caregiver = factory(Caregiver::class)->create();

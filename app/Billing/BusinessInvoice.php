@@ -28,6 +28,10 @@ use Illuminate\Support\Collection;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\BusinessInvoice query()
  * @mixin \Eloquent
+ * @property string|null $notes
+ * @property-read int|null $audits_count
+ * @property-read int|null $deposits_count
+ * @property-read int|null $items_count
  */
 class BusinessInvoice extends AuditableModel implements DepositInvoiceInterface
 {

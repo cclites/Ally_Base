@@ -2,6 +2,29 @@
 
 namespace App;
 
+/**
+ * App\CaregiverYearlyEarnings
+ *
+ * @property int $id
+ * @property int $year
+ * @property int $caregiver_id
+ * @property int $client_id
+ * @property int $business_id
+ * @property float $earnings
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Business $business
+ * @property-read \App\Caregiver $caregiver
+ * @property-read \App\Client $client
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverYearlyEarnings newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverYearlyEarnings newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverYearlyEarnings overThreshold($threshold)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverYearlyEarnings query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverYearlyEarnings whereUsesAllyPayer()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverYearlyEarnings whereUsesClientPayer()
+ * @mixin \Eloquent
+ */
 class CaregiverYearlyEarnings extends BaseModel
 {
     /**

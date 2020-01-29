@@ -596,7 +596,7 @@
                     return;
                 }
 
-                if (this.hoverShift.starts_at && moment(this.hoverShift.starts_at.date).isBefore(moment())) {
+                if (this.hoverShift.starts_at && moment(this.hoverShift.starts_at).isBefore(moment())) {
                     if (! confirm('Modifying past schedules will NOT change the shift history or billing.  Continue?')) {
                         return;
                     }

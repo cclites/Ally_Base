@@ -13,7 +13,7 @@ class CommunicationLogTest extends TestCase
 {
     use RefreshDatabase, CreatesBusinesses;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
 
@@ -32,7 +32,7 @@ class CommunicationLogTest extends TestCase
         $log = CommunicationLog::first();
         $this->assertEquals($this->caregiver->email, $log->to);
         $this->assertEquals('mail', $log->channel);
-        $this->assertContains('Click here to confirm', $log->body);
+        $this->assertStringContainsString('Click here to confirm', $log->body);
     }
 
     /** @test */

@@ -98,7 +98,7 @@
                                 <i class="fa fa-exclamation-triangle mr-2"></i>
                             </b-btn>
 
-                            <div v-if="row.item.caregiver_1099_id">
+                            <div v-if="row.item.caregiver_1099_id && row.item.caregiver_1099 != 'ally'">
                                 <b-btn
                                        @click="edit(row.item.caregiver_1099_id)"
                                        class="btn btn-secondary"

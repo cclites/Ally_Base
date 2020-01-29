@@ -6,6 +6,7 @@ use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use Illuminate\Support\Str;
 
 class ClaimsReportController extends BaseController
 {
@@ -96,7 +97,7 @@ class ClaimsReportController extends BaseController
         switch ($request->export_type) {
             case 'pdf':
                 $pdf = PDF::loadView('business.reports.print.insurance_claim', $viewData);
-                return $pdf->download(str_slug($client->name.' Claim').'.pdf');
+                return $pdf->download(Str::slug($client->name.' Claim').'.pdf');
             default:
                 $viewData['render'] = 'html';
                 return view('business.reports.print.insurance_claim', $viewData);

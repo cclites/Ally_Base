@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use App\Events\ShiftFlagsCouldChange;
+use Illuminate\Support\Arr;
 
 class ShiftController extends BaseController
 {
@@ -117,7 +118,7 @@ class ShiftController extends BaseController
                 'notes' => optional($shift->schedule)->notes,
             ],
             'goals' => empty($shift->goals) ? [] : $shift->goals->map(function ($item) {
-                return array_only($item->toArray(), ['id', 'pivot']);
+                return Arr::only($item->toArray(), ['id', 'pivot']);
             })->values()->toArray(),
         ]);
 

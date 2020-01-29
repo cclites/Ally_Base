@@ -26,13 +26,13 @@ class FilteredResourceRequest extends FormRequest
      *
      * @return void
      */
-    public function validate()
+    public function validateResolved()
     {
         if (! $this->forJson() && ! $this->forExport()) {
             return;
         }
 
-        parent::validate();
+        parent::validateResolved();
     }
 
     /**
@@ -74,6 +74,7 @@ class FilteredResourceRequest extends FormRequest
      * @param string|null $fromTimezone
      * @param string $toTimezone
      * @return array
+     * @throws \Exception
      */
     public function filterDateRange(string $startKey = 'start_date', string $endKey = 'end_date', ?string $fromTimezone = null, string $toTimezone = 'UTC') : array
     {
