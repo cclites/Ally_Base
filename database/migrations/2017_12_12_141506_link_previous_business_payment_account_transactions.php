@@ -76,7 +76,7 @@ class LinkPreviousBusinessPaymentAccountTransactions extends Migration
             }
 
             $details = json_decode(json_encode($result->transaction), true);
-            Cache::put($cacheKey, $details, 60);
+            Cache::put($cacheKey, $details, 60 * 60);
         }
 
         $details = Cache::get($cacheKey);

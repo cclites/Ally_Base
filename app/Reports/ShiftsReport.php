@@ -7,6 +7,7 @@ use App\Shift;
 use App\Shifts\RateFactory;
 use App\Shifts\Rates;
 use App\Traits\ShiftReportFilters;
+use Illuminate\Support\Str;
 
 class ShiftsReport extends BusinessResourceReport
 {
@@ -85,7 +86,7 @@ class ShiftsReport extends BusinessResourceReport
                 'client_confirmed' => $shift->client_confirmed,
                 'charged' => !($shift->statusManager()->isPending()),
                 'charged_at' => $shift->charged_at,
-                'status' => $shift->status ? title_case(preg_replace('/_/', ' ', $shift->status)) : '',
+                'status' => $shift->status ? Str::title(preg_replace('/_/', ' ', $shift->status)) : '',
                 // Send both verified and EVV for backwards compatibility
                 'verified' => $shift->verified,
                 'EVV' => ($shift->checked_in_verified && $shift->checked_out_verified),

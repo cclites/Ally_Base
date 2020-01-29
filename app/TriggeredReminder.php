@@ -6,6 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Carbon;
 
+/**
+ * App\TriggeredReminder
+ *
+ * @property int $id
+ * @property string $key
+ * @property int $reference_id
+ * @property string $expires_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TriggeredReminder newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TriggeredReminder newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TriggeredReminder query()
+ * @mixin \Eloquent
+ */
 class TriggeredReminder extends Model
 {
     /**

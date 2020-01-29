@@ -47,6 +47,29 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @property-read mixed $masked_name
  * @property-read mixed $updated_at
  * @property-read \App\PhoneNumber $smsNumber
+ * @property-read int|null $addresses_count
+ * @property-read int|null $audits_count
+ * @property-read int|null $bank_accounts_count
+ * @property-read int|null $credit_cards_count
+ * @property-read \App\DeactivationReason $deactivationReason
+ * @property-read int|null $documents_count
+ * @property-read mixed $deactivation_reason_id
+ * @property-read mixed $initialed_name
+ * @property-read mixed $reactivation_date
+ * @property-read mixed $setup_status
+ * @property-read mixed $status_alias_id
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\UserNotificationPreferences[] $notificationPreferences
+ * @property-read int|null $notification_preferences_count
+ * @property-read int|null $phone_numbers_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SetupStatusHistory[] $setupStatusHistory
+ * @property-read int|null $setup_status_history_count
+ * @property-read \App\StatusAlias $statusAlias
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin doesntHaveEmail()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin hasEmail()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin inactive()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Admin query()
  */
 class Admin extends AuditableModel implements UserRole, HasTimezone
 {

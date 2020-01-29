@@ -8,6 +8,10 @@ namespace App;
  * @property-read \App\Schedule $schedule
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleException newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleException newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleException query()
  */
 class ScheduleException extends AuditableModel
 {

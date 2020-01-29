@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+use Illuminate\Support\Str;
+
 trait CanHaveEmptyUsername
 {
     /**
@@ -40,6 +42,6 @@ trait CanHaveEmptyUsername
      */
     public function hasNoUsername()
     {
-        return starts_with($this->username, self::$fakeUsernamePrefix);
+        return Str::startsWith($this->username, self::$fakeUsernamePrefix);
     }
 }

@@ -20,8 +20,8 @@ use App\Billing\GatewayTransactionHistory;
  * @property int $declined
  * @property int|null $cvv_pass
  * @property int|null $avs_pass
- * @property  int $routing_number
- * @property  int $account_number
+ * @property int $routing_number
+ * @property int $account_number
  * @property string|null $response_text
  * @property string|null $response_data
  * @property \Carbon\Carbon|null $created_at
@@ -51,6 +51,12 @@ use App\Billing\GatewayTransactionHistory;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\GatewayTransaction whereTransactionType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\GatewayTransaction whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @property-read int|null $history_count
+ * @property-read int|null $refunds_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\GatewayTransaction newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\GatewayTransaction newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\GatewayTransaction query()
  */
 class GatewayTransaction extends AuditableModel
 {

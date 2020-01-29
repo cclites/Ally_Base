@@ -19,7 +19,7 @@ class ProcessPaymentTest extends TestCase
 
     private $strategy;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
         $this->strategy = \Mockery::mock(PaymentMethodStrategy::class);

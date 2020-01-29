@@ -8,6 +8,7 @@ use App\Http\Requests\StoreKnowledgeRequest;
 use App\Responses\SuccessResponse;
 use App\Http\Requests\UpdateKnowledgeRequest;
 use App\Responses\ErrorResponse;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class KnowledgeManagerController extends Controller
@@ -49,7 +50,7 @@ class KnowledgeManagerController extends Controller
 
         try {
             DB::beginTransaction();
-            $item = Knowledge::create(array_except($data, ['attachments', 'assigned_roles']));
+            $item = Knowledge::create(Arr::except($data, ['attachments', 'assigned_roles']));
             $item->attachments()->sync($attachments);
             $item->syncRoles($data['assigned_roles']);
         } catch (\Exception $ex) {
@@ -92,7 +93,7 @@ class KnowledgeManagerController extends Controller
         $attachments = collect($data['attachments'])->pluck('id')->toArray();
 
         DB::beginTransaction();
-        if ($knowledge->update(array_except($data, ['attachments', 'assigned_roles']))) {
+        if ($knowledge->update(Arr::except($data, ['attachments', 'assigned_roles']))) {
             $knowledge->attachments()->sync($attachments);
             $knowledge->syncRoles($data['assigned_roles']);
 

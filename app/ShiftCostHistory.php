@@ -30,6 +30,10 @@ namespace App;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereTotalCost($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftCostHistory query()
  */
 class ShiftCostHistory extends AuditableModel
 {

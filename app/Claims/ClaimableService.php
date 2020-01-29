@@ -67,6 +67,16 @@ use Packages\GMaps\GeocodeCoordinates;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimableService query()
  * @mixin \Eloquent
+ * @property int|null $client_signature_id
+ * @property int|null $caregiver_signature_id
+ * @property int $is_overtime
+ * @property int|null $visit_edit_action_id
+ * @property int|null $visit_edit_reason_id
+ * @property-read int|null $audits_count
+ * @property-read \App\Signature $caregiverSignature
+ * @property-read \App\Signature $clientSignature
+ * @property-read \App\VisitEditAction $visitEditAction
+ * @property-read \App\VisitEditReason $visitEditReason
  */
 class ClaimableService extends AuditableModel implements ClaimableInterface
 {

@@ -4,6 +4,7 @@ namespace App\Billing\Gateway;
 
 use App\Billing\Exceptions\PaymentAmountError;
 use App\Billing\Payments\Methods\BankAccount;
+use App\Exports\GenericExport;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -31,7 +32,7 @@ class AchExportFile
      */
     public function __construct(string $storage_path = null, string $bank = 'heritage')
     {
-        $this->storage_path = $storage_path ?? storage_path('ach/exports');
+        $this->storage_path = $storage_path ?? 'ach' . DIRECTORY_SEPARATOR . 'exports';
         $this->bank = $bank;
     }
 
@@ -86,18 +87,11 @@ class AchExportFile
         }
 
         $filename = $this->getBankName() . "_export_" . Carbon::now()->format("Y_m_d_H_i_s_u");
-        $format = 'xlsx';
-        $filepath = $this->storage_path . DIRECTORY_SEPARATOR . $filename . '.' . $format;
+        $filepath = $this->storage_path . DIRECTORY_SEPARATOR . $filename . '.xlsx';
 
-        Excel::create($filename, function($excel) {
+        Excel::store(new GenericExport($this->transactions), $filepath);
 
-            $excel->sheet('Sheet1', function($sheet) {
-                $sheet->fromArray($this->transactions);
-            });
-
-        })->store($format, $this->storage_path);
-
-        if (!file_exists($filepath)) {
+        if (! \Storage::exists($filepath)) {
             throw new \Exception("Unable to write ACH Export file to: " . $filepath);
         }
 

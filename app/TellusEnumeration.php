@@ -4,6 +4,19 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\TellusEnumeration
+ *
+ * @property int $id
+ * @property string $category
+ * @property int $code
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TellusEnumeration newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TellusEnumeration newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TellusEnumeration query()
+ * @mixin \Eloquent
+ */
 class TellusEnumeration extends Model
 {
     /**

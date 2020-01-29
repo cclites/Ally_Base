@@ -34,7 +34,7 @@ class ScheduleAggregatorTest extends TestCase
      */
     public $aggregator;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
 

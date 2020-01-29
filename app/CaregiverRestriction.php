@@ -4,6 +4,22 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\CaregiverRestriction
+ *
+ * @property int $id
+ * @property int $caregiver_id
+ * @property string $description
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverRestriction newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverRestriction newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverRestriction query()
+ * @mixin \Eloquent
+ */
 class CaregiverRestriction extends AuditableModel
 {
     /**

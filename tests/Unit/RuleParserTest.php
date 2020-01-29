@@ -15,7 +15,7 @@ class RuleParserTest extends TestCase
 
     protected $timezones = ['UTC', 'America/New_York', 'America/Los_Angeles'];
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
         $this->parser = new RuleParser();

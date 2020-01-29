@@ -5,6 +5,7 @@ use App\Client;
 use App\Http\Controllers\Business\StatusAliasController;
 use App\Rules\ValidSSN;
 use App\StatusAlias;
+use Illuminate\Support\Str;
 
 class CreateClientRequest extends BusinessRequest
 {
@@ -56,7 +57,7 @@ class CreateClientRequest extends BusinessRequest
         $data = $this->validated();
         if ($data['date_of_birth']) $data['date_of_birth'] = filter_date($data['date_of_birth']);
         if (substr($data['ssn'], 0, 3) == '***') unset($data['ssn']);
-        $data['password'] = bcrypt($data['password'] ?? str_random());
+        $data['password'] = bcrypt($data['password'] ?? Str::random());
 
         if ($data['status_alias_id'] == -1) {
             // inactive

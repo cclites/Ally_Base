@@ -5,6 +5,7 @@ namespace App;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 /**
  * App\ClientOnboarding
@@ -134,6 +135,10 @@ use Illuminate\Support\Facades\File;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientOnboarding whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientOnboarding whereWeight($value)
  * @mixin \Eloquent
+ * @property-read int|null $activities_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientOnboarding newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientOnboarding newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientOnboarding query()
  */
 class ClientOnboarding extends BaseModel
 {
@@ -163,7 +168,7 @@ class ClientOnboarding extends BaseModel
         if (! File::exists($dir)) {
             File::makeDirectory($dir, 493, true);
         }
-        $filename = str_slug($this->client->id . ' ' . $this->client->name . ' Intake') . '.pdf';
+        $filename = Str::slug($this->client->id . ' ' . $this->client->name . ' Intake') . '.pdf';
         $filePath = $dir . '/' . $filename;
         if (config('app.env') == 'local') {
             if (File::exists($filePath)) {
@@ -174,7 +179,7 @@ class ClientOnboarding extends BaseModel
 
         if ($response) {
             DB::transaction(function () use ($response, $filePath) {
-                $this->update(['intake_pdf' => str_after($filePath, 'storage/')]);
+                $this->update(['intake_pdf' => Str::after($filePath, 'storage/')]);
                 $this->client->documents()->create([
                     'filename' => File::basename($filePath),
                     'original_filename' => File::basename($filePath),

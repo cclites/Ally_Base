@@ -26,7 +26,7 @@
         <div class="tab-pane active" id="settings" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <business-chain-edit :chain="{{ $chain OR '{}' }}"></business-chain-edit>
+                    <business-chain-edit :chain="{{ $chain ?? '{}' }}"></business-chain-edit>
                 </div>
             </div>
         </div>
@@ -34,7 +34,7 @@
         <div class="tab-pane" id="users" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <business-office-user-list :chain="{{ $chain }}" :businesses="{{ $chain->businesses OR '[]' }}"></business-office-user-list>
+                    <business-office-user-list :chain="{{ $chain }}" :businesses="{{ $chain->businesses ?? '[]' }}"></business-office-user-list>
                 </div>
             </div>
         </div>

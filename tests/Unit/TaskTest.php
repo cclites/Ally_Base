@@ -15,7 +15,7 @@ class TaskTest extends TestCase
     public $business;
     public $officeUser;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
 

@@ -25,6 +25,14 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property int|null $chain_expiration_type_id
+ * @property-read int|null $audits_count
+ * @property-read \App\ExpirationType $defaultType
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense whereApplicable()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverLicense whereHasValidCaregiver()
  */
 class CaregiverLicense extends AuditableModel
 {

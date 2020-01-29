@@ -16,7 +16,9 @@ class AlterCaregiversAddImportFields extends Migration
         Schema::table('caregivers', function (Blueprint $table) {
             $table->date('hire_date')->nullable();
             $table->string('gender')->nullable();
-            $table->dropForeign('fk_caregivers_bank_account_id');
+            if (\DB::getDriverName() != 'sqlite') {
+                $table->dropForeign('fk_caregivers_bank_account_id');
+            }
             $table->foreign('bank_account_id', 'fk_caregivers_bank_account_id')->references('id')->on('bank_accounts')->onUpdate('CASCADE')->onDelete('CASCADE');
         });
     }

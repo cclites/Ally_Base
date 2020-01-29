@@ -200,6 +200,15 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereWorkmansCompDates($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication whereZip($value)
  * @mixin \Eloquent
+ * @property string|null $certification
+ * @property int $archived
+ * @property bool $has_cell_phone
+ * @property bool $has_smart_phone
+ * @property bool $can_text
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverApplication query()
  */
 class CaregiverApplication extends AuditableModel implements BelongsToChainsInterface
 {

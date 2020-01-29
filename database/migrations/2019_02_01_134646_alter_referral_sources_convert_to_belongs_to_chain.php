@@ -17,7 +17,9 @@ class AlterReferralSourcesConvertToBelongsToChain extends Migration
     {
         Schema::table('referral_sources', function (Blueprint $table) {
             $table->unsignedInteger('chain_id')->nullable()->after('id');
-            $table->dropForeign(['business_id']);
+            if (\DB::getDriverName() != 'sqlite') {
+                $table->dropForeign(['business_id']);
+            }
         });
 
         foreach (ReferralSource::all() as $source) {

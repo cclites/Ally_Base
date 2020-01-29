@@ -37,6 +37,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read \App\User $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @property-read int|null $charged_transactions_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payments\Methods\CreditCard newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payments\Methods\CreditCard newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payments\Methods\CreditCard query()
  */
 class CreditCard extends AuditableModel implements ChargeableInterface
 {

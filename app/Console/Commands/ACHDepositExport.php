@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Billing\Deposit;
 use App\Billing\Payments\Methods\BankAccount;
+use App\Exports\GenericExport;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Maatwebsite\Excel\Facades\Excel;
@@ -38,6 +39,8 @@ class ACHDepositExport extends Command
      * Execute the console command.
      *
      * @return mixed
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
     public function handle()
     {
@@ -53,36 +56,34 @@ class ACHDepositExport extends Command
             return false;
         }
 
-        $filename = pathinfo($file, PATHINFO_FILENAME);
-        $extension = pathinfo($file, PATHINFO_EXTENSION) ?: "xlsx";
-        $storagePath = pathinfo($file, PATHINFO_DIRNAME) ?: getcwd() ?: "";
+        $filename = pathinfo($file, PATHINFO_FILENAME) . '.xlsx';
+        $storagePath = storage_path('app' . DIRECTORY_SEPARATOR . $filename);
 
-        $deposits = Deposit::with('transaction.method')->whereBetween('created_at', [$date->toDateString() . ' 00:00:00', $date->toDateString() . ' 23:59:59'])->get();
-
-        Excel::create($filename, function($excel) use ($deposits) {
-
-            $excel->sheet('Sheet1', function($sheet) use ($deposits) {
-
-                $sheet->fromArray($deposits->map(function(Deposit $deposit) {
-                    $method = $deposit->transaction ? $deposit->transaction->method : null;
-                    return [
-                        'Deposit ID' => $deposit->id,
-                        'Deposit Type' => $deposit->deposit_type,
-                        'Caregiver ID' => $deposit->caregiver_id,
-                        'Business ID' => $deposit->business_id,
-                        'Successful' => $deposit->success ? 1 : 0,
-                        'Amount' => $deposit->amount,
-                        'Name on Account' => ($method instanceof BankAccount) ? $method->name_on_account : "",
-                        'Routing Number' => ($method instanceof BankAccount) ? $method->routing_number : "",
-                        'Account Number' => ($method instanceof BankAccount) ? $method->account_number : "",
-                        'Account Type' => ($method instanceof BankAccount) ? $method->account_type : "",
-                        'Account Holder Type' => ($method instanceof BankAccount) ? $method->account_holder_type : "",
-                    ];
-                }));
+        $deposits = Deposit::with('transaction.method')->whereBetween('created_at', [$date->toDateString() . ' 00:00:00', $date->toDateString() . ' 23:59:59'])
+            ->get()
+            ->map(function(Deposit $deposit) {
+                $method = $deposit->transaction ? $deposit->transaction->method : null;
+                return [
+                    'Deposit ID' => $deposit->id,
+                    'Deposit Type' => $deposit->deposit_type,
+                    'Caregiver ID' => $deposit->caregiver_id,
+                    'Business ID' => $deposit->business_id,
+                    'Successful' => $deposit->success ? 1 : 0,
+                    'Amount' => $deposit->amount,
+                    'Name on Account' => ($method instanceof BankAccount) ? $method->name_on_account : "",
+                    'Routing Number' => ($method instanceof BankAccount) ? $method->routing_number : "",
+                    'Account Number' => ($method instanceof BankAccount) ? $method->account_number : "",
+                    'Account Type' => ($method instanceof BankAccount) ? $method->account_type : "",
+                    'Account Holder Type' => ($method instanceof BankAccount) ? $method->account_holder_type : "",
+                ];
             });
 
-        })->store($extension, $storagePath);
+        Excel::store(new GenericExport($deposits), DIRECTORY_SEPARATOR . $filename);
 
-        $this->output->writeln("Written {$deposits->count()} deposits to: $file");
+        if (! file_exists($storagePath)) {
+            throw new \Exception("Unable to write file to: " . $storagePath);
+        }
+
+        $this->output->writeln("Written {$deposits->count()} deposits to: $storagePath");
     }
 }

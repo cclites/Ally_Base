@@ -23,7 +23,7 @@ class ShiftTest extends TestCase
     public $client;
     public $shift;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
         $this->client = factory(Client::class)->create();

@@ -45,7 +45,7 @@
                 <b-row>
                     <b-col md="6" v-if="schedules.length > 0">
                         <div class="form-group" v-for="schedule in schedules" :key="schedule.id">
-                            <b-button variant="info" @click="clockIn(schedule)" :disabled="submitting || authInactive">Clock Into Your {{ formatTime(schedule.starts_at.date) }} Shift</b-button>
+                            <b-button variant="info" @click="clockIn(schedule)" :disabled="submitting || authInactive">Clock Into Your {{ formatTime(schedule.starts_at) }} Shift</b-button>
                         </div>
                     </b-col>
                     <b-col md="6" v-else>

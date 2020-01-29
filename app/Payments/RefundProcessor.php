@@ -8,6 +8,7 @@ use App\Billing\Gateway\ECSPayment;
 use App\Billing\GatewayTransaction;
 use App\Billing\Payment;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class RefundProcessor
 {
@@ -81,15 +82,13 @@ class RefundProcessor
                     'total' => $amount,
                     'amount_due' => $amount,
                     'date' => new Carbon(),
-                    'notes' => str_limit($notes, 250),
+                    'notes' => Str::limit($notes, 250),
                 ]));
                 $invoice->addPayment($payment, $amount);
             }
             // TODO: Need to figure out how to record invoices for refunds to business entities
-
         }
 
         return $transaction;
     }
-
 }

@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Requests;
 
+use Illuminate\Support\Arr;
+
 class CaregiverTimesheetRequest extends CreateTimesheetRequest
 {
 
@@ -11,7 +13,7 @@ class CaregiverTimesheetRequest extends CreateTimesheetRequest
      */
     public function rules()
     {
-        return array_except(parent::rules(), [
+        return Arr::except(parent::rules(), [
             'caregiver_id',
             'entries.*.client_rate',
             'entries.*.caregiver_rate'

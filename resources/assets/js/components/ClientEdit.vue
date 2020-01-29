@@ -514,7 +514,7 @@
                     disaster_code_plan: this.client.disaster_code_plan,
                     disaster_planning: this.client.disaster_planning,
                     created_by: this.client.creator && this.client.creator.nameLastFirst,
-                    created_at: this.formatDateTime(this.client.created_at.date),
+                    created_at: this.formatDateTime(this.client.created_at),
                     modified_by: this.client.updator && this.client.updator.nameLastFirst,
                     modified_at: this.client.updator ? this.formatDateTimeFromUTC(this.client.updated_by_timestamp) : null,
                     receive_summary_email: this.client.receive_summary_email,

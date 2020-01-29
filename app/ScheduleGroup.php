@@ -3,6 +3,26 @@ namespace App;
 
 use App\Scheduling\RuleParser;
 
+/**
+ * App\ScheduleGroup
+ *
+ * @property int $id
+ * @property \Illuminate\Support\Carbon $starts_at
+ * @property string $end_date
+ * @property string $rrule
+ * @property string $interval_type
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read int|null $audits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $schedules
+ * @property-read int|null $schedules_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleGroup newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleGroup newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleGroup query()
+ * @mixin \Eloquent
+ */
 class ScheduleGroup extends AuditableModel
 {
     protected $table = 'schedule_groups';

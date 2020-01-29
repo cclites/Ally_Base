@@ -63,6 +63,24 @@ use App\Client;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoice query()
  * @mixin \Eloquent
+ * @property string $claim_invoice_type
+ * @property string|null $transmitted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Claims\ClaimAdjustment[] $adjustments
+ * @property-read int|null $adjustments_count
+ * @property-read int|null $audits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientInvoice[] $clientInvoices
+ * @property-read int|null $client_invoices_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Claims\ClaimInvoiceItem[] $expenseItems
+ * @property-read int|null $expense_items_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Claims\ClaimInvoiceHhaFile[] $hhaFiles
+ * @property-read int|null $hha_files_count
+ * @property-read int|null $items_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Claims\ClaimInvoiceItem[] $serviceItems
+ * @property-read int|null $service_items_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Claims\ClaimInvoiceStatusHistory[] $statuses
+ * @property-read int|null $statuses_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\ClaimInvoiceTellusFile[] $tellusFiles
+ * @property-read int|null $tellus_files_count
  */
 class ClaimInvoice extends AuditableModel implements BelongsToBusinessesInterface
 {
