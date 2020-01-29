@@ -707,27 +707,19 @@ class ReportsController extends BaseController
     {
         $type = strtolower($request->type) == 'clients' ? 'clients' : 'caregivers';
         $filteredId = $request->id;
+        $clientType = $request->clientType;
 
+        // Clients
         if($type == 'clients') {
             $clients =  $this->addCityAndPhone(Client::forRequestedBusinesses()->get());
-            $clientType = $request->clientType;
 
             return $this->filterClientTypes($clients, $clientType, $filteredId);
-
         }
 
         // Caregivers
         $caregivers = $this->addCityAndPhone(Caregiver::forRequestedBusinesses()->get());
 
-        if ($filteredId) {
-            $filteredCaregivers = $caregivers->filter(function($value) use($filteredId) {
-                return $value->id == $filteredId;
-            })->values();
-
-            return $filteredCaregivers;
-        }
-
-        return $caregivers;
+        return $this->filterClientTypes($caregivers, $clientType, $filteredId);
     }
 
     /**

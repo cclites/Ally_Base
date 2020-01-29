@@ -40,7 +40,7 @@
             <b-button @click=" fetch() " variant="info">Generate Report</b-button>
         </b-row>
 
-        <b-row class="filter justify-content-between align-items-center">
+        <b-row class="filter justify-content-between align-items-center" v-if="type === 'Clients'">
             <b-col cols="3">
                 <b-form-checkbox v-model="showInactive" :value="true" :unchecked-value="false" class="d-flex align-items-center">
                     Show inactive {{type}}
@@ -127,18 +127,15 @@
 
         computed: {
             items() {
-                return this.data.filter(user => {
-                    if (this.showEmpty) {
-                        return true;
-                    }
-                    return !!user.date_of_birth;
-                }).map((item) => {
-                    return {
-                        ...item,
-                        formatted_date: item.date_of_birth ? moment(item.date_of_birth).format('MM/DD/YYYY') : '-',
-                        date_of_birth: moment(item.date_of_birth).format('MMDD'),
-                    };
-                });
+                return this.data.filter(user =>
+                    (this.showEmpty || !!user.date_of_birth) && (this.showInactive || user.active === 1))
+                           .map((item) => {
+                               return {
+                                   ...item,
+                                   formatted_date: item.date_of_birth ? moment(item.date_of_birth).format('MM/DD/YYYY') : '-',
+                                   date_of_birth: moment(item.date_of_birth).format('MMDD'),
+                               };
+                           });
             }
         },
 
