@@ -689,35 +689,56 @@ class ReportsController extends BaseController
         $type = $request->type == 'clients' ? 'clients' : 'caregivers';
         $type = ucfirst($type);
 
-        $clients =  Client::forRequestedBusinesses()->get();
-        $clientTypes = $clients->map(function ($client) {
+        $clients =  Client::forRequestedBusinesses();
+
+        $clientTypes = $clients->get()->map(function ($client) {
             return $client->client_type;
         })->unique()->values();
 
-        return view('business.reports.user_birthday', compact('type', 'clientTypes'));
+
+        $clientList = $clients->select('id')->get()->sortBy('name')->values();
+
+        $caregiverList = Caregiver::forRequestedBusinesses()->select('id')->get()->sortBy('name')->values();
+
+        return view('business.reports.user_birthday', compact('type', 'clientTypes', 'clientList', 'caregiverList'));
     }
 
     public function userBirthdayData(Request $request)
     {
         $type = strtolower($request->type) == 'clients' ? 'clients' : 'caregivers';
+        $filteredId = $request->id ?? null;
 
         if($type == 'clients') {
             $clients =  $this->addCityAndPhone(Client::forRequestedBusinesses()->get());
-
-            // Filter by client type, if exists
             $clientType = $request->clientType ?? 'All';
-            if($clientType == 'All') {
-                return $clients;
-            }
 
-            $filteredClients = $clients->filter(function ($value) use ($clientType) {
+            $filteredClients = $clients->filter(function ($value) use ($clientType, $filteredId, $clients) {
+                if ($filteredId) {
+                    return $value->id == $filteredId;
+                }
+
+                if($clientType == 'All') {
+                    return $clients;
+                }
+
                 return $value->client_type  == $clientType;
             });
 
             return $filteredClients->values();
         }
 
-        return $this->addCityAndPhone(Caregiver::forRequestedBusinesses()->get());
+        // Caregivers
+        $caregivers = $this->addCityAndPhone(Caregiver::forRequestedBusinesses()->get());
+
+        if ($filteredId) {
+            $filteredCaregivers = $caregivers->filter(function($value) use($filteredId) {
+                return $value->id == $filteredId;
+            })->values();
+
+            return $filteredCaregivers;
+        }
+
+        return $caregivers;
     }
 
     /**

@@ -16,6 +16,27 @@
                 </label>
             </b-col>
 
+            <b-col lg="3" v-if="type === 'Caregivers'">
+                <b-form-group label="Caregiver">
+                    <b-form-select v-model="selectedId">
+                        <option value="">All</option>
+                        <option v-for="caregiver in caregiverList" :value="caregiver.id">{{
+                            caregiver.name }}
+                        </option>
+                    </b-form-select>
+                </b-form-group>
+            </b-col>
+            <b-col lg="3"v-else>
+                <b-form-group label="Clients">
+                    <b-form-select v-model="selectedId">
+                        <option value="">All</option>
+                        <option v-for="client in clientList" :value="client.id">{{
+                            client.name }}
+                        </option>
+                    </b-form-select>
+                </b-form-group>
+            </b-col>
+
             <b-button @click=" fetch() " variant="info">Generate Report</b-button>
         </b-row>
         <loading-card v-show="loading" />
@@ -46,7 +67,16 @@
             clientTypes: {
                 type: Array,
                 required: false
+            },
+            caregiverList: {
+                type: Array,
+                required: true
+            },
+            clientList: {
+                type: Array,
+                required: true
             }
+
         },
 
         data() {
@@ -54,6 +84,7 @@
                 loading: false,
                 showEmpty: true,
                 selectedClients: 'All',
+                selectedId: null,
                 data: [],
                 fields: [
                     {
@@ -106,7 +137,7 @@
                 this.loading = true;
 
                 try {
-                    const {data} = await axios.get(`/business/reports/data/birthdays?type=${this.type}&clientType=${this.selectedClients}`);
+                    const {data} = await axios.get(`/business/reports/data/birthdays?type=${this.type}&clientType=${this.selectedClients}&id=${this.selectedId}`);
                     this.data = data;
                     this.loading = false
                 }catch (e) {
