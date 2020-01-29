@@ -706,25 +706,14 @@ class ReportsController extends BaseController
     public function userBirthdayData(Request $request)
     {
         $type = strtolower($request->type) == 'clients' ? 'clients' : 'caregivers';
-        $filteredId = $request->id ?? null;
+        $filteredId = $request->id;
 
         if($type == 'clients') {
             $clients =  $this->addCityAndPhone(Client::forRequestedBusinesses()->get());
-            $clientType = $request->clientType ?? 'All';
+            $clientType = $request->clientType;
 
-            $filteredClients = $clients->filter(function ($value) use ($clientType, $filteredId, $clients) {
-                if ($filteredId) {
-                    return $value->id == $filteredId;
-                }
+            return $this->filterClientTypes($clients, $clientType, $filteredId);
 
-                if($clientType == 'All') {
-                    return $clients;
-                }
-
-                return $value->client_type  == $clientType;
-            });
-
-            return $filteredClients->values();
         }
 
         // Caregivers
@@ -1204,5 +1193,26 @@ class ReportsController extends BaseController
         });
 
         return $clients;
+    }
+
+    /**
+     * @param $clients
+     * @param $clientType
+     * @param $filteredId
+     *
+     * @return mixed
+     */
+    protected function filterClientTypes($clients, $clientType, $filteredId) {
+        return $clients->filter(function ($value) use ($clientType, $filteredId, $clients) {
+            if ($filteredId != 'All' && !(is_null($filteredId))) {
+                return $value->id == $filteredId;
+            }
+
+            if ($clientType == 'All' || is_null($clientType)) {
+                return $clients;
+            }
+
+            return $value->client_type == $clientType;
+        })->values();
     }
 }

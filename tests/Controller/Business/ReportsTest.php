@@ -122,6 +122,26 @@ class ReportsTest extends TestCase {
     }
 
     /** @test */
+    public function client_birthday_report_returns_client_type_if_id_is_null() {
+        $client1 = factory(Client::class)->create([
+            'business_id' => $this->business->id,
+            'client_type' => 'private_pay'
+        ]);
+
+        factory(Client::class)->create([
+            'business_id' => $this->business->id,
+            'client_type' => 'medicaid'
+        ]);
+
+        $query_string = '?type=clients&clientType=' . $client1->client_type .'&id=All';
+
+        $this->get('business/reports/data/birthdays' . $query_string)
+             ->assertSuccessful()
+             ->assertJsonCount(1)
+             ->assertJsonFragment(["id" => $client1->id, "email" => $client1->email]);
+    }
+
+    /** @test */
     public function caregiver_birthday_report_returns_all_caregivers() {
         $query_string = '?type=caregivers';
         $caregivers = factory(Caregiver::class, 2)->create()->each(function ($caregiver) {

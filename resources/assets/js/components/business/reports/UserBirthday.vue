@@ -19,7 +19,7 @@
             <b-col lg="3" v-if="type === 'Caregivers'">
                 <b-form-group label="Caregiver">
                     <b-form-select v-model="selectedId">
-                        <option value="">All</option>
+                        <option value="All">All</option>
                         <option v-for="caregiver in caregiverList" :value="caregiver.id">{{
                             caregiver.name }}
                         </option>
@@ -29,7 +29,7 @@
             <b-col lg="3"v-else>
                 <b-form-group label="Clients">
                     <b-form-select v-model="selectedId">
-                        <option value="">All</option>
+                        <option value="All">All</option>
                         <option v-for="client in clientList" :value="client.id">{{
                             client.name }}
                         </option>
@@ -39,6 +39,15 @@
 
             <b-button @click=" fetch() " variant="info">Generate Report</b-button>
         </b-row>
+
+        <b-row class="filter justify-content-between align-items-center">
+            <b-col cols="3">
+                <b-form-checkbox v-model="showInactive" :value="true" :unchecked-value="false" class="d-flex align-items-center">
+                    Show inactive {{type}}
+                </b-form-checkbox>
+            </b-col>
+        </b-row>
+
         <loading-card v-show="loading" />
         <div v-show="! loading" class="table-responsive">
             <ally-table id="user-birthday" :columns="fields" :items="items" sort-by="nameLastFirst">
@@ -83,8 +92,9 @@
             return {
                 loading: false,
                 showEmpty: true,
+                showInactive: true,
                 selectedClients: 'All',
-                selectedId: null,
+                selectedId: 'All',
                 data: [],
                 fields: [
                     {
