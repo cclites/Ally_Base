@@ -47,6 +47,10 @@ namespace App;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverAvailability whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverAvailability whereWednesday($value)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverAvailability newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverAvailability newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverAvailability query()
  */
 class CaregiverAvailability extends AuditableModel
 {

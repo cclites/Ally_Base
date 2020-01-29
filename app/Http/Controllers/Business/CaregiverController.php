@@ -462,7 +462,7 @@ class CaregiverController extends BaseController
 
         $data = $request->validated();
 
-        if ($caregiver->user()->update($data)) {
+        if ($caregiver->user->update($data)) {
             return new SuccessResponse('Caregiver\'s notification options have been updated.');
         }
 

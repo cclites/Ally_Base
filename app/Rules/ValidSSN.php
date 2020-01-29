@@ -25,6 +25,10 @@ class ValidSSN implements Rule
      */
     public function passes($attribute, $value)
     {
+        if ($value == '123-45-6789') {
+            return false;
+        }
+
         if ($this->allowMaskedInput) {
             $pattern = '/(\d{3}|\*{3})-(\d{2}|\*{2})-(\d{4}|\*{4})/';
         } else {

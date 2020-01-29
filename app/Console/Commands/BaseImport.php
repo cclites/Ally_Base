@@ -10,6 +10,7 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use PHPExcel_IOFactory;
 use PHPExcel_Shared_Date;
+use Illuminate\Support\Str;
 
 abstract class BaseImport extends Command
 {
@@ -238,7 +239,7 @@ abstract class BaseImport extends Command
     {
         $cellValue = $this->getValue($this->sheet, $field, $row);
 
-        $methodName = 'resolve' . studly_case($field);
+        $methodName = 'resolve' . Str::studly($field);
         if ($field != '' && method_exists($this, $methodName)) {
             return $this->$methodName($row, $cellValue);
         }

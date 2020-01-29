@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Business;
 use App\Caregiver;
+use Illuminate\Support\Str;
 
 class HomeController extends Controller
 {
@@ -38,7 +39,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $method = camel_case(auth()->user()->role_type) . 'Dashboard';
+        $method = Str::camel(auth()->user()->role_type) . 'Dashboard';
         if (method_exists($this, $method)) {
             $role = auth()->user()->role;
             return $this->$method($role);

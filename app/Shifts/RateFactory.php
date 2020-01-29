@@ -11,6 +11,7 @@ use App\Billing\Payments\Methods\CreditCard;
 use App\RateCode;
 use App\Schedule;
 use App\Shift;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use App\Data\ScheduledRates;
 use App\Billing\Payer;
@@ -477,8 +478,8 @@ class RateFactory
         $fieldId = $fixedRates ? 'fixed' : 'hourly';
 
         return $this->resolveRate(
-            array_get($pivot, "caregiver_${fieldId}_rate"),
-            array_get($pivot, "caregiver_${fieldId}_id"),
+            Arr::get($pivot, "caregiver_${fieldId}_rate"),
+            Arr::get($pivot, "caregiver_${fieldId}_id"),
             $usingRateCodes
         );
     }
@@ -488,8 +489,8 @@ class RateFactory
         $fieldId = $fixedRates ? 'fixed' : 'hourly';
 
         return $this->resolveRate(
-            array_get($pivot, "provider_${fieldId}_fee"),
-            array_get($pivot, "provider_${fieldId}_id"),
+            Arr::get($pivot, "provider_${fieldId}_fee"),
+            Arr::get($pivot, "provider_${fieldId}_id"),
             $usingRateCodes
         );
     }
@@ -499,8 +500,8 @@ class RateFactory
         $fieldId = $fixedRates ? 'fixed' : 'hourly';
 
         return $this->resolveRate(
-            array_get($pivot, "client_${fieldId}_rate"),
-            array_get($pivot, "client_${fieldId}_id"),
+            Arr::get($pivot, "client_${fieldId}_rate"),
+            Arr::get($pivot, "client_${fieldId}_id"),
             $usingRateCodes
         );
     }

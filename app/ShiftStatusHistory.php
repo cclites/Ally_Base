@@ -18,6 +18,10 @@ namespace App;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftStatusHistory whereUpdatedAt($value)
  * @mixin \Eloquent
  * @property-read \App\Shift $shift
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftStatusHistory newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftStatusHistory newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftStatusHistory query()
  */
 class ShiftStatusHistory extends AuditableModel
 {

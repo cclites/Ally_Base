@@ -17,7 +17,7 @@ class QuickSearchTest extends TestCase
     public $admin;
     public $officeUser;
     
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
 

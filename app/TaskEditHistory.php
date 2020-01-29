@@ -18,6 +18,9 @@ namespace App;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TaskEditHistory whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\TaskEditHistory whereUserId($value)
  * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TaskEditHistory newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TaskEditHistory newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\TaskEditHistory query()
  */
 class TaskEditHistory extends BaseModel
 {

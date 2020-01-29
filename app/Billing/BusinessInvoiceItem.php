@@ -8,6 +8,33 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 
+/**
+ * App\Billing\BusinessInvoiceItem
+ *
+ * @property int $id
+ * @property int $invoice_id
+ * @property string|null $invoiceable_type
+ * @property int|null $invoiceable_id
+ * @property string|null $group
+ * @property string $name
+ * @property float $units
+ * @property float $client_rate
+ * @property float $caregiver_rate
+ * @property float $ally_rate
+ * @property float $rate
+ * @property float $total
+ * @property string|null $date
+ * @property string|null $notes
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read int|null $audits_count
+ * @property-read \App\Billing\BusinessInvoice $invoice
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $invoiceable
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\BusinessInvoiceItem newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\BusinessInvoiceItem newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\BusinessInvoiceItem query()
+ * @mixin \Eloquent
+ */
 class BusinessInvoiceItem extends BaseInvoiceItem
 {
     protected $casts = [

@@ -59,6 +59,17 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereTransactionId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Payment whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property string|null $payment_method_type
+ * @property int|null $payment_method_id
+ * @property-read int|null $audits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientInvoice[] $invoices
+ * @property-read int|null $invoices_count
+ * @property-read \App\Billing\Payer $payer
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $paymentMethod
+ * @property-read int|null $shifts_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payment newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payment newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payment query()
  */
 class Payment extends AuditableModel implements BelongsToBusinessesInterface, PaymentInterface
 {

@@ -12,6 +12,7 @@ use App\Claims\ClaimableService;
 use App\Claims\ClaimInvoice;
 use App\VisitEditAction;
 use App\VisitEditReason;
+use Illuminate\Support\Str;
 
 class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitterInterface
 {
@@ -141,7 +142,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             $service->visit_end_time->setTimezone($claim->getTimezone())->format($this->timeFormat), //    "Visit End Time", (required)
             $service->getHasEvv() ? $service->evv_start_time->setTimezone($claim->getTimezone())->format($this->timeFormat) : '', //    "EVV Start Time",
             $service->getHasEvv() ? $service->evv_end_time->setTimezone($claim->getTimezone())->format($this->timeFormat) : '', //    "EVV End Time",
-            str_limit($service->getAddress(), 100), //    "Service Location",
+            Str::limit($service->getAddress(), 100), //    "Service Location",
             $this->mapActivities($service->activities), //    "Duties",
             $service->checked_in_number, //    "Clock-In Phone Number",
             $service->checked_in_latitude, //    "Clock-In Latitude",

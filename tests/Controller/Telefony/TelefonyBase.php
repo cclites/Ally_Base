@@ -35,7 +35,7 @@ class TelefonyBase extends TestCase
      */
     public $phone;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
         $this->business = factory(Business::class)->create();

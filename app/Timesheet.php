@@ -48,6 +48,12 @@ use App\Events\ShiftFlagsCouldChange;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @property-read int|null $entries_count
+ * @property-read int|null $system_notifications_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Timesheet query()
  */
 class Timesheet extends AuditableModel implements BelongsToBusinessesInterface
 {

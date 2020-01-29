@@ -4,6 +4,7 @@ namespace App\Businesses;
 
 use App\Business;
 use Illuminate\Cache\CacheManager;
+use Illuminate\Support\Arr;
 
 class SettingsRepository
 {
@@ -45,11 +46,11 @@ class SettingsRepository
         if (!isset($this->memory[$key])) {
             $this->memory[$key] = $this->cache->remember($key, 1440, function () use ($business) {
                 $business = $this->resolveBusinessModel($business);
-                return array_except(optional($business)->getAttributes() ?? [], $this->removed);
+                return Arr::except(optional($business)->getAttributes() ?? [], $this->removed);
             });
         }
 
-        return $setting ? array_get($this->memory[$key], $setting, $default) : $this->memory[$key];
+        return $setting ? Arr::get($this->memory[$key], $setting, $default) : $this->memory[$key];
     }
 
     /**

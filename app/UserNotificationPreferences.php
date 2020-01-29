@@ -4,6 +4,23 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\UserNotificationPreferences
+ *
+ * @property int $id
+ * @property int $user_id
+ * @property string $key
+ * @property int $sms
+ * @property int $email
+ * @property int $system
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\UserNotificationPreferences newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\UserNotificationPreferences newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\UserNotificationPreferences query()
+ * @mixin \Eloquent
+ */
 class UserNotificationPreferences extends Model
 {
     /**

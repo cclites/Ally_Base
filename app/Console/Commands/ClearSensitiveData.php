@@ -6,7 +6,6 @@ use App\Address;
 use App\Audit;
 use App\Billing\BusinessInvoiceItem;
 use App\Billing\CaregiverInvoiceItem;
-use App\Billing\ClaimPayment;
 use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
 use App\Billing\ClientPayer;
@@ -75,6 +74,7 @@ use App\User;
 use Carbon\Carbon;
 use Crypt;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 class ClearSensitiveData extends Command
 {
@@ -171,7 +171,6 @@ class ClearSensitiveData extends Command
             $this->scrubModel(ClaimableExpense::class);
             $this->scrubModel(ClaimRemit::class);
             $this->scrubModel(ClaimAdjustment::class);
-            $this->scrubModel(ClaimPayment::class);
             $this->scrubModel(BusinessChain::class);
             $this->scrubModel(Business::class);
             $this->scrubModel(BusinessInvoiceItem::class);
@@ -270,7 +269,7 @@ class ClearSensitiveData extends Command
     public function scrubModel(string $class) : void
     {
         $query = call_user_func("{$class}::getScrubQuery");
-        $objectName = str_replace('_', ' ', snake_case(str_plural(class_basename($class))));
+        $objectName = str_replace('_', ' ', Str::snake(Str::plural(class_basename($class))));
 
         $this->startProgress(
             "Cleaning $objectName...",

@@ -26,6 +26,17 @@ use App\AuditableModel;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimAdjustment newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimAdjustment query()
  * @mixin \Eloquent
+ * @property string|null $note
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read int|null $audits_count
+ * @property-read \App\Claims\ClaimRemit|null $remit
+ * @method static bool|null forceDelete()
+ * @method static \Illuminate\Database\Query\Builder|\App\Claims\ClaimAdjustment onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static bool|null restore()
+ * @method static \Illuminate\Database\Query\Builder|\App\Claims\ClaimAdjustment withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|\App\Claims\ClaimAdjustment withoutTrashed()
  */
 class ClaimAdjustment extends AuditableModel
 {

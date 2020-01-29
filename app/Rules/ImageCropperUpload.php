@@ -3,6 +3,7 @@
 namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Support\Str;
 
 class ImageCropperUpload implements Rule
 {
@@ -25,7 +26,7 @@ class ImageCropperUpload implements Rule
      */
     public function passes($attribute, $value)
     {
-        if (str_contains($value, '/storage/') ||
+        if (Str::contains($value, '/storage/') ||
             in_array($value, [config('ally.logo.invoice'), config('ally.avatar.default')])) {
             return true;
         }

@@ -34,7 +34,7 @@ class ActivityPolicy extends BasePolicy
         }
 
         if ($activity->carePlans()->exists()) {
-            $this->deny('You cannot delete this activity because it is attached to a client\'s ADL Groups.');
+            return $this->deny('You cannot delete this activity because it is attached to a client\'s ADL Groups.');
         }
 
         return $this->businessCheck($user, $activity);

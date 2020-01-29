@@ -41,6 +41,12 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read \App\User|null $user
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @property-read int|null $charged_transactions_count
+ * @property-read mixed $last_four_routing_number
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payments\Methods\BankAccount newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payments\Methods\BankAccount newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payments\Methods\BankAccount query()
  */
 class BankAccount extends AuditableModel implements ChargeableInterface, DepositableInterface
 {

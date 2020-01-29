@@ -35,6 +35,17 @@ use Illuminate\Support\Collection;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientInvoice query()
  * @mixin \Eloquent
+ * @property float $offline_amount_paid
+ * @property string|null $notes
+ * @property-read int|null $audits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Claims\ClaimInvoice[] $claimInvoices
+ * @property-read int|null $claim_invoices_count
+ * @property-read mixed $is_paid
+ * @property-read int|null $items_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\OfflineInvoicePayment[] $offlinePayments
+ * @property-read int|null $offline_payments_count
+ * @property-read int|null $payments_count
+ * @property-read \App\QuickbooksClientInvoice $quickbooksInvoice
  */
 class ClientInvoice extends AuditableModel implements InvoiceInterface
 {
