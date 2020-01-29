@@ -284,6 +284,26 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
     }
 
     /**
+     * Get service code with whatever mldifiers exist concatenated to it
+     * for HHA transmissions
+     *
+     * @return string
+     */
+    public function getServiceCodeWithModifiers() : string
+    {
+        if( empty( $this->service_code ) ){
+
+            return null;
+        }
+
+        $code = $this->service_code;
+        if( !empty( $this->service_code_mod1 ) ) $code .= $this->service_code_mod1;
+        if( !empty( $this->service_code_mod2 ) ) $code .= $this->service_code_mod2;
+
+        return $code;
+    }
+
+    /**
      * Get the distance from the checked in location to the service address.
      *
      * @return float
