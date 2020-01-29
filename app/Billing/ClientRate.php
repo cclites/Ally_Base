@@ -15,6 +15,23 @@ use App\Client;
  * @property-read \App\Billing\Service $service
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @mixin \Eloquent
+ * @property int $id
+ * @property int $client_id
+ * @property int|null $payer_id
+ * @property int|null $service_id
+ * @property int|null $caregiver_id
+ * @property string $effective_start
+ * @property string $effective_end
+ * @property float $caregiver_hourly_rate
+ * @property float $caregiver_fixed_rate
+ * @property float $client_hourly_rate
+ * @property float $client_fixed_rate
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientRate newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientRate newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientRate query()
  */
 class ClientRate extends AuditableModel
 {

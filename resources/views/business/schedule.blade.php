@@ -4,7 +4,7 @@
 
 @section('content')
     <business-schedule
-        :business="{{ $active_business OR '{}' }}"
+        :business="{{ $active_business ?? '{}' }}"
         week-start="{{ $weekStart }}"
         default-view="{{ $business->calendar_default_view ?? 'timelineWeek' }}">
     </business-schedule>

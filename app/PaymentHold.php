@@ -25,6 +25,7 @@ namespace App;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\PaymentHold whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\PaymentHold whereUserId($value)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
  */
 class PaymentHold extends AuditableModel
 {

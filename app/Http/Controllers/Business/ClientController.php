@@ -33,6 +33,7 @@ use App\Notifications\ClientWelcomeEmail;
 use App\Notifications\TrainingEmail;
 use App\Shift;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 
 class ClientController extends BaseController
@@ -462,7 +463,7 @@ class ClientController extends BaseController
 
         $data = $request->validated();
 
-        if ($client->user()->update($data)) {
+        if ($client->user->update($data)) {
             return new SuccessResponse('Client\'s notification options have been updated.');
         }
 
@@ -481,7 +482,7 @@ class ClientController extends BaseController
     {
         $this->authorize('update', $client);
 
-        $client->setPreferences(array_except($request->validated(), 'ethnicities'));
+        $client->setPreferences(Arr::except($request->validated(), 'ethnicities'));
         $client->preferences->ethnicities()->delete();
         $client->preferences->ethnicities()->saveMany(
             collect($request->ethnicities)->map(function ($ethnicity) {

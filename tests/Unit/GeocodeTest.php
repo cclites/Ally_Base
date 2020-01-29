@@ -14,7 +14,7 @@ class GeocodeTest extends TestCase
     protected $latitude = 43.000;
     protected $longitude = -89.000;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
         $this->geocode = new GeocodeCoordinates($this->latitude, $this->longitude);

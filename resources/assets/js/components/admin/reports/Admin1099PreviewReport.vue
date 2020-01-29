@@ -98,7 +98,7 @@
                                 <i class="fa fa-exclamation-triangle mr-2"></i>
                             </b-btn>
 
-                            <div v-if="row.item.caregiver_1099_id">
+                            <div v-if="row.item.caregiver_1099_id && row.item.caregiver_1099 != 'ally'">
                                 <b-btn
                                        @click="edit(row.item.caregiver_1099_id)"
                                        class="btn btn-secondary"
@@ -152,23 +152,25 @@
         </b-modal>
 
         <b-modal
-                v-model="showErrorModal"
-                @cancel="hideEditModal()"
-                ok-variant="info"
-                size="md"
-                title="Caregiver 1099 Errors"
+            v-model="showErrorModal"
+            size="md"
+            title="Caregiver 1099 Errors"
         >
             <label class="mb-2">Caregiver 1099 is missing:</label>
-
             <b-row v-for="item in errorItems" :key="item" class="mb-3 pl-4">
                 {{ item }}
             </b-row>
-
             <hr>
-
             <a :href="'/business/clients/' + selected.client_id">Edit Client</a>
             <br>
             <a :href="'/business/caregivers/' + selected.caregiver_id">Edit Caregiver</a>
+
+            <div slot="modal-footer">
+                <div class="d-flex">
+                    <b-btn v-if="eligibleForOverride(selected)" variant="danger" @click="create(selected, true)">Create 1099 With Ally As Payer</b-btn>
+                    <b-btn class="ml-auto" variant="default" @click="hideEditModal()">Close</b-btn>
+                </div>
+            </div>
         </b-modal>
     </b-card>
 </template>
@@ -242,12 +244,18 @@
                     })
             },
 
-            create(item){
+            create(item, overridePayerToAlly = false){
+                if (overridePayerToAlly) {
+                    if (! confirm('Are you sure you want to create this 1099 with ALLY as the payer (override)?')) {
+                        return;
+                    }
+                }
                 let data = new Form({
                     'year': item.year,
                     'business_id': item.business_id,
                     'client_id' : item.client_id,
                     'caregiver_id' : item.caregiver_id,
+                    override_payer_to_ally: overridePayerToAlly,
                 });
 
                 data.post('/admin/business-1099/create')
@@ -257,6 +265,7 @@
                     .catch( e => {
                     })
                     .finally(() => {
+                        this.hideEditModal();
                     });
             },
 
@@ -317,7 +326,14 @@
             hideEditModal(){
                 this.errorItems = [];
                 this.showErrorModal = false;
-            }
+            },
+            
+            eligibleForOverride(item) {
+                return item.caregiver_1099 == 'client'
+                    && item.errors
+                    && item.errors.length === 1
+                    && item.errors[0] == 'Client SSN';
+            },
         },
         watch: {
             'form.business_id'(newVal, oldVal){

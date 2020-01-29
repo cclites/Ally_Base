@@ -82,7 +82,7 @@ class PrintClaimInvoiceController extends BaseController
         if ($request->filled('download')) {
             $pdfWrapper = app('snappy.pdf.wrapper');
             $pdfWrapper->loadHTML($view->render());
-            return $pdfWrapper->download('C-Invoice-' . snake_case($claim->name) . '.pdf');
+            return $pdfWrapper->download('C-Invoice-' . Str::snake($claim->name) . '.pdf');
         }
 
         return $view;
@@ -126,7 +126,7 @@ class PrintClaimInvoiceController extends BaseController
         if ($request->filled('download')) {
             $pdfWrapper = app('snappy.pdf.wrapper');
             $pdfWrapper->loadHTML($view->render());
-            return $pdfWrapper->download('C-Invoice-' . snake_case($claim->name) . '.pdf');
+            return $pdfWrapper->download('C-Invoice-' . Str::snake($claim->name) . '.pdf');
         }
 
         return $view;

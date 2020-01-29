@@ -15,11 +15,14 @@ use App\Http\Requests\Transmit1099Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 
 class Caregiver1099Controller extends Controller
 {
     protected $headerRow = [
+        'Table Id',
         'Created At',
+        'Total Clients',
         'Void (Enter 0 or 1)',
         'Corrected (Enter 0 or 1)',
         'Payer Name',
@@ -56,7 +59,7 @@ class Caregiver1099Controller extends Controller
         'Box 17_1',
         'Box 17_2',
         'Box 18_1',
-        'Box 18_2'
+        'Box 18_2',
     ];
 
     /**
@@ -88,7 +91,8 @@ class Caregiver1099Controller extends Controller
     public function store(StoreCaregiver1099Request $request)
     {
         /** @var \App\CaregiverYearlyEarnings $earnings */
-        $earnings = CaregiverYearlyEarnings::where('business_id', $request->business_id)
+        $earnings = CaregiverYearlyEarnings::with('client', 'caregiver')
+            ->where('business_id', $request->business_id)
             ->where('client_id', $request->client_id)
             ->where('caregiver_id', $request->caregiver_id)
             ->where('year', $request->year)
@@ -96,6 +100,11 @@ class Caregiver1099Controller extends Controller
 
         if (empty($earnings)) {
             return new ErrorResponse(500, 'Could not find earnings data for this caregiver and client.');
+        }
+
+        if ($earnings->client->caregiver_1099 == Caregiver1099Payer::CLIENT() && $request->override_payer_to_ally) {
+            // override payer ot ally (just this once)
+            $earnings->client->caregiver_1099 = Caregiver1099Payer::ALLY();
         }
 
         if ($errors = $earnings->getMissing1099Errors()) {
@@ -195,7 +204,7 @@ class Caregiver1099Controller extends Controller
                 $caregiverTin = decrypt($cg1099->caregiver_ssn);
 
                 if ($maskRecipientSSN) {
-                    $caregiverTin = '***-**-*' . substr($caregiverTin, strlen($caregiverTin) - 4, 4);
+                    $caregiverTin = '***-**-' . substr($caregiverTin, strlen($caregiverTin) - 4, 4);
                 } else {
                     $caregiverTin = $this->ensureSsnFormat($caregiverTin);
                 }
@@ -221,7 +230,8 @@ class Caregiver1099Controller extends Controller
                     'recipient_state' => strtoupper($cg1099->caregiver_state),
                     'recipient_zip' => $cg1099->caregiver_zip,
                     'payment_total' => $cg1099->payment_total,
-                    'created_at' => $cg1099->created_at->toDateString(),
+                    'created_at' => $cg1099->created_at->setTimezone(config('ally.local_timezone'))->toDateString(),
+                    'id' => $cg1099->id,
                 ];
             });
 
@@ -232,6 +242,56 @@ class Caregiver1099Controller extends Controller
             'Content-Disposition' => 'attachment; filename="Transmission.csv"',
         ]);
 
+    }
+
+    public function exportAllyGrouped(Request $request, int $year)
+    {
+        $maskRecipientSSN = $request->mask == 1;
+        $systemSettings = \DB::table('system_settings')->first();
+
+        $caregiver1099s = Caregiver1099::where('year', $year)
+            ->whereNull('transmitted_at')
+            ->where('caregiver_1099_payer', Caregiver1099Payer::ALLY())
+            ->with(['client', 'client.user'])
+            ->get()
+            ->groupBy('caregiver_id')
+            ->map(function (Collection $group) use ($systemSettings, $maskRecipientSSN) {
+                $total = $group->bcsum('payment_total');
+                $item = $group[0];
+                $caregiverTin = decrypt($item->caregiver_ssn);
+                if ($maskRecipientSSN) {
+                    $caregiverTin = '***-**-' . substr($caregiverTin, strlen($caregiverTin) - 4, 4);
+                } else {
+                    $caregiverTin = $this->ensureSsnFormat($caregiverTin);
+                }
+
+                return [
+                    'payer_name' => strtoupper($systemSettings->company_name),
+                    'payer_address' => strtoupper($item->client_address1 . ($item->client_address2 ? ", " . $item->client_address2 : '')),
+                    'payer_city' => strtoupper($item->client_city),
+                    'payer_state' => strtoupper($item->client_state),
+                    'payer_zip' => $item->client_zip,
+                    'payer_phone' => $systemSettings->company_contact_phone,
+                    'payer_tin' => $systemSettings->company_ein,
+                    'recipient_tin' => $caregiverTin,
+                    'recipient_name' => strtoupper($item->caregiver_first_name . " " . $item->caregiver_last_name),
+                    'recipient_address' => strtoupper($item->caregiver_address1 . "\n" . filled($item->caregiver_address2)),
+                    'recipient_city' => strtoupper($item->caregiver_city),
+                    'recipient_state' => strtoupper($item->caregiver_state),
+                    'recipient_zip' => $item->caregiver_zip,
+                    'payment_total' => $total,
+                    'created_at' => $item->created_at->setTimezone(config('ally.local_timezone'))->toDateString(),
+                    'id' => $item->id,
+                    'total_clients' => $group->count(),
+                ];
+            });
+
+        $csv = $this->toCsv($caregiver1099s);
+
+        return \Response::make(json_encode($csv), 200, [
+            'Content-type' => 'application/csv',
+            'Content-Disposition' => 'attachment; filename="Transmission.csv"',
+        ]);
     }
 
     public function ensureSsnFormat(string $ssn) : string
@@ -261,9 +321,10 @@ class Caregiver1099Controller extends Controller
 
         // build rows
         foreach ($rows as $row) {
-
             $data = [
+                $row['id'],
                 $row['created_at'],
+                isset($row['total_clients']) ? $row['total_clients'] : '-',
                 0,
                 0,
                 $row['payer_name'],

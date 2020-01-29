@@ -2,6 +2,29 @@
 
 namespace App;
 
+/**
+ * App\CaregiverYearlyEarnings
+ *
+ * @property int $id
+ * @property int $year
+ * @property int $caregiver_id
+ * @property int $client_id
+ * @property int $business_id
+ * @property float $earnings
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Business $business
+ * @property-read \App\Caregiver $caregiver
+ * @property-read \App\Client $client
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverYearlyEarnings newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverYearlyEarnings newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverYearlyEarnings overThreshold($threshold)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverYearlyEarnings query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverYearlyEarnings whereUsesAllyPayer()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverYearlyEarnings whereUsesClientPayer()
+ * @mixin \Eloquent
+ */
 class CaregiverYearlyEarnings extends BaseModel
 {
     /**
@@ -229,7 +252,7 @@ class CaregiverYearlyEarnings extends BaseModel
             'caregiver_state' => $this->caregiver->address->state,
             'caregiver_zip' => $this->caregiver->address->zip,
             'caregiver_ssn' => encrypt($this->caregiver->ssn),
-            'created_by' => auth()->user()->nameLastFirst(),
+            'created_by' => filled(auth()->user()) ? auth()->user()->nameLastFirst() : 'System',
             'caregiver_1099_payer' => $this->client->caregiver_1099,
         ]);
     }

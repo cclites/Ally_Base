@@ -14,7 +14,9 @@ class AlterClientAuthorizationsTableRemovePayerId extends Migration
     public function up()
     {
         Schema::table('client_authorizations', function (Blueprint $table) {
-            $table->dropForeign(['payer_id']);
+            if (\DB::getDriverName() != 'sqlite') {
+                $table->dropForeign(['payer_id']);
+            }
             $table->dropColumn('payer_id');
         });
     }

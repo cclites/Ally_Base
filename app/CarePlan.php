@@ -35,6 +35,14 @@ use Carbon\Carbon;
  * @method static \Illuminate\Database\Query\Builder|\App\CarePlan withTrashed()
  * @method static \Illuminate\Database\Query\Builder|\App\CarePlan withoutTrashed()
  * @mixin \Eloquent
+ * @property-read int|null $activities_count
+ * @property-read int|null $audits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Schedule[] $futureSchedules
+ * @property-read int|null $future_schedules_count
+ * @property-read int|null $schedules_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CarePlan newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CarePlan newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CarePlan query()
  */
 class CarePlan extends AuditableModel
 {

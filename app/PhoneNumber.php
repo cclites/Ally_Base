@@ -35,6 +35,10 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Eloquent
  * @property int $receives_sms
  * @method static \Illuminate\Database\Eloquent\Builder|\App\PhoneNumber whereReceivesSms($value)
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\PhoneNumber newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\PhoneNumber newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\PhoneNumber query()
  */
 class PhoneNumber extends AuditableModel
 {

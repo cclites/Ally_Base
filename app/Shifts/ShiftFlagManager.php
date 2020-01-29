@@ -3,6 +3,7 @@ namespace App\Shifts;
 
 use App\Shift;
 use App\ShiftFlag;
+use Illuminate\Support\Str;
 
 class ShiftFlagManager
 {
@@ -56,7 +57,7 @@ class ShiftFlagManager
     {
         $flags = [];
         foreach($flagsToCheck as $flag) {
-            $method = 'is' . studly_case($flag);
+            $method = 'is' . Str::studly($flag);
             if (method_exists($this, $method) && $this->$method($this->shift)) {
                 $flags[] = $flag;
             }

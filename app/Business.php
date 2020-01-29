@@ -23,6 +23,7 @@ use App\Traits\ScrubsForSeeding;
 use Crypt;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 /**
  * App\Business
@@ -199,6 +200,55 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereUseRateCodes($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Business whereZip($value)
  * @mixin \Eloquent
+ * @property string $open_shifts_setting
+ * @property int $enable_client_onboarding
+ * @property float $ot_multiplier
+ * @property string|null $ot_behavior
+ * @property float $hol_multiplier
+ * @property string|null $hol_behavior
+ * @property string|null $hha_username
+ * @property mixed|null $hha_password
+ * @property string|null $tellus_username
+ * @property mixed|null $tellus_password
+ * @property int $co_caregiver_signature
+ * @property int $require_caregiver_signatures
+ * @property string $logo
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\OfficeUser[] $activeUsers
+ * @property-read int|null $active_users_count
+ * @property-read int|null $activities_count
+ * @property-read int|null $audits_count
+ * @property-read int|null $care_plans_count
+ * @property-read int|null $caregivers_count
+ * @property-read int|null $charged_transactions_count
+ * @property-read int|null $clients_count
+ * @property-read int|null $clients_using_provider_payment_count
+ * @property-read \App\BusinessCommunications $communicationSettings
+ * @property-read int|null $deposits_count
+ * @property-read string $city_state_zip
+ * @property-read mixed $has_open_shifts
+ * @property-read string|null $street_address
+ * @property-read int|null $note_templates_count
+ * @property-read int|null $notes_count
+ * @property-read int|null $payments_count
+ * @property-read int|null $prospects_count
+ * @property-read int|null $questions_count
+ * @property-read \App\QuickbooksConnection $quickbooksConnection
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\QuickbooksCustomer[] $quickbooksCustomers
+ * @property-read int|null $quickbooks_customers_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\QuickbooksService[] $quickbooksServices
+ * @property-read int|null $quickbooks_services_count
+ * @property-read int|null $rate_codes_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SalesPerson[] $salesPeople
+ * @property-read int|null $sales_people_count
+ * @property-read int|null $schedules_count
+ * @property-read int|null $shifts_count
+ * @property-read int|null $sms_threads_count
+ * @property-read int|null $tasks_count
+ * @property-read int|null $timesheets_count
+ * @property-read int|null $users_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Business query()
  */
 class Business extends AuditableModel implements ChargeableInterface, ReconcilableInterface, HasPaymentHold,
     BelongsToBusinessesInterface, BelongsToChainsInterface, ContactableInterface, HasTimezone
@@ -1037,14 +1087,14 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
             return;
         }
 
-        if (starts_with($value, config('app.url'))) {
+        if (Str::startsWith($value, config('app.url'))) {
             return;
         }
 
         $base64Data = str_replace('data:image/png;base64,', '', $value);
         $base64Data = str_replace(' ', '+', $base64Data);
 
-        $filename = 'logos/' . $this->id . '_' . str_slug($this->name) . '.png';
+        $filename = 'logos/' . $this->id . '_' . Str::slug($this->name) . '.png';
 
         if (\Storage::disk('public')->put($filename, base64_decode($base64Data))) {
             $this->attributes['logo'] = $filename;

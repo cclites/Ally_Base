@@ -14,7 +14,9 @@ class AlterTaskEditHistoryTableUpdateForeignKey extends Migration
     public function up()
     {
         Schema::table('task_edit_history', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
+            if (\DB::getDriverName() != 'sqlite') {
+                $table->dropForeign(['user_id']);
+            }
             $table->foreign('user_id')->references('id')->on('users');
         });
     }

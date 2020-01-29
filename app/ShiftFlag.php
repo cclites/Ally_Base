@@ -18,6 +18,9 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftFlag whereShiftId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftFlag whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftFlag newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftFlag newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftFlag query()
  */
 class ShiftFlag extends Model
 {

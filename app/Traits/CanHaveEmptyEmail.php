@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+use Illuminate\Support\Str;
+
 trait CanHaveEmptyEmail
 {
     /**
@@ -42,6 +44,6 @@ trait CanHaveEmptyEmail
      */
     public function hasNoEmail()
     {
-        return ends_with($this->email, '@' . $this->fakeEmailDomain);
+        return Str::endsWith($this->email, '@' . $this->fakeEmailDomain);
     }
 }

@@ -95,6 +95,30 @@ use Illuminate\Support\Collection;
  * @method static \Illuminate\Database\Query\Builder|\App\Schedule withTrashed()
  * @method static \Illuminate\Database\Query\Builder|\App\Schedule withoutTrashed()
  * @mixin \Eloquent
+ * @property int|null $service_id
+ * @property int|null $payer_id
+ * @property int|null $group_id
+ * @property-read int|null $activities_count
+ * @property-read int|null $audits_count
+ * @property-read int|null $exceptions_count
+ * @property-read mixed $is_open
+ * @property-read bool $will_be_converted
+ * @property-read \App\ScheduleGroup|null $group
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverScheduleRequest[] $scheduleRequests
+ * @property-read int|null $schedule_requests_count
+ * @property-read \App\Billing\Service $service
+ * @property-read int|null $services_count
+ * @property-read int|null $shifts_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule betweenDates(\Carbon\Carbon $start, \Carbon\Carbon $end)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule canBeClockedIn()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule forCaregiver($caregiver)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule inTheNextMonth($timezone)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule startsBetweenDates($timezone, $start, $end)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule thatCanBeClockedIn()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Schedule whereOpen()
  */
 class Schedule extends AuditableModel implements BelongsToBusinessesInterface
 {

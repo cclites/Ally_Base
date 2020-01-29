@@ -2,6 +2,7 @@
 
 use Faker\Generator as Faker;
 use App\CaregiverApplication;
+use Illuminate\Support\Arr;
 
 $factory->define(CaregiverApplication::class, function (Faker $faker) {
     return [
@@ -26,9 +27,9 @@ $factory->define(CaregiverApplication::class, function (Faker $faker) {
         'preferred_start_date' => $faker->date(),
         'preferred_days' => 'Mon,Tues,Wed,Thurs,Fri',
         'preferred_times' => 'Mornings,Afternoons,Evenings,Nights',
-        'preferred_shift_length' => array_random([1, 4, 8, 12]),
+        'preferred_shift_length' => Arr::random([1, 4, 8, 12]),
         'work_weekends' => $faker->boolean,
-        'travel_radius' => array_random([5, 10, 15, 20]),
+        'travel_radius' => Arr::random([5, 10, 15, 20]),
         'dui' => $faker->boolean,
         'reckless_driving' => $faker->boolean,
         'moving_violation' => $faker->boolean,

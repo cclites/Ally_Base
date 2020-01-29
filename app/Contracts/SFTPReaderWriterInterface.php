@@ -19,7 +19,8 @@ interface SFTPReaderWriterInterface
         $remote_file,
         $local_file = false,
         $offset = 0,
-        $length = -1
+        $length = -1,
+        $progressCallback = null
     );
 
     function _close_handle($handle);

@@ -12,6 +12,7 @@ use App\Reports\ClientPaymentHistoryReport;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PaymentController extends BaseController
 {
@@ -86,6 +87,6 @@ class PaymentController extends BaseController
         $payments = $data['rows'];
         $client = $this->client();
         $pdf = PDF::loadView('clients.print.yearly-payment-summary', compact('client', 'year', 'payments', 'total'));
-        return $pdf->download(strtolower(str_slug($client->name . ' ' . $request->year . ' Payment Summary')) . '.pdf');
+        return $pdf->download(strtolower(Str::slug($client->name . ' ' . $request->year . ' Payment Summary')) . '.pdf');
     }
 }

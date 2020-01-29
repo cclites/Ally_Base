@@ -11,6 +11,7 @@ use App\PhoneNumber;
 use App\Jobs\SendTextMessage;
 use App\SystemNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Str;
 
 abstract class BaseNotification extends Notification implements ShouldQueue
 {
@@ -90,7 +91,7 @@ abstract class BaseNotification extends Notification implements ShouldQueue
     public static function getKey()
     {
         if (empty(static::KEY)) {
-            return snake_case(basename(str_replace('\\', '/', get_called_class())));
+            return Str::snake(basename(str_replace('\\', '/', get_called_class())));
         }
 
         return static::KEY;

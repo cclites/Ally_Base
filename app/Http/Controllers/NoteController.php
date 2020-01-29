@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Caregiver;
+use App\Exports\GenericExport;
 use App\Note;
 use App\OfficeUser;
 use App\Responses\CreatedResponse;
@@ -167,6 +168,9 @@ class NoteController extends Controller
      * Generate xls file
      *
      * @param $user
+     * @return \Maatwebsite\Excel\BinaryFileResponse|\Symfony\Component\HttpFoundation\BinaryFileResponse
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
     public function generateXls($user)
     {
@@ -180,11 +184,7 @@ class NoteController extends Controller
             ];
         })->toArray();
 
-        Excel::create($user->name . '_Notes', function($excel) use($xls){
-            $excel->sheet('Sheet 1', function($sheet) use($xls){
-                $sheet->fromArray($xls);
-            });
-        })->download('xls');
+        return Excel::download(new GenericExport($xls), $user->name . '_Notes.xlsx');
     }
 
      /** Get the PDF printed output of the report.

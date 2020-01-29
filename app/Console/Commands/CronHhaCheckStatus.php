@@ -93,7 +93,7 @@ class CronHhaCheckStatus extends Command
                  } else {
                     $this->status('Claim rejected.');
                     $hhaFile->update(['status' => ClaimInvoiceHhaFile::STATUS_REJECTED]);
-                    $hhaFile->claimInvoice()->update(['status' => ClaimStatus::REJECTED()]);
+                    $hhaFile->claimInvoice->update(['status' => ClaimStatus::REJECTED()]);
                 }
 
                 \DB::commit();

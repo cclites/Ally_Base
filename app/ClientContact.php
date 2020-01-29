@@ -5,6 +5,38 @@ namespace App;
 use App\Traits\ScrubsForSeeding;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\ClientContact
+ *
+ * @property int $id
+ * @property int $client_id
+ * @property string $name
+ * @property int $is_payer
+ * @property string|null $relationship
+ * @property string|null $relationship_custom
+ * @property int $has_poa
+ * @property string|null $email
+ * @property string|null $phone1
+ * @property string|null $phone2
+ * @property string|null $address
+ * @property string|null $city
+ * @property string|null $state
+ * @property string|null $zip
+ * @property int $is_emergency
+ * @property int|null $emergency_priority
+ * @property int $has_login_access
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $work_phone
+ * @property string|null $fax_number
+ * @property-read \App\Client $client
+ * @property-read string $first_name
+ * @property-read string $last_name
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientContact newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientContact newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientContact query()
+ * @mixin \Eloquent
+ */
 class ClientContact extends Model
 {
     /**

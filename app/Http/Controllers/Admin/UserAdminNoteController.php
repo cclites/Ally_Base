@@ -9,6 +9,7 @@ use App\Responses\SuccessResponse;
 use App\User;
 use App\UserAdminNote;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class UserAdminNoteController extends Controller
 {
@@ -81,7 +82,7 @@ class UserAdminNoteController extends Controller
      */
     public function update(CreateUserAdminNoteRequest $request, UserAdminNote $adminNote )
     {
-        $data = array_only($request->filtered(), ['body']);
+        $data = Arr::only($request->filtered(), ['body']);
 
         if ($adminNote->update($data)) {
             return new SuccessResponse( 'Successfully updated admin note!', $adminNote->fresh()->load('creator') );
