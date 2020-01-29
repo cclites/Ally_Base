@@ -263,7 +263,7 @@
                                     </tr>
 
                                     <!-- Service Breakout -->
-                                    <div v-if="billingType === 'services'">
+                                    <template v-if="billingType === 'services'">
                                         <tr v-for="(service,index) in form.services" :key=" index ">
                                             <td>
                                                 <b-form-select v-model="service.service_id" class="services" @input="changedService(service, service.service_id)">
@@ -339,7 +339,7 @@
                                             <td>
                                                 <b-form-select v-model="service.payer_id" class="payers" @input="changedPayer(service, service.payer_id)">
                                                     <option :value="null">(Auto)</option>
-                                                    <option v-for="payer in clientPayers" :value="payer.id">{{ payer.name }}</option>
+                                                    <option v-for="payer in clientPayers" :value="payer.id" :key="payer.id">{{ payer.name }}</option>
                                                 </b-form-select>
                                             </td>
                                             <td v-if="allowQuickbooksMapping">
@@ -357,7 +357,7 @@
                                                 </b-btn>
                                             </td>
                                         </tr>
-                                    </div>
+                                    </template>
                                     </tbody>
                                 </table>
                             </div>

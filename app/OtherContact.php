@@ -51,6 +51,9 @@ use Illuminate\Database\Eloquent\Builder;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OtherContact whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OtherContact whereZip($value)
  * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OtherContact newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OtherContact newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OtherContact query()
  */
 class OtherContact extends Model implements BelongsToBusinessesInterface
 {

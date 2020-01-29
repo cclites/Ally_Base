@@ -39,7 +39,7 @@ class ClaimInvoiceFactoryTest extends TestCase
     /** @var ClaimInvoiceFactory */
     private $claimGenerator;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
 

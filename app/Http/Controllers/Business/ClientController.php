@@ -33,6 +33,7 @@ use App\Notifications\ClientWelcomeEmail;
 use App\Notifications\TrainingEmail;
 use App\Shift;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 
 class ClientController extends BaseController
@@ -45,6 +46,9 @@ class ClientController extends BaseController
      */
     public function index(Request $request)
     {
+        if (empty($request->businesses) && auth()->user()->role_type == 'admin') {
+            return [];
+        }
 
         if ($request->expectsJson()) {
             $query = Client::forRequestedBusinesses()->ordered();
@@ -301,7 +305,7 @@ class ClientController extends BaseController
         }
 
         //update 1099 options
-        if( $request->client_type !== $client->client_type ){
+        if ($request->client_type !== $client->client_type) {
             $data = array_merge($this->update1099Options($request->client_type), $data);
         }
 
@@ -333,7 +337,7 @@ class ClientController extends BaseController
             return new ErrorResponse(400, 'You cannot delete this client because they have an active shift clocked in.');
         }
 
-        if($client->getUnpaidInvoicesCount() > 0){
+        if ($client->getUnpaidInvoicesCount() > 0) {
             return new ErrorResponse(400, 'Warning: This client has an outstanding invoice or payment and cannot be deactivated. Contact Ally support with any questions.');
         }
 
@@ -354,8 +358,7 @@ class ClientController extends BaseController
         $data[ 'status_alias_id' ] = null;
         $data[ 'deactivated_by' ] = \Auth::user()->name;
 
-        if ( $client->update( $data ) ) {
-
+        if ($client->update($data)) {
             $client->clearFutureSchedules();
 
             \DB::commit();
@@ -460,7 +463,7 @@ class ClientController extends BaseController
 
         $data = $request->validated();
 
-        if ($client->user()->update($data)) {
+        if ($client->user->update($data)) {
             return new SuccessResponse('Client\'s notification options have been updated.');
         }
 
@@ -479,7 +482,7 @@ class ClientController extends BaseController
     {
         $this->authorize('update', $client);
 
-        $client->setPreferences(array_except($request->validated(), 'ethnicities'));
+        $client->setPreferences(Arr::except($request->validated(), 'ethnicities'));
         $client->preferences->ethnicities()->delete();
         $client->preferences->ethnicities()->saveMany(
             collect($request->ethnicities)->map(function ($ethnicity) {
@@ -553,18 +556,18 @@ class ClientController extends BaseController
     }
 
     /**
-     * 
+     *
      * generate a discharge letter for the client resource ON THE FLY
      */
-    public function dischargeLetter( Client $client )
+    public function dischargeLetter(Client $client)
     {
-        $client->load( 'deactivationReason' );
+        $client->load('deactivationReason');
 
         $query = \DB::table('shifts')->where('client_id', $client->id);
         $totalLifetimeShifts = $query->count();
         $totalLifetimeHours = $query->selectRaw('SUM(hours) as hours')->first()->hours;
 
-        $pdf = PDF::loadView( 'business.clients.deactivation_reason', [
+        $pdf = PDF::loadView('business.clients.deactivation_reason', [
 
             'client'              => $client,
             'deactivatedBy'       => $client->user->deactivated_by ?? 'Unknown',
@@ -573,8 +576,8 @@ class ClientController extends BaseController
             'override_ally_logo' => $client->business->logo,
         ]);
 
-        $filePath = $client->id . '-' . 'deactivation-details-' . Carbon::now()->format( 'm-d-Y' );
-        return $pdf->stream( $filePath . '.pdf' );
+        $filePath = $client->id . '-' . 'deactivation-details-' . Carbon::now()->format('m-d-Y');
+        return $pdf->stream($filePath . '.pdf');
     }
 
     /**

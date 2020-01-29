@@ -18,7 +18,7 @@ class ShiftSummaryEmailTest extends TestCase
 {
     use RefreshDatabase, CreatesBusinesses, CreatesShifts;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
 

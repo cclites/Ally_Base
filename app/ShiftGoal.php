@@ -21,6 +21,10 @@ namespace App;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftGoal whereShiftId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftGoal whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftGoal newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftGoal newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftGoal query()
  */
 class ShiftGoal extends AuditableModel
 {

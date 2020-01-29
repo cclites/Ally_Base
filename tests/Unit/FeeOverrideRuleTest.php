@@ -13,7 +13,7 @@ class FeeOverrideRuleTest extends TestCase
     use RefreshDatabase;
     use CreatesBusinesses;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
         $this->createBusinessWithUsers(false);

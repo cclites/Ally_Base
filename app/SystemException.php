@@ -41,6 +41,10 @@ use Carbon\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException whereTitle($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SystemException query()
  */
 class SystemException extends AuditableModel implements BelongsToBusinessesInterface
 {

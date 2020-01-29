@@ -14,6 +14,7 @@ class InvoiceSummaryByClientReportController extends Controller
      * @param InvoiceSummaryByClientReportRequest $request
      * @param InvoiceSummaryByClientReport $report
      * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     * @throws \Exception
      */
     public function index(InvoiceSummaryByClientReportRequest $request, InvoiceSummaryByClientReport $report)
     {

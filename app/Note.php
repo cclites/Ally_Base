@@ -48,6 +48,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $call_direction
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereCallDirection($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Note whereTitle($value)
+ * @property int|null $import_id
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Note query()
  */
 class Note extends AuditableModel implements BelongsToBusinessesInterface
 {

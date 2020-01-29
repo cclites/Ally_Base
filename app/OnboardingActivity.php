@@ -16,6 +16,9 @@ namespace App;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OnboardingActivity whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\OnboardingActivity whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OnboardingActivity newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OnboardingActivity newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\OnboardingActivity query()
  */
 class OnboardingActivity extends BaseModel
 {

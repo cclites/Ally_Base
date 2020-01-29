@@ -128,7 +128,7 @@
             <h6 class="print-date">Printed on <span>{{currentTime()}}</span></h6>
         </div>
 
-        <schedule-request-modal v-model=" requestsModal " :selected-schedule-id=" selectedScheduleId " @request-response=" calendarRequestResponded "></schedule-request-modal>
+        <schedule-request-modal v-if="false" v-model=" requestsModal " :selected-schedule-id=" selectedScheduleId " @request-response=" calendarRequestResponded "></schedule-request-modal>
 
         <schedule-notes-modal v-model="notesModal"
                                 :event="selectedEvent"
@@ -596,7 +596,7 @@
                     return;
                 }
 
-                if (this.hoverShift.starts_at && moment(this.hoverShift.starts_at.date).isBefore(moment())) {
+                if (this.hoverShift.starts_at && moment(this.hoverShift.starts_at).isBefore(moment())) {
                     if (! confirm('Modifying past schedules will NOT change the shift history or billing.  Continue?')) {
                         return;
                     }

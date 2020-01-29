@@ -21,6 +21,9 @@ use App\Caregiver;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverMeta whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverMeta whereValue($value)
  * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverMeta newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverMeta newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverMeta query()
  */
 class CaregiverMeta extends BaseModel
 {    

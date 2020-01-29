@@ -8,8 +8,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Client;
 use App\Caregiver;
-use App\Rules\ValidSSN;
-use Crypt;
 
 class AdminBadSsnReportController extends Controller
 {
@@ -41,11 +39,12 @@ class AdminBadSsnReportController extends Controller
                     ->map(function (Client $client) {
 
                         try {
-                            if ($client->ssn && $this->validSSN($client->ssn)) {
+                            if ($client->ssn && valid_ssn($client->ssn)) {
                                 return null;
                             }
                         } catch (DecryptException $ex) {
                             // Corrupt -> continue
+                            return null;
                         }
 
                         return [
@@ -68,11 +67,12 @@ class AdminBadSsnReportController extends Controller
                 $data = $report->get()
                     ->map(function (Caregiver $caregiver) {
                         try {
-                            if ($this->validSSN($caregiver->ssn)) {
+                            if (valid_ssn($caregiver->ssn)) {
                                 return null;
                             }
                         } catch (DecryptException $ex) {
                             // Corrupt -> continue
+                            return null;
                         }
 
                         return [
@@ -104,17 +104,6 @@ class AdminBadSsnReportController extends Controller
                 '1099' => route('admin.admin-1099-actions')
             ]
         );
-    }
-
-    /**
-     * Check for valid SSN format.
-     *
-     * @param null|string $ssn
-     * @return bool
-     */
-    private function validSSN(?string $ssn) : bool
-    {
-        return preg_match('/(\d{3}|\*{3})-(\d{2}|\*{2})-(\d{4}|\*{4})/', $ssn);
     }
 
     /**

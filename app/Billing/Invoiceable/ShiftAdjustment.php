@@ -11,6 +11,7 @@ use App\Traits\BelongsToOneBusiness;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 /**
  * \App\Billing\Invoiceable\ShiftAdjustment
@@ -42,6 +43,13 @@ use Illuminate\Support\Collection;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\InvoiceableModel whereMeta($key, $delimiter = null, $value = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\InvoiceableModel withMeta()
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @property-read int|null $client_invoice_items_count
+ * @property-read int|null $meta_count
+ * @property-read \App\Billing\Payer|null $payer
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment forBusinesses($businessIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment forCaregivers($caregiverIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\ShiftAdjustment forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
  */
 class ShiftAdjustment extends InvoiceableModel
 {
@@ -169,7 +177,7 @@ class ShiftAdjustment extends InvoiceableModel
      */
     public function getItemNotes(): ?string
     {
-        return str_limit($this->notes, 252);
+        return Str::limit($this->notes, 252);
     }
 
     /**

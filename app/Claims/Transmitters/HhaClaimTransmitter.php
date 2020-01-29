@@ -2,6 +2,7 @@
 
 namespace App\Claims\Transmitters;
 
+use App\Claims\ClaimInvoiceHhaFile;
 use App\Claims\Exceptions\ClaimTransmissionException;
 use App\Claims\Contracts\ClaimTransmitterInterface;
 use App\Services\HhaExchangeService;
@@ -9,9 +10,9 @@ use App\Claims\ClaimInvoiceType;
 use App\Claims\ClaimInvoiceItem;
 use App\Claims\ClaimableService;
 use App\Claims\ClaimInvoice;
-use App\HhaFile;
 use App\VisitEditAction;
 use App\VisitEditReason;
+use Illuminate\Support\Str;
 
 class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitterInterface
 {
@@ -96,7 +97,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             // create new HhaFile for the Claim
             $claim->hhaFiles()->create([
                 'filename' => substr($filename, 0, strlen($filename) - 4),
-                'status' => HhaFile::STATUS_PENDING,
+                'status' => ClaimInvoiceHhaFile::STATUS_PENDING,
             ]);
 
             return true;
@@ -141,7 +142,7 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             $service->visit_end_time->setTimezone($claim->getTimezone())->format($this->timeFormat), //    "Visit End Time", (required)
             $service->getHasEvv() ? $service->evv_start_time->setTimezone($claim->getTimezone())->format($this->timeFormat) : '', //    "EVV Start Time",
             $service->getHasEvv() ? $service->evv_end_time->setTimezone($claim->getTimezone())->format($this->timeFormat) : '', //    "EVV End Time",
-            str_limit($service->getAddress(), 100), //    "Service Location",
+            Str::limit($service->getAddress(), 100), //    "Service Location",
             $this->mapActivities($service->activities), //    "Duties",
             $service->checked_in_number, //    "Clock-In Phone Number",
             $service->checked_in_latitude, //    "Clock-In Latitude",
@@ -152,13 +153,12 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             $service->checked_out_longitude, //    "Clock-Out Longitude",
             '', //    "Clock-Out EVV Other Info",
             $claim->name, //    "Invoice Number",
-            $service->getHasEvv() ? $service->visitEditReason->code : VisitEditAction::nonEvvDefault(), //    "Visit Edit Reason Code",
-            $service->getHasEvv() ? $service->visitEditAction->code : VisitEditReason::nonEvvDefault(), //    "Visit Edit Action Taken",
+            $this->getVisitEditReason($service), //    "Visit Edit Reason Code",
+            $this->getVisitEditAction($service), //    "Visit Edit Action Taken",
             $service->caregiver_comments, //    "Notes",
             'N', //    "Is Deletion",
             $item->id, //    "Invoice Line Item ID",
             'N', //    "Missed Visit",
-            // TODO: implement reason codes?
             '', //    "Missed Visit Reason Code",
             '', //    "Missed Visit Action Taken Code",
             $service->getHasEvv() ? '' : 'Y', //    "Timesheet Required",
@@ -169,6 +169,44 @@ class HhaClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitt
             '', //    "User Field 4",
             '', //    "User Field 5",
         ];
+    }
+
+    /**
+     * Get the visit edit reason code for the Claimable Service.
+     *
+     * @param ClaimableService $service
+     * @return string
+     */
+    public function getVisitEditReason(ClaimableService $service) : string
+    {
+        if (filled($service->visitEditReason)) {
+            return $service->visitEditReason->code;
+        }
+
+        if (! $service->getHasEvv()) {
+            return VisitEditReason::nonEvvDefault();
+        }
+
+        return '';
+    }
+
+    /**
+     * Get the visit edit action code for the Claimable Service.
+     *
+     * @param ClaimableService $service
+     * @return string
+     */
+    public function getVisitEditAction(ClaimableService $service) : string
+    {
+        if (filled($service->visitEditAction)) {
+            return $service->visitEditAction->code;
+        }
+
+        if (! $service->getHasEvv()) {
+            return VisitEditAction::nonEvvDefault();
+        }
+
+        return '';
     }
 
     /**

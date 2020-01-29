@@ -37,6 +37,10 @@ use File;
  * @method static \Illuminate\Database\Query\Builder|\App\Document withTrashed()
  * @method static \Illuminate\Database\Query\Builder|\App\Document withoutTrashed()
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Document newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Document newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Document query()
  */
 class Document extends AuditableModel
 {

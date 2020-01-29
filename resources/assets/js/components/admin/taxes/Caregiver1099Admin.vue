@@ -7,8 +7,14 @@
         <div v-for="year in years" :key="year" class="mb-3">
             <h4 lg="12">{{ year }}:</h4>
             <ul>
-                <li @click="download1099( year )">
-                    1099 Export CSV
+                <li @click="download1099( year, true )">
+                    1099 Export CSV (Mask recipient SSN)
+                </li>
+                <li @click="download1099( year, false )">
+                    1099 Export CSV (Show full recipient SSN)
+                </li>
+                <li @click="download1099( year, false, true )">
+                    1099 Export CSV - Grouped Ally Payer (Show full recipient SSN)
                 </li>
                 <li @click="getEmails( year, 'caregiver')">
                     Get a list of all Caregiver Emails that were in this 1099
@@ -61,9 +67,12 @@
         mounted(){
         },
         methods: {
-            download1099(year){
+            download1099(year, mask, grouped){
 
-                let url = '/admin/business-1099/transmit/' + year;
+                let url = '/admin/business-1099/transmit/' + year + '?mask=' + (mask ? '1' : '0');
+                if (grouped) {
+                    url = `/admin/business-1099/export-ally-grouped/${year}?mask=0`;
+                }
 
                 axios.get(url)
                     .then(response => {

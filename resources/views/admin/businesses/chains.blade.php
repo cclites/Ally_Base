@@ -8,5 +8,5 @@
 @endsection
 
 @section('content')
-    <business-chain-list :chains="{{ $chains OR '[]' }}"></business-chain-list>
+    <business-chain-list :chains="{{ $chains ?? '[]' }}"></business-chain-list>
 @endsection

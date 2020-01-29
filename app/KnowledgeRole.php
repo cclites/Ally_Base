@@ -14,6 +14,9 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\KnowledgeRole whereKnowledgeId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\KnowledgeRole whereRole($value)
  * @mixin \Eloquent
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\KnowledgeRole newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\KnowledgeRole newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\KnowledgeRole query()
  */
 class KnowledgeRole extends Model
 {

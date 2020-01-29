@@ -13,8 +13,6 @@
                 <b-form-checkbox class="m-0 vertical-center" v-model=" hide_inapplicables ">Hide any expirations inapplicable to the caregiver</b-form-checkbox>
             </b-col>
             <b-col lg="6" class="text-right d-flex justify-content-end align-items-center">
-
-                <p class="mb-0">Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results</p>
                 <b-btn :disabled=" loading || updateList.length == 0 " class="ml-3" @click=" saveLicenses() " variant="success">Save Expirations</b-btn>
             </b-col>
         </b-row>
@@ -24,10 +22,9 @@
                 :busy="loading"
                 :items=" filteredExpirations "
                 :fields="fields"
-                :current-page="currentPage"
                 :filter="filter"
-                :sort-by.sync="sortBy"
-                :sort-desc.sync="sortDesc"
+                sort-by="actions"
+                no-sort-reset
             >
 
                 <template slot="name" scope="row">
@@ -98,8 +95,6 @@
         <b-row class="align-items-center">
 
             <b-col lg="12" class="text-right d-flex justify-content-end align-items-center">
-
-                <p class="mb-0">Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results</p>
                 <b-btn :disabled=" loading || updateList.length == 0 " class="ml-3" @click=" saveLicenses() " variant="success">Save Expirations</b-btn>
             </b-col>
         </b-row>
@@ -115,41 +110,38 @@
 
         data() {
             return {
-
                 hide_inapplicables : true,
                 updateList : [],
                 loading: false,
-                perPage: 25,
-                currentPage: 1,
-                sortBy: null,
-                sortDesc: false,
                 filter: null,
                 fields: [
                     {
                         key: 'name',
                         label: 'Name',
                         class: 'name-column',
-                        sortable: true,
+                        sortable: false,
                     },
                     {
                         key: 'expires_sort',
                         class: 'expiration-column',
                         label: 'Expiration Date',
-                        sortable: true,
+                        sortable: false,
                     },
                     {
                         key: 'description',
-                        label: "Notes"
+                        label: "Notes",
+                        sortable: false,
                     },
                     {
                         key: 'updated_at',
                         class: 'updated-column',
                         label: 'Last Updated',
-                        sortable: true,
+                        sortable: false,
                     },
                     {
                         key: 'actions',
-                        class: 'actions-column hidden-print'
+                        class: 'actions-column hidden-print',
+                        sortable: false,
                     }
                 ],
                 chainExpirations : [],
@@ -163,11 +155,6 @@
         },
 
         computed: {
-
-            totalRows(){
-
-                return this.chainExpirations.length || 0;
-            },
 
             alreadyCreating(){
 
@@ -221,7 +208,7 @@
                 await axios.get( `/business/expiration-types` )
                     .then( ( { data } ) => {
 
-                        console.log( 'response: ', data );
+                        // console.log( 'response: ', data );
 
                         this.licenses.forEach( license => {
 
@@ -229,7 +216,7 @@
 
                             if( existingLicense ){
 
-                                console.log( 'if existing.. ', existingLicense );
+                                // console.log( 'if existing.. ', existingLicense );
 
                                 existingLicense.id                       = license.id;
                                 existingLicense.chain_expiration_type_id = license.chain_expiration_type_id;

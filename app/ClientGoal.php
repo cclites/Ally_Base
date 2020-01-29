@@ -27,6 +27,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $track_goal_progress
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientGoal tracked($areTracked = true)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientGoal whereTrackGoalProgress($value)
+ * @property-read int|null $audits_count
+ * @property-read int|null $shifts_count
+ * @method static bool|null forceDelete()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientGoal newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientGoal newQuery()
+ * @method static \Illuminate\Database\Query\Builder|\App\ClientGoal onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ClientGoal query()
+ * @method static bool|null restore()
+ * @method static \Illuminate\Database\Query\Builder|\App\ClientGoal withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|\App\ClientGoal withoutTrashed()
  */
 class ClientGoal extends AuditableModel
 {

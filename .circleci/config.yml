@@ -20,6 +20,7 @@ jobs:
       - checkout
       - run: sudo apt install -y libsqlite3-dev libpng-dev
       - run: sudo docker-php-ext-install bcmath
+      - run: sudo docker-php-ext-install gd
 
       # Composer
       - restore_cache:

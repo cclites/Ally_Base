@@ -14,7 +14,9 @@ class AlterCaregiversRemoveCascadingBankAccountFk extends Migration
     public function up()
     {
         Schema::table('caregivers', function (Blueprint $table) {
-            $table->dropForeign('fk_caregivers_bank_account_id');
+            if (\DB::getDriverName() != 'sqlite') {
+                $table->dropForeign('fk_caregivers_bank_account_id');
+            }
             $table->foreign('bank_account_id', 'fk_caregivers_bank_account_id')->references('id')->on('bank_accounts')->onUpdate('CASCADE')->onDelete('SET NULL');
         });
     }

@@ -14,7 +14,9 @@ class MakeServiceAuthorizationFkRestrict extends Migration
     public function up()
     {
         Schema::table('client_authorizations', function (Blueprint $table) {
-            $table->dropForeign(['service_id']);
+            if (\DB::getDriverName() != 'sqlite') {
+                $table->dropForeign(['service_id']);
+            }
             $table->foreign('service_id')->references('id')->on('services')->onDelete('restrict')->onUpdate('cascade');
         });
     }

@@ -32,6 +32,33 @@ use App\Client;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoiceItem query()
  * @mixin \Eloquent
+ * @property int|null $client_invoice_id
+ * @property int $client_id
+ * @property string $client_first_name
+ * @property string $client_last_name
+ * @property string|null $client_dob
+ * @property string|null $client_medicaid_id
+ * @property string|null $client_medicaid_diagnosis_codes
+ * @property string|null $client_case_manager
+ * @property string|null $client_program_number
+ * @property string|null $client_cirts_number
+ * @property string|null $client_ltci_policy_number
+ * @property string|null $client_ltci_claim_number
+ * @property string|null $client_hic
+ * @property string|null $client_invoice_notes
+ * @property int $caregiver_id
+ * @property string $caregiver_first_name
+ * @property string $caregiver_last_name
+ * @property string|null $caregiver_gender
+ * @property string|null $caregiver_dob
+ * @property null|string $caregiver_ssn
+ * @property string|null $caregiver_medicaid_id
+ * @property-read int|null $adjustments_count
+ * @property-read int|null $audits_count
+ * @property-read \App\Caregiver $caregiver
+ * @property-read \App\Client $client
+ * @property-read \App\Billing\ClientInvoice|null $clientInvoice
+ * @property-read string $type
  */
 class ClaimInvoiceItem extends AuditableModel
 {

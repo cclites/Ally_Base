@@ -49,6 +49,16 @@ use App\Traits\BelongsToOneBusiness;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereTransactionId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Deposit whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\BusinessInvoice[] $businessInvoices
+ * @property-read int|null $business_invoices_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\CaregiverInvoice[] $caregiverInvoices
+ * @property-read int|null $caregiver_invoices_count
+ * @property-read \App\BusinessChain|null $chain
+ * @property-read int|null $shifts_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Deposit newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Deposit newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Deposit query()
  */
 class Deposit extends AuditableModel implements BelongsToBusinessesInterface
 {
@@ -110,9 +120,11 @@ class Deposit extends AuditableModel implements BelongsToBusinessesInterface
         }
 
         $date = $this->created_at->copy()->subWeek();
+        $start = $date->setIsoDate($date->year, $date->weekOfYear);
+        $end = $start->copy()->addDays(6);
         return [
-            'start' => $date->setIsoDate($date->year, $date->weekOfYear)->toDateString(),
-            'end' => $date->setIsoDate($date->year, $date->weekOfYear, 7)->toDateString()
+            'start' => $start->toDateString(),
+            'end' => $end->toDateString()
         ];
     }
 

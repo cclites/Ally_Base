@@ -36,7 +36,7 @@
         <div class="tab-pane active" id="settings" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <business-edit :business="{{ $business OR '{}' }}"></business-edit>
+                    <business-edit :business="{{ $business ?? '{}' }}"></business-edit>
                 </div>
             </div>
         </div>
@@ -45,7 +45,7 @@
         <div class="tab-pane" id="users" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <business-office-user-list :chain="{{ $business->chain }}" :businesses="{{ $business->chain->businesses OR '[]' }}"></business-office-user-list>
+                    <business-office-user-list :chain="{{ $business->chain }}" :businesses="{{ $business->chain->businesses ?? '[]' }}"></business-office-user-list>
                 </div>
             </div>
         </div>
@@ -62,7 +62,7 @@
         <div class="tab-pane" id="sms_settings" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <business-sms-settings :business="{{ $business OR '{}' }}" />
+                    <business-sms-settings :business="{{ $business ?? '{}' }}" />
                 </div>
             </div>
         </div>
@@ -70,7 +70,7 @@
         <div class="tab-pane" id="business_1099_settings" role="tabpanel">
             <div class="row">
                 <div class="col-lg-12">
-                    <business-1099-settings :business="{{ $business OR '{}' }}" />
+                    <business-1099-settings :business="{{ $business ?? '{}' }}" />
                 </div>
             </div>
         </div>

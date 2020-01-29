@@ -3,7 +3,25 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
+/**
+ * App\CustomFieldOption
+ *
+ * @property int $id
+ * @property int $field_id
+ * @property string $value
+ * @property string $label
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\CustomField $field
+ * @property-read string $text
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CustomFieldOption newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CustomFieldOption newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CustomFieldOption query()
+ * @mixin \Eloquent
+ */
 class CustomFieldOption extends BaseModel
 {   
     /**
@@ -102,7 +120,7 @@ class CustomFieldOption extends BaseModel
      */
     public static function getValueFromLabel(string $label) : string
     {
-        return snake_case(preg_replace('/[^A-Za-z0-9]/', '', $label));
+        return Str::snake(preg_replace('/[^A-Za-z0-9]/', '', $label));
     }
 
     /**

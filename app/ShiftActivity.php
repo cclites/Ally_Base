@@ -18,6 +18,11 @@ namespace App;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftActivity whereOther($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftActivity whereShiftId($value)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @property-read \App\Shift $shift
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftActivity newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftActivity newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftActivity query()
  */
 class ShiftActivity extends AuditableModel
 {

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Billing\Payer;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Carbon;
 
@@ -78,7 +79,7 @@ class UpdateClientRatesRequest extends FormRequest
 
         $rates = array_map(
             function($rate) use ($keys) {
-                $rate = array_only($rate, $keys);
+                $rate = Arr::only($rate, $keys);
                 $rate['effective_start'] = (new Carbon($rate['effective_start']))->format('Y-m-d');
                 $rate['effective_end'] = (new Carbon($rate['effective_end']))->format('Y-m-d');
                 return $rate;

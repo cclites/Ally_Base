@@ -2,12 +2,13 @@
 
 use Faker\Generator as Faker;
 use App\BusinessChain;
+use Illuminate\Support\Str;
 
 $factory->define(BusinessChain::class, function(Faker $faker) {
     $companyName = $faker->unique()->company;
     return [
         'name' => $companyName,
-        'slug' => str_Slug($companyName),
+        'slug' => Str::slug($companyName),
         'address1' => $faker->streetAddress,
         'address2' => null,
         'city' => $faker->city,

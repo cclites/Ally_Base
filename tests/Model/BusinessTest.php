@@ -17,7 +17,7 @@ class BusinessTest extends TestCase
 
     public $business;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
         $this->business = factory(Business::class)->create();

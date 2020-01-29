@@ -1,5 +1,6 @@
 <?php
 namespace App\Payments;
+
 use App\Billing\BusinessInvoice;
 use App\Billing\BusinessInvoiceItem;
 use App\Billing\CaregiverInvoice;
@@ -11,6 +12,7 @@ use App\Billing\Deposit;
 use App\Billing\Gateway\ACHDepositInterface;
 use App\Billing\Gateway\ECSPayment;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * Class SingleDepositProcessor
@@ -65,7 +67,7 @@ class SingleDepositProcessor
             'rate' => $amount,
             'total' => $amount,
             'date' => new Carbon(),
-            'notes' => str_limit($notes, 250),
+            'notes' => Str::limit($notes, 250),
         ]));
 
         return $invoice;
@@ -111,7 +113,7 @@ class SingleDepositProcessor
             'rate' => $amount,
             'total' => $amount,
             'date' => new Carbon(),
-            'notes' => str_limit($notes, 250),
+            'notes' => Str::limit($notes, 250),
         ]));
 
         return $invoice;
@@ -128,5 +130,4 @@ class SingleDepositProcessor
         }
         return false;
     }
-
 }

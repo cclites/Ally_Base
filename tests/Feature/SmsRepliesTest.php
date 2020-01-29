@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Support\Str;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -21,7 +22,7 @@ class SmsRepliesTest extends TestCase
     public $business;
     public $officeUser;
     
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
 
@@ -43,7 +44,7 @@ class SmsRepliesTest extends TestCase
         return SmsThread::create(array_merge([
             'business_id' => $this->business->id,
             'from_number' => PhoneNumber::formatNational($this->business->outgoing_sms_number),
-            'message' => str_random(10),
+            'message' => Str::random(10),
             'can_reply' => true,
             'sent_at' => Carbon::now(),
         ], $overrides));
@@ -425,7 +426,7 @@ class SmsRepliesTest extends TestCase
         $this->withoutExceptionHandling();
 
         $data = $this->generateWebhook(config('services.twilio.default_number'), '+12019999999', '');
-        $data["MediaUrl"] = str_random(10);
+        $data["MediaUrl"] = Str::random(10);
         $this->assertEmpty($data['Body']);
 
         $this->post(route('telefony.sms.incoming'), $data)
@@ -442,7 +443,7 @@ class SmsRepliesTest extends TestCase
         $this->withoutExceptionHandling();
 
         $data = $this->generateWebhook(config('services.twilio.default_number'), '+12019999999', 'test');
-        $data["MediaUrl"] = str_random(10);
+        $data["MediaUrl"] = Str::random(10);
 
         $this->post(route('telefony.sms.incoming'), $data)
             ->assertStatus(200);

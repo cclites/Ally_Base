@@ -24,6 +24,10 @@ use App\AuditableModel;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\GatewayTransactionHistory whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\GatewayTransactionHistory whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\GatewayTransactionHistory newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\GatewayTransactionHistory newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\GatewayTransactionHistory query()
  */
 class GatewayTransactionHistory extends AuditableModel
 {

@@ -26,6 +26,28 @@ use App\Traits\BelongsToOneChain;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource wherePhone($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property int $chain_id
+ * @property string $type
+ * @property int|null $is_company
+ * @property string|null $source_owner
+ * @property string|null $source_type
+ * @property string|null $web_address
+ * @property string|null $work_phone
+ * @property-read int|null $audits_count
+ * @property-read \App\BusinessChain $businessChain
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Caregiver[] $caregivers
+ * @property-read int|null $caregivers_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Client[] $clients
+ * @property-read int|null $clients_count
+ * @property-read int|null $notes_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Prospect[] $prospects
+ * @property-read int|null $prospects_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource forAuthorizedChain(\App\User $authorizedUser = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource forChains($chains)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource forType($type = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ReferralSource query()
  */
 class ReferralSource extends AuditableModel implements BelongsToChainsInterface
 {

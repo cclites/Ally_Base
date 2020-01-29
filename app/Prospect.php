@@ -7,6 +7,7 @@ use App\Traits\BelongsToBusinesses;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
 
 /**
  * App\Prospect
@@ -84,6 +85,17 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect whereZip($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect withConverted()
  * @mixin \Eloquent
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read int|null $audits_count
+ * @property-read int|null $notes_count
+ * @method static bool|null forceDelete()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect newQuery()
+ * @method static \Illuminate\Database\Query\Builder|\App\Prospect onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Prospect query()
+ * @method static bool|null restore()
+ * @method static \Illuminate\Database\Query\Builder|\App\Prospect withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|\App\Prospect withoutTrashed()
  */
 class Prospect extends AuditableModel implements BelongsToBusinessesInterface
 {
@@ -101,6 +113,8 @@ class Prospect extends AuditableModel implements BelongsToBusinessesInterface
      */
     public static function boot()
     {
+        parent::boot();
+
         // Add global scope to remove revised shifts from results
         static::addGlobalScope('ignore_clients', function ($builder) {
             $builder->whereNull('client_id');
@@ -190,7 +204,7 @@ class Prospect extends AuditableModel implements BelongsToBusinessesInterface
                 'email' => $this->email ?: (new Client)->getAutoEmail(),  // temporary until we have their ID below
                 'date_of_birth' => $this->date_of_birth,
                 'client_type' => $this->client_type,
-                'password' => bcrypt(str_random(32)),
+                'password' => bcrypt(Str::random(32)),
             ]);
 
             if (!$this->email) {

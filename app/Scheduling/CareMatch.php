@@ -8,6 +8,7 @@ use App\Client;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 
 class CareMatch
 {
@@ -287,31 +288,31 @@ class CareMatch
 
     protected function queryPreferences($builder)
     {
-        if ($certification = array_get($this->preferences, 'certification')) {
+        if ($certification = Arr::get($this->preferences, 'certification')) {
             $builder->where('certification', $certification);
         }
 
-        if ($gender = array_get($this->preferences, 'gender')) {
+        if ($gender = Arr::get($this->preferences, 'gender')) {
             $this->queryCaregiverUser($builder, 'gender', $gender);
         }
 
-        if ($smoking = array_get($this->preferences, 'smoking')) {
+        if ($smoking = Arr::get($this->preferences, 'smoking')) {
             $this->queryCaregiverUser($builder, 'smoking_okay', $smoking);
         }
 
-        if ($pets_dogs = array_get($this->preferences, 'pets_dogs')) {
+        if ($pets_dogs = Arr::get($this->preferences, 'pets_dogs')) {
             $this->queryCaregiverUser($builder, 'pets_dogs_okay', $pets_dogs);
         }
 
-        if ($pets_cats = array_get($this->preferences, 'pets_cats')) {
+        if ($pets_cats = Arr::get($this->preferences, 'pets_cats')) {
             $this->queryCaregiverUser($builder, 'pets_cats_okay', $pets_cats);
         }
 
-        if ($pets_birds = array_get($this->preferences, 'pets_birds')) {
+        if ($pets_birds = Arr::get($this->preferences, 'pets_birds')) {
             $this->queryCaregiverUser($builder, 'pets_birds_okay', $pets_birds);
         }
 
-//        if ($ethnicities = array_get($this->preferences, 'ethnicities')) {
+//        if ($ethnicities = Arr::get($this->preferences, 'ethnicities')) {
 //            $builder->whereIn('ethnicity', $ethnicities);
 //        }
     }

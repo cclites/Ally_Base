@@ -4,6 +4,7 @@ namespace App\Reports;
 use App\Business;
 use App\Caregiver;
 use App\Traits\IsDirectoryReport;
+use Illuminate\Support\Str;
 
 class CaregiverDirectoryReport extends BusinessResourceReport
 {
@@ -204,8 +205,8 @@ class CaregiverDirectoryReport extends BusinessResourceReport
                 'id' => $caregiver->id,
                 'firstname' => $caregiver->firstname,
                 'lastname' => $caregiver->lastname,
-                'username' => starts_with($caregiver->username, 'no_login_') ? null : $caregiver->username,
-                'email' => str_contains($caregiver->email, '@noemail.allyms.com') ? null : $caregiver->email,
+                'username' => Str::startsWith($caregiver->username, 'no_login_') ? null : $caregiver->username,
+                'email' => Str::contains($caregiver->email, '@noemail.allyms.com') ? null : $caregiver->email,
                 'title' => $caregiver->title,
                 'date_of_birth' => $caregiver->date_of_birth,
                 'certification' => $caregiver->certification,

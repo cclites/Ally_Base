@@ -51,6 +51,11 @@ use Carbon\Carbon;
  * @method static \Illuminate\Database\Query\Builder|\App\Task withTrashed()
  * @method static \Illuminate\Database\Query\Builder|\App\Task withoutTrashed()
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @property-read int|null $edit_history_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Task query()
  */
 class Task extends AuditableModel implements BelongsToBusinessesInterface
 {

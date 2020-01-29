@@ -2,15 +2,56 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Collection;
-use App\Caregiver;
-use App\Client;
-use App\Business;
+use App\Contracts\BelongsToBusinessesInterface;
+use App\Services\TaxDocumentPrinter;
+use App\Traits\BelongsToOneBusiness;
 use mikehaertl\pdftk\Pdf;
 
-class Caregiver1099 extends BaseModel
+/**
+ * App\Caregiver1099
+ *
+ * @property int $id
+ * @property int $year
+ * @property int|null $caregiver_id
+ * @property int|null $client_id
+ * @property int|null $business_id
+ * @property string|null $client_first_name
+ * @property string|null $client_last_name
+ * @property mixed|null $client_ssn
+ * @property string|null $client_address1
+ * @property string|null $client_address2
+ * @property string|null $client_city
+ * @property string|null $client_state
+ * @property string|null $client_zip
+ * @property string|null $caregiver_first_name
+ * @property string|null $caregiver_last_name
+ * @property mixed|null $caregiver_ssn
+ * @property string|null $caregiver_address1
+ * @property string|null $caregiver_address2
+ * @property string|null $caregiver_city
+ * @property string|null $caregiver_state
+ * @property string|null $caregiver_zip
+ * @property float $payment_total
+ * @property string $created_by
+ * @property int|null $modified_by
+ * @property string|null $caregiver_1099_payer
+ * @property string|null $transmitted_at
+ * @property int|null $transmitted_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Business $business
+ * @property-read \App\Caregiver|null $caregiver
+ * @property-read \App\Client $client
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver1099 newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver1099 newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver1099 query()
+ * @mixin \Eloquent
+ */
+class Caregiver1099 extends BaseModel implements BelongsToBusinessesInterface
 {
+    use BelongsToOneBusiness;
+
     /**
      * 1099 Earnings threshold
      */
@@ -20,169 +61,151 @@ class Caregiver1099 extends BaseModel
     protected $guarded = [];
 
     // Relations
-    public function caregiver(){
+    public function caregiver()
+    {
         return $this->belongsTo(Caregiver::class);
     }
 
-    public function client(){
+    public function client()
+    {
         return $this->hasOne(Client::class, 'id', 'client_id');
     }
 
-    public function business(){
+    public function business()
+    {
         return $this->hasOne(Business::class, 'id', 'business_id');
     }
 
-    public function client_address3(){
+    public function client_address3()
+    {
         return $this->client_city . ", " . $this->client_state . " " . $this->client_zip;
     }
 
-    public function caregiver_address3(){
+    public function caregiver_address3()
+    {
         return $this->caregiver_city . ", " . $this->caregiver_state . " " . $this->caregiver_zip;
     }
 
-    public static function getErrors($cg1099){
-        $errors = [];
-
-        if(! $cg1099->client_first_name){
-            $errors[] = "Client First Name";
-        }
-
-        if(! $cg1099->client_last_name){
-            $errors[] = "Client Last Name";
-        }
-
-        if(! $cg1099->client_address1){
-            $errors[] = "Client Address";
-        }
-
-        if(! $cg1099->client_city){
-            $errors[] = "Client City";
-        }
-
-        if(! $cg1099->client_state){
-            $errors[] = "Client State";
-        }
-
-        if(! $cg1099->client_zip){
-            $errors[] = "Client Zip";
-        }
-
-        if(! $cg1099->client_ssn){
-            $errors[] = "Client Ssn";
-        }
-
-        if(! $cg1099->client_email){
-            $errors[] = "Client Email";
-        }
-
-        if($cg1099->caregiver_1099 === 'ally'){
-            return $errors;
-        }
-
-        if(! $cg1099->caregiver_first_name){
-            $errors[] = "Caregiver First Name";
-        }
-
-        if(! $cg1099->caregiver_last_name){
-            $errors[] = "Caregiver Last Name";
-        }
-
-        if(! $cg1099->caregiver_address1){
-            $errors[] = "Caregiver Address";
-        }
-
-        if(! $cg1099->caregiver_city){
-            $errors[] = "Caregiver City";
-        }
-
-        if(! $cg1099->caregiver_state){
-            $errors[] = "Caregiver State";
-        }
-
-        if(! $cg1099->caregiver_zip){
-            $errors[] = "Caregiver Zip";
-        }
-
-        if(! $cg1099->caregiver_ssn){
-            $errors[] = "Caregiver Ssn";
-        }
-
-        if(! $cg1099->caregiver_email){
-            $errors[] = "Caregiver Email";
-        }elseif(strpos($cg1099->caregiver_email, 'noemail') !== false){
-            $errors[] = "Caregiver has no Email";
-        }
-
-        return $errors;
+    /**
+     * Determine if the payer is Ally.
+     *
+     * @return bool
+     */
+    public function isFromAlly(): bool
+    {
+        return $this->caregiver_1099_payer == Caregiver1099Payer::ALLY() ||
+            $this->caregiver_1099_payer == Caregiver1099Payer::ALLY_LOCKED();
     }
 
-    public function getFilledCaregiverPdf($maskPayerSsn = true, $maskRecipientSsn = true) : Pdf
+    /**
+     * Get a filled out copy of the caregiver 1099 PDF.
+     * Note: This automatically aggregates the Ally 1099 totals.
+     *
+     * @param bool $maskPayerTin
+     * @param bool $maskRecipientTin
+     * @return Pdf
+     */
+    public function getFilledCaregiverPdf($maskPayerTin = true, $maskRecipientTin = true): Pdf
     {
-        $this->load("client");
-
-        $systemSettings = \DB::table('system_settings')->first();
-
-        $pdf = new Pdf('../resources/pdf_forms/caregiver1099s/' . $this->year . '/1099-misc-full.pdf');
-
-        $payerTin = $this->client_ssn ? decrypt($this->client_ssn) : '';
-        $payerName = $this->client_first_name . " " . $this->client_last_name;
-        $clAddress2 = $this->client_address2 ? $this->client_address2 . "\n" : '';
-        $caAddress2 = $this->caregiver_address2 ? ", " . $this->caregiver_address2 : '';
-        $payerAddress = $payerName . "\n" . $this->client_address1 . "\n" . $clAddress2 . $this->client_address3();
-        $paymentTotal = $this->caregiver_1099_amount ? $this->caregiver_1099_amount : $this->payment_total;
         $caregiverTin = decrypt($this->caregiver_ssn);
-
         if ($this->uses_ein_number) {
             $caregiverTin = str_replace("-", "", $caregiverTin);
             $caregiverTin = substr($caregiverTin, 0, 2) . "-" . substr($caregiverTin, 2, 7);
         }
 
-        if ($this->client->caregiver_1099 === 'ally') {
-            $payerName = $systemSettings->company_name;
-            $payerTin = $systemSettings->company_ein;
-            $payerAddress3 = $systemSettings->company_city . ", " . $systemSettings->company_state . " " . $systemSettings->company_zip;
-            $clAddress2 = $systemSettings->company_address2 ? $systemSettings->company_address2 . "\n" : '';
-            $payerAddress = $payerName . "\n" . $systemSettings->company_address1 . "\n" . $clAddress2 . $payerAddress3;
+        if ($this->isFromAlly()) {
+            // Ally is the payer
+            $systemSettings = \DB::table('system_settings')->first();
+
+            // Aggregate all Ally payer 1099s for the same year
+            $total = $this->caregiver->caregiver1099s()
+                ->where('year', $this->year)
+                ->where('caregiver_1099_payer', Caregiver1099Payer::ALLY())
+                ->get()
+                ->bcsum('payment_total');
+
+            return app(TaxDocumentPrinter::class)->create1099MiscCopyB(
+                $this->year,
+                $systemSettings->company_name,
+                $systemSettings->company_address1,
+                $systemSettings->company_address2,
+                $systemSettings->company_city,
+                $systemSettings->company_state,
+                $systemSettings->company_zip,
+                $systemSettings->company_ein,
+                $caregiverTin,
+                $this->caregiver_first_name . " " . $this->caregiver_last_name,
+                $this->caregiver_address1,
+                $this->caregiver_address2,
+                $this->caregiver_city,
+                $this->caregiver_state,
+                $this->caregiver_zip,
+                $total,
+                $maskPayerTin,
+                $maskRecipientTin
+            );
+        } else {
+            // Client is the payer
+            return app(TaxDocumentPrinter::class)->create1099MiscCopyB(
+                $this->year,
+                $this->client_first_name . " " . $this->client_last_name,
+                $this->client_address1,
+                $this->client_address2,
+                $this->client_city,
+                $this->client_state,
+                $this->client_zip,
+                $this->client_ssn ? decrypt($this->client_ssn) : '',
+                $caregiverTin,
+                $this->caregiver_first_name . " " . $this->caregiver_last_name,
+                $this->caregiver_address1,
+                $this->caregiver_address2,
+                $this->caregiver_city,
+                $this->caregiver_state,
+                $this->caregiver_zip,
+                $this->payment_total,
+                $maskPayerTin,
+                $maskRecipientTin
+            );
+        }
+    }
+
+    /**
+     * Get a filled out copy of the caregiver 1099 PDF.
+     * Note: This automatically aggregates the Ally 1099 totals.
+     *
+     * @param bool $maskPayerTin
+     * @param bool $maskRecipientTin
+     * @return Pdf
+     */
+    public function getFilledClientPdf($maskPayerTin = true, $maskRecipientTin = true): Pdf
+    {
+        $caregiverTin = decrypt($this->caregiver_ssn);
+        if ($this->uses_ein_number) {
+            $caregiverTin = str_replace("-", "", $caregiverTin);
+            $caregiverTin = substr($caregiverTin, 0, 2) . "-" . substr($caregiverTin, 2, 7);
         }
 
-        if ($maskPayerSsn) {
-            $payerTin = '**-*******';
-        }
-
-        if ($maskRecipientSsn) {
-            $caregiverTin = '***-**-****';
-        }
-
-        $pdf->fillForm([
-            /** COPY B **/
-            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_1[0]' => $payerAddress,
-            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
-            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_3[0]' => $caregiverTin, //recipient tin
-            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_4[0]' => $this->caregiver_first_name . " " . $this->caregiver_last_name, //recipient name
-            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_5[0]' => $this->caregiver_address1 . $caAddress2, //recipient street address
-            'topmostSubform[0].CopyB[0].LeftColumn[0].f2_6[0]' => $this->caregiver_address3(), //recipient city, state, zip
-            'topmostSubform[0].CopyB[0].RightCol[0].f2_14[0]' => $paymentTotal,
-
-            /** COPY 1 **/
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_1[0]' => $payerAddress,
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_3[0]' => $caregiverTin, //recipient tin
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_4[0]' => $this->caregiver_first_name . " " . $this->caregiver_last_name, //recipient name
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_5[0]' => $this->caregiver_address1 . $caAddress2, //recipient street address
-            'topmostSubform[0].Copy1[0].LeftColumn[0].f2_6[0]' => $this->caregiver_address3(), //recipient city, state, zip
-            'topmostSubform[0].Copy1[0].RightCol[0].f2_14[0]' => $paymentTotal,
-
-            /** COPY 2 **/
-            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_1[0]' => $payerAddress,
-            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_2[0]' => $payerTin, //payers tin
-            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_3[0]' => $caregiverTin, //recipient tin
-            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_4[0]' => $this->caregiver_first_name . " " . $this->caregiver_last_name, //recipient name
-            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_5[0]' => $this->caregiver_address1 . $caAddress2, //recipient street address
-            'topmostSubform[0].Copy2[0].LeftColumn[0].f2_6[0]' => $this->caregiver_address3(), //recipient city, state, zip
-            'topmostSubform[0].Copy2[0].RightColumn[0].f2_14[0]' => $paymentTotal,
-        ])->execute();
-
-        return $pdf;
+        // Client is always the payer, client's do not have access to an Ally 1099
+        return app(TaxDocumentPrinter::class)->create1099MiscCopyC(
+            $this->year,
+            $this->client_first_name . " " . $this->client_last_name,
+            $this->client_address1,
+            $this->client_address2,
+            $this->client_city,
+            $this->client_state,
+            $this->client_zip,
+            $this->client_ssn ? decrypt($this->client_ssn) : '',
+            $caregiverTin,
+            $this->caregiver_first_name . " " . $this->caregiver_last_name,
+            $this->caregiver_address1,
+            $this->caregiver_address2,
+            $this->caregiver_city,
+            $this->caregiver_state,
+            $this->caregiver_zip,
+            $this->payment_total,
+            $maskPayerTin,
+            $maskRecipientTin
+        );
     }
 
     // **********************************************************
@@ -198,7 +221,7 @@ class Caregiver1099 extends BaseModel
      * @param null|\Illuminate\Database\Eloquent\Model $item
      * @return array
      */
-    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item) : array
+    public static function getScrubbedData(\Faker\Generator $faker, bool $fast, ?\Illuminate\Database\Eloquent\Model $item): array
     {
         return [
             'client_first_name' => $faker->firstName,

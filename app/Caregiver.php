@@ -166,6 +166,40 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver hasEmail()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver notOnboarded()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver onboarded()
+ * @property int $uses_ein_number
+ * @property-read int|null $addresses_count
+ * @property-read int|null $audits_count
+ * @property-read int|null $bank_accounts_count
+ * @property-read int|null $business_chains_count
+ * @property-read int|null $businesses_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Caregiver1099[] $caregiver1099s
+ * @property-read int|null $caregiver1099s_count
+ * @property-read int|null $clients_count
+ * @property-read int|null $credit_cards_count
+ * @property-read int|null $days_off_count
+ * @property-read int|null $deposits_count
+ * @property-read int|null $documents_count
+ * @property-read mixed $initialed_name
+ * @property-read mixed $status_alias_name
+ * @property-read int|null $licenses_count
+ * @property-read int|null $meta_count
+ * @property-read int|null $notes_count
+ * @property-read int|null $notification_preferences_count
+ * @property-read int|null $notifications_count
+ * @property-read int|null $payments_count
+ * @property-read int|null $phone_numbers_count
+ * @property-read int|null $restrictions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\CaregiverScheduleRequest[] $scheduleRequests
+ * @property-read int|null $schedule_requests_count
+ * @property-read int|null $schedules_count
+ * @property-read int|null $setup_status_history_count
+ * @property-read int|null $shifts_count
+ * @property-read int|null $skills_count
+ * @property-read \App\StatusAlias $statusAlias
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver inactive()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereHasShiftsOrSchedules()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereNotSetup()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Caregiver whereScheduled()
  */
 class Caregiver extends AuditableModel implements
     UserRole,
@@ -181,7 +215,16 @@ class Caregiver extends AuditableModel implements
 
     protected $table = 'caregivers';
     public $timestamps = false;
-    public $hidden = ['ssn'];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password', 'remember_token', 'ssn',
+    ];
+
     public $fillable = [
         'ssn',
         'bank_account_id',

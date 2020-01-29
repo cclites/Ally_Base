@@ -2,6 +2,29 @@
 
 namespace App;
 
+/**
+ * App\CaregiverYearlyEarnings
+ *
+ * @property int $id
+ * @property int $year
+ * @property int $caregiver_id
+ * @property int $client_id
+ * @property int $business_id
+ * @property float $earnings
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Business $business
+ * @property-read \App\Caregiver $caregiver
+ * @property-read \App\Client $client
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverYearlyEarnings newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverYearlyEarnings newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverYearlyEarnings overThreshold($threshold)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverYearlyEarnings query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverYearlyEarnings whereUsesAllyPayer()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CaregiverYearlyEarnings whereUsesClientPayer()
+ * @mixin \Eloquent
+ */
 class CaregiverYearlyEarnings extends BaseModel
 {
     /**
@@ -105,45 +128,6 @@ class CaregiverYearlyEarnings extends BaseModel
     {
         $errors = [];
 
-        if ($this->client->caregiver_1099 == Caregiver1099Payer::CLIENT()) {
-            if (empty($this->client->first_name)) {
-                $errors[] = 'Client First Name';
-            }
-
-            if (empty($this->client->last_name)) {
-                $errors[] = "Client Last Name";
-            }
-
-            if (empty($this->client->address)) {
-                $errors[] = "Client Address";
-            } else {
-                /** @var \App\Address $address */
-                $address = $this->client->address;
-                if (empty($address->address1)) {
-                    $errors[] = "Client Street Address";
-                }
-                if (empty($address->city)) {
-                    $errors[] = "Client City";
-                }
-                if (empty($address->state)) {
-                    $errors[] = "Client State";
-                }
-                if (empty($address->zip)) {
-                    $errors[] = "Client Zip";
-                }
-            }
-
-            if (empty($this->client->ssn)) {
-                $errors[] = "Client SSN";
-            } else if (strlen(str_replace('-', '', $this->client->ssn)) <> 9) {
-                $errors[] = "Client SSN Invalid";
-            }
-
-            if (empty($this->client->email)) {
-                $errors[] = "Client Email";
-            }
-        }
-
         if (empty($this->caregiver->first_name)) {
             $errors[] = "Caregiver First Name";
         }
@@ -154,11 +138,13 @@ class CaregiverYearlyEarnings extends BaseModel
 
         if (empty($this->caregiver->ssn)) {
             $errors[] = "Caregiver SSN";
+        } else if (! valid_ssn($this->caregiver->ssn)) {
+            $errors[] = "Caregiver SSN Invalid";
         }
 
-        if (empty($this->caregiver->email) || $this->caregiver->hasNoEmail()) {
-            $errors[] = "Caregiver Email";
-        }
+//        if (empty($this->caregiver->email) || $this->caregiver->hasNoEmail()) {
+//            $errors[] = "Caregiver Email";
+//        }
 
         if (empty($this->caregiver->address)) {
             $errors[] = "Caregiver Address";
@@ -179,6 +165,47 @@ class CaregiverYearlyEarnings extends BaseModel
             }
         }
 
+        if($this->client->caregiver_1099 == Caregiver1099Payer::ALLY()){
+          return $errors;
+        }
+
+        if (empty($this->client->first_name)) {
+            $errors[] = 'Client First Name';
+        }
+
+        if (empty($this->client->last_name)) {
+            $errors[] = "Client Last Name";
+        }
+
+        if (empty($this->client->address)) {
+            $errors[] = "Client Address";
+        } else {
+            /** @var \App\Address $address */
+            $address = $this->client->address;
+            if (empty($address->address1)) {
+                $errors[] = "Client Street Address";
+            }
+            if (empty($address->city)) {
+                $errors[] = "Client City";
+            }
+            if (empty($address->state)) {
+                $errors[] = "Client State";
+            }
+            if (empty($address->zip)) {
+                $errors[] = "Client Zip";
+            }
+        }
+
+        if (empty($this->client->ssn)) {
+            $errors[] = "Client SSN";
+        } else if (! valid_ssn($this->client->ssn)) {
+            $errors[] = "Client SSN Invalid";
+        }
+
+//        if (empty($this->client->email)) {
+//            $errors[] = "Client Email";
+//        }
+
         return $errors;
     }
 
@@ -189,19 +216,33 @@ class CaregiverYearlyEarnings extends BaseModel
      */
     public function make1099Record() : Caregiver1099
     {
+
+        $systemSettings = \DB::table('system_settings')->first();
+
+        $allyPayer = ($this->client->caregiver_1099 == Caregiver1099Payer::ALLY()) ? true : false;
+
+        $payerFirstName = $allyPayer ? $systemSettings->company_name : $this->client->first_name;
+        $payerLastName = $allyPayer ? "ALLY" : $this->client->last_name;
+        $payerAddress1 = $allyPayer ? $systemSettings->company_address1 : $this->client->address->address1;
+        $payerAddress2 = $allyPayer ? $systemSettings->company_address2 : $this->client->address->address2;
+        $payerCity = $allyPayer ? $systemSettings->company_city : $this->client->address->city;
+        $payerState = $allyPayer ? $systemSettings->company_state : $this->client->address->state;
+        $payerZip = $allyPayer ? $systemSettings->company_zip : $this->client->address->zip;
+        $payerTin = $allyPayer ? $systemSettings->company_ein : $this->client->ssn;
+
         return Caregiver1099::make([
             'year' => $this->year,
             'business_id' => $this->business_id,
             'payment_total' => $this->earnings,
             'client_id' => $this->client_id,
-            'client_first_name' => $this->client->first_name,
-            'client_last_name' => $this->client->last_name,
-            'client_address1' => $this->client->address->address1,
-            'client_address2' => $this->client->address->address2,
-            'client_city' => $this->client->address->city,
-            'client_state' => $this->client->address->state,
-            'client_zip' => $this->client->address->zip,
-            'client_ssn' => encrypt($this->client->ssn),
+            'client_first_name' => $payerFirstName,
+            'client_last_name' => $payerLastName,
+            'client_address1' => $payerAddress1,
+            'client_address2' => $payerAddress2,
+            'client_city' => $payerCity,
+            'client_state' => $payerState,
+            'client_zip' => $payerZip,
+            'client_ssn' => encrypt($payerTin),
             'caregiver_id' => $this->caregiver_id,
             'caregiver_first_name' => $this->caregiver->first_name,
             'caregiver_last_name' => $this->caregiver->last_name,
@@ -211,7 +252,8 @@ class CaregiverYearlyEarnings extends BaseModel
             'caregiver_state' => $this->caregiver->address->state,
             'caregiver_zip' => $this->caregiver->address->zip,
             'caregiver_ssn' => encrypt($this->caregiver->ssn),
-            'created_by' => auth()->user()->nameLastFirst(),
+            'created_by' => filled(auth()->user()) ? auth()->user()->nameLastFirst() : 'System',
+            'caregiver_1099_payer' => $this->client->caregiver_1099,
         ]);
     }
 }

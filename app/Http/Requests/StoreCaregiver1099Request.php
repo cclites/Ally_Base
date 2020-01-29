@@ -28,6 +28,7 @@ class StoreCaregiver1099Request extends FormRequest
             'business_id' => 'required|integer',
             'client_id' => 'required|integer',
             'caregiver_id' => 'required|integer',
+            'override_payer_to_ally' => 'nullable|boolean',
         ];
     }
 }

@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 /**
  * App\Knowledge
@@ -34,6 +35,12 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge whereYoutubeId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge withKeyword($keyword)
  * @mixin \Eloquent
+ * @property-read int|null $attachments_count
+ * @property-read int|null $roles_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Knowledge query()
  */
 class Knowledge extends BaseModel
 {
@@ -77,6 +84,8 @@ class Knowledge extends BaseModel
      */
     public static function boot()
     {
+        parent::boot();
+
         // create the slug automatically
         static::saving(function (Knowledge $item) {
             if (is_null($item->slug)) {
@@ -183,7 +192,7 @@ class Knowledge extends BaseModel
      */
     public static function uniqueSlug($title, $ignoreId)
     {
-        $slug = str_slug($title);
+        $slug = Str::slug($title);
         $index = 1;
 
         while (true) {
@@ -192,7 +201,7 @@ class Knowledge extends BaseModel
             }
 
             $index++;
-            $slug = str_slug($title) . $index;
+            $slug = Str::slug($title) . $index;
         }
 
         return $slug;

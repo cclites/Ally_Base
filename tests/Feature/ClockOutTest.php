@@ -25,7 +25,7 @@ class ClockOutTest extends TestCase
     public $client;
     public $caregiver;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
         $this->business = factory(Business::class)->create();
