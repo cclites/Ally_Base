@@ -8,15 +8,14 @@ use Carbon\Carbon;
 use DB;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
-use PHPExcel_IOFactory;
-use PHPExcel_Shared_Date;
 use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 abstract class BaseImport extends Command
 {
-
     /**
-     * @var \PHPExcel
+     * @var \PhpOffice\PhpSpreadsheet\Spreadsheet
      */
     protected $sheet;
 
@@ -65,6 +64,7 @@ abstract class BaseImport extends Command
      * Execute the console command.
      *
      * @return mixed
+     * @throws \Exception
      */
     public function handle()
     {
@@ -72,7 +72,7 @@ abstract class BaseImport extends Command
         sleep(3);
 
         $this->loadSheet();
-        $lastRow = (int) $this->getRowCount($this->sheet);
+        $lastRow = (int)$this->getRowCount($this->sheet);
         if (!$lastRow) {
             $this->output->error('Error getting row count.  Is this spreadsheet empty?');
             exit;
@@ -81,7 +81,7 @@ abstract class BaseImport extends Command
         DB::beginTransaction();
 
         $count = 0;
-        for($row=2; $row <= $lastRow; $row++) {
+        for ($row = 2; $row <= $lastRow; $row++) {
 
             if (!$this->emptyRow($row)) {
                 if ($imported = $this->importRow($row)) {
@@ -108,7 +108,7 @@ abstract class BaseImport extends Command
 
         if ($metaFields = $this->option('meta')) {
             $metaFields = array_map('trim', explode(',', $metaFields));
-            foreach($metaFields as $field) {
+            foreach ($metaFields as $field) {
                 $value = $this->resolve($field, $row);
                 if (strlen($value)) {
                     $model->setMeta(substr($field, 0, 32), $value);
@@ -129,7 +129,7 @@ abstract class BaseImport extends Command
                 $number = preg_replace('/[^\d\-]/', '', $this->resolve($phoneField, $row));
                 $phone = PhoneNumber::fromInput($type, $number);
                 $phone->number(); // This should throw an exception if invalid format
-                $phone->notes = $this->resolve("${phoneField}Notes",  $row); // ex. Phone1Notes
+                $phone->notes = $this->resolve("${phoneField}Notes", $row); // ex. Phone1Notes
                 $model->phoneNumbers()->save($phone);
             }
         } catch (\Exception $e) {
@@ -157,12 +157,12 @@ abstract class BaseImport extends Command
     /**
      * Load the import spreadsheet into $sheet
      *
-     * @return \PHPExcel
-     * @throws \PHPExcel_Reader_Exception
+     * @return \PhpOffice\PhpSpreadsheet\Spreadsheet
+     * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
      */
     public function loadSheet()
     {
-        if (!$objPHPExcel = PHPExcel_IOFactory::load($this->argument('file'))) {
+        if (! $objPHPExcel = IOFactory::load($this->argument('file'))) {
             $this->output->error('Could not load file: ' . $this->argument('file'));
             exit;
         }
@@ -172,53 +172,64 @@ abstract class BaseImport extends Command
     /**
      * Get the row count from the spreadsheet
      *
-     * @param \PHPExcel $PHPExcel
+     * @param Spreadsheet $sheet
      * @return int
-     * @throws \PHPExcel_Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
-    public function getRowCount(\PHPExcel $PHPExcel)
+    public function getRowCount(Spreadsheet $sheet)
     {
-        $lastRow = (int) $PHPExcel->setActiveSheetIndex(0)->getHighestRow();
+        $lastRow = (int) $sheet->setActiveSheetIndex(0)->getHighestRow();
         return $lastRow;
     }
 
     /**
      * Get the cell value at row $rowNo with a header matching $header
      *
-     * @param \PHPExcel $PHPExcel
+     * @param Spreadsheet $sheet
      * @param $header
      * @param $rowNo
      * @return false|mixed|null|string
-     * @throws \PHPExcel_Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \Exception
      */
-    public function getValue(\PHPExcel $PHPExcel, $header, $rowNo)
+    public function getValue(Spreadsheet $sheet, $header, $rowNo)
     {
-        $column = $this->findColumn($PHPExcel, $header);
+        $column = $this->findColumn($sheet, $header);
         if ($column === false) {
             return null;
         }
-        $cell = $PHPExcel->getActiveSheet()->getCell($column . $rowNo);
+        $cell = $sheet->getActiveSheet()->getCell($column . $rowNo);
         $value = $cell->getValue();
 
-        if(PHPExcel_Shared_Date::isDateTime($cell)) {
-            return date('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP($value));
+        if (\PhpOffice\PhpSpreadsheet\Shared\Date::isDateTime($cell)) {
+            return date('Y-m-d', \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($value));
         }
 
         return is_string($value) ? trim($value) : $value;
     }
 
-    public function findColumn(\PHPExcel $PHPExcel, $header)
+    /**
+     * @param Spreadsheet $sheet
+     * @param $header
+     * @return bool|mixed
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     */
+    public function findColumn(Spreadsheet $sheet, $header)
     {
         // Get range from A to BZ
         $a_z = range('A', 'Z');
         $range = array_merge(
             $a_z,
-            array_map(function($val) { return 'A' . $val; }, $a_z),
-            array_map(function($val) { return 'B' . $val; }, $a_z)
+            array_map(function ($val) {
+                return 'A' . $val;
+            }, $a_z),
+            array_map(function ($val) {
+                return 'B' . $val;
+            }, $a_z)
         );
 
-        foreach($range as $column) {
-            $value = $PHPExcel->getActiveSheet()->getCell($column . '1')->getValue();
+        foreach ($range as $column) {
+            $value = $sheet->getActiveSheet()->getCell($column . '1')->getValue();
             if (strcasecmp(trim($value), $header) === 0) {
                 return $column;
             }
@@ -233,7 +244,8 @@ abstract class BaseImport extends Command
      * @param string $field
      * @param int $row
      * @return false|mixed|null|string
-     * @throws \PHPExcel_Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     public function resolve(string $field, int $row)
     {
@@ -256,7 +268,8 @@ abstract class BaseImport extends Command
      * @param array $additionalTrueStrings
      * @param array $additionalFalseStrings
      * @return bool
-     * @throws \PHPExcel_Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     public function resolveBoolean(string $field, int $row, $default = false, array $additionalTrueStrings = [], array $additionalFalseStrings = [])
     {
@@ -272,7 +285,7 @@ abstract class BaseImport extends Command
         );
 
         if (is_numeric($cellValue) || is_bool($cellValue)) {
-            return (bool) $cellValue;
+            return (bool)$cellValue;
         }
         if (in_array(strtoupper($cellValue), $trueStrings)) {
             return true;
@@ -290,6 +303,7 @@ abstract class BaseImport extends Command
      * @param int $row
      * @param $cellValue
      * @return bool
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     protected function resolveActive(int $row, $cellValue)
     {
@@ -341,6 +355,7 @@ abstract class BaseImport extends Command
      * @param int $row
      * @param $cellValue
      * @return mixed
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     protected function resolveLastName(int $row, $cellValue)
     {
@@ -353,6 +368,11 @@ abstract class BaseImport extends Command
         }
     }
 
+    /**
+     * @param int $row
+     * @return array|bool
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     */
     protected function getNameArray(int $row)
     {
         if ($name = $this->resolve('Name', $row)) {
@@ -497,15 +517,16 @@ abstract class BaseImport extends Command
             if (Carbon::createFromFormat('Y-m-d', $value) !== false) {
                 return $value;
             }
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
 
         try {
             if ($parsed = Carbon::parse($value)) {
                 return $parsed->format('Y-m-d');
             }
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
 
         return null;
     }
-
 }

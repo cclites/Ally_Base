@@ -101,7 +101,7 @@ class ImportReferrals extends BaseImport
      *
      * @param int $row
      * @return bool
-     * @throws \PHPExcel_Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     private function duplicateDataProcessed(int $row)
     {
@@ -137,7 +137,7 @@ class ImportReferrals extends BaseImport
      *
      * @param int $row
      * @return bool
-     * @throws \PHPExcel_Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     protected function emptyRow(int $row)
     {

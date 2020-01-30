@@ -1,18 +1,18 @@
 <?php
 namespace App\Imports;
 
-use PHPExcel_IOFactory;
-use PHPExcel_Reader_IReader;
+use \PhpOffice\PhpSpreadsheet\IOFactory;
+use \PhpOffice\PhpSpreadsheet\Reader\IReader;
 
 class Worksheet
 {
     /**
-     * @var \PHPExcel
+     * @var \PhpOffice\PhpSpreadsheet\Spreadsheet
      */
     protected $PHPExcel;
 
     /**
-     * @var \PHPExcel_Worksheet
+     * @var \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet
      */
     protected $sheet;
 
@@ -23,18 +23,18 @@ class Worksheet
      */
     protected $allowEmptyStrings = false;
 
-    public function __construct($file, PHPExcel_Reader_IReader $reader = null)
+    public function __construct($file, \PhpOffice\PhpSpreadsheet\Reader\IReader $reader = null)
     {
         if ($reader) {
             $this->PHPExcel = $reader->load($file);
         }
         else {
-            $this->PHPExcel = PHPExcel_IOFactory::load($file);
+            $this->PHPExcel = \PhpOffice\PhpSpreadsheet\IOFactory::load($file);
         }
     }
 
     /**
-     * @return \PHPExcel_Worksheet
+     * @return \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet
      */
     public function loadSheet($name = null)
     {
@@ -48,7 +48,7 @@ class Worksheet
     }
 
     /**
-     * @return \PHPExcel_Worksheet
+     * @return \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet
      */
     public function sheet()
     {
@@ -88,7 +88,7 @@ class Worksheet
      * @param $rowNo
      * @param bool $evaluate   Whether or not to return a plain string or to evaluate a formula
      * @return false|null|string
-     * @throws \PHPExcel_Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     public function getValue($header, $rowNo, $evaluate = false)
     {
@@ -99,8 +99,8 @@ class Worksheet
         $cell = $this->sheet->getCell($column . $rowNo);
         $value = $evaluate ? $cell->getCalculatedValue() : $cell->getValue();
 
-        if(\PHPExcel_Shared_Date::isDateTime($cell)) {
-            return date('Y-m-d H:i:s', \PHPExcel_Shared_Date::ExcelToPHP($value));
+        if(\PhpOffice\PhpSpreadsheet\Shared\Date::isDateTime($cell)) {
+            return date('Y-m-d H:i:s', \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($value));
 //            return date('Y-m-d H:i:s', strtotime($value));
         }
 

@@ -240,7 +240,7 @@ class ImportCaregivers extends BaseImport
      *
      * @param int $row
      * @return StatusAlias|null
-     * @throws \PHPExcel_Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     protected function resolveStatusAlias(int $row): ?StatusAlias
     {
@@ -261,7 +261,7 @@ class ImportCaregivers extends BaseImport
      *
      * @param int $row
      * @return bool
-     * @throws \PHPExcel_Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     private function duplicateDataProcessed(int $row)
     {

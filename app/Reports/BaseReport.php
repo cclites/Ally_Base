@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Collections\SheetCollection;
 use Maatwebsite\Excel\Facades\Excel;
-use PHPExcel_IOFactory;
+use \PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Exception;
 
 abstract class BaseReport implements Report

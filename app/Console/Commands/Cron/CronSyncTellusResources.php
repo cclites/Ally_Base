@@ -3,6 +3,7 @@
 namespace App\Console\Commands\Cron;
 
 use App\Services\AnonymousConfluenceApiClient;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Console\Commands\BaseImport;
 use App\Services\TellusService;
 use App\TellusEnumeration;
@@ -223,12 +224,12 @@ class CronSyncTellusResources extends BaseImport
     /**
      * Load the import spreadsheet into $sheet
      *
-     * @return \PHPExcel
-     * @throws \PHPExcel_Reader_Exception
+     * @return \PhpOffice\PhpSpreadsheet\Spreadsheet
+     * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
      */
     public function loadSheet()
     {
-        if (!$objPHPExcel = \PHPExcel_IOFactory::load($this->dictionaryFile)) {
+        if (! $objPHPExcel = IOFactory::load($this->dictionaryFile)) {
             $this->output->error('Could not load dictionary file at ' . $this->dictionaryFile);
             exit;
         }
