@@ -31,19 +31,16 @@
             font-size: 10px;
         }
 
+        .avatar,
         .logo_header tr td{
             text-align: center;
         }
 
-        .avatar{
-            text-align: center;
-            /*width: 50%;
-            height: auto;*/
-        }
-
-        .logo_header tr td,
+        .logo_header img,
         .avatar img{
-            /*height: 100px;*/
+            height: auto;
+            width: 20%;
+            border: none;
         }
 
         .heading span{
