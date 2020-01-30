@@ -95,7 +95,9 @@ class CronSyncTellusResources extends BaseImport
 
         $url = $attachments[0]['url'];
         $filename = $attachments[0]['filename'];
-        $localFile = \Storage::disk('public')->path("tellus/$filename");
+
+        \Storage::disk('local')->makeDirectory('tellus');
+        $localFile = \Storage::disk('local')->path("tellus/$filename");
 
         $this->info("Downloading $filename...");
         if (!$this->confluenceClient->download($url, $localFile)) {
@@ -129,8 +131,10 @@ class CronSyncTellusResources extends BaseImport
             return null;
         }
 
-        $url = $xsdAttachments[0]['url'];
-        $filename = $xsdAttachments[0]['filename'];
+        $attachment = $xsdAttachments->first();
+
+        $url = $attachment['url'];
+        $filename = $attachment['filename'];
         $localFile = \Storage::disk('public')->path(TellusService::XML_SCHEMA_FILENAME);
 
         $this->info("Downloading $filename...");
