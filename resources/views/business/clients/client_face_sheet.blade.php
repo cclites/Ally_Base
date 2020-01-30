@@ -19,6 +19,7 @@
         .contact-info, .contact-info th, .contact-info td,
         .profile-info, .profile-info th, .profile-info td,
         .address-info, .address-info th, .address-info td,
+        .services-info, .services-info th, .services-info td,
         .emergency-info, .emergency-info th, .emergency-info td{
             border: 1px solid #4d575d;
             padding: 6px;
@@ -308,9 +309,9 @@
         </thead>
         <tbody>
         @if( $activities )
-            @foreach($activities as $activity=>$value)
+            @foreach($activities as $activity)
                 <tr>
-                    <td>{{ json_encode($value) }}</td>
+                    <td>{{ $activity }}</td>
                 </tr>
             @endforeach
         @else

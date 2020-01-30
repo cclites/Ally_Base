@@ -985,20 +985,6 @@ class Client extends AuditableModel implements
         return BillingCalculator::getDefaultRate();
     }
 
-    public function getCarePlanActivities(){
-
-        $careplan = CarePlan::where('client_id', $this->id)
-                        ->with('activities')
-                        ->first();
-
-        foreach($careplan->activities as $activity){
-            \Log::info($activity);
-        }
-
-        return $careplan->activities;
-
-    }
-
     /**
      * Remove missing ClientRates and update existing with the given
      * request values.

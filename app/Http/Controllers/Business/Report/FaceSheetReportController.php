@@ -25,8 +25,15 @@ class FaceSheetReportController
             return new ErrorResponse("404", 'You must select a client.');
         }
 
-        $client = $client->load(['addresses', 'preferences', 'business', 'careDetails', 'contacts']);
-        $activities = $client->getCarePlanActivities();
+        $client = $client->load(['addresses', 'preferences', 'business', 'careDetails', 'contacts', 'carePlans']);
+
+        $activities = $client->carePlans->map(function(\App\CarePlan $carePlan){
+            return $carePlan->activities->pluck('name');
+        })
+            ->flatten(1)
+            ->values()
+            ->unique();
+
         $html = response(view('business.clients.client_face_sheet', ['client'=>$client, 'activities'=>$activities]))->getContent();
         $snappy = \App::make('snappy.pdf');
 
