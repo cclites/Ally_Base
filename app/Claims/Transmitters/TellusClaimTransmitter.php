@@ -230,12 +230,12 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'DiagnosisCode4' => $diagnosisCodes[3], // OPTIONAL && TODO
             'StartVerificationType' => $this->tcLookup('StartVerificationType', $this->getVerificationType($service->evv_method_in)), // OPTIONAL
             'EndVerificationType' => $this->tcLookup('EndVerificationType', $this->getVerificationType($service->evv_method_out)), // OPTIONAL
-            'ScheduledStartDateTime' => $service->scheduled_start_time->setTimezone( $business->timezone )->format($this->timeFormat), // OPTIONAL
-            'ScheduledEndDateTime' => $service->scheduled_end_time->setTimezone( $business->timezone )->format($this->timeFormat), // OPTIONAL
+            'ScheduledStartDateTime' => $service->scheduled_start_time->format($this->timeFormat), // OPTIONAL
+            'ScheduledEndDateTime' => $service->scheduled_end_time->format($this->timeFormat), // OPTIONAL
             'ScheduledLatitude' => '',
             'ScheduledLongitude' => '',
-            'ActualStartDateTime' => $service->evv_start_time->setTimezone($business->timezone)->format($this->timeFormat), // OPTIONAL
-            'ActualEndDateTime' => $service->evv_end_time->setTimezone($business->timezone)->format($this->timeFormat), // OPTIONAL
+            'ActualStartDateTime' => $service->evv_start_time->format($this->timeFormat), // OPTIONAL
+            'ActualEndDateTime' => $service->evv_end_time->format($this->timeFormat), // OPTIONAL
             'ActualStartLatitude' => '',
             'ActualStartLongitude' => '',
             'ActualEndLatitude' => '',
