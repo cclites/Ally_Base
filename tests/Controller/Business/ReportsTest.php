@@ -142,6 +142,24 @@ class ReportsTest extends TestCase {
     }
 
     /** @test */
+    public function client_birthday_report_filters_by_date_range() {
+        $start_date = '01/28/2020';
+        $end_date = '01/28/2020';
+        $clients = factory(Client::class, 2)->create([
+            'business_id' => $this->business->id
+        ]);
+
+        $query_string = '?type=clients&start_date='.$start_date.'&end_date='.$end_date;
+
+
+        $this->get('business/reports/data/birthdays' . $query_string)
+             ->assertSuccessful()
+             ->assertJsonCount(2)
+             ->assertJsonFragment(["id" => $clients[0]->id, "email" => $clients[0]->email]);
+
+    }
+
+    /** @test */
     public function caregiver_birthday_report_returns_all_caregivers() {
         $query_string = '?type=caregivers';
         $caregivers = factory(Caregiver::class, 2)->create()->each(function ($caregiver) {

@@ -40,11 +40,41 @@
             <b-button @click=" fetch() " variant="info">Generate Report</b-button>
         </b-row>
 
-        <b-row class="filter justify-content-between align-items-center" v-if="type === 'Clients'">
+        <b-row class="filter">
             <b-col cols="3">
-                <b-form-checkbox v-model="showInactive" :value="true" :unchecked-value="false" class="d-flex align-items-center">
+                <b-form-checkbox v-model="showInactive" :value="true" :unchecked-value="false" class="d-flex align-items-center" v-if="type === 'Clients'">
                     Show inactive {{type}}
                 </b-form-checkbox>
+            </b-col>
+        </b-row>
+
+        <b-row class="filter">
+            <b-col cols="3">
+                <b-form-checkbox v-model="showDateRange" :value="true" :unchecked-value="false" class="d-flex align-items-center">
+                    Filter by {{type}} birthday
+                </b-form-checkbox>
+            </b-col>
+
+            <b-col cols="3" v-show="showDateRange">
+                <b-form-group label="Start Date">
+                    <date-picker
+                            class="mb-1"
+                            name="start_date"
+                            v-model="start_date"
+                            placeholder="Start Date"
+                    ></date-picker>
+                </b-form-group>
+            </b-col>
+
+            <b-col cols="3" v-show="showDateRange">
+                <b-form-group label="End Date">
+                    <date-picker
+                            class="mb-1"
+                            v-model="end_date"
+                            name="end_date"
+                            placeholder="End Date"
+                    ></date-picker>
+                </b-form-group>
             </b-col>
         </b-row>
 
@@ -93,8 +123,11 @@
                 loading: false,
                 showEmpty: true,
                 showInactive: true,
+                showDateRange: false,
                 selectedClients: 'All',
                 selectedId: 'All',
+                start_date: moment().format('MM/DD/YYYY'),
+                end_date: moment().format('MM/DD/YYYY'),
                 data: [],
                 fields: [
                     {
@@ -144,7 +177,11 @@
                 this.loading = true;
 
                 try {
-                    const {data} = await axios.get(`/business/reports/data/birthdays?type=${this.type}&clientType=${this.selectedClients}&id=${this.selectedId}`);
+                    let query = `&clientType=${this.selectedClients}&id=${this.selectedId}`;
+                    if (this.showDateRange) {
+                        query += `&start_date=${this.start_date}&end_date=${this.end_date}`;
+                    }
+                    const {data} = await axios.get(`/business/reports/data/birthdays?type=${this.type}` + query);
                     this.data = data;
                     this.loading = false
                 }catch (e) {

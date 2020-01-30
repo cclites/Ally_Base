@@ -713,7 +713,12 @@ class ReportsController extends BaseController
         if($type == 'clients') {
             $clients =  $this->addCityAndPhone(Client::forRequestedBusinesses()->get());
 
-            return $this->filterClientTypes($clients, $clientType, $filteredId);
+            $clients =  $this->filterClientTypes($clients, $clientType, $filteredId);
+
+           // TODO need to filter birthdays through start/end dates
+
+
+            return $clients;
         }
 
         // Caregivers
