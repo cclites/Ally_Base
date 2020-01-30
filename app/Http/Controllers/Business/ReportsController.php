@@ -713,18 +713,27 @@ class ReportsController extends BaseController
         if($type == 'clients') {
             $clients =  $this->addCityAndPhone(Client::forRequestedBusinesses()->get());
 
-            $clients =  $this->filterClientTypes($clients, $clientType, $filteredId);
+            $filteredClients =  $this->filterClientTypes($clients, $clientType, $filteredId);
 
-           // TODO need to filter birthdays through start/end dates
+           // Filter birthdays through start/end dates
+             if($request->start_date) {
+                 return $this->filterBirthdays($request, $filteredClients);
+             }
 
-
-            return $clients;
+            return $filteredClients;
         }
 
         // Caregivers
         $caregivers = $this->addCityAndPhone(Caregiver::forRequestedBusinesses()->get());
 
-        return $this->filterClientTypes($caregivers, $clientType, $filteredId);
+        $filteredCaregivers = $this->filterClientTypes($caregivers, $clientType, $filteredId);
+
+        // Filter birthdays through start/end dates
+        if($request->start_date) {
+            return $this->filterBirthdays($request, $filteredCaregivers);
+        }
+
+        return $filteredCaregivers;
     }
 
     /**
@@ -1211,5 +1220,30 @@ class ReportsController extends BaseController
 
             return $value->client_type == $clientType;
         })->values();
+    }
+
+    /**
+     * @param Request $request
+     * @param         $clients
+     *
+     * @return mixed
+     */
+    protected function filterBirthdays(Request $request, $clients) {
+        $start = new Carbon($request->start_date);
+        $end = new Carbon($request->end_date);
+
+        return $clients->filter(function ($client) use ($start, $end) {
+            if (!is_null($client->date_of_birth)) {
+                $birthday = new Carbon($client->date_of_birth);
+                $birthInCurrentYear = new Carbon($birthday->month . '/' . $birthday->day . '/' . $start->year);
+
+                if ($start->year != $end->year && $birthInCurrentYear < $start) {
+                    $birthInCurrentYear = new Carbon($birthday->month . '/' . $birthday->day . '/' . ($start->year + 1));
+                }
+
+                return $birthInCurrentYear->between($start, $end);
+            }
+        })->values();
+
     }
 }
