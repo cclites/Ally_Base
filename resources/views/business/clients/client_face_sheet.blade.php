@@ -308,7 +308,7 @@
         </tr>
         </thead>
         <tbody>
-        @if( $activities )
+        @if( count($activities) )
             @foreach($activities as $activity)
                 <tr>
                     <td>{{ $activity }}</td>
@@ -317,7 +317,7 @@
         @else
             <tr>
                 <td>
-                    No Services selected
+                    No Services Requested
                 </td>
             </tr>
         @endif
