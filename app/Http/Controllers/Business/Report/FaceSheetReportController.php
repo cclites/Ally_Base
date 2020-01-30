@@ -26,7 +26,8 @@ class FaceSheetReportController
         }
 
         $client = $client->load(['addresses', 'preferences', 'business', 'careDetails', 'contacts']);
-        $html = response(view('business.clients.client_face_sheet', ['client'=>$client]))->getContent();
+        $activities = $client->getCarePlanActivities();
+        $html = response(view('business.clients.client_face_sheet', ['client'=>$client, 'activities'=>$activities]))->getContent();
         $snappy = \App::make('snappy.pdf');
 
         return new Response(

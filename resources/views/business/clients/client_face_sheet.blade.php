@@ -298,9 +298,33 @@
         </tbody>
     </table>
 
+    <table class="services-info">
+        <thead>
+        <tr>
+            <th>
+                Requested Services:
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        @if( $activities )
+            @foreach($activities as $activity=>$value)
+                <tr>
+                    <td>{{ json_encode($value) }}</td>
+                </tr>
+            @endforeach
+        @else
+            <tr>
+                <td>
+                    No Services selected
+                </td>
+            </tr>
+        @endif
+        </tbody>
+    </table>
+
     {{-- Requested Days (do not have) --}}
     {{-- Current Needs (do not have) --}}
-    {{-- Requested Services (do not have) --}}
     {{-- Bio (do not have --}}
     {{-- Caregiver Preferences (do not have)--}}
 

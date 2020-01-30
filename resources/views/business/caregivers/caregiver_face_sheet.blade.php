@@ -162,7 +162,7 @@
         <thead>
         <tr>
             <th>
-                Services:
+                Services Offered:
             </th>
         </tr>
         </thead>
