@@ -53,8 +53,10 @@
                     </b-row>
                     <b-row>
                         <b-col>
-                            <div class="form-group" v-for="schedule in schedules" :key="schedule.id">
-                                <b-col md="12"><b-button class="shift-button" variant="info" @click="clockIn(schedule)" :disabled="submitting || authInactive">Clock into the <strong>{{formatTime(schedule.start_date) }}</strong> shift</b-button></b-col>
+                            <div class="form-group d-flex" v-for="schedule in schedules" :key="schedule.id">
+                                <b-button class="mb-4 mx-auto" variant="info" @click="clockIn(schedule)" :disabled="submitting || authInactive">
+                                    Clock into the <strong>{{formatTime(schedule.start_date) }}</strong> shift
+                                </b-button>
                             </div>
                         </b-col>
                     </b-row>
@@ -355,9 +357,5 @@
     }
     .translucent {
         opacity: .5;
-    }
-    .shift-button {
-        margin-bottom: 40px;
-        margin-left: 100px;
     }
 </style>
