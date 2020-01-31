@@ -3,7 +3,7 @@ namespace App\Responses\Resources;
 
 use App\QuickbooksConnection;
 
-class QuickbooksConnectionResource extends ClientInvoice
+class QuickbooksConnectionResource 
 {
     /** @var QuickbooksConnection */
     public $resource;
