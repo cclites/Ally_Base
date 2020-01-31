@@ -2,6 +2,9 @@
 
 namespace App;
 
+use App\Events\CaregiverAvailabilityChanged;
+use phpDocumentor\Reflection\Types\Boolean;
+
 /**
  * App\CaregiverAvailability
  *
@@ -58,8 +61,55 @@ class CaregiverAvailability extends AuditableModel
     protected $guarded = ['id'];
     public $incrementing = false;
 
+    const CONFLICT_REASON = 'Caregiver changed available days';
+
     public function updatedByUser()
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * When CG removes available days, make sure CG was not scheduled on those days
+     *
+     * @param int $caregiverId
+     * @param array $availability
+     * @return bool
+     */
+    public function checkRemovedAvailableDaysConflict(int $caregiverId, array $availability): boolean
+    {
+        $hasConflict = false;
+        $today = \Carbon::today()->startOfDay();
+
+        $schedules = Schedule::where('caregiver_id', $caregiverId)
+            ->where('starts_at', '>=', $today)
+            ->select('id', 'starts_at')
+            ->get();
+
+        //Will have an array of days
+        collect($availability)->map(function($day) use($caregiverId,$today, $schedules, &$hasConflict){
+
+            $schedules->map(function($schedule) use($day,$caregiverId, &$hasConflict){
+                $startsAt = \Carbon::instance(new \DateTimeImmutable($schedule->starts_at));
+
+                if($startsAt->is(ucfirst($day))){
+
+                    $hasConflict = true;
+
+                    \DB::table('caregiver_availability_conflict')->insert([
+                        'caregiver_id'=>$caregiverId,
+                        'schedule_id'=>$schedule->id,
+                        'starts_at'=>$schedule->starts_at,
+                        'reason'=>self::CONFLICT_REASON
+                    ]);
+                }
+
+                return null;
+            });
+
+        })->flatten(1)
+            ->values()
+            ->unique();
+
+        return $hasConflict;
     }
 }

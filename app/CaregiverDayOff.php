@@ -2,7 +2,9 @@
 
 namespace App;
 
+use App\Events\CaregiverAvailabilityChanged;
 use Illuminate\Database\Eloquent\Model;
+use phpDocumentor\Reflection\Types\Boolean;
 
 /**
  * App\CaregiverDayOff
@@ -52,6 +54,8 @@ class CaregiverDayOff extends AuditableModel
      */
     protected $appends = [];
 
+    const CONFLICT_REASON = 'Caregiver scheduled a day off';
+
     /**
      * The "booting" method of the model.
      *
@@ -78,4 +82,49 @@ class CaregiverDayOff extends AuditableModel
     // **********************************************************
     // OTHER FUNCTIONS
     // **********************************************************
+
+
+    /**
+     * When CG schedules vacation days, checks to make sure CG wasn't scheduled
+     * on those days.
+     *
+     * @param int $caregiverId
+     * @param array $daysOff
+     * @return bool
+     */
+    public static function checkAddedVacationConflict(int $caregiverId, array $daysOff): boolean
+    {
+        $today = \Carbon::today()->startOfDay();
+        $hasConflict = false;
+
+        $scheduled = collect($daysOff)->map(function($day) use($caregiverId, $today){
+
+                $startDate = \Carbon::createFromFormat('Y-m-d', $day['start_date'])->startOfDay();
+                $endDate = \Carbon::createFromFormat('Y-m-d', $day['end_date'])->endOfDay();
+
+                return Schedule::whereBetween('starts_at', [$startDate, $endDate])
+                    ->where('starts_at', '>=', $today)
+                    ->where('caregiver_id', $caregiverId)
+                    ->select('id', 'starts_at')
+                    ->get();
+
+        })->flatten(1)
+        ->values()
+        ->unique();
+
+        if($scheduled->count()){
+            $hasConflict = true;
+        }
+
+        foreach($scheduled as $schedule){
+            \DB::table('caregiver_availability_conflict')->insert([
+                'caregiver_id'=>$caregiverId,
+                'schedule_id'=>$schedule->id,
+                'starts_at'=>$schedule->starts_at,
+                'reason'=>self::CONFLICT_REASON
+            ]);
+        }
+
+        return $hasConflict;
+    }
 }
