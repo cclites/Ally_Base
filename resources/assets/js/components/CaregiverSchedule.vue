@@ -97,8 +97,7 @@
             },
 
             viewDetails(event, jsEvent, view) {
-                console.log(event);
-                this.selectedEvent = event;
+                   this.selectedEvent = event;
                 this.viewModal = true;
             },
 
