@@ -42,20 +42,35 @@
                         </div>
                     </b-col>
                 </b-row>
-                <b-row>
-                    <b-col md="6" v-if="schedules.length > 0">
-                        <div class="form-group" v-for="schedule in schedules" :key="schedule.id">
-                            <b-button variant="info" @click="clockIn(schedule)" :disabled="submitting || authInactive">Clock Into Your {{ formatTime(schedule.starts_at) }} Shift</b-button>
-                        </div>
-                    </b-col>
-                    <b-col md="6" v-else>
+                <div v-if="schedules.length > 0">
+                    <b-row>
+                        <b-col md="9">{{visitMessage}}</b-col>
+                        <b-col md="3">
+                            <div class="d-flex">
+                                <user-avatar v-if="form.client_id" :src="avatar" size="75" class="ml-auto"/>
+                            </div>
+                        </b-col>
+                    </b-row>
+                    <b-row>
+                        <b-col>
+                            <div class="form-group d-flex" v-for="schedule in schedules" :key="schedule.id">
+                                <b-button class="mb-4 mx-auto" variant="info" @click="clockIn(schedule)" :disabled="submitting || authInactive">
+                                    Clock into the <strong>{{ formatDate(schedule.start_time, 'dddd') }} {{ formatTime(schedule.start_date) }}</strong> shift
+                                </b-button>
+                            </div>
+                        </b-col>
+                    </b-row>
+                </div>
+
+                <b-row v-if="!schedules.length > 0">
+                    <b-col md="9">
                         <div class="form-group" v-if="form.client_id">
                             <b-button variant="success" @click="clockInWithoutSchedule()" :disabled="submitting || authInactive">Clock in</b-button>
                         </div>
                     </b-col>
-                    <b-col md="6">
+                    <b-col md="3">
                         <div class="d-flex">
-                            <user-avatar v-if="form.client_id" :src="avatar" size="75" class="ml-auto" />
+                            <user-avatar v-if="form.client_id" :src="avatar" size="75" class="ml-auto"/>
                         </div>
                     </b-col>
                 </b-row>
@@ -65,7 +80,7 @@
                             <b-button variant="success" @click="clockInWithoutSchedule()" :disabled="submitting || authInactive">Clock Into An Unscheduled Shift</b-button>
                         </div>
                         <div v-else>
-                            <b-button variant="link" @click="allowUnscheduledClockin = true">If you do not see your shift, Click Here.</b-button>
+                            <b-button variant="secondary" @click="allowUnscheduledClockin = true">If you do not see your shift, Click Here.</b-button>
                         </div>
                     </b-col>
                 </b-row>
@@ -124,13 +139,21 @@
         },
 
         computed: {
-            avatar() {
-                let client = this.clients.find(e => e.id == this.form.client_id);
-                if (client) {
-                    return client.avatar; 
-                }
-                return '';
+            client() {
+                return this.clients.find(e => e.id === this.form.client_id);
             },
+            avatar() {
+                return this.client ? this.client.avatar : '';
+            },
+            clientName() {
+                return this.client ? this.client.name : '';
+            },
+            visitMessage() {
+                if (this.schedules.length > 1) {
+                    return `We found multiple visits for ${this. clientName} today!  Which visit are you here for?`;
+                }
+                return `We found a visit for ${this. clientName} today!  Are you here for this visit?`;
+            }
         },
 
         mounted() {
@@ -245,8 +268,7 @@
                 this.locationWarning = null;
             },
 
-            watchLocation()
-            {
+            watchLocation() {
                 if (!navigator.geolocation) {
                     alert('Location services are not supported on your device.');
                     return;
@@ -260,22 +282,19 @@
                 this.watchId = navigator.geolocation.watchPosition(this.setLocation, null, this.locationOptions);
             },
 
-            stopWatchingLocation()
-            {
+            stopWatchingLocation() {
                 navigator.geolocation.clearWatch(this.watchId);
                 this.watchId = null;
                 this.form.latitude = null;
                 this.form.longitude = null;
             },
 
-            setLocation(position)
-            {
+            setLocation(position) {
                 this.form.latitude = position.coords.latitude;
                 this.form.longitude = position.coords.longitude;
             },
 
-            async loadLocation()
-            {
+            async loadLocation() {
                 if (this.form.latitude === null || !this.watchId) {
                     this.showLoading('Waiting for your location..');
                     await navigator.geolocation.getCurrentPosition(this.setLocation, this.handleLocationError, this.locationOptions);
@@ -319,8 +338,11 @@
         },
 
         watch: {
-            'form.client_id': function(val) {
-                if (val) this.loadSchedules();
+            'form.client_id': function (val) {
+                this.schedules = [];
+                if (val) {
+                    this.loadSchedules();
+                }
             }
         },
 
@@ -329,14 +351,13 @@
 
 <style>
     .loading-card {
-        z-index: 10000;
-        position: absolute;
-        top: 20%;
-        width: 250px;
-        left: 50%;
+        z-index:     10000;
+        position:    absolute;
+        top:         20%;
+        width:       250px;
+        left:        50%;
         margin-left: -125px;
     }
-
     .translucent {
         opacity: .5;
     }
