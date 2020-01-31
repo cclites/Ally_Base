@@ -71,7 +71,7 @@ class ClientController extends BaseController
      */
     public function currentSchedules(Client $client)
     {
-        $now = Carbon::now();
+        $now = Carbon::now()->setTimezone($client->business->getTimezone());
         $start = $now->copy()->startOfDay();
         $end = $now->copy()->endOfDay();
 
