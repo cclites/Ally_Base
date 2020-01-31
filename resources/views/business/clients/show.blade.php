@@ -86,7 +86,7 @@
                     @else
 
                         class="nav-link"
-                    @endif data-toggle="tab" href="#admin_note" role="tab">Admin Notes</a>
+                    @endif data-toggle="tab" href="#admin_note" role="tab">Ally Team Notes</a>
             </li>
         @endif
     </ul>
@@ -114,7 +114,7 @@
                 <a class="dropdown-item" data-toggle="tab" href="#misc" role="tab">Misc</a>
                 <a class="dropdown-item" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
                 <a class="dropdown-item" data-toggle="tab" href="#tax_documents" role="tab">Tax Documents</a>
-                @if( is_admin() ) <a class="dropdown-item" data-toggle="tab" href="#admin_note" role="tab">Admin Notes</a> @endif
+                @if( is_admin() ) <a class="dropdown-item" data-toggle="tab" href="#admin_note" role="tab">Ally Team Notes</a> @endif
             </div>
         </li>
     </ul>
