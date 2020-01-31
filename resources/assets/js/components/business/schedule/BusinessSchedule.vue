@@ -55,6 +55,7 @@
                         <b-btn variant="info" @click="createSchedule()"><i class="fa fa-plus"></i> Schedule Shift</b-btn>
                         <b-btn variant="primary" @click="bulkUpdateModal = !bulkUpdateModal" v-if="!officeUserSettings.enable_schedule_groups">Update Schedules</b-btn>
                         <b-btn variant="danger" @click="bulkDeleteModal = !bulkDeleteModal">Delete Schedules</b-btn>
+                        <b-btn variant="info" @click="createFreeFloatingNoteModal = !createFreeFloatingNoteModal"><i class="fa fa-plus"></i> Add Note</b-btn>
                     </b-col>
                 </b-row>
             </b-col>
@@ -155,6 +156,11 @@
                                     :pass-clients="clients"
                                     :pass-caregivers="caregivers"
                                     @refresh-events="fetchEvents(true)"
+        />
+
+        <schedule-free-floating-note-modal
+            v-model="createFreeFloatingNoteModal"
+            @refresh-events="fetchEvents( true )"
         />
 
         <schedule-clock-out-modal v-model="clockOutModal"
@@ -281,6 +287,7 @@
                 caregivers: this.caregiver ? [this.caregiver] : [],
                 bulkUpdateModal: false,
                 bulkDeleteModal: false,
+                createFreeFloatingNoteModal: false,
                 notesModal: false,
                 clockOutModal: false,
                 selectedEvent: {},
@@ -472,7 +479,7 @@
             getFilteredEvents() {
                 let events = this.events;
 
-                // console.log( events );
+                console.log( 'fetched events: ', events );
 
                 if (this.statusFilters.length) {
                     events = events.filter(event => {

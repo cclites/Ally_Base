@@ -232,6 +232,7 @@ Vue.component('business-franchise-reports', require('./components/business/franc
 Vue.component('business-franchise-payments', require('./components/business/franchise/FranchisePayments.vue'));
 Vue.component('bulk-update-schedule-modal', require('./components/business/schedule/BulkUpdateScheduleModal'));
 Vue.component('bulk-delete-schedule-modal', require('./components/business/schedule/BulkDeleteScheduleModal'));
+Vue.component('schedule-free-floating-note-modal', require('./components/business/schedule/ScheduleFreeFloatingNoteModal'));
 Vue.component('schedule-notes-modal', require('./components/business/schedule/ScheduleNotesModal'));
 Vue.component('schedule-clock-out-modal', require('./components/business/schedule/ScheduleClockOutModal'));
 Vue.component('business-caregiver-pay-statements', require('./components/business/caregivers/CaregiverPayStatementsTab'));
