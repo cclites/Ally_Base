@@ -339,7 +339,10 @@
 
         watch: {
             'form.client_id': function (val) {
-                if (val) this.loadSchedules();
+                this.schedules = [];
+                if (val) {
+                    this.loadSchedules();
+                }
             }
         },
 
