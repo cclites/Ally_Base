@@ -19,7 +19,7 @@ class ClientPayerTest extends TestCase
     /** @var ClientPayerValidator */
     protected $validator;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
         $this->client = factory(Client::class)->create();
@@ -243,6 +243,6 @@ class ClientPayerTest extends TestCase
         ]);
 
         $this->assertFalse($this->validate());
-        $this->assertContains('offline', $this->validator->getErrorMessage());
+        $this->assertStringContainsString('offline', $this->validator->getErrorMessage());
     }
 }

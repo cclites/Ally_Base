@@ -77,7 +77,7 @@ class ImportProspects extends ImportClients
      *
      * @param int $row
      * @return int|null
-     * @throws \PHPExcel_Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     public function findOrCreateReferralSource(int $row) : ?int
     {

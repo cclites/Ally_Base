@@ -2,6 +2,7 @@
 namespace App\Http\Requests;
 
 use App\StatusAlias;
+use Illuminate\Support\Str;
 
 class CreateCaregiverRequest extends UpdateCaregiverRequest
 {
@@ -33,7 +34,7 @@ class CreateCaregiverRequest extends UpdateCaregiverRequest
     public function filtered()
     {
         $data = [
-            'password' => bcrypt($this->validated()['password'] ?? str_random())
+            'password' => bcrypt($this->validated()['password'] ?? Str::random())
         ] + parent::filtered();
 
         if ($data['status_alias_id'] == -1) {

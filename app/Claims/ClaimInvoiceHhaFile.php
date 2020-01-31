@@ -6,6 +6,24 @@ use App\BaseModel;
 use App\Claims\Contracts\TransmissionFileInterface;
 use Carbon\Carbon;
 
+/**
+ * App\Claims\ClaimInvoiceHhaFile
+ *
+ * @property int $id
+ * @property int $claim_invoice_id
+ * @property string $filename
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Claims\ClaimInvoice $claimInvoice
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Claims\ClaimInvoiceHhaFileResult[] $results
+ * @property-read int|null $results_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoiceHhaFile newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoiceHhaFile newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimInvoiceHhaFile query()
+ * @mixin \Eloquent
+ */
 class ClaimInvoiceHhaFile extends BaseModel implements TransmissionFileInterface
 {
     /**

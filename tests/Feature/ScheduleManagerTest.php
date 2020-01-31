@@ -5,6 +5,7 @@ use App\Billing\Service;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Scheduling\ScheduleCreator;
 use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use Tests\CreatesBusinesses;
 use Tests\TestCase;
 use App\Scheduling\ScheduleAggregator;
@@ -19,7 +20,7 @@ class ScheduleManagerTest extends TestCase
 
     public $service;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
 
@@ -55,7 +56,7 @@ class ScheduleManagerTest extends TestCase
 
         $shift = $this->createShift($date->addDay(), 4);
 
-        $data = array_merge(array_only($shift->toArray(), [
+        $data = array_merge(Arr::only($shift->toArray(), [
             'client_id', 
             'hours_type',
             'notes',
@@ -88,7 +89,7 @@ class ScheduleManagerTest extends TestCase
 
         $shift = $this->createShift($date->addDay(), 5);
 
-        $data = array_merge(array_only($shift->toArray(), [
+        $data = array_merge(Arr::only($shift->toArray(), [
             'caregiver_id',
             'caregiver_rate',
             'client_rate',

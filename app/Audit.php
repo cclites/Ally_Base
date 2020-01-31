@@ -38,6 +38,10 @@ use OwenIt\Auditing\Models\Audit as BaseAudit;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Audit whereUserAgent($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Audit whereUserId($value)
  * @mixin \Eloquent
+ * @property string|null $user_type
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Audit newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Audit newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Audit query()
  */
 class Audit extends BaseAudit
 {

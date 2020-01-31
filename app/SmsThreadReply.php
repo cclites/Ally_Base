@@ -38,6 +38,13 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Eloquent
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadReply forBusinesses($businessIds)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadReply forRequestedBusinesses($businessIds = null, \App\User $authorizedUser = null)
+ * @property string|null $read_at
+ * @property string|null $media_url
+ * @property int|null $continued_thread_id
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadReply betweenDates($start, $end)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadReply newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadReply newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\SmsThreadReply query()
  */
 class SmsThreadReply extends BaseModel implements BelongsToBusinessesInterface
 {

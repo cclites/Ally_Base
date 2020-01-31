@@ -41,6 +41,14 @@ use App\Business;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemit withStatus(\App\Claims\ClaimRemitStatus $remitStatus = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimRemit withType($remitType = null)
  * @mixin \Eloquent
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read int|null $adjustments_count
+ * @property-read int|null $audits_count
+ * @method static bool|null forceDelete()
+ * @method static \Illuminate\Database\Query\Builder|\App\Claims\ClaimRemit onlyTrashed()
+ * @method static bool|null restore()
+ * @method static \Illuminate\Database\Query\Builder|\App\Claims\ClaimRemit withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|\App\Claims\ClaimRemit withoutTrashed()
  */
 class ClaimRemit extends AuditableModel implements BelongsToBusinessesInterface
 {

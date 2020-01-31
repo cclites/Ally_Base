@@ -91,6 +91,42 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Eloquent
  * @property-read mixed $masked_name
  * @property-read \App\PhoneNumber $smsNumber
+ * @property int|null $deactivation_reason_id
+ * @property string|null $deactivated_by
+ * @property \Illuminate\Support\Carbon|null $reactivation_date
+ * @property int|null $status_alias_id
+ * @property string|null $setup_status
+ * @property int $allow_sms_notifications
+ * @property int $allow_email_notifications
+ * @property int $allow_system_notifications
+ * @property string|null $notification_email
+ * @property string|null $notification_phone
+ * @property-read int|null $addresses_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\UserAdminNote[] $adminNotes
+ * @property-read int|null $admin_notes_count
+ * @property-read int|null $audits_count
+ * @property-read int|null $bank_accounts_count
+ * @property-read int|null $credit_cards_count
+ * @property-read int|null $documents_count
+ * @property-read int|null $due_tasks_count
+ * @property-read int|null $emergency_contacts_count
+ * @property-read mixed $formatted_gender
+ * @property-read int|null $meta_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\UserNotificationPreferences[] $notificationPreferences
+ * @property-read int|null $notification_preferences_count
+ * @property-read int|null $notifications_count
+ * @property-read int|null $phone_numbers_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SetupStatusHistory[] $setupStatusHistory
+ * @property-read int|null $setup_status_history_count
+ * @property-read int|null $sms_threads_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemNotification[] $systemNotifications
+ * @property-read int|null $system_notifications_count
+ * @property-read int|null $tasks_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\User forChain($chainId)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\User newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\User newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\User query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\User search($searchFilter)
  */
 class User extends Authenticatable implements HasPaymentHold, Auditable, BelongsToBusinessesInterface, HasTimezone
 {

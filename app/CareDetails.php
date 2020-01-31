@@ -101,6 +101,15 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails whereVision($value)
  * @mixin \Eloquent
+ * @property string|null $pharmacy_name
+ * @property string|null $pharmacy_number
+ * @property string|null $allergies
+ * @property string|null $height
+ * @property string|null $weight
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\CareDetails query()
  */
 class CareDetails extends AuditableModel
 {

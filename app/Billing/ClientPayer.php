@@ -38,6 +38,11 @@ use Carbon\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\ClientPayer query()
  * @mixin \Eloquent
+ * @property string|null $payment_method_type
+ * @property int|null $payment_method_id
+ * @property string|null $program_number
+ * @property string|null $cirts_number
+ * @property-read int|null $audits_count
  */
 class ClientPayer extends AuditableModel implements HasAllyFeeInterface
 {

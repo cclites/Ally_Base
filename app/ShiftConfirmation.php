@@ -23,6 +23,10 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftConfirmation whereToken($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftConfirmation whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read int|null $shifts_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftConfirmation newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftConfirmation newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftConfirmation query()
  */
 class ShiftConfirmation extends Model
 {

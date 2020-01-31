@@ -1,6 +1,8 @@
 <?php
 namespace App\Http\Requests;
 
+use Illuminate\Support\Arr;
+
 class UpdateCaregiverApplicationRequest extends CaregiverApplicationStoreRequest
 {
     /**
@@ -10,7 +12,7 @@ class UpdateCaregiverApplicationRequest extends CaregiverApplicationStoreRequest
      */
     public function rules()
     {
-        return array_except(parent::rules(), [
+        return Arr::except(parent::rules(), [
            'caregiver_signature',
         ]);
     }

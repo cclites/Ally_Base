@@ -29,7 +29,7 @@ class CreateAuditsTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('user_id')->nullable();
             $table->string('event');
-            $table->morphs('auditable');
+            $table->morphs('auditable', 'audits_auditable_id_auditable_type_index');
             $table->text('old_values')->nullable();
             $table->text('new_values')->nullable();
             $table->text('url')->nullable();

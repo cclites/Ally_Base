@@ -8,6 +8,7 @@ use App\Caregiver;
 use App\CaregiverRestriction;
 use App\StatusAlias;
 use App\User;
+use Illuminate\Support\Str;
 
 class ImportCaregivers extends BaseImport
 {
@@ -90,7 +91,7 @@ class ImportCaregivers extends BaseImport
             'gender' => $this->resolve('Gender', $row),
             'active' => $statusAlias ? $statusAlias->active : $this->resolve('Active', $row),
             'preferences' => $this->resolve('Preferences', $row),
-            'password' => bcrypt(str_random(12)),
+            'password' => bcrypt(Str::random(12)),
             'status_alias_id' => $statusAlias->id ?? null,
         ];
 
@@ -99,7 +100,7 @@ class ImportCaregivers extends BaseImport
             $this->output->writeln('Skipping duplicate email: ' . $data['email']);
             return false;
         } else if (!$data['email']) {
-            $data['username'] = str_slug($data['firstname'] . $data['lastname'] . mt_rand(100, 9999));
+            $data['username'] = Str::slug($data['firstname'] . $data['lastname'] . mt_rand(100, 9999));
             $data['email'] = 'placeholder' . uniqid();
             $noemail = true;
         }
@@ -173,7 +174,7 @@ class ImportCaregivers extends BaseImport
     {
         if ($restrictionText = $this->resolve('Restrictions', $row)) {
             foreach(explode("\n\n", $restrictionText) as $description) {
-                $restriction = new CaregiverRestriction(['description' => str_limit($description, 253, '..')]);
+                $restriction = new CaregiverRestriction(['description' => Str::limit($description, 253, '..')]);
                 $caregiver->restrictions()->save($restriction);
             }
         }
@@ -209,10 +210,10 @@ class ImportCaregivers extends BaseImport
      */
     protected function resolveClassification(int $row, $cellValue)
     {
-        if (starts_with($cellValue, 'Home Health')) {
+        if (Str::startsWith($cellValue, 'Home Health')) {
             return 'HHA';
         }
-        if (starts_with($cellValue, 'Certified Nurs')) {
+        if (Str::startsWith($cellValue, 'Certified Nurs')) {
             return 'CNA';
         }
         if (strlen($cellValue) > 4) {
@@ -239,7 +240,7 @@ class ImportCaregivers extends BaseImport
      *
      * @param int $row
      * @return StatusAlias|null
-     * @throws \PHPExcel_Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     protected function resolveStatusAlias(int $row): ?StatusAlias
     {
@@ -260,7 +261,7 @@ class ImportCaregivers extends BaseImport
      *
      * @param int $row
      * @return bool
-     * @throws \PHPExcel_Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     private function duplicateDataProcessed(int $row)
     {

@@ -37,7 +37,7 @@ class ShiftFactoryTest extends TestCase
     /** @var \App\Caregiver */
     private $caregiver;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
         $this->business = factory(Business::class)->create([

@@ -2,13 +2,14 @@
 namespace App\Reports;
 
 use App\Contracts\Report;
-use App\Shift;
+use App\Exports\GenericExport;
 use Carbon\Carbon;
-use File;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Collections\SheetCollection;
 use Maatwebsite\Excel\Facades\Excel;
-use PHPExcel_IOFactory;
+use \PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Writer\Exception;
 
 abstract class BaseReport implements Report
 {
@@ -182,20 +183,13 @@ abstract class BaseReport implements Report
      */
     public function download()
     {
-        return Excel::create($this->getDownloadName(), function( $excel ) {
+        $data = $this->setHeadersFormat()
+            ->setNumericToFloatFormat()
+            ->setNullsToStrings()
+            ->setScalarFilter()
+            ->toArray();
 
-            $excel->sheet('Sheet1', function( $sheet ) {
-
-                $data = $this->setHeadersFormat()
-                             ->setNumericToFloatFormat()
-                             ->setNullsToStrings()
-                             ->setScalarFilter()
-                             ->toArray();
-
-                $sheet->fromArray( $data, null, 'A1', true );
-            });
-
-        })->export( 'xls' );
+        return Excel::download(new GenericExport($data), $this->getDownloadName() . '.xlsx');
     }
 
     /**
@@ -308,7 +302,7 @@ abstract class BaseReport implements Report
         $this->formatters['date'] = function($row) use ($format, $timezone) {
             return array_map(function($value) use ($format, $timezone) {
                 if (
-                    is_string($value) && str_contains($value, ':')
+                    is_string($value) && Str::contains($value, ':')
                     && ($strtotime = strtotime($value)) && $strtotime >= 1483228800
                 ) {
                     $value = Carbon::createFromTimestampUTC($strtotime);

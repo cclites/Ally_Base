@@ -40,6 +40,7 @@ use App\Reports\EVVReport;
 use App\CustomField;
 use App\OfficeUser;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Twilio\Rest\Taskrouter\V1\Workspace\TaskQueue\TaskQueuesStatisticsInstance;
 
 class ReportsController extends BaseController
@@ -549,7 +550,7 @@ class ReportsController extends BaseController
                        'ally_pct'        => AllyFeeCalculator::getPercentage($shift->client, null),
                        'shift_total'     => number_format($shift->costs()->getTotalCost(), 2),
                        'confirmed'       => $shift->statusManager()->isConfirmed(),
-                       'status'          => $shift->status ? title_case(preg_replace('/_/', ' ',
+                       'status'          => $shift->status ? Str::title(preg_replace('/_/', ' ',
                            $shift->status)) : '',
                        'EVV'             => $shift->verified,
                    ])->toArray();
@@ -566,9 +567,11 @@ class ReportsController extends BaseController
 
     private function clientShiftGroups(Business $business, array $data)
     {
+        $start = Carbon::createFromFormat( 'Y-m-d', Carbon::parse($data['start_date'])->format( 'Y-m-d' ), $business->getTimezone() )->startOfDay()->setTimezone( 'UTC' );
+        $end = Carbon::createFromFormat( 'Y-m-d', Carbon::parse($data['end_date'])->format( 'Y-m-d' ), $business->getTimezone() )->endOfDay()->setTimezone( 'UTC' );
         return $business->shifts()
             ->with('activities', 'client', 'caregiver', 'questions')
-            ->whereBetween('checked_in_time', [Carbon::parse($data['start_date']), Carbon::parse($data['end_date'])])
+            ->whereBetween('checked_in_time', [ $start, $end ])
             ->when(isset($data['client_id']) && $data['client_id'], function ($query) use ($data) {
                 return $query->where('client_id', $data['client_id']);
             })
@@ -1035,7 +1038,7 @@ class ReportsController extends BaseController
             ->pluck('client_type')
             ->map(function($item) {
                 return [
-                    'name' => title_case(str_replace('_', ' ', $item)),
+                    'name' => Str::title(str_replace('_', ' ', $item)),
                     'id' => $item
                 ];
             });

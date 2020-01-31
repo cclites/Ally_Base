@@ -12,7 +12,7 @@ use App\Billing\Payment;
 use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use PHPExcel_IOFactory;
+use \PhpOffice\PhpSpreadsheet\IOFactory;
 
 
 class ImportShiftReconciliation extends Command
@@ -39,12 +39,12 @@ class ImportShiftReconciliation extends Command
     protected $allowEmptyStrings = false;
 
     /**
-     * @var \PHPExcel
+     * @var \PhpOffice\PhpSpreadsheet\Spreadsheet
      */
     protected $file;
 
     /**
-     * @var \PHPExcel_Worksheet
+     * @var \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet
      */
     protected $sheet;
 
@@ -311,11 +311,11 @@ class ImportShiftReconciliation extends Command
     }
 
     /**
-     * @return \PHPExcel
+     * @return \PhpOffice\PhpSpreadsheet\Spreadsheet
      */
     public function loadFile()
     {
-        if (!$objPHPExcel = PHPExcel_IOFactory::load($this->argument('file'))) {
+        if (!$objPHPExcel = \PhpOffice\PhpSpreadsheet\IOFactory::load($this->argument('file'))) {
             $this->output->error('Could not load file: ' . $this->argument('file'));
             exit;
         }
@@ -324,7 +324,7 @@ class ImportShiftReconciliation extends Command
     }
 
     /**
-     * @return \PHPExcel_Worksheet
+     * @return \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet
      */
     public function loadSheet($name)
     {
@@ -364,8 +364,8 @@ class ImportShiftReconciliation extends Command
         $cell = $this->sheet->getCell($column . $rowNo);
         $value = $cell->getValue();
 
-        if(\PHPExcel_Shared_Date::isDateTime($cell)) {
-            //return date('Y-m-d H:i:s', \PHPExcel_Shared_Date::ExcelToPHP($value));
+        if(\PhpOffice\PhpSpreadsheet\Shared\Date::isDateTime($cell)) {
+            //return date('Y-m-d H:i:s', \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($value));
             return date('Y-m-d H:i:s', strtotime($value));
         }
 

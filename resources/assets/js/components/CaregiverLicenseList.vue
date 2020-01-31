@@ -22,9 +22,9 @@
                 :busy="loading"
                 :items=" filteredExpirations "
                 :fields="fields"
-                :current-page="currentPage"
                 :filter="filter"
-                sort-by="name"
+                sort-by="actions"
+                no-sort-reset
             >
 
                 <template slot="name" scope="row">
@@ -119,27 +119,29 @@
                         key: 'name',
                         label: 'Name',
                         class: 'name-column',
-                        sortable: true,
+                        sortable: false,
                     },
                     {
                         key: 'expires_sort',
                         class: 'expiration-column',
                         label: 'Expiration Date',
-                        sortable: true,
+                        sortable: false,
                     },
                     {
                         key: 'description',
-                        label: "Notes"
+                        label: "Notes",
+                        sortable: false,
                     },
                     {
                         key: 'updated_at',
                         class: 'updated-column',
                         label: 'Last Updated',
-                        sortable: true,
+                        sortable: false,
                     },
                     {
                         key: 'actions',
-                        class: 'actions-column hidden-print'
+                        class: 'actions-column hidden-print',
+                        sortable: false,
                     }
                 ],
                 chainExpirations : [],
@@ -153,6 +155,7 @@
         },
 
         computed: {
+
             alreadyCreating(){
 
                 return !!this.chainExpirations.find( exp => exp.isNew );
@@ -205,7 +208,7 @@
                 await axios.get( `/business/expiration-types` )
                     .then( ( { data } ) => {
 
-                        console.log( 'response: ', data );
+                        // console.log( 'response: ', data );
 
                         this.licenses.forEach( license => {
 
@@ -213,7 +216,7 @@
 
                             if( existingLicense ){
 
-                                console.log( 'if existing.. ', existingLicense );
+                                // console.log( 'if existing.. ', existingLicense );
 
                                 existingLicense.id                       = license.id;
                                 existingLicense.chain_expiration_type_id = license.chain_expiration_type_id;

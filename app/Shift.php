@@ -37,6 +37,7 @@ use App\Events\ShiftDeleted;
 use Illuminate\Support\Collection;
 use App\Data\ScheduledRates;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 /**
  * App\Shift
@@ -172,6 +173,45 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereDuplicatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift whereFlagsIn($flags)
  * @property int $quickbooks_service_id
+ * @property float|null $client_rate
+ * @property int|null $service_id
+ * @property int|null $payer_id
+ * @property int|null $visit_edit_action_id
+ * @property int|null $visit_edit_reason_id
+ * @property string|null $admin_note
+ * @property-read int|null $activities_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read int|null $audits_count
+ * @property-read \App\Signature $caregiverSignature
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\ClientInvoiceItem[] $clientInvoiceItems
+ * @property-read int|null $client_invoice_items_count
+ * @property-read \App\Signature $clientSignature
+ * @property-read int|null $deposits_count
+ * @property-read int|null $duplicates_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Invoiceable\ShiftExpense[] $expenses
+ * @property-read int|null $expenses_count
+ * @property-read int|null $goals_count
+ * @property-read int|null $issues_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\Invoiceable\InvoiceableMeta[] $meta
+ * @property-read int|null $meta_count
+ * @property-read int|null $other_activities_count
+ * @property-read \App\Billing\Payer|null $payer
+ * @property-read int|null $questions_count
+ * @property-read \App\Billing\Service|null $service
+ * @property-read int|null $services_count
+ * @property-read int|null $shift_flags_count
+ * @property-read int|null $status_history_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\SystemNotification[] $systemNotifications
+ * @property-read int|null $system_notifications_count
+ * @property-read \App\VisitEditAction $visitEditAction
+ * @property-read \App\VisitEditReason $visitEditReason
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forCaregivers($caregiverIds)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift forClients($clients)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Shift query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\InvoiceableModel whereMeta($key, $delimiter = null, $value = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Invoiceable\InvoiceableModel withMeta()
  */
 class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBusinessesInterface, HasTimezone
 {
@@ -932,7 +972,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
                 'name' => 'Other Expenses',
                 'units' => 1,
                 'rate' => $this->other_expenses,
-                'notes' => str_limit($this->other_expenses_desc, 253, '..'),
+                'notes' => Str::limit($this->other_expenses_desc, 253, '..'),
             ]);
         } elseif ($this->other_expenses < 0) {
             return ShiftExpense::create([
@@ -940,7 +980,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
                 'name' => 'Expense Adjustment',
                 'units' => 1,
                 'rate' => $this->other_expenses,
-                'notes' => str_limit($this->other_expenses_desc, 253, '..'),
+                'notes' => Str::limit($this->other_expenses_desc, 253, '..'),
             ]);
         }
         return null;
@@ -1070,7 +1110,7 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
             return null;
         }
 
-        return str_limit($this->activities->implode('name', ', '), 252);
+        return Str::limit($this->activities->implode('name', ', '), 252);
     }
 
     /**

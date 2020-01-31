@@ -28,6 +28,7 @@ use App\Shift;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Claims\ClaimableExpense query()
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
  */
 class ClaimableExpense extends AuditableModel implements ClaimableInterface
 {

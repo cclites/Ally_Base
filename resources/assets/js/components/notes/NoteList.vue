@@ -177,7 +177,7 @@
                         key: 'type',
                         label: 'Type',
                         sortable: true,
-                        formatter: d => d.toLowerCase() === 'other' ? 'Note' : 'Phone Call'
+                        formatter: d => d == 'other' ? 'Note' : 'Phone Call'
                     },
                     {
                         key: 'caregiver',

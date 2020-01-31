@@ -19,7 +19,7 @@ class ShiftImporter
 {
 
     /**
-     * @var \PHPExcel_Worksheet
+     * @var \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet
      */
     private $sheet;
 

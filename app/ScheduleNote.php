@@ -19,6 +19,11 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleNote whereNote($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleNote whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @property-read int|null $schedules_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleNote newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleNote newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ScheduleNote query()
  */
 class ScheduleNote extends AuditableModel
 {

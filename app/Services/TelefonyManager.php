@@ -6,15 +6,15 @@ use Illuminate\Support\Facades\Cache;
 use App\PhoneNumber;
 use Carbon\Carbon;
 use App\Caregiver;
-use Twilio\Twiml;
 use App\Schedule;
 use App\Client;
 use App\Shift;
+use Twilio\TwiML\VoiceResponse;
 
 class TelefonyManager
 {
     /**
-     * @var \Twilio\Twiml
+     * @var \Twilio\TwiML\VoiceResponse
      */
     protected $twilioResponse;
 
@@ -32,7 +32,7 @@ class TelefonyManager
             })
             ->first();
 
-        Cache::put('telefony_client_' . $national_number, $client, 2);
+        Cache::put('telefony_client_' . $national_number, $client, 2 * 60);
         return $client;
     }
 
@@ -130,7 +130,7 @@ class TelefonyManager
     public function twiml()
     {
         if (!$this->twilioResponse) {
-            $this->twilioResponse = new Twiml;
+            $this->twilioResponse = new VoiceResponse();
         }
         return $this->twilioResponse;
     }

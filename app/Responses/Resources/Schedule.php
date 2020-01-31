@@ -22,7 +22,7 @@ class Schedule implements Responsable
         unset($array['business']);
         unset($array['note']);
 
-        $array['starts_at'] = $this->schedule->starts_at->toDateTimeString();;
+        $array['starts_at'] = $this->schedule->starts_at->toDateTimeString();
         $array['offset'] = $this->schedule->starts_at->format('P');
 
         if ($shift = $this->schedule->clockedInShift) {

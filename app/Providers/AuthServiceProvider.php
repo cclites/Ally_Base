@@ -9,6 +9,7 @@ use App\Billing\Service;
 use App\Business;
 use App\BusinessChain;
 use App\Caregiver;
+use App\Caregiver1099;
 use App\CaregiverApplication;
 use App\Claims\ClaimInvoice;
 use App\Claims\ClaimRemit;
@@ -22,6 +23,7 @@ use App\PhoneNumber;
 use App\Policies\ActivityPolicy;
 use App\Policies\BusinessChainPolicy;
 use App\Policies\BusinessPolicy;
+use App\Policies\Caregiver1099Policy;
 use App\Policies\CaregiverApplicationPolicy;
 use App\Policies\CaregiverPolicy;
 use App\Claims\Policies\ClaimInvoicePolicy;
@@ -112,10 +114,11 @@ class AuthServiceProvider extends ServiceProvider
         ExpirationType::class => ExpirationTypePolicy::class,
         ClaimInvoice::class => ClaimInvoicePolicy::class,
         ClaimRemit::class => ClaimRemitPolicy::class,
+        Caregiver1099::class => Caregiver1099Policy::class,
     ];
 
     /**
-     * Register any authentication / authorization services.
+     * Register any authentiation / authorization services.
      *
      * @return void
      */

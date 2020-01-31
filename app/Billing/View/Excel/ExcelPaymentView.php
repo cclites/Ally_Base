@@ -5,6 +5,7 @@ use App\Billing\Payment;
 use App\Billing\View\Data\PaymentInvoiceData;
 use App\Billing\View\PaymentViewStrategy;
 use App\Contracts\ContactableInterface;
+use App\Exports\GenericExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ExcelPaymentView implements PaymentViewStrategy
@@ -21,17 +22,14 @@ class ExcelPaymentView implements PaymentViewStrategy
      * @param \App\Billing\Payment $payment
      * @param \App\Billing\View\Data\PaymentInvoiceData[] $invoiceObjects
      * @return mixed
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
     function generate(ContactableInterface $payer, Payment $payment, array $invoiceObjects)
     {
-        Excel::create($this->filename, function($excel) use ($invoiceObjects) {
+        $data = $this->mapToArray($invoiceObjects);
 
-            $excel->sheet('Sheet1', function($sheet) use ($invoiceObjects) {
-                $data = $this->mapToArray($invoiceObjects);
-                $sheet->fromArray($data, null, 'A1', true);
-            });
-
-        })->export('xls');
+        return Excel::download(new GenericExport($data), $this->filename . '.xlsx');
     }
 
     /**

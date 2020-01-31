@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Str;
+
 require __DIR__ . '/bootstrap.php';
 
 \DB::beginTransaction();
@@ -159,7 +161,7 @@ foreach($users as $user) {
     $user = \App\OfficeUser::create([
         'username' => $user['email'],
         'email' => $user['email'],
-        'password' => bcrypt(str_random()),
+        'password' => bcrypt(Str::random()),
         'firstname' => $user['firstname'],
         'lastname' => $user['lastname'],
         'chain_id' => $chain->id,

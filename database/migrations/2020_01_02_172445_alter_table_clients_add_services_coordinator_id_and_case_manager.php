@@ -14,7 +14,9 @@ class AlterTableClientsAddServicesCoordinatorIdAndCaseManager extends Migration
     public function up()
     {
         Schema::table('clients', function (Blueprint $table) {
-            $table->dropForeign('fk_client_case_manager_id');
+            if (\DB::getDriverName() != 'sqlite') {
+                $table->dropForeign('fk_client_case_manager_id');
+            }
             $table->renameColumn('case_manager_id', 'services_coordinator_id');
             $table->foreign('services_coordinator_id', 'fk_services_coordinator_id')->references('id')->on('users');
         });

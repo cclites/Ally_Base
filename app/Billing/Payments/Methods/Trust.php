@@ -10,6 +10,26 @@ use App\Client;
 use App\Traits\ChargedTransactionsTrait;
 use App\Traits\HasAllyFeeTrait;
 
+/**
+ * App\Billing\Payments\Methods\Trust
+ *
+ * @property int $id
+ * @property int $client_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read int|null $audits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Billing\GatewayTransaction[] $chargedTransactions
+ * @property-read int|null $charged_transactions_count
+ * @property-read \App\Client $client
+ * @property-read object $charge_metrics
+ * @property-write mixed $user_id
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payments\Methods\Trust newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payments\Methods\Trust newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Billing\Payments\Methods\Trust query()
+ * @mixin \Eloquent
+ */
 class Trust extends AuditableModel implements ChargeableInterface
 {
     use ChargedTransactionsTrait;

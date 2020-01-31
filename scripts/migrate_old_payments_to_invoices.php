@@ -4,6 +4,7 @@ require __DIR__ . "/bootstrap.php";
 use App\Billing\ClientInvoice;
 use App\Billing\Deposit;
 use App\Billing\Payment;
+use Illuminate\Support\Str;
 
 DB::beginTransaction();
 
@@ -40,7 +41,7 @@ Payment::with(['paymentMethod', 'client', 'client.payers'])->whereNotNull('clien
                 'name' => 'Manual Adjustment',
                 'total' => $diff,
                 'amount_due' => $diff,
-                'notes' => str_limit($payment->notes, 253, '..'),
+                'notes' => Str::limit($payment->notes, 253, '..'),
             ]);
             $invoice->addItem($item);
         }
@@ -162,7 +163,7 @@ Deposit::with(['caregiver', 'shifts', 'shifts.expenses'])->whereNotNull('caregiv
                 'group' => 'Adjustments',
                 'name' => 'Manual Adjustment',
                 'total' => $diff,
-                'notes' => str_limit($deposit->notes, 253, '..'),
+                'notes' => Str::limit($deposit->notes, 253, '..'),
                 'date' => $deposit->created_at,
             ]);
             $invoice->addItem($item);
@@ -214,7 +215,7 @@ Deposit::with(['business', 'shifts'])->whereNotNull('business_id')->chunk(500, f
                 'group' => 'Adjustments',
                 'name' => 'Manual Adjustment',
                 'total' => $diff,
-                'notes' => str_limit($deposit->notes, 253, '..'),
+                'notes' => Str::limit($deposit->notes, 253, '..'),
                 'date' => $deposit->created_at,
             ]);
             $invoice->addItem($item);
@@ -248,7 +249,7 @@ function _createOtherExpense(\App\Shift $shift)
     return \App\Billing\Invoiceable\ShiftExpense::create([
         'shift_id' => $shift->id,
         'name' => 'Other Expenses',
-        'notes' => str_limit($shift->other_expenses_desc, 253, '..'),
+        'notes' => Str::limit($shift->other_expenses_desc, 253, '..'),
         'units' => 1,
         'rate' => $shift->costs()->getOtherExpenses(false),
         'ally_fee' => subtract($shift->costs()->getOtherExpenses(), $shift->costs()->getOtherExpenses(false)),

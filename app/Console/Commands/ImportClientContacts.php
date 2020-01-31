@@ -176,7 +176,7 @@ class ImportClientContacts extends BaseImport
      *
      * @param int $row
      * @return bool
-     * @throws \PHPExcel_Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     private function duplicateDataProcessed(int $row)
     {

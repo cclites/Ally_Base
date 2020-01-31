@@ -3,6 +3,7 @@
 namespace App\Console\Commands\Cron;
 
 use App\Services\AnonymousConfluenceApiClient;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Console\Commands\BaseImport;
 use App\Services\TellusService;
 use App\TellusEnumeration;
@@ -95,7 +96,9 @@ class CronSyncTellusResources extends BaseImport
 
         $url = $attachments[0]['url'];
         $filename = $attachments[0]['filename'];
-        $localFile = \Storage::disk('public')->path("tellus/$filename");
+
+        \Storage::disk('local')->makeDirectory('tellus');
+        $localFile = \Storage::disk('local')->path("tellus/$filename");
 
         $this->info("Downloading $filename...");
         if (!$this->confluenceClient->download($url, $localFile)) {
@@ -129,8 +132,10 @@ class CronSyncTellusResources extends BaseImport
             return null;
         }
 
-        $url = $xsdAttachments[0]['url'];
-        $filename = $xsdAttachments[0]['filename'];
+        $attachment = $xsdAttachments->first();
+
+        $url = $attachment['url'];
+        $filename = $attachment['filename'];
         $localFile = \Storage::disk('public')->path(TellusService::XML_SCHEMA_FILENAME);
 
         $this->info("Downloading $filename...");
@@ -219,12 +224,12 @@ class CronSyncTellusResources extends BaseImport
     /**
      * Load the import spreadsheet into $sheet
      *
-     * @return \PHPExcel
-     * @throws \PHPExcel_Reader_Exception
+     * @return \PhpOffice\PhpSpreadsheet\Spreadsheet
+     * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
      */
     public function loadSheet()
     {
-        if (!$objPHPExcel = \PHPExcel_IOFactory::load($this->dictionaryFile)) {
+        if (! $objPHPExcel = IOFactory::load($this->dictionaryFile)) {
             $this->output->error('Could not load dictionary file at ' . $this->dictionaryFile);
             exit;
         }

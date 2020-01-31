@@ -18,6 +18,10 @@ namespace App;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftIssue whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftIssue whereShiftId($value)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftIssue newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftIssue newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\ShiftIssue query()
  */
 class ShiftIssue extends AuditableModel
 {

@@ -3,6 +3,7 @@
 use Faker\Generator as Faker;
 use App\CustomField;
 use App\CustomFieldOption;
+use Illuminate\Support\Str;
 
 $factory->define(CustomFieldOption::class, function (Faker $faker) {
 
@@ -13,7 +14,7 @@ $factory->define(CustomFieldOption::class, function (Faker $faker) {
 
     return [
         'field_id' => CustomField::inRandomOrder()->first()->id,
-        'value' => snake_case($faker->word),
+        'value' => Str::snake($faker->word),
         'label' => $faker->word,
     ];
 });

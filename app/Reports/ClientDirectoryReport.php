@@ -5,6 +5,7 @@ use App\Client;
 use App\Traits\IsDirectoryReport;
 use App\CustomField;
 use App\User;
+use Illuminate\Support\Str;
 
 class ClientDirectoryReport extends BusinessResourceReport
 {
@@ -224,10 +225,10 @@ class ClientDirectoryReport extends BusinessResourceReport
                 'id' => $client->id,
                 'firstname' => $client->firstname,
                 'lastname' => $client->lastname,
-                'username' => starts_with($client->username, 'no_login_') ? null : $client->username,
+                'username' => Str::startsWith($client->username, 'no_login_') ? null : $client->username,
                 'date_of_birth' => $client->date_of_birth,
                 'gender' => $client->gender,
-                'email' => str_contains($client->email, '@noemail.allyms.com') ? null : $client->email,
+                'email' => Str::contains($client->email, '@noemail.allyms.com') ? null : $client->email,
                 'active' => $client->active,
                 'office_location' => $client->business->name,
                 'address' => optional($client->getAddress())->full_address,
@@ -249,7 +250,7 @@ class ClientDirectoryReport extends BusinessResourceReport
                 'caregiver_1099' => $client->caregiver_1099,
                 'agreement_status' => str_replace('_', ' ', ucwords($client->agreement_status)),
                 'hic' => $client->hic,
-                'diagnosis' => $this->for_export ? $client->diagnosis : str_limit($client->diagnosis, 15),
+                'diagnosis' => $this->for_export ? $client->diagnosis : Str::limit($client->diagnosis, 15),
             ];
 
             $meta = [];

@@ -4,6 +4,30 @@ namespace App;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * App\QuickbooksService
+ *
+ * @property int $id
+ * @property int $business_id
+ * @property string $service_id
+ * @property string $name
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
+ * @property-read int|null $audits_count
+ * @property-read \App\Business $business
+ * @method static bool|null forceDelete()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\QuickbooksService newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\QuickbooksService newQuery()
+ * @method static \Illuminate\Database\Query\Builder|\App\QuickbooksService onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\BaseModel ordered($direction = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\QuickbooksService query()
+ * @method static bool|null restore()
+ * @method static \Illuminate\Database\Query\Builder|\App\QuickbooksService withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|\App\QuickbooksService withoutTrashed()
+ * @mixin \Eloquent
+ */
 class QuickbooksService extends AuditableModel
 {
     use SoftDeletes;

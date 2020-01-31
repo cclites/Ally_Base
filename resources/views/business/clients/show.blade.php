@@ -73,6 +73,9 @@
         <li class="nav-item">
             <a class="nav-link" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#tax_documents" role="tab">Tax Documents</a>
+        </li>
         @if( is_admin() )
 
             <li class="nav-item">
@@ -83,7 +86,7 @@
                     @else
 
                         class="nav-link"
-                    @endif data-toggle="tab" href="#admin_note" role="tab">Admin Notes</a>
+                    @endif data-toggle="tab" href="#admin_note" role="tab">Ally Team Notes</a>
             </li>
         @endif
     </ul>
@@ -110,7 +113,8 @@
                 <a class="dropdown-item" data-toggle="tab" href="#insurance_service_auth" role="tab">Insurance & Service Auths</a>
                 <a class="dropdown-item" data-toggle="tab" href="#misc" role="tab">Misc</a>
                 <a class="dropdown-item" data-toggle="tab" href="#notifications" role="tab">Notifications</a>
-                @if( is_admin() ) <a class="dropdown-item" data-toggle="tab" href="#admin_note" role="tab">Admin Notes</a> @endif
+                <a class="dropdown-item" data-toggle="tab" href="#tax_documents" role="tab">Tax Documents</a>
+                @if( is_admin() ) <a class="dropdown-item" data-toggle="tab" href="#admin_note" role="tab">Ally Team Notes</a> @endif
             </div>
         </li>
     </ul>
@@ -135,7 +139,7 @@
                 <div class="col-lg-6 col-sm-12">
                     <payment-method title="Primary Payment Method"
                                     source="primary"
-                                    :method="{{ $client->defaultPayment OR '{}' }}"
+                                    :method="{{ $client->defaultPayment ?? '{}' }}"
                                     :client="{{ $client }}"
                                     payment-type-message="{{ $defaultPaymentTypeMessage }}"
                                     role="{{ auth()->user()->role_type }}"
@@ -145,7 +149,7 @@
                 <div class="col-lg-6 col-sm-12">
                     <payment-method title="Backup Payment Method"
                                     source="backup"
-                                    :method="{{ $client->backupPayment OR '{}' }}"
+                                    :method="{{ $client->backupPayment ?? '{}' }}"
                                     :client="{{ $client }}"
                                     payment-type-message="{{ $backupPaymentTypeMessage }}"
                                     role="{{ auth()->user()->role_type }}"
@@ -207,7 +211,7 @@
         </div>
         <div class="tab-pane" id="client_invoice_history" role="tabpanel">
             <b-card title="Invoice History">
-                <client-invoice-history :client="{{ $client }}" :invoices="{{ $invoices OR "[]" }}">
+                <client-invoice-history :client="{{ $client }}" :invoices="{{ $invoices ?? "[]" }}">
                     <template slot="actions" scope="data">
                         <a :href="'/business/client/invoices/' + data.item.id" class="btn btn-secondary" target="_blank">
                             <i class="fa fa-external-link"></i> View
@@ -244,6 +248,9 @@
         </div>
         <div class="tab-pane" id="notifications" role="tabpanel">
             <notification-preferences :admin="true" :user="{{ $client->user }}" :notifications="{{ $notifications }}"></notification-preferences>
+        </div>
+        <div class="tab-pane" id="tax_documents" role="tabpanel">
+            <business-client-1099s-tab :client="{{ $client->id }}" />
         </div>
         @if(is_admin())
         <div class="tab-pane" id="admin_note" role="tabpanel">

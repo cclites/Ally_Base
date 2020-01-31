@@ -16,7 +16,7 @@ class PaymentQueryTest extends TestCase
      */
     private $paymentQuery;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
         $this->paymentQuery = new PaymentQuery();

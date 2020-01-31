@@ -30,6 +30,11 @@ use Illuminate\Database\Eloquent\Builder;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property-read int|null $audits_count
+ * @property-read int|null $care_plans_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Activity query()
  */
 class Activity extends AuditableModel implements BelongsToBusinessesInterface
 {

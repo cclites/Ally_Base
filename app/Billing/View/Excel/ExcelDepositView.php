@@ -7,6 +7,7 @@ use App\Billing\Deposit;
 use App\Billing\View\Data\DepositInvoiceData;
 use App\Billing\View\DepositViewStrategy;
 use App\Contracts\ContactableInterface;
+use App\Exports\GenericExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ExcelDepositView implements DepositViewStrategy
@@ -23,17 +24,14 @@ class ExcelDepositView implements DepositViewStrategy
      * @param \App\Billing\Deposit $deposit
      * @param \App\Billing\View\Data\DepositInvoiceData[] $invoiceObjects
      * @return mixed
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
     function generate(ContactableInterface $recipient, Deposit $deposit, array $invoiceObjects)
     {
-        Excel::create($this->filename, function($excel) use ($invoiceObjects) {
+        $data = $this->mapToArray($invoiceObjects);
 
-            $excel->sheet('Sheet1', function($sheet) use ($invoiceObjects) {
-                $data = $this->mapToArray($invoiceObjects);
-                $sheet->fromArray($data, null, 'A1', true);
-            });
-
-        })->export('xls');
+        return Excel::download(new GenericExport($data), $this->filename . '.xlsx');
     }
 
     /**

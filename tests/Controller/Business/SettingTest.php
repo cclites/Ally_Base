@@ -7,6 +7,7 @@ use App\BusinessChain;
 use App\Caregiver;
 use App\Client;
 use App\OfficeUser;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -18,7 +19,7 @@ class SettingTest extends TestCase
 
     protected $officeUser;
     
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
         $this->disableExceptionHandling();
@@ -82,7 +83,7 @@ class SettingTest extends TestCase
             'phone2' => $this->faker->phoneNumber,
             'address1' => $this->faker->streetAddress,
             'city' => $this->faker->city,
-            'state' => str_random(2),
+            'state' => Str::random(2),
             'zip' => $this->faker->postcode
         ];
 

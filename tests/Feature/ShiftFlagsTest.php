@@ -27,7 +27,7 @@ class ShiftFlagsTest extends TestCase
     protected $client;
     protected $service;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         parent::setUp();
 

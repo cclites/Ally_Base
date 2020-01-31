@@ -19,7 +19,7 @@ class ApplyPaymentTest extends TestCase
     /** @var ApplyPayment */
     private $paymentApplicator;
 
-    function setUp()
+    function setUp() : void
     {
         parent::setUp();
 

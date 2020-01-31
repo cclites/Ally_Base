@@ -109,7 +109,7 @@ class ImportPayers extends BaseImport
      *
      * @param int $row
      * @return bool
-     * @throws \PHPExcel_Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     protected function emptyRow(int $row)
     {

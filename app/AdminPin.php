@@ -4,6 +4,20 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\AdminPin
+ *
+ * @property int $id
+ * @property int $pin
+ * @property string $name
+ * @property string $access
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\AdminPin newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\AdminPin newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\AdminPin query()
+ * @mixin \Eloquent
+ */
 class AdminPin extends Model
 {
     /**

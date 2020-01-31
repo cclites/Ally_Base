@@ -38,7 +38,7 @@ class ClockInTest extends TestCase
      */
     public $schedule;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
         $this->business = factory(Business::class)->create();

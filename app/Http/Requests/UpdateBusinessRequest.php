@@ -8,8 +8,6 @@ use Crypt;
 
 class UpdateBusinessRequest extends BusinessRequest
 {
-    protected $preserveValidated = true;
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -102,6 +100,10 @@ class UpdateBusinessRequest extends BusinessRequest
         }
         if (isset($data['tellus_password'])) {
             $data['tellus_password'] = Crypt::encrypt($data['tellus_password']);
+        }
+
+        if (isset($data['business_id'])) {
+            unset($data['business_id']);
         }
 
         return $data;
