@@ -55,7 +55,7 @@
                         <b-col>
                             <div class="form-group d-flex" v-for="schedule in schedules" :key="schedule.id">
                                 <b-button class="mb-4 mx-auto" variant="info" @click="clockIn(schedule)" :disabled="submitting || authInactive">
-                                    Clock into the <strong>{{formatTime(schedule.start_date) }}</strong> shift
+                                    Clock into the <strong>{{ formatDate(schedule.start_time, 'dddd') }} {{ formatTime(schedule.start_date) }}</strong> shift
                                 </b-button>
                             </div>
                         </b-col>

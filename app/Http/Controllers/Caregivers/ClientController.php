@@ -75,6 +75,14 @@ class ClientController extends BaseController
         $start = $now->copy()->startOfDay();
         $end = $now->copy()->endOfDay();
 
+        if ($start->isAfter($now->copy()->subHours(2))) {
+            $start = $now->copy()->subHours(2);
+        }
+
+        if ($end->isBefore($now->copy()->addHours(2))) {
+            $end = $now->copy()->addHours(2);
+        }
+
         $schedules = Schedule::forClient($client->id)
             ->forCaregiver($this->caregiver()->id)
             ->betweenDates($start, $end)
