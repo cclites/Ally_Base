@@ -114,27 +114,8 @@
                         }
                         self.$emit('event-render', ...args);
 
-                        const eventObj = args[0], $el = args[1], view = args[2];
-                        const spansMultipleDays = e => {
-                            if (!e.start || !e.end) {
-                                return false;
-                            }
-
-                            return e.start.format("D") !== e.end.format("D");
-                        };
-
-                        const isListView = $el.hasClass("fc-list-item");
-
-                        if (isListView && spansMultipleDays(eventObj)) {
-                            // only hide if NOT start day
-
-                            const startDate = eventObj.start.format('LL');
-                            const selectedDate = view.calendar.currentDate.format('LL');
-
-                            if (startDate !== selectedDate) {
-                                $el.closest("tr").hide();
-                            }
-                        }
+                        // Use jQuery to hide the second day of overlapping shifts
+                        self.hideMultiDayShifts(args[0], args[1], args[2]);
                     },
 
                     eventDestroy(event) {
@@ -228,6 +209,33 @@
         },
 
         methods: {
+            /**
+             * Hide the events that are part of an overnight schedule
+             * and are not the day it starts. ALLY-183
+             */
+            hideMultiDayShifts(eventObj, $el, view) {
+                const spansMultipleDays = e => {
+                    if (!e.start || !e.end) {
+                        return false;
+                    }
+
+                    return e.start.format("D") !== e.end.format("D");
+                };
+
+                const isListView = $el.hasClass("fc-list-item");
+
+                if (isListView && spansMultipleDays(eventObj)) {
+                    // only hide if NOT start day
+
+                    const startDate = eventObj.start.format('LL');
+                    const selectedDate = view.calendar.currentDate.format('LL');
+
+                    if (startDate !== selectedDate) {
+                        $el.closest("tr").hide();
+                    }
+                }
+            },
+
             fireMethod(...options) {
                 $(this.$el).fullCalendar(...options)
             },
