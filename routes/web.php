@@ -441,6 +441,8 @@ Route::group([
     Route::resource('schedule', 'Business\ScheduleController');
     Route::get('schedule/{schedule}/preview', 'Business\ScheduleController@preview')->name('schedule.preview');
 
+    Route::resource('schedule-free-floating-notes', 'Business\ScheduleFreeFloatingNotesController');
+
     Route::resource('shifts', 'Business\ShiftController');
     Route::post('shifts/{shift}/confirm', 'Business\ShiftController@confirm')->name('shifts.confirm');
     Route::get('shifts/{shift}/print', 'Business\ShiftController@printPage')->name('shifts.print');
