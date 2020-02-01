@@ -2,8 +2,9 @@
 namespace App\Responses\Resources;
 
 use App\QuickbooksConnection;
+use Illuminate\Http\Resources\Json\Resource;
 
-class QuickbooksConnectionResource extends ClientInvoice
+class QuickbooksConnectionResource extends Resource
 {
     /** @var QuickbooksConnection */
     public $resource;

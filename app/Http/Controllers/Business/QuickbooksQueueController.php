@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Billing\ClientInvoice;
 use App\Billing\ClientInvoiceItem;
-use App\Billing\Queries\OnlineClientInvoiceQuery;
+use App\Billing\Queries\ClientInvoiceQuery;
 use App\ChargedRate;
 use App\QuickbooksClientInvoice;
 use App\QuickbooksConnection;
@@ -25,10 +25,10 @@ class QuickbooksQueueController extends Controller
      * Get claims listing.
      *
      * @param Request $request
-     * @param OnlineClientInvoiceQuery $invoiceQuery
+     * @param ClientInvoiceQuery $invoiceQuery
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection|\Illuminate\Http\Response
      */
-    public function index(Request $request, OnlineClientInvoiceQuery $invoiceQuery)
+    public function index(Request $request, ClientInvoiceQuery $invoiceQuery)
     {
         if ($request->expectsJson()) {
             $invoiceQuery->paidInFull()

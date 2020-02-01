@@ -400,6 +400,20 @@ class ClientInvoice extends AuditableModel implements InvoiceInterface
             . ' - ' .
             optional(optional($ordered->last())->getDate())->format('m/d/Y');
     }
+
+    /**
+     * Check if the client invoice belongs to any claims.
+     *
+     * @return bool
+     */
+    public function getHasClaim() : bool
+    {
+        if (is_object($this->claimInvoices)) {
+            return $this->claimInvoices->isNotEmpty();
+        }
+
+        return ! empty($this->claimInvoices);
+    }
     
     // **********************************************************
     // ScrubsForSeeding Methods

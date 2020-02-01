@@ -52,7 +52,7 @@
                                     <option v-for="item in clients" :key="item.id" :value="item.id">{{ item.nameLastFirst }}</option>
                                 </b-form-select>
 
-                                <payer-dropdown v-model="payerFilter" class="mr-1 mt-1" empty-text="-- Select a Payer --" />
+                                <payer-dropdown v-model="payerFilter" class="mr-1 mt-1" empty-text="-- Select a Payer --" :show-offline="true" />
 
                                 &nbsp;<br /><b-button type="submit" variant="info" class="mt-1" :disabled="loadingTable">Generate</b-button>
                             </b-form>

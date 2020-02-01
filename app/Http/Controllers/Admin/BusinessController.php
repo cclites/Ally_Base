@@ -58,7 +58,7 @@ class BusinessController extends Controller
         \DB::beginTransaction();
 
         $businessData = $request->validate([
-            'name' => 'required|string|max:70',
+            'name' => 'required|string|max:64',
             'short_name' => 'required|string|max:45',
             'address1' => 'string|nullable',
             'city' => 'string|nullable',
@@ -129,7 +129,7 @@ class BusinessController extends Controller
     public function update(Request $request, Business $business)
     {
         $businessData = $request->validate([
-            'name' => 'required|string|max:70',
+            'name' => 'required|string|max:64',
             'short_name' => 'required|string|max:45',
             'address1' => 'string|nullable',
             'city' => 'string|nullable',
