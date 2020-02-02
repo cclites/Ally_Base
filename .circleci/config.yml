@@ -19,8 +19,7 @@ jobs:
     steps:
       - checkout
       - run: sudo apt install -y libsqlite3-dev libpng-dev
-      - run: sudo docker-php-ext-install bcmath
-      - run: sudo docker-php-ext-install gd
+      - run: sudo docker-php-ext-install bcmath gd sockets
 
       # Composer
       - restore_cache:
