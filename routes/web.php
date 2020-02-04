@@ -524,6 +524,7 @@ Route::group([
     Route::resource('claims', 'Business\Claims\ClaimInvoiceController');
     Route::get('claims/{claim}/print', 'Business\Claims\PrintClaimInvoiceController@standard');
     Route::get('claims/{claim}/print/full', 'Business\Claims\PrintClaimInvoiceController@full');
+    Route::get('claims/{claim}/cmsInvoice', 'Business\Claims\PrintClaimInvoiceController@cmsInvoice');
 //    Route::get('claims/{claim}/print/cms1500', 'Business\Claims\PrintClaimInvoiceController@cms1500');
     Route::post('claims/{claim}/transmit', 'Business\Claims\ClaimTransmissionController@transmit')->name('claims.transmit');
     Route::get('claims/{claim}/results', 'Business\Claims\ClaimResultsController@show')->name('claims.results');
