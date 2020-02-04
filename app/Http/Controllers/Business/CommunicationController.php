@@ -85,7 +85,7 @@ class CommunicationController extends Controller
      * Initiate SMS text blast.
      *
      * @param \App\Http\Requests\SendTextRequest $request
-     * @return \Illuminate\Http\Response
+     * @return ErrorResponse|SuccessResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function sendText(SendTextRequest $request)
@@ -95,6 +95,9 @@ class CommunicationController extends Controller
         // Scrub the recipients list
         $recipients = $request->getEligibleCaregivers();
         if ($recipients->count() == 0) {
+            if (filled($this->input('recipients'))) {
+                return new ErrorResponse(422, 'None of the selected recipients have SMS enabled for any contact numbers.');
+            }
             return new ErrorResponse(422, 'You must have at least 1 recipient.');
         }
 
