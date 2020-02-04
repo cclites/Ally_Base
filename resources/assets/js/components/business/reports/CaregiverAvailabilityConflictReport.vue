@@ -9,7 +9,7 @@
                     <b-row>
                         <b-col lg="4">
                             <business-location-form-group
-                                    v-model="filters.businesses"
+                                    v-model="filters.business"
                                     label="Location"
                                     class="mr-1"
                                     :allow-all="false"
@@ -30,7 +30,7 @@
                                 </b-button-group>
                             </b-form-group>
                         </b-col>
-                        <b-col md="4" v-if="this.conflicts.length > 0">
+                        <b-col md="4" v-if="this.items.length > 0 && this.caregiver">
                             <b-form-group label="&nbsp;">
                                 <b-button-group>
                                     <b-btn @click="reopenShifts()">
@@ -54,7 +54,7 @@
                 </b-card>
             </b-col>
             <b-col lg="12">
-                <b-row v-if="this.conflicts.length > 0">
+                <b-row v-if="this.items.length > 0">
                     <b-col lg="6" >
                         <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
                     </b-col>
@@ -92,7 +92,7 @@
                 currentPage: 1,
                 headerText: "Availability Conflict - " + (this.caregiver ? this.caregiver.name : ''),
                 filters: {
-                    businesses: '',
+                    business: '',
                     caregiver: this.caregiver ? this.caregiver.id : '',
                 },
                 caregivers: [],
@@ -103,7 +103,7 @@
         },
         methods: {
             fetchCaregivers(){
-                axios.get('/business/caregivers/' + [this.filters.businesses])
+                axios.get('/business/caregivers')
                     .then( ({ data }) => {
                         this.caregivers = data;
                     })
@@ -114,12 +114,12 @@
             fetchReport(){
 
                 let form = new Form(this.filters);
-                let url= '/business/reports/caregiver-availability-conflict&json=1';
+                let url= '/business/reports/caregiver-availability-conflict?json=1';
 
                 form.get(url)
                     .then( ({ data }) => {
-                        console.log(data);
-                        //window.location = "/business/reports/caregiver-availability-conflict";
+                        history.replaceState(null, '','/business/reports/caregiver-availability-conflict' )
+                        this.items = data;
                     })
                     .catch(e => {
                     });
@@ -138,10 +138,6 @@
             }
         },
         computed: {
-          /*
-            headerText(){
-                return
-            }*/
         },
         mounted() {
             this.fetchCaregivers();

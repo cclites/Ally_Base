@@ -122,7 +122,7 @@ class CaregiverDayOff extends AuditableModel
             \DB::table('caregiver_availability_conflict')->insert([
                 'caregiver_id'=>$caregiver->id,
                 'schedule_id'=>$schedule->id,
-                'business_id'=>$schedule->business_id,
+                'business_id'=>$businessId,
                 'starts_at'=>$schedule->starts_at,
                 'reason'=>self::CONFLICT_REASON
             ]);

@@ -13,35 +13,52 @@ use Illuminate\Http\Request;
 class CaregiverAvailabilityConflictReport extends BaseController
 {
 
-    public function index(Request $request, Caregiver $caregiver = null){
+    /**
+     * @param Request $request
+     * @return mixed
+     */
+    public function index(Request $request){
 
-        \Log::info($caregiver);
+        if($request->filled('json')){
 
-        if($caregiver){
+            if($request->filled('caregiver')){
+                $conflicts = \DB::table('caregiver_availability_conflict')
+                    ->where('caregiver_id', $request->caregiver)
+                    ->where('business_id', $request->business)
+                    ->get();
+            }else{
+                $conflicts = \DB::table('caregiver_availability_conflict')
+                    ->where('business_id', $request->business)
+                    ->get();
+            }
 
-            $businessId= $caregiver->businesses->first()->id;
-
-            $conflicts = \DB::table('caregiver_availability_conflict')
-                ->where('caregiver_id', $caregiver->id)
-                ->where('business_id', $businessId)
-                ->get();
-        }elseif($request->businesses && $request->caregiver){
-            $conflicts = \DB::table('caregiver_availability_conflict')
-                ->where('caregiver_id', $request->caregiver)
-                ->where('business_id', $request->businesses)
-                ->get();
-        }elseif($request->businesses){
-            $conflicts = \DB::table('caregiver_availability_conflict')
-                ->where('business_id', $request->businesses)
-                ->get();
-        }else{
-            $conflicts = [];
-        }
-
-        if($request->json){
             return response()->json($conflicts);
+
         }
 
+        return view_component('caregiver-availability-conflict-report', 'Caregiver Availability Conflict Report', [], [
+            'Home' => route('home'),
+            'Reports' => route('business.reports.index')
+        ]);
+
+
+    }
+
+    /**
+     * Shows the report coming from the office user link in Caregiver Availability
+     * Conflict modal.
+     *
+     * @param Caregiver $caregiver
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function show(Caregiver $caregiver){
+
+        $businessId= $caregiver->businesses->first()->id;
+
+        $conflicts = \DB::table('caregiver_availability_conflict')
+            ->where('caregiver_id', $caregiver->id)
+            ->where('business_id', $businessId)
+            ->get();
 
         return view_component('caregiver-availability-conflict-report', 'Caregiver Availability Conflict Report', compact('caregiver', 'conflicts'), [
             'Home' => route('home'),
