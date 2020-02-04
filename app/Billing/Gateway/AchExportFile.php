@@ -95,7 +95,7 @@ class AchExportFile
             throw new \Exception("Unable to write ACH Export file to: " . $filepath);
         }
 
-        return $filepath;
+        return \Storage::path($filepath);
     }
 
     /**
