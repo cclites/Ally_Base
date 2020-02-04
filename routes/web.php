@@ -312,8 +312,8 @@ Route::group([
 
     Route::get('reports', 'Business\ReportsController@index')->name('reports.index');
 // Route::get('reports/birthdays', 'Business\ReportsController@userBirthday')->name('reports.user_birthday');
-    Route::get('reports/birthdays', 'Business\Report\BusinessClientBirthdayReportController@index')->name('reports.user_birthday');
-    Route::post('reports/birthdays/', 'Business\Report\BusinessClientBirthdayReportController@index')->name('reports.user_birthday_data');
+    Route::get('reports/birthdays', 'Business\Report\BusinessBirthdayReportController@index')->name('reports.user_birthday');
+    Route::post('reports/birthdays/', 'Business\Report\BusinessBirthdayReportController@index')->name('reports.user_birthday_data');
 
 
     Route::get('reports/anniversary', 'Business\ReportsController@caregiverAnniversary')->name('reports.caregiver_anniversary');

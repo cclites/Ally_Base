@@ -7,7 +7,7 @@ use App\Client;
 use App\Caregiver;
 use Carbon\Carbon;
 
-class ClientBirthdayReport extends BaseReport
+class BirthdayReport extends BaseReport
 {
     /**
      * @var int

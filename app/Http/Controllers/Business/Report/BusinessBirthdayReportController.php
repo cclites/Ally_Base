@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Business\Report;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Reports\ClientBirthdayReport;
+use App\Reports\BirthdayReport;
 use App\Caregiver;
 use App\Client;
 
-class BusinessClientBirthdayReportController extends Controller {
+class BusinessBirthdayReportController extends Controller {
     public function index(Request $request) {
-        $report = new ClientBirthdayReport($request->type);
+        $report = new BirthdayReport($request->type);
         $report->includeContactInfo();
 
         $userId = $request->selectedId;
