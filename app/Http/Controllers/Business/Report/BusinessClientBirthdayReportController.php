@@ -9,18 +9,20 @@ use App\Caregiver;
 use App\Client;
 
 class BusinessClientBirthdayReportController extends Controller {
-    public function index(Request $request, ClientBirthdayReport $report) {
+    public function index(Request $request) {
+        $report = new ClientBirthdayReport($request->type);
         $report->includeContactInfo();
 
-        $clientId = $request->selectedId;
+        $userId = $request->selectedId;
         $startDate = $request->start_date;
         $endDate = $request->end_date;
+        $clientType = $request->selectedClients;
 
-        if ($clientId != 'All' && $clientId) {
-            $report->filterByClientId($clientId);
+        if ($userId != 'All' && $userId) {
+            $report->filterByClientId($userId);
         }
 
-        if($clientType = $request->client_type) {
+        if($clientType != 'All'  && $clientType) {
             $report->filterByClientType($clientType);
         }
 

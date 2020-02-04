@@ -4,6 +4,7 @@
 namespace App\Reports;
 
 use App\Client;
+use App\Caregiver;
 use Carbon\Carbon;
 
 class ClientBirthdayReport extends BaseReport
@@ -13,26 +14,37 @@ class ClientBirthdayReport extends BaseReport
      */
     protected $client_id;
 
-
+    /**
+     * @var string
+     */
+    protected $type;
 
     /**
      * BusinessClientBirthdayReport constructor.
      */
-    public function __construct()
+    public function __construct($type)
     {
-        // TODO: possibly split into Client/Caregiver based on request data.
-        // TODO: Or use 2 separate report classes.
-        $this->query = Client::forRequestedBusinesses()
-                             ->with(['user.addresses', 'user.phoneNumbers']);
+        $this->type = strtolower($type);
+
+        if ($this->type == 'clients') {
+            $this->query = Client::forRequestedBusinesses()
+                                 ->with(['user.addresses', 'user.phoneNumbers']);
+        }
+        else {
+            $this->query = Caregiver::forRequestedBusinesses()
+                                 ->with(['user.addresses', 'user.phoneNumbers']);
+        }
+
     }
+
 
     public function includeContactInfo() {
         // Add city & phone when data retrieved.
-        $this->formatters['add_contact_info'] = function($client) {
-            $client->city = $client->user->addresses[0]->city ?? 'Unknown';
-            $client->phone = $client->user->phoneNumbers[0]->national_number ?? 'Unknown';
+        $this->formatters['add_contact_info'] = function($user) {
+            $user->city = $user->user->addresses[0]->city ?? 'Unknown';
+            $user->phone = $user->user->phoneNumbers[0]->national_number ?? 'Unknown';
 
-            return $client;
+            return $user;
         };
     }
 
@@ -46,7 +58,7 @@ class ClientBirthdayReport extends BaseReport
 
 
     public function filterByClientId(int $client_id) : self {
-        $this->query->where('clients.id', $client_id);
+        $this->query->where($this->type . '.id', $client_id);
 
         return $this;
     }
@@ -78,7 +90,7 @@ class ClientBirthdayReport extends BaseReport
      */
     protected function results() : iterable
     {
-        $record =  $this->query()->get()->sortBy('clients.name');
+        $record =  $this->query()->get()->sortBy($this->type . '.name');
 
         return $record->values();
     }

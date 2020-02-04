@@ -126,7 +126,7 @@ class ReportsTest extends TestCase {
         $data = [
             'type' => 'clients',
             'json' => 1,
-            'client_type' => 'private_pay',
+            'selectedClients' => 'private_pay',
             'id' => 'All',
         ];
 
@@ -151,7 +151,7 @@ class ReportsTest extends TestCase {
         $data = [
             'type' => 'clients',
             'json' => 1,
-            'client_type' => 'private_pay',
+            'selectedClients' => 'private_pay',
             'id' => $client1->id,
         ];
 
@@ -202,13 +202,16 @@ class ReportsTest extends TestCase {
 
     /** @test */
     public function caregiver_birthday_report_returns_all_caregivers() {
-        $this->markTestIncomplete();
-        $query_string = '?type=caregivers';
+        $data = [
+            'type' => 'caregivers',
+            'json' => 1
+        ];
+
         $caregivers = factory(Caregiver::class, 2)->create()->each(function ($caregiver) {
             $caregiver->businesses()->attach($this->business);
         });
 
-        $this->get('business/reports/data/birthdays' . $query_string)
+        $this->post('business/reports/birthdays', $data)
              ->assertSuccessful()
              ->assertJsonCount(2)
              ->assertJsonFragment(["id" => $caregivers[0]->id, "email" => $caregivers[0]->email]);
@@ -216,14 +219,17 @@ class ReportsTest extends TestCase {
 
     /** @test */
     public function caregiver_birthday_report_filters_by_caregiver_id() {
-        $this->markTestIncomplete();
         $caregivers = factory(Caregiver::class, 2)->create()->each(function ($caregiver) {
             $caregiver->businesses()->attach($this->business);
         });
 
-        $query_string = '?type=caregiver&id=' . $caregivers[0]->id;
+        $data = [
+            'type' => 'caregivers',
+            'selectedId' => $caregivers[0]->id,
+            'json' => 1
+        ];
 
-        $this->get('business/reports/data/birthdays' . $query_string)
+        $this->post('business/reports/birthdays', $data)
              ->assertSuccessful()
              ->assertJsonCount(1)
              ->assertJsonFragment(["id" => $caregivers[0]->id, "email" => $caregivers[0]->email]);
