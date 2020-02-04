@@ -306,10 +306,10 @@
                 data.patch('/admin/business-1099/' + this.caregiver1099.id)
                 .then(response => {
                     this.generate();
+                    this.caregiver1099Edit = false;
                 })
                 .catch( e => {})
                 .finally(() => {
-                    this.caregiver1099Edit = false;
                 });
             },
 
