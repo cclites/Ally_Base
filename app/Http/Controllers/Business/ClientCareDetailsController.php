@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Activity;
 use App\CareDetails;
+use App\CarePlan;
 use App\Http\Requests\UpdateClientCareDetailsRequest;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -44,6 +46,7 @@ class ClientCareDetailsController extends BaseController
         $this->authorize('read', $client);
 
         $careDetails = $client->careDetails;
+        $client->load('contacts', 'carePlans', 'carePlans.activities');
 
         if(!$careDetails){
             return new ErrorResponse(500, 'You must first create and save a Care Details plan before printing.');
@@ -61,7 +64,21 @@ class ClientCareDetailsController extends BaseController
             $client->careDetails->diet_as_string = $this->snakeCaseArrayToUpperCaseString($careDetails->diet);
         }
 
-        $html = response(view('print.business.client_care_details', ['client'=>$client]))->getContent();
+        $businessActivities = Activity::where('business_id', $client->business_id)
+                                        ->orWhereNull('business_id')
+                                        ->select('code', 'id', 'name')
+                                        ->orderBy('id')
+                                        ->get();
+
+        $clientActivityIds = $client->carePlans->map(function(CarePlan $carePlan){
+            return $carePlan->activities->map(function($activity){
+                return $activity->id;
+            });
+        })->values()
+            ->flatten(1)
+            ->toArray();
+
+        $html = response(view('print.business.client_care_details', ['client'=>$client, 'businessActivities'=>$businessActivities, 'clientActivityIds'=>$clientActivityIds]))->getContent();
 
         $snappy = \App::make('snappy.pdf');
         return new Response(
