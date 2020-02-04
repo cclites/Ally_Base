@@ -3,6 +3,7 @@
         <b-modal title="Reply to Text Message"
             v-model="showModal"
             size="lg"
+            :no-close-on-backdrop="true"
         >
 
             <b-row>
@@ -31,8 +32,8 @@
 
                     <b-form-group label="Message" label-class="required">
 
-                        <b-textarea :rows=" 6 " v-model=" form.message " required :disabled=" form.busy " :state=" form.message.length <= 140 "></b-textarea>
-                        <input-help :form=" form " field="Message" :text=" `Maximum 140 characters. Currently ${form.message.length}` "></input-help>
+                        <b-textarea :rows=" 6 " v-model=" form.message " required :disabled=" form.busy " :state=" form.message.length <= maxLength "></b-textarea>
+                        <input-help :form=" form " field="Message" :text=" `Maximum ${maxLength} characters. Currently ${form.message.length}` "></input-help>
                     </b-form-group>
                 </b-col>
             </b-row>
@@ -41,7 +42,7 @@
 
                 <b-button variant="success"
                         type="submit"
-                        :disabled=" form.busy "
+                        :disabled=" form.busy || form.message.length > maxLength "
                 >
                     Send Reply
                 </b-button>
@@ -90,6 +91,7 @@
                     continued      : 1
                 }),
                 showModal : this.value,
+                maxLength : 290
             }
         },
 
@@ -118,9 +120,9 @@
 
             async submitForm(){
 
-                if ( this.form.message.length > 140 ) {
+                if ( this.form.message.length > this.maxLength ) {
 
-                    this.form.addError( 'Message', 'A maximum character count of 140 is applied to text messages' );
+                    this.form.addError( 'Message', `A maximum character count of ${this.maxLength} is applied to text messages` );
                     return;
                 }
 
@@ -130,7 +132,7 @@
 
                 try {
 
-                    this.form.post( `/business/communication/text-caregivers` )
+                    this.form.post( `/business/communication/reply-to-reply` )
                         .then( res => {
 
                             this.$emit( 'continuedThread', { new_thread_id : res.data.data.new_thread_id, reply_id: this.data.id });
