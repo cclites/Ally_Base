@@ -74,10 +74,9 @@ class BirthdayReport extends BaseReport
         $startDate = Carbon::createFromFormat('m/d/Y', $startDate)->format('Y/m/d');
         $endDate = Carbon::createFromFormat('m/d/Y', $endDate)->format('Y/m/d');
 
-        $this->query->select('users.date_of_birth','clients.*')->join('users', 'users.id', '=', 'clients.id');
+        $this->query->select($this->type . '.*')->join('users', 'users.id', '=', $this->type . '.id');
         $this->query->whereRaw(
-            'DATE_ADD(`users`.`date_of_birth`, INTERVAL YEAR(CURDATE()) - YEAR(`users`.`date_of_birth`) + IF(DAYOFYEAR(CURDATE()) > DAYOFYEAR(`users`.`date_of_birth`), 1, 0) YEAR) BETWEEN "?" AND "?"',
-            [$startDate, $endDate]
+            'DATE_ADD(`users`.`date_of_birth`, INTERVAL YEAR(CURDATE()) - YEAR(`users`.`date_of_birth`) + IF(DAYOFYEAR(CURDATE()) > DAYOFYEAR(`users`.`date_of_birth`), 1, 0) YEAR) BETWEEN "'.$startDate.'" AND "'.$endDate.'"'
         );
 
         return $this;

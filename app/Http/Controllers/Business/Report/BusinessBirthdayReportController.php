@@ -28,13 +28,12 @@ class BusinessBirthdayReportController extends Controller {
 
         if($request->filterDates) {
             $report->filterByDateRange($startDate, $endDate);
-
-           // dd($report->query()->toSql(), $report->query()->getBindings());
         }
 
         if ($request->filled('json')) {
             return response()->json($report->rows());
         }
+
         $type = $request->type == 'clients' ? 'clients' : 'caregivers';
         $type = ucfirst($type);
 

@@ -89,7 +89,7 @@ class ReportsTest extends TestCase {
              ->assertSuccessful()
              ->assertJsonCount(2)
              ->assertJsonFragment(["id" => $clients[0]->id, "email" => $clients[0]->email])
-            ->assertJsonFragment(["id" => $clients[1]->id, "email" => $clients[1]->email]);
+             ->assertJsonFragment(["id" => $clients[1]->id, "email" => $clients[1]->email]);
     }
 
     /** @test */
@@ -99,8 +99,8 @@ class ReportsTest extends TestCase {
         ]);
 
         $data = [
-            'type' => 'clients',
-            'json' => 1,
+            'type'       => 'clients',
+            'json'       => 1,
             'selectedId' => $clients[0]->id
         ];
 
@@ -124,13 +124,13 @@ class ReportsTest extends TestCase {
         ]);
 
         $data = [
-            'type' => 'clients',
-            'json' => 1,
+            'type'            => 'clients',
+            'json'            => 1,
             'selectedClients' => 'private_pay',
-            'id' => 'All',
+            'id'              => 'All',
         ];
 
-        $this->post('business/reports/birthdays',  $data)
+        $this->post('business/reports/birthdays', $data)
              ->assertSuccessful()
              ->assertJsonCount(1)
              ->assertJsonFragment(["id" => $client1->id, "email" => $client1->email]);
@@ -149,49 +149,51 @@ class ReportsTest extends TestCase {
         ]);
 
         $data = [
-            'type' => 'clients',
-            'json' => 1,
+            'type'            => 'clients',
+            'json'            => 1,
             'selectedClients' => 'private_pay',
-            'id' => $client1->id,
+            'id'              => $client1->id,
         ];
 
-        $this->post('business/reports/birthdays',  $data)
+        $this->post('business/reports/birthdays', $data)
              ->assertSuccessful()
              ->assertJsonCount(1)
              ->assertJsonFragment(["id" => $client1->id, "email" => $client1->email]);
     }
 
-    /** @test */
+    /**
+     * Test won't pass in sqlite. production uses MySQL
+     */
     public function client_birthday_report_filters_by_date_range() {
-        $this->markTestIncomplete('filterByDateRange() in ClientBirthdayReport');
         $clients = factory(Client::class, 3)->create([
             'business_id' => $this->business->id,
         ]);
 
         $user = $clients[0]->user;
-        $user->date_of_birth = '1985/07/04';
+        $user->date_of_birth = '1985-07-04';
         $user->save();
 
         $user2 = $clients[1]->user;
-        $user2->date_of_birth = '1990/08/04';
+        $user2->date_of_birth = '1990-08-04';
         $user2->save();
 
         $user3 = $clients[2]->user;
-        $user3->date_of_birth = '2000/01/04';
+        $user3->date_of_birth = '2000-01-04';
         $user3->save();
 
         // Calendar date range
-        $start_date = '07/28/2020';
-        $end_date = '01/28/2021';
+        $start_date = "07/28/2020";
+        $end_date = "01/28/2021";
 
         $data = [
-            'json' => 1,
-            'type' => 'clients',
-            'start_date' => $start_date,
-            'end_date' => $end_date,
+            'type'        => 'clients',
+            'json'        => 1,
+            'filterDates' => true,
+            'start_date'  => $start_date,
+            'end_date'    => $end_date
         ];
 
-        //$this->withoutExceptionHandling();
+        $this->withoutExceptionHandling();
 
         $this->post('business/reports/birthdays', $data)
              ->assertSuccessful()
@@ -224,9 +226,9 @@ class ReportsTest extends TestCase {
         });
 
         $data = [
-            'type' => 'caregivers',
+            'type'       => 'caregivers',
             'selectedId' => $caregivers[0]->id,
-            'json' => 1
+            'json'       => 1
         ];
 
         $this->post('business/reports/birthdays', $data)
@@ -235,11 +237,10 @@ class ReportsTest extends TestCase {
              ->assertJsonFragment(["id" => $caregivers[0]->id, "email" => $caregivers[0]->email]);
     }
 
-    /** @test */
+    /**
+     * Test won't pass in sqlite. production uses MySQL
+     */
     public function caregiver_birthday_report_filters_by_date_range() {
-        $this->markTestIncomplete();
-        $start_date = '07/28/2020';
-        $end_date = '01/28/2021';
         $caregivers = factory(Caregiver::class, 3)->create()->each(function ($caregiver) {
             $caregiver->businesses()->attach($this->business);
         });
@@ -256,9 +257,19 @@ class ReportsTest extends TestCase {
         $user3->date_of_birth = '2000/01/04';
         $user3->save();
 
-        $query_string = '?type=caregivers&start_date=' . $start_date . '&end_date=' . $end_date;
+        // Calendar date range
+        $start_date = "07/28/2020";
+        $end_date = "01/28/2021";
 
-        $this->get('business/reports/data/birthdays' . $query_string)
+        $data = [
+            'type'        => 'caregivers',
+            'json'        => 1,
+            'filterDates' => true,
+            'start_date'  => $start_date,
+            'end_date'    => $end_date
+        ];
+
+        $this->get('business/reports/data/birthdays', $data)
              ->assertSuccessful()
              ->assertJsonCount(2)
              ->assertJsonFragment(["id" => $caregivers[1]->id, "email" => $caregivers[1]->email])
