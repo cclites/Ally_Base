@@ -72,10 +72,10 @@ class CaregiverAvailability extends AuditableModel
      * When CG removes available days, make sure CG was not scheduled on those days
      *
      * @param int $caregiverId
-     * @param array $availability
+     * @param array $availability //represents days of the week as strings
      * @return bool
      */
-    public function checkRemovedAvailableDaysConflict(int $caregiverId, array $availability): boolean
+    public static function checkRemovedAvailableDaysConflict(int $caregiverId, array $availability): bool
     {
         $hasConflict = false;
         $today = \Carbon::today()->startOfDay();
@@ -85,7 +85,6 @@ class CaregiverAvailability extends AuditableModel
             ->select('id', 'starts_at')
             ->get();
 
-        //Will have an array of days
         collect($availability)->map(function($day) use($caregiverId,$today, $schedules, &$hasConflict){
 
             $schedules->map(function($schedule) use($day,$caregiverId, &$hasConflict){
@@ -111,5 +110,26 @@ class CaregiverAvailability extends AuditableModel
             ->unique();
 
         return $hasConflict;
+    }
+
+    /**
+     * @param $newAvailabilities
+     * @param $storedAvailabilities
+     * @return array
+     */
+    public static function arrayDiffAvailability($newAvailabilities, $storedAvailabilities): array
+    {
+        $days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+        $arrayDiff = [];
+
+        foreach($days as $day){
+
+            if($newAvailabilities[$day] === 0 && $newAvailabilities[$day] !== $storedAvailabilities[$day]){
+                $arrayDiff[] = $day;
+            }
+        }
+
+        return $arrayDiff;
     }
 }

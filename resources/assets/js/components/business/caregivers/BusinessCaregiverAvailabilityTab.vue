@@ -101,12 +101,17 @@
                 </b-card>
             </b-col>
         </b-row>
-        <b-modal ref="availability_conflict_modal"
-                 title="Caregiver Availability COnflict"
-                 v-model="conflict_modal">
+        <b-modal title="Caregiver Availability Conflict"
+                 v-model="availability_conflict_modal"
+                 class="text-center"
+                 size="lg"
+        >
 
-                {{ this.caregiver.name }} has a schedule conflict.
-
+                {{ this.caregiver.name }} has a schedule conflict.<br><br>
+                <!--b-link :href="this.report_url">Show caregiver availability conflict report.</b-link><br><br-->
+                <b-btn @click="reopenShifts()">
+                    Remove Caregiver from these visits and mark them as open?
+                </b-btn>
         </b-modal>
     </div>
 </template>
@@ -156,7 +161,8 @@
                     { key: 'description', label: 'Description', sortable: true },
                     { key: 'actions', label: ' ', sortable: false },
                 ],
-                conflict_modal: false,
+                availability_conflict_modal: false,
+                report_url: "/business/reports/caregiver-availability-conflict/" + this.caregiver.id,
             }
         },
 
@@ -200,12 +206,23 @@
                 this.form.put(url)
                     .then( ({ data }) => {
                         if(data.error){
-
+                            //show the modal
+                            this.availability_conflict_modal = true;
                         }
                     })
                     .catch(e => {
                     });
             },
+            reopenShifts(){
+                let url = '/business/schedule/reopen/' + this.caregiver.id;
+                let form = new Form();
+                form.post(url)
+                    .then( ({ data }) => {
+                        console.log(data);
+                    })
+                    .catch(e => {
+                    });
+            }
         }
     }
 </script>

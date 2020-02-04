@@ -2,12 +2,15 @@
 
 namespace App\Notifications\Business;
 
+use App\Notifications\BaseNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Jobs\SendTextMessage;
+use App\Caregiver;
 
-class CaregiverAvailabilityChanged extends Notification
+class CaregiverAvailabilityChanged extends BaseNotification
 {
     use Queueable;
 
@@ -20,6 +23,7 @@ class CaregiverAvailabilityChanged extends Notification
      */
     public function __construct(Caregiver $caregiver)
     {
+        \Log::info("Sending Caregiver notification");
         $this->caregiver = $caregiver;
     }
 
@@ -43,9 +47,8 @@ class CaregiverAvailabilityChanged extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+                    ->line($this->caregiver->name . " has marked themselves as unavailable for scheduled shifts.")
+                    ->action('See affected schedules', url('/business/reports/caregiver-availability-conflict/' . $this->caregiver->id));
     }
 
     /**

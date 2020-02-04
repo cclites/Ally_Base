@@ -414,14 +414,21 @@ class CaregiverController extends BaseController
 
         //This call looks at scheduled vacation days saved in the system and compares
         //them against scheduled vacation days to find the difference.
-        //$diffDaysOff is used to check that the CG was not scheduled for those dates.
-        $diffDaysOff = $this->arrayDiffCustom($request->daysOffData(), $caregiver->daysOff);
+        //$diffDaysOff represents those days.
+        $diffDaysOff = CaregiverDayOff::arrayDiffCustom($request->daysOffData(), $caregiver->daysOff);
+
+        \Log::info("DIFF DAYS OFF");
+        \Log::info($diffDaysOff);
 
         //This call looks at CG available days saved in the system and compares against
         //available days stored in the system. If any days were previously marked available
-        //and are now unavailable, $diffAvailability is used to check that CG was not
-        //scheduled on those days.
-        $diffAvailability = $this->arrayDiffAvailability($request->availabilityData(), $caregiver->availability);
+        //and are now unavailable, $diffAvailability represents those days.
+        $diffAvailability = CaregiverAvailability::arrayDiffAvailability($request->availabilityData(), $caregiver->availability);
+
+        \Log::info("DIFF AVAILABILITY.");
+        \Log::info($$diffAvailability);
+
+        $vacationConflict = $availabilityConflict = [];
 
         if($diffDaysOff){
             $vacationConflict = CaregiverDayOff::checkAddedVacationConflict($caregiver->id, $diffDaysOff);
@@ -431,13 +438,12 @@ class CaregiverController extends BaseController
             $availabilityConflict = CaregiverAvailability::checkRemovedAvailableDaysConflict($caregiver->id, $diffAvailability);
         }
 
-        if( $vacationConflict || $availabilityConflict ){
-            if( Auth()::user->role === 'office_user' ){
+        if( $vacationConflict || $availabilityConflict){
+
+            if( \Auth::user()->role_type === 'office_user' ){
                 return response()->json(['error'=> 'caregiver has conflict']);
-            }else{
-                //send a notification
-                event(new CaregiverAvailabilityChanged($caregiver));
             }
+
         }
 
         \DB::beginTransaction();
@@ -596,46 +602,4 @@ class CaregiverController extends BaseController
             'has_open_invoices' => $count > 0
         ]);
     }
-
-    public function arrayDiffCustom($newDays, $storedDaysOff): array
-    {
-        $daysOff = $storedDaysOff->map(function (\App\CaregiverDayOff $dayOff) {
-            return [
-                'start_date' => $dayOff->start_date,
-                'end_date' => $dayOff->end_date,
-                'description' => $dayOff->description,
-            ];
-        })->toArray();
-
-        $index = 0;
-
-        foreach ($newDays as $day) {
-            foreach($daysOff as $dayOff){
-                if($day === $dayOff){
-                    unset($newDays[$index]);
-                }
-            }
-            $index++;
-        }
-
-        return $newDays;
-    }
-
-    public function arrayDiffAvailability($newAvailabilities, $storedAvailabilities): array
-    {
-        $days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-
-        $arrayDiff = [];
-
-        foreach($days as $day){
-
-            if($newAvailabilities[$day] === 0 && $newAvailabilities[$day] !== $storedAvailabilities[$day]){
-                $arrayDiff[] = $day;
-            }
-        }
-
-        return $arrayDiff;
-    }
-
-
 }

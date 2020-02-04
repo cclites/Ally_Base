@@ -92,7 +92,7 @@ class CaregiverDayOff extends AuditableModel
      * @param array $daysOff
      * @return bool
      */
-    public static function checkAddedVacationConflict(int $caregiverId, array $daysOff): boolean
+    public static function checkAddedVacationConflict(int $caregiverId, array $daysOff): bool
     {
         $today = \Carbon::today()->startOfDay();
         $hasConflict = false;
@@ -126,5 +126,34 @@ class CaregiverDayOff extends AuditableModel
         }
 
         return $hasConflict;
+    }
+
+    /**
+     * @param $newDays
+     * @param $storedDaysOff
+     * @return array
+     */
+    public static function arrayDiffCustom($newDays, $storedDaysOff): array
+    {
+        $daysOff = $storedDaysOff->map(function (\App\CaregiverDayOff $dayOff) {
+            return [
+                'start_date' => $dayOff->start_date,
+                'end_date' => $dayOff->end_date,
+                'description' => $dayOff->description,
+            ];
+        })->toArray();
+
+        $index = 0;
+
+        foreach ($newDays as $day) {
+            foreach($daysOff as $dayOff){
+                if($day === $dayOff){
+                    unset($newDays[$index]);
+                }
+            }
+            $index++;
+        }
+
+        return $newDays;
     }
 }

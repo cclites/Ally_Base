@@ -2,11 +2,13 @@
 
 namespace App\Listeners;
 
+use App\Caregiver;
 use App\Schedule;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use App\Events\CaregiverAvailabilityChanged;
+use App\Notifications\Business\CaregiverAvailabilityChanged;
 use phpDocumentor\Reflection\Types\Boolean;
+
 
 class DetectScheduleAvailabilityConflicts
 {
@@ -29,7 +31,8 @@ class DetectScheduleAvailabilityConflicts
      */
     public function handle(CaregiverAvailabilityChanged $event)
     {
-        //TODO: send notification
+        \Log::info("DetectScheduledAvailability");
+        \Notification::send($event->caregiver->business->notifiableUsers(),new CaregiverAvailabilityChanged($event->caregiver));
     }
 
 }
