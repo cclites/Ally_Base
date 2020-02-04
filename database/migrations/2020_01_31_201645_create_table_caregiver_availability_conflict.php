@@ -17,6 +17,7 @@ class CreateTableCaregiverAvailabilityConflict extends Migration
             $table->bigIncrements('id');
             $table->unsignedInteger( 'caregiver_id' );
             $table->unsignedInteger( 'schedule_id' );
+            $table->unsignedInteger( 'business_id' )->nullable();
             $table->dateTime('starts_at');
             $table->string('reason');
         });

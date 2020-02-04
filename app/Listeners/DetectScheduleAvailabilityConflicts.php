@@ -6,7 +6,7 @@ use App\Caregiver;
 use App\Schedule;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use App\Notifications\Business\CaregiverAvailabilityChanged;
+//use App\Notifications\Business\CaregiverAvailabilityChanged;
 use phpDocumentor\Reflection\Types\Boolean;
 
 
@@ -29,10 +29,12 @@ class DetectScheduleAvailabilityConflicts
      * @param  object  $event
      * @return void
      */
-    public function handle(CaregiverAvailabilityChanged $event)
+    public function handle(\App\Events\CaregiverAvailabilityChanged $event)
     {
+        $notifiableUsers = $event->caregiver->businesses()->first()->notifiableUsers();
+
         \Log::info("DetectScheduledAvailability");
-        \Notification::send($event->caregiver->business->notifiableUsers(),new CaregiverAvailabilityChanged($event->caregiver));
+        \Notification::send($notifiableUsers,new \App\Notifications\Business\CaregiverAvailabilityChanged($event->caregiver));
     }
 
 }

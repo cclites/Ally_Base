@@ -75,19 +75,23 @@ class CaregiverAvailability extends AuditableModel
      * @param array $availability //represents days of the week as strings
      * @return bool
      */
-    public static function checkRemovedAvailableDaysConflict(int $caregiverId, array $availability): bool
+    public static function checkRemovedAvailableDaysConflict(Caregiver $caregiver, array $availability): bool
     {
         $hasConflict = false;
         $today = \Carbon::today()->startOfDay();
+        $businessId = $caregiver->businesses->first()->id;
 
-        $schedules = Schedule::where('caregiver_id', $caregiverId)
+        \Log::info("BusinessId: " . $businessId);
+
+        $schedules = Schedule::where('caregiver_id', $caregiver->id)
             ->where('starts_at', '>=', $today)
+            ->where('business_id', $businessId)
             ->select('id', 'starts_at')
             ->get();
 
-        collect($availability)->map(function($day) use($caregiverId,$today, $schedules, &$hasConflict){
+        collect($availability)->map(function($day) use($caregiver,$today, $schedules, &$hasConflict, $businessId){
 
-            $schedules->map(function($schedule) use($day,$caregiverId, &$hasConflict){
+            $schedules->map(function($schedule) use($day,$caregiver, &$hasConflict, $businessId){
                 $startsAt = \Carbon::instance(new \DateTimeImmutable($schedule->starts_at));
 
                 if($startsAt->is(ucfirst($day))){
@@ -95,8 +99,9 @@ class CaregiverAvailability extends AuditableModel
                     $hasConflict = true;
 
                     \DB::table('caregiver_availability_conflict')->insert([
-                        'caregiver_id'=>$caregiverId,
+                        'caregiver_id'=>$caregiver->id,
                         'schedule_id'=>$schedule->id,
+                        'business_id'=>$businessId,
                         'starts_at'=>$schedule->starts_at,
                         'reason'=>self::CONFLICT_REASON
                     ]);
@@ -117,7 +122,7 @@ class CaregiverAvailability extends AuditableModel
      * @param $storedAvailabilities
      * @return array
      */
-    public static function arrayDiffAvailability($newAvailabilities, $storedAvailabilities): array
+    public static function arrayDiffAvailability($newAvailabilities, Caregiver $caregiver): array
     {
         $days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
@@ -125,7 +130,7 @@ class CaregiverAvailability extends AuditableModel
 
         foreach($days as $day){
 
-            if($newAvailabilities[$day] === 0 && $newAvailabilities[$day] !== $storedAvailabilities[$day]){
+            if($newAvailabilities[$day] === 0 && $newAvailabilities[$day] !== $caregiver->ability[$day]){
                 $arrayDiff[] = $day;
             }
         }

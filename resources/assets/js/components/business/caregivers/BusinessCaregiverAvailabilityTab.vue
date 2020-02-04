@@ -108,7 +108,7 @@
         >
 
                 {{ this.caregiver.name }} has a schedule conflict.<br><br>
-                <!--b-link :href="this.report_url">Show caregiver availability conflict report.</b-link><br><br-->
+                <b-link :href="this.report_url">Show caregiver availability conflict report.</b-link><br><br>
                 <b-btn @click="reopenShifts()">
                     Remove Caregiver from these visits and mark them as open?
                 </b-btn>
@@ -218,7 +218,7 @@
                 let form = new Form();
                 form.post(url)
                     .then( ({ data }) => {
-                        console.log(data);
+                        this.availability_conflict_modal = false;
                     })
                     .catch(e => {
                     });

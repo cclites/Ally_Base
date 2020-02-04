@@ -206,16 +206,10 @@ class ProfileController extends Controller
         //$diffDaysOff represents those days.
         $diffDaysOff = CaregiverDayOff::arrayDiffCustom($request->daysOffData(), $caregiver->daysOff);
 
-        \Log::info("DIFF DAYS OFF");
-        \Log::info($diffDaysOff);
-
         //This call looks at CG available days saved in the system and compares against
         //available days stored in the system. If any days were previously marked available
         //and are now unavailable, $diffAvailability represents those days.
         $diffAvailability = CaregiverAvailability::arrayDiffAvailability($request->availabilityData(), $caregiver->availability);
-
-        \Log::info("DIFF AVAILABILITY.");
-        \Log::info($diffAvailability);
 
         $vacationConflict = $availabilityConflict = [];
 
@@ -226,6 +220,9 @@ class ProfileController extends Controller
         if($diffAvailability){
             $availabilityConflict = CaregiverAvailability::checkRemovedAvailableDaysConflict($caregiver->id, $diffAvailability);
         }
+
+        \Log::info("This business");
+        \Log::info(json_encode($this->business()));
 
         if( $vacationConflict || $availabilityConflict){
             event(new CaregiverAvailabilityChanged($caregiver));

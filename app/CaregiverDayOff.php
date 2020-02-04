@@ -92,19 +92,21 @@ class CaregiverDayOff extends AuditableModel
      * @param array $daysOff
      * @return bool
      */
-    public static function checkAddedVacationConflict(int $caregiverId, array $daysOff): bool
+    public static function checkAddedVacationConflict(Caregiver $caregiver, array $daysOff): bool
     {
         $today = \Carbon::today()->startOfDay();
         $hasConflict = false;
+        $businessId = $caregiver->businesses()->first()->id;
 
-        $scheduled = collect($daysOff)->map(function($day) use($caregiverId, $today){
+        $scheduled = collect($daysOff)->map(function($day) use($caregiver, $today, $businessId){
 
                 $startDate = \Carbon::createFromFormat('Y-m-d', $day['start_date'])->startOfDay();
                 $endDate = \Carbon::createFromFormat('Y-m-d', $day['end_date'])->endOfDay();
 
                 return Schedule::whereBetween('starts_at', [$startDate, $endDate])
                     ->where('starts_at', '>=', $today)
-                    ->where('caregiver_id', $caregiverId)
+                    ->where('caregiver_id', $caregiver->id)
+                    ->where('business_id', $businessId)
                     ->select('id', 'starts_at')
                     ->get();
 
@@ -118,8 +120,9 @@ class CaregiverDayOff extends AuditableModel
 
         foreach($scheduled as $schedule){
             \DB::table('caregiver_availability_conflict')->insert([
-                'caregiver_id'=>$caregiverId,
+                'caregiver_id'=>$caregiver->id,
                 'schedule_id'=>$schedule->id,
+                'business_id'=>$schedule->business_id,
                 'starts_at'=>$schedule->starts_at,
                 'reason'=>self::CONFLICT_REASON
             ]);
@@ -133,9 +136,9 @@ class CaregiverDayOff extends AuditableModel
      * @param $storedDaysOff
      * @return array
      */
-    public static function arrayDiffCustom($newDays, $storedDaysOff): array
+    public static function arrayDiffCustom($newDays, $caregiver): array
     {
-        $daysOff = $storedDaysOff->map(function (\App\CaregiverDayOff $dayOff) {
+        $daysOff = $caregiver->daysOff->map(function (\App\CaregiverDayOff $dayOff) {
             return [
                 'start_date' => $dayOff->start_date,
                 'end_date' => $dayOff->end_date,

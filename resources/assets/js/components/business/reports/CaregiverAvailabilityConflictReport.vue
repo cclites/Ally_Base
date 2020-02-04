@@ -16,7 +16,7 @@
                             />
                         </b-col>
                         <b-col lg="4">
-                            <b-form-group label="Caregivers" class="mb-2 mr-2">
+                            <b-form-group label="Caregivers" class="mb-2">
                                 <b-select v-model="filters.caregiver">
                                     <option value="">Select Caregiver</option>
                                     <option v-for="caregiver in caregivers" :key="caregiver.id" :value="caregiver.id">{{ caregiver.nameLastFirst }}</option>
@@ -26,7 +26,16 @@
                         <b-col md="2">
                             <b-form-group label="&nbsp;">
                                 <b-button-group>
-                                    <b-button @click="fetchReport()" variant="info" :disabled="busy"><i class="fa fa-file-pdf-o mr-1"></i>Generate</b-button>
+                                    <b-button @click="fetchReport()" variant="info" :disabled="busy"><i class="fa fa-file-pdf-o mr-2"></i>Generate</b-button>
+                                </b-button-group>
+                            </b-form-group>
+                        </b-col>
+                        <b-col md="4" v-if="this.conflicts.length > 0">
+                            <b-form-group label="&nbsp;">
+                                <b-button-group>
+                                    <b-btn @click="reopenShifts()">
+                                        Remove Caregiver from these visits and mark them as open?
+                                    </b-btn>
                                 </b-button-group>
                             </b-form-group>
                         </b-col>
@@ -81,20 +90,20 @@
                 totalRows: this.conflicts.length,
                 perPage: 15,
                 currentPage: 1,
-                headerText: "Availability Conflict - " + this.caregiver.name,
+                headerText: "Availability Conflict - " + (this.caregiver ? this.caregiver.name : ''),
                 filters: {
-                    business: '',
-                    caregiver: ''
+                    businesses: '',
+                    caregiver: this.caregiver ? this.caregiver.id : '',
                 },
                 caregivers: [],
                 busy: false,
-                emptyText: "There are no recods for this Caregiver."
+                emptyText: "There are no records to display."
 
             }
         },
         methods: {
             fetchCaregivers(){
-                axios.get('/business/caregivers/' + this.filters.business)
+                axios.get('/business/caregivers/' + [this.filters.businesses])
                     .then( ({ data }) => {
                         this.caregivers = data;
                     })
@@ -103,10 +112,36 @@
                     })
             },
             fetchReport(){
-                let url= '/business/reports/caregiver-availability-conflict/' + this.filters.caregiver;
-                window.location = url;
 
+                let form = new Form(this.filters);
+                let url= '/business/reports/caregiver-availability-conflict&json=1';
+
+                form.get(url)
+                    .then( ({ data }) => {
+                        console.log(data);
+                        //window.location = "/business/reports/caregiver-availability-conflict";
+                    })
+                    .catch(e => {
+                    });
+
+                //window.location = url;
+            },
+            reopenShifts(){
+                let url = '/business/schedule/reopen/' + this.caregiver.id;
+                let form = new Form();
+                form.post(url)
+                    .then( ({ data }) => {
+                        window.location = "/business/reports/caregiver-availability-conflict";
+                    })
+                    .catch(e => {
+                    });
             }
+        },
+        computed: {
+          /*
+            headerText(){
+                return
+            }*/
         },
         mounted() {
             this.fetchCaregivers();

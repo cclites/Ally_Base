@@ -415,35 +415,27 @@ class CaregiverController extends BaseController
         //This call looks at scheduled vacation days saved in the system and compares
         //them against scheduled vacation days to find the difference.
         //$diffDaysOff represents those days.
-        $diffDaysOff = CaregiverDayOff::arrayDiffCustom($request->daysOffData(), $caregiver->daysOff);
-
-        \Log::info("DIFF DAYS OFF");
-        \Log::info($diffDaysOff);
+        $diffDaysOff = CaregiverDayOff::arrayDiffCustom($request->daysOffData(), $caregiver);
 
         //This call looks at CG available days saved in the system and compares against
         //available days stored in the system. If any days were previously marked available
         //and are now unavailable, $diffAvailability represents those days.
-        $diffAvailability = CaregiverAvailability::arrayDiffAvailability($request->availabilityData(), $caregiver->availability);
-
-        \Log::info("DIFF AVAILABILITY.");
-        \Log::info($$diffAvailability);
+        $diffAvailability = CaregiverAvailability::arrayDiffAvailability($request->availabilityData(), $caregiver);
 
         $vacationConflict = $availabilityConflict = [];
 
         if($diffDaysOff){
-            $vacationConflict = CaregiverDayOff::checkAddedVacationConflict($caregiver->id, $diffDaysOff);
+            $vacationConflict = CaregiverDayOff::checkAddedVacationConflict($caregiver, $diffDaysOff);
         }
 
         if($diffAvailability){
-            $availabilityConflict = CaregiverAvailability::checkRemovedAvailableDaysConflict($caregiver->id, $diffAvailability);
+            $availabilityConflict = CaregiverAvailability::checkRemovedAvailableDaysConflict($caregiver, $diffAvailability);
         }
 
         if( $vacationConflict || $availabilityConflict){
-
             if( \Auth::user()->role_type === 'office_user' ){
                 return response()->json(['error'=> 'caregiver has conflict']);
             }
-
         }
 
         \DB::beginTransaction();
