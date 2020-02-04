@@ -62,7 +62,6 @@ class ClientBirthdayReport extends BaseReport
         $startDate = Carbon::createFromFormat('m/d/Y', $startDate)->format('Y/m/d');
         $endDate = Carbon::createFromFormat('m/d/Y', $endDate)->format('Y/m/d');
 
-        // Problem: double quotes around table names. IE: "clients".* instead of `clients`.*
         $this->query->select('users.date_of_birth','clients.*')->join('users', 'users.id', '=', 'clients.id');
         $this->query->whereRaw(
             'DATE_ADD(`users`.`date_of_birth`, INTERVAL YEAR(CURDATE()) - YEAR(`users`.`date_of_birth`) + IF(DAYOFYEAR(CURDATE()) > DAYOFYEAR(`users`.`date_of_birth`), 1, 0) YEAR) BETWEEN "?" AND "?"',
@@ -79,11 +78,7 @@ class ClientBirthdayReport extends BaseReport
      */
     protected function results() : iterable
     {
-        // SQLSTATE[42S22]: Column not found: 1054 Unknown column 'clients.name' in 'order clause'
-       // return $this->query()->orderBy('clients.name', 'ASC')->get();
-        $record = $this->query
-            ->select('clients.id')->get()->sortBy('clients.name');
-
+        $record =  $this->query()->get()->sortBy('clients.name');
 
         return $record->values();
     }
