@@ -131,9 +131,10 @@ interface InvoiceableInterface
 
     /**
      * Note: This is a calculated field from the other rates, provider is synonymous with business.
+     * @param null $allyRate
      * @return float
      */
-    public function getProviderRate(): float;
+    public function getProviderRate($allyRate = null): float;
 
     /**
      * Get the assigned payer ID (payers.id, not client_payers.id)
