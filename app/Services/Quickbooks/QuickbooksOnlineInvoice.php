@@ -175,13 +175,13 @@ class QuickbooksOnlineInvoice
                         $lineItem->unitPrice = floatval(0.00);
                         $lineItem->amount = floatval(0.00);
                     } else {
-                        $lineItem->unitPrice = $invoiceItem->getInvoiceable()->getProviderRate();
+                        $lineItem->unitPrice = $invoiceItem->getInvoiceable()->getProviderRate($invoice->isOffline() ? 0.00 : null);
                         $lineItem->amount = multiply($lineItem->quantity, $lineItem->unitPrice);
                     }
                 } else {
                     // For regular invoices, we just send the same provider fee
                     // calculation used when generating the BusinessInvoices.
-                    $lineItem->unitPrice = $invoiceItem->getInvoiceable()->getProviderRate();
+                    $lineItem->unitPrice = $invoiceItem->getInvoiceable()->getProviderRate($invoice->isOffline() ? 0.00 : null);
                     $lineItem->amount = multiply($lineItem->quantity, $lineItem->unitPrice);
                 }
             } else {
