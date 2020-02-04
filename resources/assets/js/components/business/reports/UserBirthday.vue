@@ -9,16 +9,17 @@
                 </b-form-checkbox>
             </b-col>
             <b-col cols="3" v-if="type === 'Clients'">
-                <label>Client Types:<b-form-select class="form-group-label " v-model="selectedClients" >
-                    <option value="All">All</option>
-                    <option v-for="option in clientTypes" :value="option" :key="option.id" >{{ option }}</option>
-                </b-form-select>
+                <label>Client Types:
+                    <b-form-select class="form-group-label " v-model="search.selectedClients">
+                        <option value="All">All</option>
+                        <option v-for="option in clientTypes" :value="option" :key="option.id">{{ option }}</option>
+                    </b-form-select>
                 </label>
             </b-col>
 
             <b-col lg="3" v-if="type === 'Caregivers'">
                 <b-form-group label="Caregiver">
-                    <b-form-select v-model="selectedId">
+                    <b-form-select v-model="search.selectedId">
                         <option value="All">All</option>
                         <option v-for="caregiver in caregiverList" :value="caregiver.id">{{
                             caregiver.name }}
@@ -26,9 +27,9 @@
                     </b-form-select>
                 </b-form-group>
             </b-col>
-            <b-col lg="3"v-else>
+            <b-col lg="3" v-else>
                 <b-form-group label="Clients">
-                    <b-form-select v-model="selectedId">
+                    <b-form-select v-model="search.selectedId">
                         <option value="All">All</option>
                         <option v-for="client in clientList" :value="client.id">{{
                             client.name }}
@@ -60,7 +61,7 @@
                     <date-picker
                             class="mb-1"
                             name="start_date"
-                            v-model="start_date"
+                            v-model="search.start_date"
                             placeholder="Start Date"
                     ></date-picker>
                 </b-form-group>
@@ -70,7 +71,7 @@
                 <b-form-group label="End Date">
                     <date-picker
                             class="mb-1"
-                            v-model="end_date"
+                            v-model="search.end_date"
                             name="end_date"
                             placeholder="End Date"
                     ></date-picker>
@@ -78,7 +79,7 @@
             </b-col>
         </b-row>
 
-        <loading-card v-show="loading" />
+        <loading-card v-show="loading"/>
         <div v-show="! loading" class="table-responsive">
             <ally-table id="user-birthday" :columns="fields" :items="items" sort-by="nameLastFirst">
                 <template slot="name" scope="data">
@@ -96,7 +97,7 @@
     import FormatsDates from '../../../mixins/FormatsDates';
 
     export default {
-        mixins: [ FormatsDates ],
+        mixins: [FormatsDates],
 
         props: {
             type: {
@@ -124,10 +125,15 @@
                 showEmpty: true,
                 showInactive: true,
                 showDateRange: false,
-                selectedClients: 'All',
-                selectedId: 'All',
-                start_date: moment().format('MM/DD/YYYY'),
-                end_date: moment().format('MM/DD/YYYY'),
+                search: {
+                    start_date: moment().format('MM/DD/YYYY'),
+                    end_date: moment().format('MM/DD/YYYY'),
+                    filterDates: this.showDateRange,
+                    selectedClients: 'All',
+                    selectedId: 'All',
+                    type: this.type,
+                    json: 1,
+                },
                 data: [],
                 fields: [
                     {
@@ -177,14 +183,12 @@
                 this.loading = true;
 
                 try {
-                    let query = `&clientType=${this.selectedClients}&id=${this.selectedId}`;
-                    if (this.showDateRange) {
-                        query += `&start_date=${this.start_date}&end_date=${this.end_date}`;
-                    }
-                    const {data} = await axios.get(`/business/reports/data/birthdays?type=${this.type}` + query);
-                    this.data = data;
-                    this.loading = false
-                }catch (e) {
+                    const { data } = axios.post('/business/reports/birthdays/', this.search)
+                                          .then(({ data }) => {
+                                              this.data = data;
+                                              this.loading = false;
+                                          })
+                } catch (e) {
                     console.error(e);
                     this.loading = false;
                 }
@@ -194,8 +198,8 @@
 </script>
 
 <style scoped>
-.filter {
-    margin: 20px 0;
-}
+    .filter {
+        margin: 20px 0;
+    }
 </style>
 

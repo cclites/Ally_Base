@@ -1212,13 +1212,13 @@ class ReportsController extends BaseController
      * @return mixed
      */
     protected function filterClientTypes($clients, $clientType, $filteredId) {
-        return $clients->filter(function ($value) use ($clientType, $filteredId, $clients) {
+        return $clients->filter(function ($value) use ($clientType, $filteredId) {
             if ($filteredId != 'All' && !(is_null($filteredId))) {
                 return $value->id == $filteredId;
             }
 
             if ($clientType == 'All' || is_null($clientType)) {
-                return $clients;
+                return true;
             }
 
             return $value->client_type == $clientType;
