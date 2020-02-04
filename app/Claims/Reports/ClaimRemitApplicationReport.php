@@ -142,6 +142,6 @@ class ClaimRemitApplicationReport extends BaseReport
             });
         })->flatten(1);
 
-        parent::download();
+        return parent::download();
     }
 }
