@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidSSN;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateCaregiver1099Request extends FormRequest
@@ -46,7 +47,37 @@ class UpdateCaregiver1099Request extends FormRequest
             'caregiver_city' => 'required|string',
             'caregiver_state' => 'required|string',
             'caregiver_zip' => 'required|string',
-            'payment_total' => 'required'
+            'payment_total' => 'required',
+            'client_ssn' => ['required', new ValidSSN(true)],
+            'caregiver_ssn' => ['required', new ValidSSN(true)],
         ];
+    }
+
+    /**
+     * Filter the request data for processing.
+     *
+     * @return array
+     */
+    public function filtered(): array
+    {
+        $data = $this->validated();
+
+        if (isset($data['client_ssn'])) {
+            if (substr($data['client_ssn'], 0, 3) == '***') {
+                unset($data['client_ssn']);
+            } else {
+                $data['client_ssn'] = encrypt($data['client_ssn']);
+            }
+        }
+
+        if (isset($data['caregiver_ssn'])) {
+            if (substr($data['caregiver_ssn'], 0, 3) == '***') {
+                unset($data['caregiver_ssn']);
+            } else {
+                $data['caregiver_ssn'] = encrypt($data['caregiver_ssn']);
+            }
+        }
+
+        return $data;
     }
 }
