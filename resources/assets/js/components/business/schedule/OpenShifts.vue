@@ -17,7 +17,7 @@
                     </small></p>
                 </div>
 
-                <button typwe="button" class="close" @click=" toggleOpenShiftsModal() " style="cursor:pointer">
+                <button type="button" class="close" @click=" toggleOpenShiftsModal() " style="cursor:pointer">
                     &times;
                 </button>
             </div>
