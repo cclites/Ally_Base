@@ -4,72 +4,77 @@
 
         <template slot="modal-header">
 
-            <div class="d-flex w-100 justify-content-between">
+            <div class="d-flex w-100 justify-content-between align-items-center">
 
-                <h3>Open Shifts</h3>
+                <div class="d-flex justify-content-center flex-column">
 
-                <b-button variant="default" @click=" toggleOpenShiftsModal() " style="cursor:pointer">
+                    <h5 class="m-0 modal-title">Open Shifts</h5>
+                    <p class="m-0" v-if=" role_type == 'office_user' "><small>
+                        Check Settings > General for open shifts settings for your business
+                    </small></p>
+                    <p class="m-0" v-else><small>
+                        Turn phone sideways for best view
+                    </small></p>
+                </div>
+
+                <button type="button" class="close" @click=" toggleOpenShiftsModal() " style="cursor:pointer">
                     &times;
-                </b-button>
+                </button>
             </div>
         </template>
-
-        <p class="mt-3 mb-4" v-if=" role_type == 'office_user' ">
-            Check Settings > General for open shifts settings for your business
-        </p>
 
         <loading-card v-show=" loading " />
 
         <transition-group mode="out-in" name="slide-fade">
 
             <schedule-requests :selected-schedule-id=" selectedScheduleId " v-if=" selectedScheduleId " @request-response=" requestResponded " class="mb-5" key="uno"></schedule-requests>
-            <div class="d-flex w-100 justify-content-end mb-4" key="dos">
-
-                <b-button variant="default" v-if=" selectedScheduleId " @click=" selectedScheduleId = null ">Close Requests</b-button>
-            </div>
         </transition-group>
 
-        <div v-show="! loading" class="table-responsive">
+        <ally-table id="open-shifts" :columns=" fields " :items=" aggEvents " sort-by="start" :perPage=" 1000 " :isBusy=" form.busy " v-show="! loading">
 
-            <ally-table id="open-shifts" :columns=" fields " :items=" aggEvents " sort-by="start" :perPage=" 1000 " :isBusy=" form.busy ">
+            <template slot="start" scope="data">
 
-                <template slot="start" scope="data">
+                {{ ( data.item ? formatDateFromUTC( data.item.start ) + ' ' : '' ) + ( data.item ? data.item.start_time + '-' : '' ) + ( data.item ? data.item.end_time : '' ) }}
+            </template>
+            <template slot="client" scope="data">
 
-                    {{ ( data.item ? formatDateFromUTC( data.item.start ) + ' ' : '' ) + ( data.item ? data.item.start_time + '-' : '' ) + ( data.item ? data.item.end_time : '' ) }}
-                </template>
-                <template slot="client" scope="data">
+                <a v-if=" role_type == 'office_user' " :href=" '/business/clients/' + data.item.client_id " target="_blank">{{ data.item.client }}</a>
+                <p v-else>{{ data.item.client }}</p>
+            </template>
+            <template slot="actions" scope="data">
 
-                    <a v-if=" role_type == 'office_user' " :href=" '/business/clients/' + data.item.client_id " target="_blank">{{ data.item.client }}</a>
-                    <p v-else>{{ data.item.client }}</p>
-                </template>
-                <template slot="actions" scope="data">
+                <transition mode="out-in" name="slide-fade">
 
-                    <transition mode="out-in" name="slide-fade">
+                    <div v-if=" !hasRequest( data.item.request_status ) " class="d-flex" key="first-block">
 
-                        <div v-if=" !hasRequest( data.item.request_status ) " class="d-flex" key="first-block">
-
-                            <b-button variant="success" size="sm" class="f-1 mr-1" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.UNINTERESTED ) " key="request">Not Interested</b-button>
-                            <b-button variant="primary" size="sm" class="f-1 ml-1" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.PENDING ) " key="request">Request Shift</b-button>
-                        </div>
-
-                        <div v-if=" hasRequest( data.item.request_status ) " class="" key="second-block">
-
-                            <b-button variant="danger" size="sm" class="btn-block" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.CANCELLED ) " key="rescind">Cancel Request</b-button>
-                        </div>
-                    </transition>
-                </template>
-                <template slot="requests_count" scope="data">
-
-                    <div class="text-center">
-
-                        <a href="#" @click.prevent=" showRequestModal( data.item.id ) " v-if=" data.item.requests_count > 0 " class="w-100 text-center">{{ data.item.requests_count }}</a>
-                        <span v-else>0</span>
+                        <b-button variant="success" size="sm" class="f-1 mr-1" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.UNINTERESTED ) " key="request">Not Interested</b-button>
+                        <b-button variant="primary" size="sm" class="f-1 ml-1" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.PENDING ) " key="request">Request Shift</b-button>
                     </div>
-                </template>
 
-                <template slot="status" scope="data">Open</template>
-            </ally-table>
-        </div>
+                    <div v-if=" hasRequest( data.item.request_status ) " class="" key="second-block">
+
+                        <b-button variant="danger" size="sm" class="btn-block" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.CANCELLED ) " key="rescind">Cancel Request</b-button>
+                    </div>
+                </transition>
+            </template>
+            <template slot="requests_count" scope="data">
+
+                <transition mode="out-in" name="slide-fade">
+
+                    <div class="text-center" key="requestcontainerone" v-if=" !currentlySelected( data.item.id ) ">
+
+                        <a href="#" @click.prevent=" showRequestModal( data.item.id ) " class="w-100 text-center" key="showit">{{ data.item.requests_count + ", Click to View" }}</a>
+                    </div>
+                    <div class="text-center" key="requestcontainertwo" v-else>
+
+                        <a href="#" @click=" selectedScheduleId = null " class="w-100 text-center text-danger">{{ "Click to Hide" }}</a>
+                    </div>
+                </transition>
+            </template>
+
+            <template slot="status" scope="data">Open</template>
+        </ally-table>
+
         <template slot="modal-footer">
 
             <div class="d-flex w-100 justify-content-end">
@@ -126,9 +131,9 @@
                         shouldShow : true,
                     },
                     {
-                        key        : 'status',
-                        label      : 'Status',
-                        sortable   : true,
+                        key        : this.role_type == 'caregiver' ? 'distance' : 'status',
+                        label      : this.role_type == 'caregiver' ? 'Dist.' : 'Status',
+                        sortable   : this.role_type == 'caregiver' ? true : false,
                         shouldShow : true,
                     }
                 ]
@@ -208,6 +213,10 @@
                 updateRequestStatus   : 'openShifts/updateRequestStatus',
                 toggleOpenShiftsModal : 'openShifts/toggleOpenShiftsModal',
             }),
+            currentlySelected( id ){
+
+                return this.selectedScheduleId == id;
+            },
             hasRequest( status ){
 
                 switch( status ){

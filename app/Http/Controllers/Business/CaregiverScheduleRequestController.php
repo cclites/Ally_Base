@@ -123,7 +123,7 @@ class CaregiverScheduleRequestController extends BaseController
                 ]);
 
                 $caregiverUser = User::find( $request->caregiver_id ); // just go ahead right to the user.. skip the extra eagar load query
-                \Notification::send( $caregiverUser, new OpenShiftRequestAccepted( $schedule ) );
+                \Notification::send( $caregiverUser, new OpenShiftRequestAccepted( $schedule, $caregiverScheduleRequest->business ) );
 
                 break;
             case OpenShiftRequestStatus::REQUEST_DENIED():

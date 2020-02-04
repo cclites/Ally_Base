@@ -17,7 +17,10 @@ class OpenShiftsController extends BaseController
         if( request()->filled( 'json' ) ){
 
             $results = Schedule::forRequestedBusinesses()
-                ->whereHas( 'scheduleRequests' )
+                ->whereHas( 'scheduleRequests', function( $q ){
+
+                    return $q->whereActive();
+                })
                 ->with([ 'client', 'scheduleRequests' => function( $q ){
 
                     return $q->whereActiveOrUninterested();
@@ -29,6 +32,7 @@ class OpenShiftsController extends BaseController
 
 
             $schedules = $results->map( function( Schedule $schedule ) {
+                // TODO => turn this into a resource and have it be used in the Business\OpenShiftsController as well
 
                 return [
 
@@ -37,6 +41,7 @@ class OpenShiftsController extends BaseController
                     'client'            => $schedule->client->nameLastFirst(),
                     'client_id'         => $schedule->client->id,
                     'start_time'        => $schedule->starts_at->copy()->format('g:i A'),
+                    'distance'          => null,
                     'end_time'          => $schedule->starts_at->copy()->addMinutes( $schedule->duration )->addSecond()->format( 'g:i A' ),
                     'requests_count'    => $schedule->scheduleRequests->filter( function( $r ){ return in_array( $r->status, [ OpenShiftRequestStatus::REQUEST_PENDING() ]); })->count()
                 ];

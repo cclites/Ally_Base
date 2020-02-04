@@ -277,6 +277,7 @@ class Caregiver extends AuditableModel implements
         \App\Notifications\Caregiver\VisitAccuracyCheck::class,
         \App\Notifications\Caregiver\CertificationExpiring::class,
         \App\Notifications\Caregiver\CertificationExpired::class,
+        \App\Notifications\Business\OpenShiftRequestAccepted::class,
         \App\Notifications\ChargePaymentNotification::class,
     ];
 
