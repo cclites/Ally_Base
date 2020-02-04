@@ -128,7 +128,7 @@
                 search: {
                     start_date: moment().format('MM/DD/YYYY'),
                     end_date: moment().format('MM/DD/YYYY'),
-                    filterDates: this.showDateRange,
+                    filterDates: false,
                     selectedClients: 'All',
                     selectedId: 'All',
                     type: this.type,
@@ -181,11 +181,15 @@
         methods: {
             async fetch() {
                 this.loading = true;
+                if (this.showDateRange) {
+                    this.search.filterDates = true;
+                }
 
                 try {
                     const { data } = axios.post('/business/reports/birthdays/', this.search)
                                           .then(({ data }) => {
                                               this.data = data;
+                                              this.search.filterDates = false;
                                               this.loading = false;
                                           })
                 } catch (e) {

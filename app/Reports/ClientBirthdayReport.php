@@ -63,7 +63,7 @@ class ClientBirthdayReport extends BaseReport
         $endDate = Carbon::createFromFormat('m/d/Y', $endDate)->format('Y/m/d');
 
         // Problem: double quotes around table names. IE: "clients".* instead of `clients`.*
-        $this->query->select('clients.*')->join('users', 'users.id', '=', 'clients.id');
+        $this->query->select('users.date_of_birth','clients.*')->join('users', 'users.id', '=', 'clients.id');
         $this->query->whereRaw(
             'DATE_ADD(`users`.`date_of_birth`, INTERVAL YEAR(CURDATE()) - YEAR(`users`.`date_of_birth`) + IF(DAYOFYEAR(CURDATE()) > DAYOFYEAR(`users`.`date_of_birth`), 1, 0) YEAR) BETWEEN "?" AND "?"',
             [$startDate, $endDate]
