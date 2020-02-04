@@ -97,11 +97,12 @@
     <div class="row mt-4 mb-2"><strong>Living Arrangements</strong></div>
 
     <div class="row arrangements">
-        @php  $checked = ($client->careDetails['lives_alone'] === true) ? 'checked' : ''; @endphp
+        @php $checked = ($client->careDetails['lives_alone'] == true) ? 'checked' : ''; @endphp
+
         <input type="checkbox" {{$checked}}>
         <span>Lives Alone</span>
 
-        @php  $checked = ($client->careDetails['lives_alone'] === false) ? 'checked' : ''; @endphp
+        @php  $checked = (filled($client->careDetails['lives_alone']) && $client->careDetails['lives_alone'] == false) ? 'checked' : ''; @endphp
         <input type="checkbox" {{$checked}}>
         <span>Others living in same location</span>
     </div>
@@ -125,11 +126,14 @@
     <div class="row mt-4 mb-2"><strong>Smoker</strong></div>
 
     <div class="row smoker">
-        @php  $checked = ($client->careDetails['smoker'] === true) ? 'checked' : ''; @endphp
+        @php
+            $checked = ($client->careDetails['smoker'] == true) ? 'checked' : '';
+        @endphp
+
         <input type="checkbox" {{$checked}}>
         <span>Yes</span>
 
-        @php  $checked = ($client->careDetails['smoker'] === false) ? 'checked' : ''; @endphp
+        @php  $checked = (filled($client->careDetails['smoker']) && $client->careDetails['smoker'] == false) ? 'checked' : ''; @endphp
         <input type="checkbox" {{$checked}}>
         <span>No</span>
     </div>
@@ -137,11 +141,11 @@
     <div class="row mt-4 mb-2"><strong>Alcohol</strong></div>
 
     <div class="row alcohol">
-        @php  $checked = ($client->careDetails['alcohol'] === true) ? 'checked' : ''; @endphp
+        @php  $checked = ($client->careDetails['alcohol'] == true) ? 'checked' : ''; @endphp
         <input type="checkbox" {{$checked}}>
         <span>Yes</span>
 
-        @php  $checked = ($client->careDetails['alcohol'] === false) ? 'checked' : ''; @endphp
+        @php  $checked = ( filled($client->careDetails['alcohol']) && $client->careDetails['alcohol'] == false) ? 'checked' : ''; @endphp
         <input type="checkbox" {{$checked}}>
         <span>No</span>
     </div>
@@ -149,11 +153,11 @@
     <div class="row mt-4 mb-2"><strong>Has consumer ever been deemed incompetent by licensed professional</strong></div>
 
     <div class="row incompetent">
-        @php  $checked = ($client->careDetails['incompetent'] === true) ? 'checked' : ''; @endphp
+        @php  $checked = ($client->careDetails['incompetent'] == true) ? 'checked' : ''; @endphp
         <input type="checkbox" {{$checked}}>
         <span>Yes</span>
 
-        @php  $checked = ($client->careDetails['incompetent'] === false) ? 'checked' : ''; @endphp
+        @php  $checked = ( filled($client->careDetails['incompetent']) && $client->careDetails['incompetent'] == false) ? 'checked' : ''; @endphp
         <input type="checkbox" {{$checked}}>
         <span>No</span>
     </div>
@@ -165,11 +169,11 @@
     <div class="row mt-4 mb-2"><strong>Is consumer able to provide direction to the caregiver to assist consumer in taking medication?</strong></div>
 
     <div class="row medication_direction">
-        @php  $checked = ($client->careDetails['assist_medications'] === true) ? 'checked' : ''; @endphp
+        @php  $checked = ($client->careDetails['assist_medications'] == true) ? 'checked' : ''; @endphp
         <input type="checkbox" {{$checked}}>
         <span>Yes</span>
 
-        @php  $checked = ($client->careDetails['assist_medications'] === false) ? 'checked' : ''; @endphp
+        @php  $checked = ( filled($client->careDetails['assist_medications']) && $client->careDetails['assist_medications'] == false) ? 'checked' : ''; @endphp
         <input type="checkbox" {{$checked}}>
         <span>No</span>
     </div>
@@ -177,11 +181,11 @@
     <div class="row mt-4 mb-2"><strong>Self-Administered Medications</strong></div>
 
     <div class="row can_provide_direction">
-        @php  $checked = ($client->careDetails['can_provide_direction'] === true) ? 'checked' : ''; @endphp
+        @php  $checked = ($client->careDetails['can_provide_direction'] == true) ? 'checked' : ''; @endphp
         <input type="checkbox" {{$checked}}>
         <span>Remind/Prompt</span>
 
-        @php  $checked = ($client->careDetails['can_provide_direction'] === false) ? 'checked' : ''; @endphp
+        @php  $checked = ( filled($client->careDetails['can_provide_direction']) && $client->careDetails['can_provide_direction'] == false) ? 'checked' : ''; @endphp
         <input type="checkbox" {{$checked}}>
         <span>Assist</span>
     </div>

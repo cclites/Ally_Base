@@ -74,6 +74,8 @@ class ClientCareDetailsController extends BaseController
         );
     }
 
+
+
     public function snakeCaseArrayToUpperCaseString($array){
 
         $temp='';
