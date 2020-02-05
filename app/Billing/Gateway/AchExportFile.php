@@ -58,12 +58,12 @@ class AchExportFile
         }
 
         $this->transactions[] = [
-            'SSN-ID' => $id,
+            'SSN-ID' => $id . ' ',
             'Name' => $this->sanitizeString($account->getBillingName()),
-            'ABA Routing' => $account->getRoutingNumber(),
-            'Account' => $account->getAccountNumber(),
+            'ABA Routing' => $account->getRoutingNumber() . ' ',
+            'Account' => $account->getAccountNumber() . ' ',
             'Transaction Type' => $this->sanitizeString($type),
-            'Amount' => $amount,
+            'Amount' => $amount . ' ',
             'Checking or Savings' => $this->sanitizeString(ucwords($account->getAccountType())),
         ];
     }
