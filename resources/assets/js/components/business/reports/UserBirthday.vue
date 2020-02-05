@@ -17,7 +17,7 @@
                 </label>
             </b-col>
 
-            <b-col lg="3" v-if="type === 'Caregivers'">
+            <b-col cols="3" v-if="type === 'Caregivers'">
                 <b-form-group label="Caregiver">
                     <b-form-select v-model="search.selectedId">
                         <option value="All">All</option>
@@ -27,7 +27,7 @@
                     </b-form-select>
                 </b-form-group>
             </b-col>
-            <b-col lg="3" v-else>
+            <b-col cols="3" v-else>
                 <b-form-group label="Clients">
                     <b-form-select v-model="search.selectedId">
                         <option value="All">All</option>
@@ -37,26 +37,33 @@
                     </b-form-select>
                 </b-form-group>
             </b-col>
-
             <b-button @click=" fetch() " variant="info">Generate Report</b-button>
         </b-row>
 
         <b-row class="filter">
-            <b-col cols="3">
+            <b-col lg="3">
                 <b-form-checkbox v-model="showInactive" :value="true" :unchecked-value="false" class="d-flex align-items-center" v-if="type === 'Clients'">
                     Show inactive {{type}}
                 </b-form-checkbox>
             </b-col>
+            <b-col lg="3">
+                <business-location-form-group
+                        v-model="search.businesses"
+                        :allow-all="true"
+                        class="mb-2 mr-2"
+                        :label="null"
+                />
+            </b-col>
         </b-row>
 
         <b-row class="filter">
-            <b-col cols="3">
+            <b-col lg="3">
                 <b-form-checkbox v-model="showDateRange" :value="true" :unchecked-value="false" class="d-flex align-items-center">
                     Filter by {{type}} birthday
                 </b-form-checkbox>
             </b-col>
 
-            <b-col cols="3" v-show="showDateRange">
+            <b-col lg="3" v-show="showDateRange">
                 <b-form-group label="Start Date">
                     <date-picker
                             class="mb-1"
@@ -67,7 +74,7 @@
                 </b-form-group>
             </b-col>
 
-            <b-col cols="3" v-show="showDateRange">
+            <b-col lg="3" v-show="showDateRange">
                 <b-form-group label="End Date">
                     <date-picker
                             class="mb-1"
@@ -95,9 +102,11 @@
 
 <script>
     import FormatsDates from '../../../mixins/FormatsDates';
+    import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
 
     export default {
         mixins: [FormatsDates],
+        components: { BusinessLocationFormGroup },
 
         props: {
             type: {
@@ -133,6 +142,7 @@
                     selectedId: 'All',
                     type: this.type,
                     json: 1,
+                    businesses: ''
                 },
                 data: [],
                 fields: [
