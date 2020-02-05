@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Console\Commands\AchOfflineChargeCommand;
+use App\Console\Commands\Cron\CronCleanUpAchFiles;
 use App\Console\Commands\Cron\CronSyncTellusResources;
 use App\Console\Commands\CronChargePaymentNotifications;
 use App\Console\Commands\Cron\CronTellusCheckStatus;
@@ -43,6 +44,7 @@ class Kernel extends ConsoleKernel
         CronSyncTellusResources::class,
         CronHhaCheckStatus::class,
         CronTellusCheckStatus::class,
+        CronCleanUpAchFiles::class,
     ];
 
     /**
@@ -89,6 +91,9 @@ class Kernel extends ConsoleKernel
             ->dailyAt('23:30'); // 6:30 PM EST / 7:30 EDT
 
         $schedule->command(CronSyncTellusResources::class)
+            ->dailyAt('05:00'); // 12am EST / 1am EDT
+
+        $schedule->command(CronCleanUpAchFiles::class)
             ->dailyAt('05:00'); // 12am EST / 1am EDT
     }
 
