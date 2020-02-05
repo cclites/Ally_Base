@@ -95,6 +95,9 @@
                         <business-referral-source-select v-model="form.referral_source_id" source-type="caregiver" :caregiver="true" :show-active-only="1"></business-referral-source-select>
                         <input-help :form="form" field="referred_by" text="Enter how the caregiver was referred." />
                     </b-form-group>
+                    <b-form-group>
+                        <b-form-checkbox v-model="form.has_occ_acc" value="1" unchecked-value="0">Has OccAcc Deduction</b-form-checkbox>
+                    </b-form-group>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
@@ -322,6 +325,7 @@
                     pets_cats_okay: this.caregiver.pets_cats_okay,
                     pets_birds_okay: this.caregiver.pets_birds_okay,
                     uses_ein_number: this.caregiver.uses_ein_number,
+                    has_occ_acc: this.caregiver.has_occ_acc,
                 }),
                 passwordModal: false,
                 active: this.caregiver.active,
