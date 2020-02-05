@@ -90,6 +90,7 @@
                     starts_at: { sortable: true, formatter: x => moment(x).format('M/D/YY hh:mm ') },
                     reason: { sortable: true },
                     caregiver_name: { sortable: true },
+                    caregiver_email: { sortable: true },
                     action: {}
                 },
                 totalRows: this.conflicts ? this.conflicts.length : 0,

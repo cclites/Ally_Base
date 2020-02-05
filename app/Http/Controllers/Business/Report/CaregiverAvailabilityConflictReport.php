@@ -77,7 +77,8 @@ class CaregiverAvailabilityConflictReport extends BaseController
                 'starts_at' => $conflict->starts_at,
                 'reason' => $conflict->reason,
                 'caregiver_name' => $conflict->caregiver->name,
-                'caregiver_id' => $conflict->caregiver->id
+                'caregiver_id' => $conflict->caregiver->id,
+                'caregiver_email' => $conflict->caregiver->email
             ];
         });
 
