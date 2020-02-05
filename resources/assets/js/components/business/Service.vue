@@ -78,6 +78,16 @@
                         sortable: true
                     },
                     {
+                        key: 'mod1',
+                        label: 'Modifier One',
+                        sortable: true
+                    },
+                    {
+                        key: 'mod2',
+                        label: 'Modifier Two',
+                        sortable: true
+                    },
+                    {
                         key: 'default',
                         label: 'Default',
                         sortable: true,
@@ -104,6 +114,8 @@
                 if (item) {
                     item.name = data.name;
                     item.code = data.code;
+                    item.mod1 = data.mod1;
+                    item.mod2 = data.mod2;
                     item.default = data.default;
                 } else {
                     this.items.push(data);
