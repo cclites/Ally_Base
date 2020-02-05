@@ -11,6 +11,7 @@ return [
     'amex_card_fee' => '0.06',
     'trust_fee' => '0.07',
     'gateway' => env('GATEWAY_DRIVER', 'ECS'),
+    'occAccDeductible' => env('OCC_ACC_DEDUCTIBLE', '0.5'),
 
     /**
      * Flag to turn on/off the functionality of PreventDuplicatePosts
