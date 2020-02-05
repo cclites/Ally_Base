@@ -136,7 +136,7 @@ class CaregiverDayOff extends AuditableModel
      * @param $storedDaysOff
      * @return array
      */
-    public static function arrayDiffCustom($newDays, $caregiver): array
+    public static function arrayDiffCustom($newDays, Caregiver $caregiver): array
     {
         $daysOff = $caregiver->daysOff->map(function (\App\CaregiverDayOff $dayOff) {
             return [

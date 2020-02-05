@@ -204,21 +204,21 @@ class ProfileController extends Controller
         ///This call looks at scheduled vacation days saved in the system and compares
         //them against scheduled vacation days to find the difference.
         //$diffDaysOff represents those days.
-        $diffDaysOff = CaregiverDayOff::arrayDiffCustom($request->daysOffData(), $caregiver->daysOff);
+        $diffDaysOff = CaregiverDayOff::arrayDiffCustom($request->daysOffData(), $caregiver);
 
         //This call looks at CG available days saved in the system and compares against
         //available days stored in the system. If any days were previously marked available
         //and are now unavailable, $diffAvailability represents those days.
-        $diffAvailability = CaregiverAvailability::arrayDiffAvailability($request->availabilityData(), $caregiver->availability);
+        $diffAvailability = CaregiverAvailability::arrayDiffAvailability($request->availabilityData(), $caregiver);
 
         $vacationConflict = $availabilityConflict = [];
 
         if($diffDaysOff){
-            $vacationConflict = CaregiverDayOff::checkAddedVacationConflict($caregiver->id, $diffDaysOff);
+            $vacationConflict = CaregiverDayOff::checkAddedVacationConflict($caregiver, $diffDaysOff);
         }
 
         if($diffAvailability){
-            $availabilityConflict = CaregiverAvailability::checkRemovedAvailableDaysConflict($caregiver->id, $diffAvailability);
+            $availabilityConflict = CaregiverAvailability::checkRemovedAvailableDaysConflict($caregiver, $diffAvailability);
         }
 
         if( $vacationConflict || $availabilityConflict){
