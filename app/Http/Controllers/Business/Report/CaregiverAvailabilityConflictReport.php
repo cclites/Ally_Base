@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business\Report;
 
 use App\Business;
 use App\Caregiver;
+use App\CaregiverAvailabilityConflict;
 use App\Http\Controllers\Business\BaseController;
 use App\Responses\ErrorResponse;
 use App\Schedule;
@@ -19,18 +20,18 @@ class CaregiverAvailabilityConflictReport extends BaseController
      */
     public function index(Request $request){
 
+
+
         if($request->filled('json')){
 
+            $query = CaregiverAvailabilityConflict::with(['caregiver'])
+                            ->where('business_id', $request->business);
+
             if($request->filled('caregiver')){
-                $conflicts = \DB::table('caregiver_availability_conflict')
-                    ->where('caregiver_id', $request->caregiver)
-                    ->where('business_id', $request->business)
-                    ->get();
-            }else{
-                $conflicts = \DB::table('caregiver_availability_conflict')
-                    ->where('business_id', $request->business)
-                    ->get();
+                $query->where('caregiver_id', $request->caregiver);
             }
+
+            $conflicts = $this->formatReport($query->get());
 
             return response()->json($conflicts);
 
@@ -55,14 +56,30 @@ class CaregiverAvailabilityConflictReport extends BaseController
 
         $businessId= $caregiver->businesses->first()->id;
 
-        $conflicts = \DB::table('caregiver_availability_conflict')
-            ->where('caregiver_id', $caregiver->id)
-            ->where('business_id', $businessId)
-            ->get();
+        $conflicts = CaregiverAvailabilityConflict::with(['caregiver'])
+                        ->where('caregiver_id', $caregiver->id)
+                        ->where('business_id', $businessId)
+                        ->get();
 
-        return view_component('caregiver-availability-conflict-report', 'Caregiver Availability Conflict Report', compact('caregiver', 'conflicts'), [
+        $conflicts = $this->formatReport($conflicts);
+
+        return view_component('caregiver-availability-conflict-report', 'Caregiver Availability Conflict Report', compact('caregiver', 'conflicts'),       [
             'Home' => route('home'),
             'Reports' => route('business.reports.index')
         ]);
+    }
+
+    public function formatReport($conflicts){
+
+        return $conflicts->map(function($conflict){
+            return [
+                'schedule_id' => $conflict->schedule_id,
+                'starts_at' => $conflict->starts_at,
+                'reason' => $conflict->reason,
+                'caregiver_name' => $conflict->caregiver->name,
+                'caregiver_id' => $conflict->caregiver->id
+            ];
+        });
+
     }
 }

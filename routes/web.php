@@ -441,6 +441,7 @@ Route::group([
     Route::post('schedule/bulk_update', 'Business\ScheduleController@bulkUpdate')->name('schedule.bulk_update');
     Route::post('schedule/bulk_delete', 'Business\ScheduleController@bulkDestroy')->name('schedule.bulk_delete');
     Route::post('schedule/reopen/{caregiver}', 'Business\ScheduleController@reopenSchedules')->name('schedule.reopen');
+    Route::post('schedule/reopen/single/{schedule}', 'Business\ScheduleController@reopenSingleSchedule')->name('schedule.reopen.single');
     Route::patch('schedule/{schedule}/status', 'Business\ScheduleController@updateStatus')->name('schedule.update_status');
     Route::resource('schedule', 'Business\ScheduleController');
     Route::get('schedule/{schedule}/preview', 'Business\ScheduleController@preview')->name('schedule.preview');

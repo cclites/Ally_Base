@@ -47,9 +47,12 @@
                              :per-page="perPage"
                              :empty-text="emptyText"
                     >
-                        <!--template slot="schedule_id" scope="row" class="primary">
-                            <b-link :href="`/business/schedule/${ row.item.schedule_id }`" target="_blank">{{ row.item.schedule_id }}</b-link>
-                        </template-->
+                        <template slot="caregiver_name" scope="row" class="primary">
+                            <b-link :href="`/business/caregivers/${ row.item.caregiver_id }#availability`" target="_blank">{{ row.item.caregiver_name }}</b-link>
+                        </template>
+                        <template slot="action" scope="row" class="primary">
+                            <b-btn class="btn-sm" @click="reopenSingleShift(row.item.schedule_id)">Reopen</b-btn>
+                        </template>
                     </b-table>
                 </b-card>
             </b-col>
@@ -81,13 +84,15 @@
         props: ['caregiver', 'conflicts'],
         data() {
             return{
-                items: this.conflicts,
+                items: this.conflicts ? this.conflicts : [],
                 fields: {
-                    schedule_id: { sortable: true},
+                    //schedule_id: { sortable: true},
                     starts_at: { sortable: true, formatter: x => moment(x).format('M/D/YY hh:mm ') },
                     reason: { sortable: true },
+                    caregiver_name: { sortable: true },
+                    action: {}
                 },
-                totalRows: this.conflicts.length,
+                totalRows: this.conflicts ? this.conflicts.length : 0,
                 perPage: 15,
                 currentPage: 1,
                 headerText: "Availability Conflict - " + (this.caregiver ? this.caregiver.name : ''),
@@ -123,19 +128,27 @@
                     })
                     .catch(e => {
                     });
-
-                //window.location = url;
             },
             reopenShifts(){
                 let url = '/business/schedule/reopen/' + this.caregiver.id;
                 let form = new Form();
                 form.post(url)
                     .then( ({ data }) => {
-                        window.location = "/business/reports/caregiver-availability-conflict";
+                        window.location.reload();
                     })
                     .catch(e => {
                     });
-            }
+            },
+            reopenSingleShift(scheduleId){
+                let url = '/business/schedule/reopen/single/' + scheduleId;
+                let form = new Form();
+                form.post(url)
+                    .then( ({ data }) => {
+                        window.location.reload();
+                    })
+                    .catch(e => {
+                    });
+            },
         },
         computed: {
         },

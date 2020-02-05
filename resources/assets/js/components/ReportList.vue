@@ -604,6 +604,14 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
+
+                    {
+                        name: 'Caregiver Availability Conflict',
+                        url: 'reports/caregiver-availability-conflict',
+                        description: 'Caregiver availability conflict report',
+                        category: 3,
+                        allowed: ['office_user'],
+                    },
                     // {
                     //     name: 'Batch Invoice',
                     //     url: 'reports/batch-invoice',
