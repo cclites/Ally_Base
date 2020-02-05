@@ -15,7 +15,6 @@ use App\Claims\ClaimInvoice;
 use App\TellusTypecode;
 use Carbon\Carbon;
 use App\Business;
-use App\Shift;
 
 class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitterInterface
 {
@@ -268,7 +267,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         ];
 
         // Set start EVV data (if exists)
-        if ($service->evv_method_in == Shift::METHOD_GEOLOCATION && filled($service->checked_in_latitude) && filled($service->checked_in_longitude)) {
+        if ($service->evv_method_in == ClaimableService::EVV_METHOD_GEOLOCATION && filled($service->checked_in_latitude) && filled($service->checked_in_longitude)) {
             $data['ScheduledLatitude'] = $service->latitude ?? ''; // OPTIONAL
             $data['ScheduledLongitude'] = $service->longitude ?? ''; // OPTIONAL
             $data['ActualStartLatitude'] = $service->checked_in_latitude; //OPTIONAL
@@ -276,7 +275,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         }
 
         // Set end EVV data (if exists)
-        if ($service->evv_method_out == Shift::METHOD_GEOLOCATION && filled($service->checked_out_latitude) && filled($service->checked_out_longitude)) {
+        if ($service->evv_method_out == ClaimableService::EVV_METHOD_GEOLOCATION && filled($service->checked_out_latitude) && filled($service->checked_out_longitude)) {
             $data['ActualEndLatitude'] = $service->checked_out_latitude; // OPTIONAL
             $data['ActualEndLongitude'] = $service->checked_out_longitude; //OPTIONAL
             $data['ScheduledEndLatitude'] = $service->latitude ?? ''; // OPTIONAL
@@ -382,7 +381,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
     }
 
     /**
-     * Convert the shifts check in or out method into
+     * Convert the claimable services check in or out method into
      * a valid VerificationType.
      *
      * @param string|null $checkedInOutMethod
@@ -391,9 +390,9 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
     protected function getVerificationType(?string $checkedInOutMethod)
     {
         switch ($checkedInOutMethod) {
-            case Shift::METHOD_TELEPHONY:
+            case ClaimableService::EVV_METHOD_TELEPHONY:
                 return 'IVR';
-            case Shift::METHOD_GEOLOCATION:
+            case ClaimableService::EVV_METHOD_GEOLOCATION:
                 return 'GPS';
             default:
                 return 'NON';
