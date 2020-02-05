@@ -10,34 +10,34 @@ use App\Client;
 
 class BusinessBirthdayReportController extends Controller {
     public function index(Request $request) {
-        $report = new BirthdayReport($request->type);
-        $report->includeContactInfo();
-
-        $userId = $request->selectedId;
-        $startDate = $request->start_date;
-        $endDate = $request->end_date;
-        $clientType = $request->selectedClients;
-
-        if ($userId != 'All' && $userId) {
-            $report->filterByClientId($userId);
-        }
-
-        if($clientType != 'All'  && $clientType) {
-            $report->filterByClientType($clientType);
-        }
-
-        if($request->filterDates) {
-            $report->filterByDateRange($startDate, $endDate);
-        }
-
         if ($request->filled('json')) {
+            $report = new BirthdayReport($request->type);
+            $report->includeContactInfo();
+
+            $userId = $request->selectedId;
+            $startDate = $request->start_date;
+            $endDate = $request->end_date;
+            $clientType = $request->selectedClients;
+
+            if ($userId != 'All' && $userId) {
+                $report->filterByClientId($userId);
+            }
+
+            if ($clientType != 'All' && $clientType) {
+                $report->filterByClientType($clientType);
+            }
+
+            if ($request->filterDates) {
+                $report->filterByDateRange($startDate, $endDate);
+            }
+
             return response()->json($report->rows());
         }
 
         $type = $request->type == 'clients' ? 'clients' : 'caregivers';
         $type = ucfirst($type);
 
-        $clients =  Client::forRequestedBusinesses();
+        $clients = Client::forRequestedBusinesses();
 
         $clientTypes = $clients->distinct('client_type')->get(['client_type'])->map(function ($client) {
             return $client->client_type;
