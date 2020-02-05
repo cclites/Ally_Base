@@ -7,7 +7,10 @@ use App\Caregiver;
 use App\BusinessChain;
 use App\CaregiverApplication;
 use App\Billing\Deposit;
+use App\CaregiverAvailability;
+use App\CaregiverDayOff;
 use App\Document;
+use App\Events\CaregiverAvailabilityChanged;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PhoneController;
 use App\Http\Requests\CreateCaregiverRequest;
@@ -409,13 +412,41 @@ class CaregiverController extends BaseController
     {
         $this->authorize('update', $caregiver);
 
+        //This call looks at scheduled vacation days saved in the system and compares
+        //them against scheduled vacation days to find the difference.
+        //$diffDaysOff represents those days.
+        $diffDaysOff = CaregiverDayOff::arrayDiffCustom($request->daysOffData(), $caregiver);
+
+        //This call looks at CG available days saved in the system and compares against
+        //available days stored in the system. If any days were previously marked available
+        //and are now unavailable, $diffAvailability represents those days.
+        $diffAvailability = CaregiverAvailability::arrayDiffAvailability($request->availabilityData(), $caregiver);
+
+        $vacationConflict = $availabilityConflict = [];
+
+        if($diffDaysOff){
+            $vacationConflict = CaregiverDayOff::checkAddedVacationConflict($caregiver, $diffDaysOff);
+        }
+
+        if($diffAvailability){
+            $availabilityConflict = CaregiverAvailability::checkRemovedAvailableDaysConflict($caregiver, $diffAvailability);
+        }
+
+        if( $vacationConflict || $availabilityConflict){
+            if( \Auth::user()->role_type === 'office_user' ){
+                return response()->json(['error'=> 'caregiver has conflict']);
+            }
+        }
+
         \DB::beginTransaction();
 
         $caregiver->update(['preferences' => $request->preferencesData()]);
         $caregiver->setAvailability($request->availabilityData());
 
-        $caregiver->daysOff()->delete();
-        $caregiver->daysoff()->createMany($request->daysOffData());
+        if($diffDaysOff){
+            $caregiver->daysOff()->delete();
+            $caregiver->daysoff()->createMany($request->daysOffData());
+        }
 
         \DB::commit();
 

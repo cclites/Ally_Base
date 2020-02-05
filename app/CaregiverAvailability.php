@@ -2,6 +2,9 @@
 
 namespace App;
 
+use App\Events\CaregiverAvailabilityChanged;
+use phpDocumentor\Reflection\Types\Boolean;
+
 /**
  * App\CaregiverAvailability
  *
@@ -58,8 +61,80 @@ class CaregiverAvailability extends AuditableModel
     protected $guarded = ['id'];
     public $incrementing = false;
 
+    const CONFLICT_REASON = 'Caregiver changed available days';
+
     public function updatedByUser()
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * When CG removes available days, make sure CG was not scheduled on those days
+     *
+     * @param int $caregiverId
+     * @param array $availability //represents days of the week as strings
+     * @return bool
+     */
+    public static function checkRemovedAvailableDaysConflict(Caregiver $caregiver, array $availability): bool
+    {
+        $hasConflict = false;
+        $today = \Carbon::today()->startOfDay();
+        $businessId = $caregiver->businesses->first()->id;
+
+        \Log::info("BusinessId: " . $businessId);
+
+        $schedules = Schedule::where('caregiver_id', $caregiver->id)
+            ->where('starts_at', '>=', $today)
+            ->where('business_id', $businessId)
+            ->select('id', 'starts_at')
+            ->get();
+
+        collect($availability)->map(function($day) use($caregiver,$today, $schedules, &$hasConflict, $businessId){
+
+            $schedules->map(function($schedule) use($day,$caregiver, &$hasConflict, $businessId){
+                $startsAt = \Carbon::instance(new \DateTimeImmutable($schedule->starts_at));
+
+                if($startsAt->is(ucfirst($day))){
+
+                    $hasConflict = true;
+
+                    \DB::table('caregiver_availability_conflict')->insert([
+                        'caregiver_id'=>$caregiver->id,
+                        'schedule_id'=>$schedule->id,
+                        'business_id'=>$businessId,
+                        'starts_at'=>$schedule->starts_at,
+                        'reason'=>self::CONFLICT_REASON
+                    ]);
+                }
+
+                return null;
+            });
+
+        })->flatten(1)
+            ->values()
+            ->unique();
+
+        return $hasConflict;
+    }
+
+    /**
+     * @param $newAvailabilities
+     * @param $storedAvailabilities
+     * @return array
+     */
+    public static function arrayDiffAvailability($newAvailabilities, Caregiver $caregiver): array
+    {
+        $days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+        $arrayDiff = [];
+
+        foreach($days as $day){
+
+            if($newAvailabilities[$day] === 0 && $newAvailabilities[$day] !== $caregiver->ability[$day]){
+                $arrayDiff[] = $day;
+            }
+        }
+
+        return $arrayDiff;
     }
 }

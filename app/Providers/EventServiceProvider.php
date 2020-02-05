@@ -9,6 +9,7 @@ use App\Billing\Events\InvoiceablePaymentAdded;
 use App\Billing\Events\InvoiceablePaymentRemoved;
 use App\Billing\Events\InvoiceableUninvoiced;
 use App\Events\BusinessChainCreated;
+use App\Events\CaregiverAvailabilityChanged;
 use App\Events\ClientCreated;
 use App\Events\DepositFailed;
 use App\Events\FailedTransactionFound;
@@ -18,6 +19,7 @@ use App\Events\ShiftCreated;
 use App\Events\ShiftModified;
 use App\Events\UnverifiedShiftConfirmed;
 use App\Listeners\AddPaymentHoldsOnFailedTransaction;
+use App\Listeners\DetectScheduleAvailabilityConflicts;
 use App\Listeners\CheckForClockOut;
 use App\Listeners\CreateDefaultChainSettings;
 use App\Listeners\CreateDefaultClientPayer;
@@ -63,6 +65,10 @@ class EventServiceProvider extends ServiceProvider
             CreateDefaultService::class,
             CreateDefaultChainSettings::class,
         ],
+        CaregiverAvailabilityChanged::class =>[
+            DetectScheduleAvailabilityConflicts::class,
+        ],
+
         ClientCreated::class => [
             CreateDefaultClientPayer::class,
         ],

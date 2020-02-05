@@ -291,6 +291,14 @@ class ScheduleWarningAggregator
     }
 
     /**
+     * If a CG is marked unavailable or adds vacation days, check to make sure they are not assigned
+     * to a shift.
+     */
+    public function checkShiftsIfMarkedUnavailable(){
+
+    }
+
+    /**
      * Check the schedule against any active ClientAuthorizations.
      *
      * @return bool
