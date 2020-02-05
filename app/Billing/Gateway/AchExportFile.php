@@ -26,6 +26,13 @@ class AchExportFile
     protected $bank = '';
 
     /**
+     * The path of the file after it has been created.
+     *
+     * @var string
+     */
+    protected $filepath = '';
+
+    /**
      * AchExportFile constructor.
      * @param string|null $storage_path
      * @param string $bank
@@ -87,15 +94,34 @@ class AchExportFile
         }
 
         $filename = $this->getBankName() . "_export_" . Carbon::now()->format("Y_m_d_H_i_s_u");
-        $filepath = $this->storage_path . DIRECTORY_SEPARATOR . $filename . '.xlsx';
+        $this->filepath = $this->storage_path . DIRECTORY_SEPARATOR . $filename . '.xlsx';
 
-        Excel::store(new GenericExport($this->transactions), $filepath);
+        Excel::store(new GenericExport($this->transactions), $this->filepath);
 
-        if (! \Storage::exists($filepath)) {
-            throw new \Exception("Unable to write ACH Export file to: " . $filepath);
+        if (! \Storage::exists($this->filepath)) {
+            throw new \Exception("Unable to write ACH Export file to: " . $this->filepath);
         }
 
-        return \Storage::path($filepath);
+        return \Storage::path($this->filepath);
+    }
+
+    /**
+     * Upload the created file.
+     *
+     * @return bool
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     */
+    public function upload() : bool
+    {
+        if (empty($this->filepath)) {
+            // File not yet created.
+            return false;
+        }
+
+        $filename = basename($this->filepath);
+        $file = \Storage::disk('local')->get($this->filepath);
+
+        return \Storage::disk('sftp-ach')->put($filename, $file);
     }
 
     /**

@@ -2,17 +2,13 @@
 
 namespace App\Console\Commands;
 
-use App\Billing\Actions\ProcessChainDeposits;
 use App\Billing\Actions\ProcessChainPayments;
 use App\Billing\Gateway\AchExportFile;
-use App\Billing\Gateway\HeritiageACHService;
 use App\Billing\Gateway\OfflineAchFileGateway;
-use App\Billing\Payments\DepositMethodFactory;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Billing\Payments\PaymentMethodFactory;
 use App\Business;
 use App\BusinessChain;
-use App\Responses\CreatedResponse;
 use App\Responses\Resources\PaymentLog;
 use Illuminate\Console\Command;
 
@@ -73,6 +69,10 @@ class AchOfflineChargeCommand extends Command
         $filepath = $achFile->write();
         \DB::commit();
         $this->info("ACH export file written to $filepath.");
+
+        if ($this->confirm("Would you like to transfer this file to the SFTP?")) {
+            $achFile->upload();
+        }
 
         $headers = ['log_id', 'batch_id', 'payment_id', 'payment_method', 'amount', 'success', 'exception', 'error_message', 'invoice ids'];
         $collection = collect($collection)->map(function ($item) {

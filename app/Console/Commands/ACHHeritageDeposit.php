@@ -39,6 +39,7 @@ class ACHHeritageDeposit extends Command
      * Execute the console command.
      *
      * @return mixed
+     * @throws \Exception
      */
     public function handle()
     {
@@ -61,6 +62,10 @@ class ACHHeritageDeposit extends Command
             \DB::commit();
 
             $this->output->writeln("ACH export file written to $filepath.");
+
+            if ($this->confirm("Would you like to transfer this file to the SFTP?")) {
+                $achFile->upload();
+            }
         }
     }
 }

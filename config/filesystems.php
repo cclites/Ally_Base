@@ -64,6 +64,21 @@ return [
             'url' => env('AWS_URL'),
         ],
 
+        'sftp-ach' => [
+            'driver' => 'sftp',
+            'host' => env('SFTP_ACH_HOST', 'sftp.allyms.com'),
+            'username' => env('SFTP_ACH_USERNAME', 'ubuntu'),
+            'privateKey' => env('SFTP_ACH_PRIVATE_KEY', '/home/ubuntu/id_rsa'),
+            'password' => env('SFTP_ACH_PASSWORD'),
+            'port' => 22,
+            'root' => 'ach',
+            'timeout' => 30,
+            'cache' => [
+                'store' => 'file',
+                'expire' => 600,
+                'prefix' => 'sftp-ach-cache',
+            ],
+        ],
     ],
 
 ];
