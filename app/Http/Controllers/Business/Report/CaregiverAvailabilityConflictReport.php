@@ -9,6 +9,8 @@ use App\Http\Controllers\Business\BaseController;
 use App\Responses\ErrorResponse;
 use App\Schedule;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
+use phpDocumentor\Reflection\Types\Mixed_;
 
 class CaregiverAvailabilityConflictReport extends BaseController
 {
@@ -17,8 +19,8 @@ class CaregiverAvailabilityConflictReport extends BaseController
      * @param Request $request
      * @return mixed
      */
-    public function index(Request $request){
-
+    public function index(Request $request)
+    {
         if($request->filled('json')){
 
             if($request->filled('caregiver')){
@@ -51,7 +53,8 @@ class CaregiverAvailabilityConflictReport extends BaseController
      * @param Caregiver $caregiver
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function show(Caregiver $caregiver){
+    public function show(Caregiver $caregiver): View
+    {
 
         $businessId= $caregiver->businesses->first()->id;
 
@@ -60,7 +63,7 @@ class CaregiverAvailabilityConflictReport extends BaseController
             ->where('business_id', $businessId)
             ->get();
 
-        return view_component('caregiver-availability-conflict-report', 'Caregiver Availability Conflict Report', compact('caregiver', 'conflicts'), [
+        return view_component('caregiver-availability-conflict-report', 'Caregiver Availability Conflict Report', compact('caregiver', 'conflicts'),        [
             'Home' => route('home'),
             'Reports' => route('business.reports.index')
         ]);

@@ -221,12 +221,9 @@ class ProfileController extends Controller
             $availabilityConflict = CaregiverAvailability::checkRemovedAvailableDaysConflict($caregiver->id, $diffAvailability);
         }
 
-        \Log::info("This business");
-        \Log::info(json_encode($this->business()));
-
         if( $vacationConflict || $availabilityConflict){
             event(new CaregiverAvailabilityChanged($caregiver));
-            return new ErrorResponse('401', 'Unable to update preferences at this time.');
+            return new ErrorResponse('401', 'Unable to update availability. Please contact your registry.');
         }
 
         $caregiver->update(['preferences' => $request->preferencesData()]);
