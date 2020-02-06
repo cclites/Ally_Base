@@ -284,7 +284,7 @@ class PayrollExportReport extends BaseReport
             ]);
         });
 
-        if (empty($rows)) {
+        if (empty($rows) || $rows->isEmpty()) {
             return '';
         }
 
