@@ -11,7 +11,7 @@
         <i class="fa fa-calendar"></i><span class="hide-menu">Schedule</span>
     </a>
 </li>
-@if( Auth::user()->can( 'view-open-shifts', [ activeBusiness() ] ) )
+@if( false && Auth::user()->can( 'view-open-shifts', [ activeBusiness() ] ) )
 
     <open-shifts-side-menu-icon business="{{ activeBusiness() ?? null }}"></open-shifts-side-menu-icon>
 @endif
