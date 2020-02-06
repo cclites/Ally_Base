@@ -28,7 +28,7 @@
                 <!-- ============================================================== -->
                 <!-- Open Shifts Feature -->
                 <!-- ============================================================== -->
-                @if( false && is_office_user() && Auth::user()->can( 'view-open-shifts', [ $active_business ] ) )
+                @if( is_office_user() && Auth::user()->can( 'view-open-shifts', [ $active_business ] ) )
 
                     <open-shifts role_type="{{ auth()->user()->role_type }}" businesses="{{ $active_business->id }}"></open-shifts>
 

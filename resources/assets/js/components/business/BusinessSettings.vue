@@ -129,7 +129,7 @@
                                 <input-help :form="businessSettings" field="calendar_next_day_threshold"
                                             text="When an shift’s end time crosses midnight, show the shift across both days in the calendar."></input-help>
                             </b-form-group>
-                            <b-form-group label="Enable Open Shift Feature" label-for="open_shifts_setting" v-if="false">
+                            <b-form-group label="Enable Open Shift Feature" label-for="open_shifts_setting">
                                 <b-form-select id="open_shifts_setting"
                                                v-model="businessSettings.open_shifts_setting"
                                 >
