@@ -83,7 +83,7 @@ class OpenShiftRequested extends BaseNotification
      */
     public function toSms($notifiable)
     {
-        return $this->toSmsFromBusiness( $notifiable, $this->client->business );
+        return $this->toSmsFromBusiness( $notifiable, $this->schedule->business );
     }
 
     /**
