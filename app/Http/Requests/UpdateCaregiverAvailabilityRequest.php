@@ -23,6 +23,10 @@ class UpdateCaregiverAvailabilityRequest extends FormRequest
      */
     public function rules()
     {
+        \Log::info( gettype($this->available_start_time) );
+        \Log::info($this->all());
+
+
         return [
             // CaregiverAvailability
             'monday' => 'required|boolean',
@@ -32,6 +36,8 @@ class UpdateCaregiverAvailabilityRequest extends FormRequest
             'friday' => 'required|boolean',
             'saturday' => 'required|boolean',
             'sunday' => 'required|boolean',
+            'available_start_time' => 'nullable|string',
+            'available_end_time' => 'nullable|string',
             'morning' => 'required|boolean',
             'afternoon' => 'required|boolean',
             'evening' => 'required|boolean',
@@ -108,6 +114,8 @@ class UpdateCaregiverAvailabilityRequest extends FormRequest
                 'minimum_shift_hours',
                 'maximum_shift_hours',
                 'maximum_miles',
+                'available_start_time',
+                'available_end_time',
             ])
             ->merge(['updated_by' => auth()->id()])
             ->toArray();

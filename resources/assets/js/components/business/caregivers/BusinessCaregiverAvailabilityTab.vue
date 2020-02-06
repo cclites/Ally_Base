@@ -16,38 +16,58 @@
                             </label>
                         </b-form-group>
                     </b-col>
-                    <b-col lg="6">
-                        <b-form-group label="Available Times">
-                            <label class="custom-control custom-checkbox" v-for="time in timesOfDay" :key="time">
-                                <input type="checkbox" class="custom-control-input" v-model="form[time]" :true-value="1" :false-value="0">
-                                <span class="custom-control-indicator"></span>
-                                <span class="custom-control-description">{{ time | capitalize }}</span>
-                            </label>
+                </b-row>
+                <b-row>
+                    <b-col lg="3">
+                        <b-form-group label="Preferred Shift Start Time" label-for="available_start_time">
+                            <time-picker
+                                    id="available_start_time"
+                                    name="available_start_time"
+                                    v-model="form.available_start_time"
+                            />
+                            <input-help :form="form" field="available_start_time" text="" />
                         </b-form-group>
                     </b-col>
+                    <b-col lg="3">
+                        <b-form-group label="Preferred Shift End Time" label-for="available_end_time">
+                            <time-picker
+                                    id="available_end_time"
+                                    name="available_end_time"
+                                    v-model="form.available_end_time"
+                            />
+                            <input-help :form="form" field="available_end_time" text="" />
+                        </b-form-group>
+                    </b-col>
+
                     <b-col lg="6">
-                        <b-form-group label="Willing to Perform Live In">
-                            <b-form-radio-group v-model="form.live_in">
+                        <b-form-group label="Willing to Perform Live-In">
+                            <b-form-radio-group v-model="form.live_in" class="mt-3">
                                 <b-form-radio :value="0">No</b-form-radio>
                                 <b-form-radio :value="1">Yes</b-form-radio>
                             </b-form-radio-group>
                         </b-form-group>
                     </b-col>
+                </b-row>
+                <b-row>
                     <b-col lg="6">
                         <b-form-group label="Preferred Shift Length">
                             <b-row>
                                 <b-col cols="6">
-                                    <label>Minimum Hours: <b-form-input size="sm" v-model="form.minimum_shift_hours" type="number" step="1" /></label>
+                                    <b-form-group label="Minimum Hours:">
+                                        <b-form-input size="sm" v-model="form.minimum_shift_hours" type="number" step="1" />
+                                    </b-form-group>
                                 </b-col>
                                 <b-col cols="6">
-                                    <label>Maximum Hours: <b-form-input size="sm" v-model="form.maximum_shift_hours" type="number" step="1" /></label>
+                                    <b-form-group label="Maximum Hours:">
+                                        <b-form-input size="sm" v-model="form.maximum_shift_hours" type="number" step="1" />
+                                    </b-form-group>
                                 </b-col>
                             </b-row>
                         </b-form-group>
                     </b-col>
-                    <b-col lg="6">
+                    <b-col lg="6" class="mt-4">
                         <b-form-group label="How many miles are they willing to travel?">
-                            <b-form-radio-group v-model="form.maximum_miles">
+                            <b-form-radio-group v-model="form.maximum_miles" class="mt-2">
                                 <b-form-radio :value="5">5</b-form-radio>
                                 <b-form-radio :value="10">10</b-form-radio>
                                 <b-form-radio :value="15">15</b-form-radio>
@@ -128,6 +148,8 @@
                     friday: this.caregiver.availability ? this.caregiver.availability.friday : 0,
                     saturday: this.caregiver.availability ? this.caregiver.availability.saturday : 0,
                     sunday: this.caregiver.availability ? this.caregiver.availability.sunday : 0,
+                    available_start_time: this.caregiver.availability.available_start_time ? this.caregiver.availability.available_start_time.slice(0,5) : '',
+                    available_end_time: this.caregiver.availability.available_end_time ? this.caregiver.availability.available_end_time.slice(0,5) : '',
                     morning: this.caregiver.availability ? this.caregiver.availability.morning : 0,
                     afternoon: this.caregiver.availability ? this.caregiver.availability.afternoon : 0,
                     evening: this.caregiver.availability ? this.caregiver.availability.evening : 0,
@@ -147,8 +169,6 @@
                     { key: 'end_date', label: 'End Date', sortable: true, formatter: x => moment(x).format('M/D/YY') },
                     { key: 'description', label: 'Description', sortable: true },
                     { key: 'actions', label: ' ', sortable: false },
-
-
                 ],
             }
         },

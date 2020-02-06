@@ -198,10 +198,15 @@ class ProfileController extends Controller
 
         $caregiver = auth()->user()->role;
 
+        \DB::beginTransaction();
+
         $caregiver->update(['preferences' => $request->preferencesData()]);
         $caregiver->setAvailability($request->availabilityData());
         $caregiver->daysOff()->delete();
         $caregiver->daysoff()->createMany($request->daysOffData());
+
+        \DB::commit();
+
         return new SuccessResponse('Your availability preferences have been saved.');
     }
 
