@@ -39,6 +39,8 @@ use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use App\Reports\EVVReport;
 use App\CustomField;
 use App\OfficeUser;
+use App\Reports\OccAccDeductiblesReport;
+use App\Responses\SuccessResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Twilio\Rest\Taskrouter\V1\Workspace\TaskQueue\TaskQueuesStatisticsInstance;
@@ -1097,62 +1099,32 @@ class ReportsController extends BaseController
     }
 
     /**
-     * Organize the shifts data into the required format for a full financial revenue report
+     * Gather a report for all Caregivers who receive OccAcc deductibles
      * @param Request $request
      *
      * @return array
      */
-    private function organizeRevenueReport(Request $request)
+    public function occAccDeductiblesReport( Request $request, OccAccDeductiblesReport $report )
     {
-        $report = new ShiftsReport();
-        $report->orderBy('checked_in_time');
-        $this->addShiftReportFilters($report, $request);
-        $data = $report->rows();
-        $groupedByDate = [];
+        if( $request->expectsJson() ){
 
-        foreach ($data as $i => $shiftReport) {
-            // grouped by week
-            $date = (new Carbon($shiftReport['checked_in_time']))->startOfWeek()->format('m/d/Y');
+            $data = $report->forRequestedBusinesses()
+                ->forWeekStartingAt( $request->start )
+                ->forCaregiver($request->caregiver)
+                ->rows();
 
-            if(isset($groupedByDate[$date])) {
-                $groupedByDate[$date][] = $shiftReport;
-            }else {
-                $groupedByDate[$date] = [$shiftReport];
+            if ($request->has('export')) {
+                return $report->setDateFormat('m/d/Y g:i A', $this->business()->timezone)
+                    ->download();
             }
+
+            return response()->json( $data );
         }
 
-        /* Add days with no shift worked
-        $numberOfDays = (new Carbon($request->start_date))->diffInDays((new Carbon($request->end_date)));
-        for ($i=0; $i < $numberOfDays; $i++) {
-            $date = (new Carbon($request->start_date))->addDays($i+1);
-            $formattedDate = $date->format('m/d/Y');
-            if($formattedDate == '08/10/2018') {
-                echo 'i:'.$i;
-            }
-            if($date->diffInDays((new Carbon($request->end_date))) < 0) {
-                break;
-            }
+        return view_component( 'occ-acc-deductibles-report', 'OccAcc Deductibles Report', [], [
 
-            if(!isset($groupedByDate[$formattedDate])) {
-                $groupedByDate[$formattedDate] = [];
-            }
-        }*/
-
-        foreach ($groupedByDate as $date => $itemsArray) {
-            $total = [
-                'revenue' => 0.0,
-                'wages' => 0.0,
-                'profit' => 0.0,
-            ];
-
-            foreach ($itemsArray as $entry) {
-                $total['revenue'] += (float) $entry['provider_total'] + (float) $entry['caregiver_total'];
-                $total['wages'] += (float) $entry['caregiver_total'];
-                $total['profit'] += (float) $entry['provider_total'];
-            }
-
-            $groupedByDate[$date] = $total;
-        }
-        return $groupedByDate;
+            'Home'    => route( 'home' ),
+            'Reports' => route( 'business.reports.index' )
+        ]);
     }
 }
