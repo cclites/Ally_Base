@@ -96,7 +96,7 @@ class ClientRatesController extends Controller
 
             throw new \Exception();
         } catch (\Exception $ex) {
-            \Log::debug($ex->getMessage());
+            \Log::error($ex->getMessage());
             \DB::rollBack();
             return new ErrorResponse(500, 'An unexpected error occurred.  Please try again.');
         }
