@@ -2,6 +2,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 /**
  * App\Signature
@@ -33,6 +34,13 @@ class Signature extends AuditableModel
     protected $guarded = ['id'];
 
     /**
+     * Auditable attributes excluded from the Audit.
+     *
+     * @var array
+     */
+    protected $excludedAttributes = ['content'];
+
+    /**
      * Get all of the owning signable models.
      */
     public function signable()
@@ -51,6 +59,22 @@ class Signature extends AuditableModel
             ]);
         }
         return null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function transformAudit(array $data): array
+    {
+        if (Arr::has($data, 'new_values.content')) {
+            unset($data['new_values']['content']);
+        }
+
+        if (Arr::has($data, 'old_values.content')) {
+            unset($data['old_values']['content']);
+        }
+
+        return $data;
     }
 
     // **********************************************************
