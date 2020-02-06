@@ -11,7 +11,5 @@
 @section('content')
     <user-birthday-report type="{{ $type }}"
                           :client-types="{{ $clientTypes }}"
-                          :caregiver-list="{{$caregiverList}}"
-                          :client-list="{{$clientList}}"
     />
 @endsection

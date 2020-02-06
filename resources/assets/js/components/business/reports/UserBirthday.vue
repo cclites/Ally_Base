@@ -19,28 +19,24 @@
 
             <b-col cols="3" v-if="type === 'Caregivers'">
                 <b-form-group label="Caregiver">
-                    <b-form-select v-model="search.selectedId">
-                        <option value="All">All</option>
-                        <option v-for="caregiver in caregiverList" :value="caregiver.id">{{
-                            caregiver.name }}
-                        </option>
+                    <b-form-select v-model="search.selectedId" ref="caregiverFilter" class="w-100">
+                        <option value="">All Caregivers</option>
+                        <option v-for="item in caregivers" :value="item.id" :key="item.id">{{ item.name }}</option>
                     </b-form-select>
                 </b-form-group>
             </b-col>
             <b-col cols="3" v-else>
                 <b-form-group label="Clients">
-                    <b-form-select v-model="search.selectedId">
-                        <option value="All">All</option>
-                        <option v-for="client in clientList" :value="client.id">{{
-                            client.name }}
-                        </option>
+                    <b-form-select v-model="search.selectedId" ref="clientFilter" class="w-100">
+                        <option value="">All Clients</option>
+                        <option v-for="item in clients" :value="item.id" :key="item.id">{{ item.name }}</option>
                     </b-form-select>
                 </b-form-group>
             </b-col>
             <b-button @click=" fetch() " variant="info">Generate Report</b-button>
         </b-row>
 
-        <b-row class="filter">
+        <b-row class="filter justify-content-between align-items-center">
             <b-col lg="3">
                 <b-form-checkbox v-model="showInactive" :value="true" :unchecked-value="false" class="d-flex align-items-center" v-if="type === 'Clients'">
                     Show inactive {{type}}
@@ -103,6 +99,7 @@
 <script>
     import FormatsDates from '../../../mixins/FormatsDates';
     import BusinessLocationFormGroup from '../../../components/business/BusinessLocationFormGroup';
+    import {mapGetters} from "vuex";
 
     export default {
         mixins: [FormatsDates],
@@ -117,15 +114,6 @@
                 type: Array,
                 required: false
             },
-            caregiverList: {
-                type: Array,
-                required: true
-            },
-            clientList: {
-                type: Array,
-                required: true
-            }
-
         },
 
         data() {
@@ -174,7 +162,19 @@
             };
         },
 
+        async mounted() {
+
+            this.$store.commit('filters/setBusiness', this.search.businesses);
+
+            await this.$store.dispatch('filters/fetchResources', ['clients', 'caregivers']);
+        },
+
         computed: {
+            ...mapGetters({
+                clientList: 'filters/clientList',
+                caregiverList: 'filters/caregiverList',
+            }),
+
             items() {
                 return this.data.filter(user =>
                     (this.showEmpty || !!user.date_of_birth) && (this.showInactive || user.active === 1))
@@ -185,7 +185,13 @@
                                    date_of_birth: moment(item.date_of_birth).format('MMDD'),
                                };
                            });
-            }
+            },
+            clients() {
+                return this.clientList;
+            },
+            caregivers() {
+                return this.caregiverList;
+            },
         },
 
         methods: {
