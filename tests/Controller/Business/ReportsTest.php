@@ -126,7 +126,7 @@ class ReportsTest extends TestCase {
         $data = [
             'type'            => 'clients',
             'json'            => 1,
-            'selectedClients' => 'private_pay',
+            'client_type' => 'private_pay',
             'id'              => 'All',
         ];
 
@@ -151,7 +151,7 @@ class ReportsTest extends TestCase {
         $data = [
             'type'            => 'clients',
             'json'            => 1,
-            'selectedClients' => 'private_pay',
+            'client_type' => 'private_pay',
             'id'              => $client1->id,
         ];
 

@@ -9,7 +9,5 @@
 @endsection
 
 @section('content')
-    <user-birthday-report type="{{ $type }}"
-                          :client-types="{{ $clientTypes }}"
-    />
+    <user-birthday-report type="{{ $type }}"/>
 @endsection

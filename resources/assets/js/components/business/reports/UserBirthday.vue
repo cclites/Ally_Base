@@ -9,12 +9,9 @@
                 </b-form-checkbox>
             </b-col>
             <b-col cols="3" v-if="type === 'Clients'">
-                <label>Client Types:
-                    <b-form-select class="form-group-label " v-model="search.selectedClients">
-                        <option value="All">All</option>
-                        <option v-for="option in clientTypes" :value="option" :key="option.id">{{ option }}</option>
-                    </b-form-select>
-                </label>
+                <b-form-group label="Client Type" class="form-inline">
+                    <client-type-dropdown ref="clientTypeFilter" v-model="search.client_type"/>
+                </b-form-group>
             </b-col>
 
             <b-col cols="3" v-if="type === 'Caregivers'">
@@ -110,10 +107,6 @@
                 type: String,
                 required: true,
             },
-            clientTypes: {
-                type: Array,
-                required: false
-            },
         },
 
         data() {
@@ -126,11 +119,11 @@
                     start_date: moment().format('MM/DD/YYYY'),
                     end_date: moment().format('MM/DD/YYYY'),
                     filterDates: false,
-                    selectedClients: 'All',
                     selectedId: 'All',
                     type: this.type,
                     json: 1,
-                    businesses: ''
+                    businesses: '',
+                    client_type: ''
                 },
                 data: [],
                 fields: [

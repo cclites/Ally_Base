@@ -17,7 +17,7 @@ class BusinessBirthdayReportController extends Controller {
             $userId = $request->selectedId;
             $startDate = $request->start_date;
             $endDate = $request->end_date;
-            $clientType = $request->selectedClients;
+            $clientType = $request->client_type;
 
             if ($userId != 'All' && $userId) {
                 $report->filterByClientId($userId);
