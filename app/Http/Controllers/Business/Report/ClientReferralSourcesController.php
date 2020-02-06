@@ -64,11 +64,11 @@ class ClientReferralSourcesController extends BaseController
                     "created_at" => Carbon::parse($item->created_at)->format('d/m/Y'),
                     "clients_count" => $item->clients_count,
                     "prospects_count" => $item->prospects_count,
-                    "shift_total" => ($item->clients->map(function($item) {
+                    "shift_total" => number_format(($item->clients->map(function($item) {
                         return $item->shifts->map(function($shift) {
-                            return number_format($shift->costs()->getTotalCost(), 2);
+                            return $shift->costs()->getTotalCost();
                         })->sum();
-                    }))->sum()
+                    }))->sum(), 2)
                 ];
             }
 
