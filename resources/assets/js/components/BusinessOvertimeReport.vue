@@ -62,11 +62,17 @@
                          :sort-by.sync="sortBy"
                          :sort-desc.sync="sortDesc"
                          @filtered="onFiltered"
+                         @row-clicked="selectRow"
                 >
                     <template scope="total">
 
                     </template>
                 </b-table>
+                <b-modal :id="infoModal.id" size="lg" :title="infoModal.title" ok-only @hide="resetInfoModal">
+                    <b-table bordered striped :items="infoModal.clients" :fields="infoModal.fields">
+
+                    </b-table>
+                </b-modal>
             </div>
 
             <b-row>
@@ -143,11 +149,44 @@
                     json: 1,
                 },
                 loading: false,
+                infoModal: {
+                    id: 'client-modal',
+                    title: 'Clients',
+                    clients: [],
+                    fields: [
+                        {
+                            key: 'name',
+                            label: 'Name',
+                            sortable: true,
+                        },
+                        {
+                            key: 'worked',
+                            label: 'Worked Hours (In Shift History confirmed or unconfirmed)',
+                            sortable: true,
+                        },
+                        {
+                            key: 'future_scheduled',
+                            label: 'Future Scheduled Hours',
+                            sortable: true,
+                        },
+                        {
+                            key: 'total',
+                            label: 'Total Expected Hours',
+                            sortable: true,
+                        },
+                    ],
+                }
             }
         },
 
         methods: {
-
+            selectRow(item, index, event){
+                this.infoModal.clients = item.clients;
+                this.$root.$emit('bv::show::modal', this.infoModal.id, event.target);
+            },
+            resetInfoModal(){
+                this.infoModal.clients = [];
+            },
             async loadCaregivers() {
                 const response = await axios.get('/business/caregivers?json=1');
                 this.caregivers = response.data;
@@ -160,14 +199,17 @@
 
                         this.items = response.data.map(function(item) {
                             item['_rowVariant'] = (item.total >= 36) ? (item.total > 40 ? 'danger' : 'warning') : '';
+                            for(let i = 0; i < item.clients.length; i++){
+                                item.clients[i]._rowVariant = (item.clients[i].total >= 36) ? (item.clients[i].total > 40 ? 'danger' : 'warning') : '';
+                            }
                             return item;
                         });
                         this.totalRows = this.items.length;
                         this.loading = false;
                     }).catch(error => {
-                        console.error(error);
-                        this.loading = false;
-                    });
+                    console.error(error);
+                    this.loading = false;
+                });
             },
 
             reset() {
