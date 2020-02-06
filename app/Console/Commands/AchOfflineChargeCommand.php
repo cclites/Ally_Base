@@ -11,6 +11,7 @@ use App\Business;
 use App\BusinessChain;
 use App\Responses\Resources\PaymentLog;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 class AchOfflineChargeCommand extends Command
 {
@@ -66,7 +67,7 @@ class AchOfflineChargeCommand extends Command
         \DB::beginTransaction();
         $results = $action->processPayments($chain, [Business::class, BankAccount::class]);
         $collection = PaymentLog::collection($results)->toArray(null);
-        $filepath = $achFile->write();
+        $filepath = $achFile->write(Str::slug($chain->name));
         \DB::commit();
         $this->info("ACH export file written to $filepath.");
 

@@ -8,6 +8,7 @@ use App\Billing\Gateway\HeritiageACHService;
 use App\Billing\Payments\DepositMethodFactory;
 use App\BusinessChain;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 class ACHHeritageDeposit extends Command
 {
@@ -58,7 +59,7 @@ class ACHHeritageDeposit extends Command
 
             \DB::beginTransaction();
             $processChainDeposits->processDeposits($chain);
-            $filepath = $achFile->write();
+            $filepath = $achFile->write(Str::slug($chain->name));
             \DB::commit();
 
             $this->output->writeln("ACH export file written to $filepath.");

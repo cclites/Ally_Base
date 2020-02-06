@@ -78,10 +78,12 @@ class AchExportFile
     /**
      * Write file output.
      *
+     * @param string $fileIdentifier
      * @return string
-     * @throws \Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      */
-    public function write(): string
+    public function write(string $fileIdentifier = ""): string
     {
         if (!count($this->transactions)) {
             throw new \Exception("There were no transactions to write.");
@@ -94,6 +96,9 @@ class AchExportFile
         }
 
         $filename = $this->getBankName() . "_export_" . Carbon::now()->format("Y_m_d_H_i_s_u");
+        if (filled($fileIdentifier)) {
+            $filename .= "_" . $fileIdentifier;
+        }
         $this->filepath = $this->storage_path . DIRECTORY_SEPARATOR . $filename . '.xlsx';
 
         Excel::store(new GenericExport($this->transactions), $this->filepath);
