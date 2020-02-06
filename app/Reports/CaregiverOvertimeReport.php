@@ -147,19 +147,22 @@ class CaregiverOvertimeReport extends BaseReport
         /*$clients = $caregiver->clients()->whereHas('shifts', function($query){
 
         });*/
-        return $caregiver->clients()->get()->map(function(Client $client){
+        return $caregiver->clients()->get()->map(function(Client $client) use ($caregiver){
             $worked = 0;
             $futureScheduled = 0;
 
-            foreach($client->shifts()->whereBetween( 'checked_in_time', [$this->start, $this->end] )->where('checked_out_time', '!=', null )->get() as $shift) {
+            foreach($client->shifts()->where('caregiver_id', $caregiver->id)->whereBetween( 'checked_in_time', [$this->start, $this->end] )->where('checked_out_time', '!=', null )->get() as $shift) {
                 $worked += $shift->duration();
             }
 
-            foreach($client->shifts()->whereBetween( 'checked_in_time', [$this->start, $this->end] )->where('checked_out_time', null )->get() as $shift) {
+            foreach($client->shifts()->where('caregiver_id', $caregiver->id)->whereBetween( 'checked_in_time', [$this->start, $this->end] )->where('checked_out_time', null )->get() as $shift) {
                 $worked += $shift->duration();
                 $futureScheduled += $shift->remaining();
             }
-            $futureScheduled += $client->schedules()->startsBetweenDates($this->timezone, 'now', $this->end)->sum('duration');
+            $futureScheduled += $client->schedules()
+                ->where('caregiver_id', $caregiver->id)
+                ->startsBetweenDates($this->timezone, 'now', $this->end)
+                ->sum('duration');
             $total = round($worked + $futureScheduled, 2);
             return [
                 'name' => $client->name,
