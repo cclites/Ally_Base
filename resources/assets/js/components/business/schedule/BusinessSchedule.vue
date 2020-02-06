@@ -919,10 +919,11 @@
 
                     let vm = this;
                     requests.click((e) => {
+
                         vm.selectedEvent = event;
                         vm.selectedScheduleId = event.id;
                         vm.hidePreview();
-                        vm.requestsModal = true;
+                        vm.$store.dispatch( 'openShifts/toggleOpenShiftsModal' );
                         e.preventDefault();
                         e.stopPropagation();
                     });
