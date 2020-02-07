@@ -128,8 +128,6 @@
             <h6 class="print-date">Printed on <span>{{currentTime()}}</span></h6>
         </div>
 
-        <schedule-request-modal v-if="false" v-model=" requestsModal " :selected-schedule-id=" selectedScheduleId " @request-response=" calendarRequestResponded "></schedule-request-modal>
-
         <schedule-notes-modal v-model="notesModal"
                                 :event="selectedEvent"
                                 @updateEvent="updateEvent"
@@ -249,6 +247,7 @@
     import moment from 'moment';
     import ScheduleRequestModal from "../../modals/ScheduleRequestModal";
     import HasOpenShiftsModal from '../../../mixins/HasOpenShiftsModal';
+    import { mapActions, mapGetters } from 'vuex';
 
     export default {
         components: {BusinessLocationFormGroup, ScheduleRequestModal},
@@ -318,11 +317,19 @@
 
         mounted() {
             // this.appendColorKey();
+            this.establishWeAreOnSchedulePage();
             this.loadFiltersData();
         },
 
         computed: {
 
+            ...mapGetters({
+
+                triggerBusinessScheduleToAct : 'openShifts/triggerBusinessScheduleToAct',
+                vuexSelectedScheduleId       : 'openShifts/selectedScheduleId',
+                vuexSelectedEvent            : 'openShifts/selectedEvent',
+                newStatus                    : 'openShifts/newStatus',
+            }),
             requestEvents(){
 
                 return this.events.filter( e => e.requests_count > 0 );
@@ -454,6 +461,12 @@
 
         methods: {
 
+            ...mapActions({
+
+                establishWeAreOnSchedulePage : 'openShifts/establishWeAreOnSchedulePage',
+                toggleTrigger : 'openShifts/toggleTrigger',
+                setNewStatus  : 'openShifts/setNewStatus',
+            }),
             calendarRequestResponded( data ){
 
                 this.requestResponded( data );
@@ -820,7 +833,7 @@
                     })
                     .catch(e => {
                         this.loading = false;
-                        console.log('error getting events:');
+                        // console.log('error getting events:');
                         console.log(e);
                     })
             },
@@ -830,7 +843,7 @@
                 let event = this.events.find(item => {
                     return item.id === id;
                 });
-                console.log( 'found event here:', event );
+                // console.log( 'found event here:', event );
                 if (event) {
                     event.backgroundColor = this.getEventBackground(data);
                     event.note = data.note;
@@ -923,7 +936,7 @@
                         vm.selectedEvent = event;
                         vm.selectedScheduleId = event.id;
                         vm.hidePreview();
-                        vm.$store.dispatch( 'openShifts/toggleOpenShiftsModal' );
+                        vm.$store.dispatch( 'openShifts/toggleOpenShiftsModal', event );
                         e.preventDefault();
                         e.stopPropagation();
                     });
@@ -1068,6 +1081,23 @@
         },
 
         watch: {
+
+            triggerBusinessScheduleToAct( newVal, oldVal ) {
+
+                if( newVal ){
+                    // i want to run updateEvent() with the current data from Vuex! YES
+                    // this is honestly a really convoluted solution that needs to immediately be replaced
+
+                    // console.log( 'vuex ID: ', this.vuexSelectedScheduleId );
+                    // console.log( 'vuex Event: ', this.vuexSelectedEvent );
+                    // console.log( 'new value: ', newVal );
+                    // console.log( 'old value: ', oldVal );
+                    this.selectedEvent = _.cloneDeep( this.vuexSelectedEvent );
+                    this.handleCalendarPropogation( _.cloneDeep( this.newStatus ) );
+                    this.setNewStatus( null );
+                }
+                this.toggleTrigger( false );
+            },
             calendarHeight(val) {
                 this.$refs.calendar.setOption('height', val);
             },

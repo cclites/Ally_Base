@@ -13,21 +13,16 @@ class OpenShiftsController extends BaseController
     {
         $caregiver = auth()->user()->role;
 
+        if( !auth()->user()->can( 'view-open-shifts' ) ) return new ErrorResponse( 403, 'Invalid registry setting' );
+
         if( request()->filled( 'json' ) ){
 
-            // get business dynamically, needs to be plural because 'scopeForRequestedBusinesses' will pick it up
-            $businessId = request()->input( 'businesses', null );
+            $setting  = $caregiver->role->businessesWithOpenShiftsFeature()->first()->open_shifts_setting; // this.. is a problem.. only if two locations are split 'limited' vs 'unlimited' in their settings.. this is why it would beed to be a drop-down
+            $timezone = $caregiver->role->businesses->first()->timezone; // also the absense of a dropdown means that these locations better be in the same time zone so long as we scale..
 
-            if( empty( $businessId ) ) return new ErrorResponse( 500, 'Schedules could not be received' );
-
-            $business = Business::findOrFail( $businessId );
-            $setting = $business->open_shifts_setting;
-
-            if( !in_array( $setting, [ Business::OPEN_SHIFTS_LIMITED, Business::OPEN_SHIFTS_UNLIMITED ] ) ) return new ErrorResponse( 500, 'Invalid registry setting' );
-
-            $query = Schedule::forRequestedBusinesses()
+            $query = Schedule::forRequestedBusinesses( $caregiver->role->businessesWithOpenShiftsFeature()->pluck( 'id' )->toArray() )
                 ->with([ 'client' ])
-                ->inTheNextMonth( $business->timezone )
+                ->inTheNextMonth( $timezone )
                 ->whereOpen()
                 ->ordered();
 
@@ -40,9 +35,9 @@ class OpenShiftsController extends BaseController
             }
 
             // get all of the caregver's existing schedules in the same time frame
-            $caregivers_schedule = Schedule::forRequestedBusinesses()
+            $caregivers_schedule = Schedule::forRequestedBusinesses( $caregiver->role->businessesWithOpenShiftsFeature()->pluck( 'id' )->toArray() )
                 ->forCaregiver( $caregiver )
-                ->inTheNextMonth( $business->timezone )
+                ->inTheNextMonth( $timezone )
                 ->ordered()
                 ->get();
 
@@ -80,7 +75,7 @@ class OpenShiftsController extends BaseController
                         'client'         => $schedule->client->lastname,
                         'client_id'      => $schedule->client->id,
                         'start_time'     => $schedule->starts_at->copy()->format('g:i A'),
-                        'distance'       => ( $schedule->client->evvAddress && $caregiver->address ) ? $caregiver->address->distanceToAddress( $schedule->client->evvAddress ) : null,
+                        'distance'       => ( $schedule->client->evvAddress && $caregiver->address ) ? round_to_fraction( $caregiver->address->distanceToAddress( $schedule->client->evvAddress, 'mi' ) ) : null,
                         'end_time'       => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A'),
                         'requests_count' => null
                     ];
@@ -88,14 +83,5 @@ class OpenShiftsController extends BaseController
 
             return [ 'events' => $schedules, 'requests' => $caregiver->scheduleRequests ];
         }
-
-        // deprecated, is now a modal - this code is not touched but could be kept just in case its brought back
-        return view_component( 'open-shifts',
-            'Open Shifts',
-            [ 'businesses' => $caregiver->businesses, 'role_type' => auth()->user()->role_type ],
-            [
-                'Home' => route('home')
-            ]
-        );
     }
 }

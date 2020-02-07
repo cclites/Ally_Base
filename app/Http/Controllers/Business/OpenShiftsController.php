@@ -12,11 +12,12 @@ class OpenShiftsController extends BaseController
     {
         if( !is_office_user() ) abort( 403 );
 
+        // is this valid?
         $chain = $this->businessChain();
 
         if( request()->filled( 'json' ) ){
 
-            $results = Schedule::forRequestedBusinesses()
+            $results = Schedule::forRequestedBusinesses( auth()->user()->role->businessesWithOpenShiftsFeature()->pluck( 'id' )->toArray())
                 ->whereHas( 'scheduleRequests', function( $q ){
 
                     return $q->whereActive();
@@ -49,14 +50,5 @@ class OpenShiftsController extends BaseController
 
             return [ 'events' => $schedules, 'requests' => [] ];
         }
-
-        // deprecated, changed open shifts to be a modal
-        return view_component( 'open-shifts',
-            'Open Shifts',
-            [ 'businesses' => $chain->id, 'role_type' => auth()->user()->role_type ],
-            [
-                'Home' => route('home')
-            ]
-        );
     }
 }

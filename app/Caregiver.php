@@ -700,7 +700,6 @@ class Caregiver extends AuditableModel implements
     /**
      * first pass at the ability for features to be enabled/disabled based upon whether or not any of the associated businesses have the feature..
      * 
-     * can be used in conjunction with the above relationship in code like " if( in_array( active_business() ) )
      */
     public function businessesWithOpenShiftsFeature()
     {
@@ -712,6 +711,14 @@ class Caregiver extends AuditableModel implements
         }
 
         return $businesses;
+    }
+
+    /**
+     * 
+     */
+    public function getHasAccessToOpenShiftsFeatureAttribute()
+    {
+        return $this->businessesWithOpenShiftsFeature()->count() > 0;
     }
 
     /**
