@@ -43,6 +43,9 @@ class CaregiverApplicationController extends BusinessBaseController
             if ($endDate = $request->input('end_date')) {
                 $query->where('created_at', '<', Carbon::parse($endDate, $timezone)->addDay());
             }
+            if($search = $request->input('search')){
+                $query->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%'.$search.'%']);
+            }
 
             return $query->whereArchived($request->archived)->get();
         }
