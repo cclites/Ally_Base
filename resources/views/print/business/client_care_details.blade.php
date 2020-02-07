@@ -181,11 +181,11 @@
     <div class="row mt-4 mb-2"><strong>Self-Administered Medications</strong></div>
 
     <div class="row can_provide_direction">
-        @php  $checked = ($client->careDetails['can_provide_direction'] == true) ? 'checked' : ''; @endphp
+        @php  $checked = ($client->careDetails['can_provide_direction'] == false) ? 'checked' : ''; @endphp
         <input type="checkbox" {{$checked}}>
         <span>Remind/Prompt</span>
 
-        @php  $checked = ( filled($client->careDetails['can_provide_direction']) && $client->careDetails['can_provide_direction'] == false) ? 'checked' : ''; @endphp
+        @php  $checked = ( filled($client->careDetails['can_provide_direction']) && $client->careDetails['can_provide_direction'] == true) ? 'checked' : ''; @endphp
         <input type="checkbox" {{$checked}}>
         <span>Assist</span>
     </div>
@@ -244,6 +244,12 @@
         @php  $checked = in_array('other', $client->careDetails['safety_measures']) ? 'checked' : ''; @endphp
         <input type="checkbox" {{$checked}}>
         <span>Other</span>
+
+        <div class="row mt-4 mb-2"><strong>Special Instructions</strong></div>
+
+        <div class="row safety_instructions">
+            <p>{{ $client->careDetails['safety_instructions'] }}</p>
+        </div>
     </div>
 
     <div class="row mt-4 mb-2"><strong>Toileting</strong></div>

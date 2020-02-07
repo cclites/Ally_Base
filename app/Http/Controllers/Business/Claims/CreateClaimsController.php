@@ -11,10 +11,12 @@ class CreateClaimsController extends BaseController
 {
     /**
      * Get list of client invoices that can be created into claims.
+     * This is used in the Claims > Remits > Apply Remit page
      *
      * @param GetClientInvoicesRequest $request
      * @param ClientInvoiceQuery $invoiceQuery
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\Resources\Json\AnonymousResourceCollection|\Illuminate\View\View
+     * @throws \Exception
      */
     public function index(GetClientInvoicesRequest $request, ClientInvoiceQuery $invoiceQuery)
     {

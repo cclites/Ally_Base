@@ -101,4 +101,14 @@ class TelefonyCheckInTest extends TelefonyBase
         $this->assertCount(1, $schedule->fresh()->shifts);
         $this->assertCount(2, $this->caregiver->fresh()->shifts);
     }
+
+    /** @test */
+    function test_telefony_greeting_allow_post_web_hooks()
+    {
+        // This resolves a problem where outgoing business sms numbers
+        // are set up to post webhooks.  Adding this url is faster
+        // than updating 50 numbers config
+        $this->post("/api/telefony", [], ['Content-Type' => 'text/xml'])
+            ->assertStatus(200);
+    }
 }

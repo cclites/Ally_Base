@@ -85,8 +85,7 @@ class CaregiverLicenseController extends BaseController
             \DB::commit();
             return new SuccessResponse( 'Caregiver expirations saved successfully.', $results );
         } catch ( \Exception $ex ) {
-
-            \Log::debug($ex->getMessage());
+            \Log::error($ex->getMessage());
             \DB::rollBack();
             return new ErrorResponse( 500, $ex->getMessage() );
         }

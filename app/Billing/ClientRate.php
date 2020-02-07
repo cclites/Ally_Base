@@ -120,7 +120,7 @@ class ClientRate extends AuditableModel
 
             return true;
         } catch (\Exception $ex) {
-            \Log::debug($ex->getMessage());
+            \Log::error($ex->getMessage());
             return false;
         }
     }

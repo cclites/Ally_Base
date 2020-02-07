@@ -25,6 +25,7 @@ class ClaimInvoiceController extends BaseController
      * @param GetClaimInvoicesRequest $request
      * @param ClaimInvoiceQuery $claimQuery
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     * @throws \Exception
      */
     public function index(GetClaimInvoicesRequest $request, ClaimInvoiceQuery $claimQuery)
     {
@@ -32,6 +33,8 @@ class ClaimInvoiceController extends BaseController
 
         $claimQuery->with([
             'clientInvoices.client',
+            'client.user',
+            'payer',
             'items' => function ($q) {
                 $q->orderByRaw('claimable_type desc, date asc');
             },

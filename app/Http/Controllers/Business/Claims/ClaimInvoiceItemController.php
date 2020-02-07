@@ -56,7 +56,7 @@ class ClaimInvoiceItemController extends BaseController
         } catch (ValidationException $ex) {
             throw $ex;
         } catch (\Exception $ex) {
-            \Log::info($ex);
+            \Log::error($ex->getMessage());
             app('sentry')->captureException($ex);
             return new ErrorResponse(500, 'An unexpected error occurred while trying to create this item.  Please try again.');
         }
@@ -78,8 +78,6 @@ class ClaimInvoiceItemController extends BaseController
     {
         $this->authorize('update', $claim);
 
-        \DB::enableQueryLog();
-
         try {
             \DB::beginTransaction();
 
@@ -98,12 +96,10 @@ class ClaimInvoiceItemController extends BaseController
         } catch (ValidationException $ex) {
             throw $ex;
         } catch (\Exception $ex) {
-            \Log::info($ex);
+            \Log::error($ex->getMessage());
             app('sentry')->captureException($ex);
             return new ErrorResponse(500, 'An unexpected error occurred while trying to update this item.  Please try again.');
         }
-
-        \Log::info(\DB::getQueryLog());
 
         return new SuccessResponse('Claim Item has been saved.', new ClaimInvoiceResource($claim->fresh()));
     }

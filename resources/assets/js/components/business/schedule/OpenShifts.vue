@@ -30,7 +30,15 @@
             <schedule-requests :selected-schedule-id=" hasSelectedScheduleId " v-if=" hasSelectedScheduleId " @request-response=" openShiftsModalRequestResponded " class="mb-5" key="uno"></schedule-requests>
         </transition-group>
 
-        <ally-table id="open-shifts" :columns=" fields " :items=" aggEvents " sort-by="start" :perPage=" 1000 " :isBusy=" form.busy " v-show="! loading">
+        <ally-table id="open-shifts"
+            :columns=" fields "
+            :items=" aggEvents "
+            sort-by="start"
+            :perPage=" 1000 "
+            :isBusy=" form.busy "
+            v-show="! loading"
+            empty-text="There are no caregiver requests for open shifts."
+        >
 
             <template slot="start" scope="data">
 

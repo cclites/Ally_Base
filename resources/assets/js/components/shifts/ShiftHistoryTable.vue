@@ -44,6 +44,10 @@
                     {{ service }}
                 </div>
             </template>
+            <template slot="Scheduled Time" scope="row">
+                <div>{{ row.item['Scheduled Time'] }}</div>
+                <div>({{ row.item.scheduled_time_difference }})</div>
+            </template>
             <template slot="actions" scope="row">
                 <slot name="actions" :item="row.item"></slot>
             </template>

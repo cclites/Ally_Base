@@ -27,11 +27,15 @@ class ShiftHistoryItemResource extends Resource
 
             $time_difference = number_format( ( float )( ( $shift->schedule->duration / 60 ) - $shift->duration() ), 2, '.', '' );
 
-            $scheduled_start_time = $shift->schedule->getStartDateTime()->format( 'h A' );
-            $scheduled_end_time   = $shift->schedule->getEndDateTime()->format( 'h A' );
-            $scheduled_time_difference = "$scheduled_start_time - $scheduled_end_time ( $time_difference )";
+            $scheduled_start_time = $shift->schedule->getStartDateTime()->format( 'h:i A' );
+            $scheduled_end_time   = $shift->schedule->getEndDateTime()->format( 'h:i A' );
+            $scheduled_time = "$scheduled_start_time - $scheduled_end_time";
+            $scheduled_time_difference = $time_difference;
 
-        } else $scheduled_time_difference = null;
+        } else {
+            $scheduled_time = null;
+            $scheduled_time_difference = null;
+        }
 
         return [
             'id' => $shift->id,
@@ -78,6 +82,7 @@ class ShiftHistoryItemResource extends Resource
             'visit_edit_reason_id' => optional( $shift->visitEditReason )->formatted_name,
             'visit_edit_action_id' => optional( $shift->visitEditAction )->formatted_name,
 
+            'scheduled_time' => $scheduled_time,
             'scheduled_time_difference' => $scheduled_time_difference,
         ];
     }
