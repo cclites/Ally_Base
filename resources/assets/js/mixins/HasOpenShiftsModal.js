@@ -65,12 +65,12 @@ export default {
 
             this.selectedScheduleId = null;
         },
-        showRequestModal( schedule){
+        showRequestModal( schedule ){
 
             this.setSelectedEvent( schedule );
             this.selectedScheduleId = schedule.id;
-            this.selectedEvent = schedule;
-            this.requestsModal    = true;
+            this.selectedEvent      = schedule;
+            this.requestsModal      = true;
         },
         handleCalendarPropogation( newStatus ){
 

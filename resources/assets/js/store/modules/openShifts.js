@@ -102,8 +102,9 @@ const actions = {
 
         const e = event ? {
 
-            id             : event.id,
-            requests_count : event.requests_count
+            id               : event.id,
+            requests_count   : event.requests_count,
+            background_color : event.background_color
         } : null;
         context.commit( 'setSelectedEvent', e );
         context.commit( 'toggleOpenShiftsModal' );
@@ -112,9 +113,10 @@ const actions = {
 
         context.commit( 'setSelectedEvent', event );
     },
-    emitToScheduleViaVuex( context, status ){
+    emitToScheduleViaVuex( context, data ){
 
-        context.commit( 'setNewStatus', status );
+        context.commit( 'setNewStatus', data.status );
+        context.commit( 'setSelectedEvent', data.schedule );
         context.commit( 'triggerBusinessScheduleToAct', true );
     },
     toggleTrigger: ( context, bool ) => context.commit( 'triggerBusinessScheduleToAct', bool ),

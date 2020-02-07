@@ -933,7 +933,7 @@ class Schedule extends AuditableModel implements BelongsToBusinessesInterface
 
         $query->whereBetween( 'starts_at', [
 
-            Carbon::parse( 'a month ago', $timezone ),
+            Carbon::parse( 'now', $timezone ),
             Carbon::parse( 'today +31 days', $timezone )
         ]);
     }

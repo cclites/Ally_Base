@@ -466,6 +466,7 @@
                 establishWeAreOnSchedulePage : 'openShifts/establishWeAreOnSchedulePage',
                 toggleTrigger : 'openShifts/toggleTrigger',
                 setNewStatus  : 'openShifts/setNewStatus',
+                setSelectedEvent  : 'openShifts/setSelectedEvent',
             }),
             calendarRequestResponded( data ){
 
@@ -781,7 +782,7 @@
 
             setScrollPosition() {
                 if (this.scroll.top !== null) {
-                    console.log('setScrollPosition called');
+                    // console.log('setScrollPosition called');
                     this.scrollSelector().scrollTop(this.scroll.top);
                     this.scrollSelector().scrollLeft(this.scroll.left);
                 }
@@ -853,7 +854,7 @@
             },
 
             getEventBackground(event) {
-                return event.backgroundColor || '#1c81d9';
+                return !event.caregiver_id ? '#d9c01c' : event.backgroundColor || '#1c81d9';
             },
 
             loadFiltersData() {
@@ -1088,15 +1089,16 @@
                     // i want to run updateEvent() with the current data from Vuex! YES
                     // this is honestly a really convoluted solution that needs to immediately be replaced
 
-                    // console.log( 'vuex ID: ', this.vuexSelectedScheduleId );
-                    // console.log( 'vuex Event: ', this.vuexSelectedEvent );
+                    // console.log( 'vuex ID: ', _.cloneDeep( this.vuexSelectedScheduleId ) );
+                    // console.log( 'vuex Event: ', _.cloneDeep( this.vuexSelectedEvent ) );
                     // console.log( 'new value: ', newVal );
                     // console.log( 'old value: ', oldVal );
                     this.selectedEvent = _.cloneDeep( this.vuexSelectedEvent );
                     this.handleCalendarPropogation( _.cloneDeep( this.newStatus ) );
                     this.setNewStatus( null );
+                    this.setSelectedEvent( null );
+                    this.toggleTrigger( false );
                 }
-                this.toggleTrigger( false );
             },
             calendarHeight(val) {
                 this.$refs.calendar.setOption('height', val);

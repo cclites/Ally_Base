@@ -217,46 +217,43 @@
             }),
             openShiftsModalRequestResponded( data ){
 
+                // failsafe to make sure the item is selected
+                if( this.vuexSelectedScheduleId ) this.selectedScheduleId = this.vuexSelectedScheduleId;
+
                 const status = data.status;
-
                 let schedule = this.events.find( e => e.id === data.request.schedule_id );
-                let scheduleIndex = this.events.findIndex( e => e.id === data.request.schedule_id );
 
-                // console.log( 'starting the response...', _.cloneDeep({ number: schedule.requests_count }) );
-
-                // only applicable when on the schedule calendar page, set to true from the mounted() method on BusinessSchedule.. this is soooo ugly im so sorry
-                if( this.onSchedulePage ) this.emitToScheduleViaVuex( status ); // this.handleCalendarPropogation( status );
+                // 1. only applicable when on the schedule calendar page, set to true from the mounted() method on BusinessSchedule.. this is soooo ugly im so sorry
+                if( this.onSchedulePage ) this.emitToScheduleViaVuex({ status: status, schedule : _.cloneDeep( schedule ) });
 
                 if( status == this.OPEN_SHIFTS_STATUS.DENIED ){
 
-                    // remove a mark from the row
+                    // 2. decrement the # requests on the record
                     schedule.requests_count--;
-                    if( this.openShifts.length > 0 ) this.decrementScheduleEvent( scheduleIndex );
+                    // if( this.openShifts.length > 0 ) this.decrementScheduleEvent( scheduleIndex ); // this might be necessary for caregivers?
 
-                    // remove a mark from the notifcation icon
+                    // 3. decrement the side & top-header icon counts
                     this.updateCount( -1 );
 
                     if( schedule.requests_count == 0 ){
-                        // no more requests? remove the entry
+                        // no more requests?
 
+                        // 4. remove the row from the table
                         this.removeScheduleEvent( data.request.schedule_id );
                         this.selectedScheduleId = null;
                     }
 
                     return;
-                }
+                } // else its an approval..
 
-                // remove the entire row
+                // 2. remove the row from the table
                 this.removeScheduleEvent( data.request.schedule_id );
 
-                // close the modal
-                this.toggleOpenShiftsModal();
-
-                // remove all marks within row from notification icon
+                // 3. update the icon count to reflect the entire requests_count
                 this.updateCount( -schedule.requests_count );
 
-                // this.selectedScheduleId = null;
-                this.nullifySelectedSchedule();
+                // 4. de-select the schedule
+                this.selectedScheduleId = null;
             },
             currentlySelected( id ){
 
