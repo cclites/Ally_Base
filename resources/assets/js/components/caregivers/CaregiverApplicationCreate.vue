@@ -286,7 +286,7 @@
                     </b-form-group>
                 </b-col>
             </b-row>
-            <!-- Crimal History -->
+            <!-- Crimal History
             <b-row>
                 <b-col>
                     <div class="h5">Criminal History</div>
@@ -339,7 +339,7 @@
                         <input-help :form="form" field="criminal_history_desc" text=""></input-help>
                     </b-form-group>
                 </b-col>
-            </b-row>
+            </b-row> -->
             <!-- Injury Status -->
             <b-row>
                 <b-col>
