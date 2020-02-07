@@ -456,7 +456,8 @@
                         'status': item.status,
                         'business_id': item.business_id,
                         'admin_note': item.admin_note,
-                        'Scheduled Time': item.scheduled_time_difference,
+                        'Scheduled Time': item.scheduled_time,
+                        'scheduled_time_difference': item.scheduled_time_difference,
                         '_rowVariant': this.getRowVariant(item),
                     };
                 });
