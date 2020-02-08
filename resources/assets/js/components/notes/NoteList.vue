@@ -57,6 +57,13 @@
                     >
                     </b-form-input>
                 </b-col>
+                <b-col lg="3">
+                    <b-form-input v-model="searchForm.template"
+                                  class="mb-2"
+                                  placeholder="Template"
+                    >
+                    </b-form-input>
+                </b-col>
             </b-row>
             <div>
                 <b-btn @click="print" variant="primary" class="float-right"><i class="fa fa-print"></i> Print</b-btn>
@@ -155,6 +162,7 @@
                     type: null,
                     tags: '',
                     free_form: '',
+                    template: null
                 }),
                 types: [
                     { text: 'Phone', value: 'phone' },

@@ -133,6 +133,12 @@ class NoteController extends Controller
                 return $query->where('body', 'like', '%' . $request->free_form . '%')
                        ->orWhere('tags', 'like', '%' . $request->free_form . '%');
             })
+            ->when($request->filled('template'), function($query) use ($request){
+                // return $query->whereHas('template', function($query) use ($request){
+                //   return $query->where('name', 'like', '%'.$request->input('template').'%');
+                // });
+                return $query;
+            })
             ->get();
 
         if($request->print){
