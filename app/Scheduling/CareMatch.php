@@ -234,14 +234,19 @@ class CareMatch
 
         $builder->where(function($q) {
             $q->whereHas('availability', function ($q) {
+
                 if ($this->startsAt) {
+
                     $q->where(function ($q) {
                         $end = $this->startsAt->copy()->addMinutes($this->duration);
                         $q->where($this->getTimeOfDay($this->startsAt->hour), 1)
-                          ->orWhere($this->getTimeOfDay($end->hour), 1);
+                          ->orWhere($this->getTimeOfDay($end->hour), 1)
+                          ->orWhere('available_start_time', '>=', $this->startsAt)
+                          ->orWhere('available_end_time', '<=', $this->end);
                     });
                     // Add start date to daysOfWeek
                     $this->daysOfWeek = array_merge($this->daysOfWeek, [$this->startsAt->format('l')]);
+
                 }
                 foreach($this->daysOfWeek as $day) {
                     $q->where($day , 1);
@@ -267,6 +272,7 @@ class CareMatch
         });
     }
 
+    //Tie in here with Caregiver's time?
     protected function getTimeOfDay($hour)
     {
         if ($hour > 20 || $hour < 6) return 'night';

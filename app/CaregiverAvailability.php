@@ -63,6 +63,9 @@ class CaregiverAvailability extends AuditableModel
 
     const CONFLICT_REASON = 'Caregiver changed available days';
 
+    //Completely arbitrary threshold to limit number of retrieved shifts.
+    const THRESHOLD = 25;
+
     public function updatedByUser()
     {
         return $this->belongsTo(User::class, 'updated_by');
@@ -78,15 +81,17 @@ class CaregiverAvailability extends AuditableModel
     public static function checkRemovedAvailableDaysConflict(Caregiver $caregiver, array $availability): bool
     {
         $hasConflict = false;
-        $today = \Carbon::today()->startOfDay();
-        $businessId = $caregiver->businesses->first()->id;
 
-        \Log::info("BusinessId: " . $businessId);
+        //limit checks to today and later
+        $today = \Carbon::today()->startOfDay();
+
+        $businessId = $caregiver->businesses->first()->id;
 
         $schedules = Schedule::where('caregiver_id', $caregiver->id)
             ->where('starts_at', '>=', $today)
             ->where('business_id', $businessId)
             ->select('id', 'starts_at')
+            ->take(self::THRESHOLD)
             ->get();
 
         collect($availability)->map(function($day) use($caregiver,$today, $schedules, &$hasConflict, $businessId){
@@ -94,8 +99,8 @@ class CaregiverAvailability extends AuditableModel
             $schedules->map(function($schedule) use($day,$caregiver, &$hasConflict, $businessId){
                 $startsAt = \Carbon::instance(new \DateTimeImmutable($schedule->starts_at));
 
-                if($startsAt->is(ucfirst($day))){
-
+                if($startsAt->is(ucfirst($day)))
+                {
                     $hasConflict = true;
 
                     \DB::table('caregiver_availability_conflict')->insert([
@@ -118,6 +123,8 @@ class CaregiverAvailability extends AuditableModel
     }
 
     /**
+     * See if days have been removed from available days
+     *
      * @param $newAvailabilities
      * @param $storedAvailabilities
      * @return array

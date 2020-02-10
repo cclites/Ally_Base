@@ -94,7 +94,9 @@ class CaregiverDayOff extends AuditableModel
      */
     public static function checkAddedVacationConflict(Caregiver $caregiver, array $daysOff): bool
     {
+        //limit checks to today and later
         $today = \Carbon::today()->startOfDay();
+
         $hasConflict = false;
         $businessId = $caregiver->businesses()->first()->id;
 
@@ -132,6 +134,10 @@ class CaregiverDayOff extends AuditableModel
     }
 
     /**
+     * newDays represents vacation days entered on the CG availability page.
+     * Checks to see whether newDays are already in caregiver->daysOff. If not,
+     * it returns an array of objects representing vacation days
+     *
      * @param $newDays
      * @param $storedDaysOff
      * @return array
