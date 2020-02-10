@@ -103,6 +103,9 @@ class ShiftFlagManager
      */
     public function isModified() : bool
     {
+        // This has been disabled due to poor performance in our
+        // audits system.
+        return false;
         $requiredUpdates = in_array($this->shift->checked_in_method, [Shift::METHOD_TELEPHONY, Shift::METHOD_GEOLOCATION]) ? 2 : 1;
 
         return $this->shift->audits()->where('event', 'updated')
