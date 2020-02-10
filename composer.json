@@ -37,7 +37,6 @@
         "quickbooks/v3-php-sdk": "^5.0.4",
         "rlanvin/php-rrule": "^1.6",
         "s-ichikawa/laravel-sendgrid-driver": "^2.0",
-        "scoutapp/scout-apm-laravel": "^1.2",
         "sentry/sentry-laravel": "1.6.*",
         "tplaner/when": "^2.1",
         "twilio/sdk": "^5.42",
