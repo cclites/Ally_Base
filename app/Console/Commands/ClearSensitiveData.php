@@ -268,6 +268,11 @@ class ClearSensitiveData extends Command
      */
     public function scrubModel(string $class) : void
     {
+        // Disable auditing on the model class
+        if (method_exists($class, 'disableAuditing')) {
+            call_user_func("{$class}::disableAuditing");
+        }
+
         $query = call_user_func("{$class}::getScrubQuery");
         $objectName = str_replace('_', ' ', Str::snake(Str::plural(class_basename($class))));
 
