@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Address;
 use App\Billing\Payments\Methods\BankAccount;
+use App\CaregiverAvailability;
+use App\CaregiverDayOff;
 use App\Client;
 use App\Billing\Payments\Methods\CreditCard;
 use App\Http\Requests\UpdatePaymentMethodRequest;
 use App\Http\Requests\UpdateProfileRequest;
+use App\Events\CaregiverAvailabilityChanged;
 use App\PhoneNumber;
 use App\Responses\ErrorResponse;
 use App\Responses\SuccessResponse;
@@ -188,7 +191,7 @@ class ProfileController extends Controller
      * Update caregiver availability preferences.
      *
      * @param UpdateCaregiverAvailabilityRequest $request
-     * @return \Illuminate\Http\Response
+     * @return mixed
      */
     public function preferences(UpdateCaregiverAvailabilityRequest $request)
     {
@@ -200,8 +203,39 @@ class ProfileController extends Controller
 
         \DB::beginTransaction();
 
+        ///This call looks at scheduled vacation days saved in the system and compares
+        //them against scheduled vacation days to find the difference.
+        //$diffDaysOff represents those days.
+        $diffDaysOff = CaregiverDayOff::arrayDiffCustom($request->daysOffData(), $caregiver);
+
+        //This call looks at CG available days saved in the system and compares against
+        //available days stored in the system. If any days were previously marked available
+        //and are now unavailable, $diffAvailability represents those days.
+        $diffAvailability = CaregiverAvailability::arrayDiffAvailability($request->availabilityData(), $caregiver);
+
+        $vacationConflict = $availabilityConflict = [];
+
+        if($diffDaysOff){
+            $vacationConflict = CaregiverDayOff::checkAddedVacationConflict($caregiver, $diffDaysOff);
+        }
+
+        if($diffAvailability){
+            $availabilityConflict = CaregiverAvailability::checkRemovedAvailableDaysConflict($caregiver, $diffAvailability);
+        }
+
+        if( $vacationConflict || $availabilityConflict){
+            event(new CaregiverAvailabilityChanged($caregiver));
+            return new ErrorResponse('401', 'Unable to update availability. Please contact your registry.');
+        }
+
         $caregiver->update(['preferences' => $request->preferencesData()]);
         $caregiver->setAvailability($request->availabilityData());
+
+        if($diffDaysOff){
+            $caregiver->daysOff()->delete();
+            $caregiver->daysoff()->createMany($request->daysOffData());
+        }
+
         $caregiver->daysOff()->delete();
         $caregiver->daysoff()->createMany($request->daysOffData());
 

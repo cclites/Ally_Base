@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Billing\ClientRate;
 use App\Billing\ScheduleService;
+use App\Caregiver;
 use App\Exceptions\AutomaticCaregiverAssignmentException;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
@@ -674,4 +675,27 @@ class ScheduleController extends BaseController
         }
         return false;
     }
+
+    /**
+     * Allow office users to remove a caregiver from a schedule and re-open the schedule.
+     *
+     * @param Caregiver $caregiver
+     * @return SuccessResponse
+     */
+    public function reopenSchedules(Caregiver $caregiver){
+
+        $scheduleIds = \DB::table('caregiver_availability_conflict')
+            ->where('caregiver_id', $caregiver->id)
+            ->pluck('schedule_id');
+
+        Schedule::whereIn('id', $scheduleIds)->update(['caregiver_id'=>null]);
+
+        \DB::table('caregiver_availability_conflict')
+            ->where('caregiver_id', $caregiver->id)
+            ->delete();
+
+        return new SuccessResponse('200', 'Schedules have been reopened.');
+
+    }
+
 }

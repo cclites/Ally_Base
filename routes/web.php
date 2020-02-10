@@ -409,6 +409,9 @@ Route::group([
     Route::get('reports/batch-invoice/print/', 'Business\Report\BatchInvoiceReportController@print')->name('reports.batch-invoice-report-print');
     Route::get('reports/client-referrals', 'Business\Report\ClientReferralsReportController@index')->name('reports.client-referral-report');
     Route::get('reports/client-referrals/{businessId}', 'Business\Report\ClientReferralsReportController@populateDropdown');
+    Route::get('reports/caregiver-availability-conflict', 'Business\Report\CaregiverAvailabilityConflictReport@index');
+    Route::get('reports/caregiver-availability-conflict/{caregiver}', 'Business\Report\CaregiverAvailabilityConflictReport@show');
+
 
     Route::get('reports/audit-log', 'Business\AuditLogController@show')->name('business.reports.audit-log');
 
@@ -437,6 +440,7 @@ Route::group([
     Route::get('schedule/events', 'Business\ScheduleController@events')->name('schedule.events');
     Route::post('schedule/bulk_update', 'Business\ScheduleController@bulkUpdate')->name('schedule.bulk_update');
     Route::post('schedule/bulk_delete', 'Business\ScheduleController@bulkDestroy')->name('schedule.bulk_delete');
+    Route::post('schedule/reopen/{caregiver}', 'Business\ScheduleController@reopenSchedules')->name('schedule.reopen');
     Route::patch('schedule/{schedule}/status', 'Business\ScheduleController@updateStatus')->name('schedule.update_status');
     Route::resource('schedule', 'Business\ScheduleController');
     Route::get('schedule/{schedule}/preview', 'Business\ScheduleController@preview')->name('schedule.preview');
