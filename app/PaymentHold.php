@@ -29,7 +29,6 @@ namespace App;
  */
 class PaymentHold extends AuditableModel
 {
-    use \OwenIt\Auditing\Auditable;
 
     protected $table = 'payment_holds';
     protected $fillable = ['notes', 'check_back_on'];
