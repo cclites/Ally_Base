@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Billing\ClientRate;
 use App\Billing\ScheduleService;
 use App\Caregiver;
+use App\CaregiverAvailabilityConflict;
 use App\Exceptions\AutomaticCaregiverAssignmentException;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
@@ -677,13 +678,14 @@ class ScheduleController extends BaseController
     }
 
     /**
-     * Allow office users to remove a caregiver from a schedule and re-open the schedule.
+     * Allow office users to remove a caregiver from multiple visits and
+     * reopen the schedule.
      *
      * @param Caregiver $caregiver
      * @return SuccessResponse
      */
-    public function reopenSchedules(Caregiver $caregiver){
-
+    public function reopenSchedules(Caregiver $caregiver)
+    {
         $scheduleIds = \DB::table('caregiver_availability_conflict')
             ->where('caregiver_id', $caregiver->id)
             ->pluck('schedule_id');
@@ -696,6 +698,13 @@ class ScheduleController extends BaseController
 
         return new SuccessResponse('200', 'Schedules have been reopened.');
 
+    }
+
+    public function reopenSingleSchedule(Schedule $schedule)
+    {
+        $schedule->update(['caregiver_id'=>null]);
+        CaregiverAvailabilityConflict::where('schedule_id', $schedule->id)->delete();
+        return new SuccessResponse('Schedule has been reopened.', $schedule);
     }
 
 }
