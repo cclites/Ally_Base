@@ -63,7 +63,10 @@ class ServiceAuthValidator
     {
         // Need to convert the period timezone to UTC for the shift query
         $utcPeriod = [$period[0]->copy()->setTimezone('UTC'), $period[1]->copy()->setTimezone('UTC')];
-        $total = Shift::where('client_id', $this->client->id)
+        $total = Shift::with([
+                'service', 'services', 'client', 'client.user', 'shiftFlags'
+            ])
+            ->where('client_id', $this->client->id)
             ->whereBetween('checked_in_time', $utcPeriod)
             ->get()
             ->map(function ($shift) {
@@ -205,7 +208,10 @@ class ServiceAuthValidator
     {
         $authPeriodDates = $auth->getPeriodDates($shiftDate, 'UTC');
 
-        $query = Shift::where('client_id', $this->client->id)
+        $query = Shift::with([
+                'service', 'services', 'client', 'client.user', 'shiftFlags'
+            ])
+            ->where('client_id', $this->client->id)
             ->whereNotNull('checked_out_time')
             ->where(function ($q) use ($authPeriodDates) {
                 return $q->whereBetween('checked_in_time', $authPeriodDates)
