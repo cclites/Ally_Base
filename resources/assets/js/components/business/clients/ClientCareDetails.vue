@@ -7,6 +7,9 @@
 
         <b-form-group class="pb-2">
             <b-btn @click="print()" variant="primary" class="float-right" :disabled="disablePrint"><i class="fa fa-print"></i> Print</b-btn>
+            <span class="float-right" v-html="rawHtml"></span>
+            <b-btn variant="success" class="float-right" @click.prevent="save()" :disabled="busy">Save Changes</b-btn>
+
 
         </b-form-group>
 
@@ -379,6 +382,9 @@
                     return false;
                 }
                 return true;
+            },
+            rawHtml() {
+                return '&nbsp;'
             }
         },
         
