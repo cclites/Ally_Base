@@ -163,17 +163,7 @@
                 updateList : [],
                 loading: false,
                 filter: null,
-                form : {
-
-                    expires_at  : moment().format( 'MM/DD/YYYY' ),
-                    tempId      : Math.floor( Math.random() * 10000 ),
-                    isNew       : true,
-                    isLoading   : false,
-                    name        : '',
-                    description : '',
-                    updated_at  : '',
-                    applicable  : true
-                },
+                form : {},
                 fields: [
                     {
                         key: 'name',
@@ -211,6 +201,7 @@
 
         async mounted() {
 
+            this.createForm();
             this.fetchChainExpirations();
         },
 
@@ -422,6 +413,27 @@
 
                 let i = this.chainExpirations.findIndex( exp => exp.isNew )
                 this.chainExpirations.splice( i, 1 );
+            },
+            createForm(){
+
+                this.form = {
+
+                    expires_at  : moment().format( 'MM/DD/YYYY' ),
+                    tempId      : Math.floor( Math.random() * 10000 ),
+                    isNew       : true,
+                    isLoading   : false,
+                    name        : '',
+                    description : '',
+                    updated_at  : '',
+                    applicable  : true
+                };
+            }
+        },
+        watch: {
+
+            createExpirationModal( newVal, oldVal ){
+
+                this.createForm();
             }
         }
     }
