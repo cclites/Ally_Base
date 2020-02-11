@@ -26,6 +26,7 @@ class SaveCaregiverExpirationsRequest extends FormRequest
     {
         return [
 
+            '*.chain_expiration_type_id' => 'nullable',
             '*.id' => 'nullable',
             '*.name' => 'required',
             '*.description' => 'nullable|max:100|min:0',

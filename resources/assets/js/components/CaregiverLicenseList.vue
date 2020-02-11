@@ -323,8 +323,6 @@
             saveLicense( item ){
                 // only in use for the toggling applicable status
 
-                if( item.isNew ) this.chainExpirations.unshift( item );
-
                 item.isLoading = true;
                 item.expires_at = item.expires_at; // is this necessary?
                 let form = new Form( item );
@@ -334,6 +332,8 @@
 
                 form.submit( verb, url )
                     .then( response => {
+
+                        if( item.isNew ) this.chainExpirations.unshift( item );
 
                         item.updated_at = moment.utc( response.data.data.updated_at ).local().format( 'MM/DD/YYYY h:mm A' );
                         item.id         = response.data.data.id;
