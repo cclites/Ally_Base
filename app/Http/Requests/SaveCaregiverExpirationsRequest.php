@@ -14,7 +14,7 @@ class SaveCaregiverExpirationsRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return is_office_user() || is_admin();
     }
 
     /**
@@ -26,6 +26,7 @@ class SaveCaregiverExpirationsRequest extends FormRequest
     {
         return [
 
+            '*.id' => 'nullable',
             '*.name' => 'required',
             '*.description' => 'nullable|max:100|min:0',
             '*.expires_at' => 'required|date_format:m/d/Y',

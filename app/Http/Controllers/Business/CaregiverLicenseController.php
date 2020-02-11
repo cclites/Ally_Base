@@ -63,7 +63,7 @@ class CaregiverLicenseController extends BaseController
     {
         $this->authorize( 'update', $caregiver );
 
-        $expirations = $request->validated();//[ '*' ];
+        $expirations = $request->validated(); //[ '*' ];
 
         \DB::beginTransaction();
         try {
