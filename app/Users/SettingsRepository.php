@@ -29,7 +29,8 @@ class SettingsRepository
             $defaultBusiness->calendar_default_view ? new CalendarView($defaultBusiness->calendar_default_view) : null,
             $defaultBusiness->calendar_caregiver_filter ? new CalendarCaregiverFilter($defaultBusiness->calendar_caregiver_filter) : null,
             $defaultBusiness->calendar_next_day_threshold ? new CalendarNextDayThreshold($defaultBusiness->calendar_next_day_threshold) : null,
-            $defaultBusiness->id
+            $defaultBusiness->id,
+            $chain->open_shifts_setting
         );
     }
 }

@@ -31,7 +31,7 @@ class CaregiverScheduleRequestController extends BaseController
         if( $request->input( 'count', false ) ){
             // maybe this can be organized better.. this is for the top-notification-icon
 
-            $businesses = auth()->user()->role->businessesWithOpenShiftsFeature();
+            $businesses = auth()->user()->role->businesses;
 
             $count = CaregiverScheduleRequest::forOpenSchedules()
                 ->whereActive()

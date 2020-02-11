@@ -129,17 +129,7 @@
                                 <input-help :form="businessSettings" field="calendar_next_day_threshold"
                                             text="When an shift’s end time crosses midnight, show the shift across both days in the calendar."></input-help>
                             </b-form-group>
-                            <b-form-group label="Enable Open Shift Feature" label-for="open_shifts_setting">
-                                <b-form-select id="open_shifts_setting"
-                                               v-model="businessSettings.open_shifts_setting"
-                                >
-                                    <option :value=" 'off' ">Off</option>
-                                    <option :value=" 'unlimited' ">On - Caregivers see all open shifts for all clients</option>
-                                    <option :value=" 'limited' ">On - Caregivers see open shifts for only their clients</option>
-                                </b-form-select>
-                                <input-help :form="businessSettings" field="open_shifts_setting"
-                                            text="Enable the ability for Caregivers to volunteer for open shifts. Whether for clients they are currently referred to or optionally for all clients as well."></input-help>
-                            </b-form-group>
+                            
                             <b-form-group label="Logo" label-for="logo">
                                 <image-cropper
                                     v-model="businessSettings.logo"
@@ -265,6 +255,26 @@
                             <b-btn @click="update" variant="info" size="lg">
                                 Save Settings
                             </b-btn>
+                        </b-col>
+                    </b-row>
+                </b-tab>
+                <b-tab title="Open Shifts Access" href="#openshifts">
+                    <b-row>
+                        <b-col md="12">
+
+                            <b-alert show><strong>Note:</strong> Changes here will affect all office locations.</b-alert>
+
+                            <b-form-group label="Enable Open Shift Feature" label-for="open_shifts_setting">
+                                <b-form-select id="open_shifts_setting"
+                                               v-model="officeUserSettings.open_shifts_setting"
+                                >
+                                    <option :value=" 'off' ">Off</option>
+                                    <option :value=" 'unlimited' ">On - Caregivers see all open shifts for all clients</option>
+                                    <option :value=" 'limited' ">On - Caregivers see open shifts for only their clients</option>
+                                </b-form-select>
+                                <input-help :form="businessSettings" field="open_shifts_setting"
+                                            text="Enable the ability for Caregivers to volunteer for open shifts. Whether for clients they are currently referred to or optionally for all clients as well."></input-help>
+                            </b-form-group>
                         </b-col>
                     </b-row>
                 </b-tab>
@@ -719,7 +729,6 @@
                     auto_confirm_unmodified_shifts: business.auto_confirm_unmodified_shifts,
                     auto_confirm_verified_shifts: business.auto_confirm_verified_shifts,
                     enable_client_onboarding: business.enable_client_onboarding,
-                    open_shifts_setting: business.open_shifts_setting,
                     hha_username: business.hha_username,
                     hha_password: business.hha_password ? '********' : '',
                     tellus_username: business.tellus_username,
@@ -785,19 +794,15 @@
                 this.updateCaregiverSignatureValues()
             },
 
-            business(business, oldBusiness) {
-                console.dir(business);
-                if (!oldBusiness && business) {
-                    this.businessSettings = this.makeForm (business);
-                    this.signatureOption = this.getSignatureOption(business);
-                    this.caregiverSignatureOption = this.getCaregiverSignatureOption(business);
-                    return;
-                }
+            business( business, oldBusiness ){
 
-                if (business.id !== oldBusiness.id) {
-                    this.businessSettings = this.makeForm(business);
-                    this.signatureOption = this.getSignatureOption(business);
-                    this.caregiverSignatureOption = this.getCaregiverSignatureOption(business);
+                console.dir( business );
+                if( ( !oldBusiness && business ) || ( business.id !== oldBusiness.id ) ){
+
+                    this.businessSettings = this.makeForm( business );
+                    this.signatureOption = this.getSignatureOption( business );
+                    this.caregiverSignatureOption = this.getCaregiverSignatureOption( business );
+                    return;
                 }
             },
             'businessSettings.allow_client_confirmations': function(value) {

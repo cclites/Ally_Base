@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers\Caregivers;
 
-use App\Address;
-use App\Business;
+use App\BusinessChain;
 use App\ClientExcludedCaregiver;
 use App\Responses\ErrorResponse;
 use App\Schedule;
@@ -18,19 +17,19 @@ class OpenShiftsController extends BaseController
 
         if( request()->filled( 'json' ) ){
 
-            $setting  = $caregiver->role->businessesWithOpenShiftsFeature()->first()->open_shifts_setting; // this.. is a problem.. only if two locations are split 'limited' vs 'unlimited' in their settings.. this is why it would beed to be a drop-down
-            $timezone = $caregiver->role->businesses->first()->timezone; // also the absense of a dropdown means that these locations better be in the same time zone so long as we scale..
+            $setting  = $caregiver->role->businessesChains()->first()->open_shifts_setting;
+            $timezone = $caregiver->role->businesses->first()->timezone;
 
             $excluded = ClientExcludedCaregiver::where( 'caregiver_id', auth()->user()->id )->pluck( 'client_id' )->toArray();
 
-            $query = Schedule::forRequestedBusinesses( $caregiver->role->businessesWithOpenShiftsFeature()->pluck( 'id' )->toArray() )
+            $query = Schedule::forRequestedBusinesses( $caregiver->role->businesses->pluck( 'id' )->toArray() )
                 ->with([ 'client' ])
                 ->whereNotIn( 'client_id', $excluded )
                 ->inTheNextMonth( $timezone )
                 ->whereOpen()
                 ->ordered();
 
-            if( $setting === Business::OPEN_SHIFTS_LIMITED ){
+            if( $setting === BusinessChain::OPEN_SHIFTS_LIMITED ){
                 // check to see if you should only grab related caregiver-clients
                 $query->whereHas( 'client.rates', function ( $q ) use ( $caregiver ) {
 
@@ -39,7 +38,7 @@ class OpenShiftsController extends BaseController
             }
 
             // get all of the caregver's existing schedules in the same time frame
-            $caregivers_schedule = Schedule::forRequestedBusinesses( $caregiver->role->businessesWithOpenShiftsFeature()->pluck( 'id' )->toArray() )
+            $caregivers_schedule = Schedule::forRequestedBusinesses( $caregiver->role->businesses->pluck( 'id' )->toArray() )
                 ->forCaregiver( $caregiver )
                 ->inTheNextMonth( $timezone )
                 ->ordered()
