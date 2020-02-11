@@ -407,6 +407,9 @@ Route::group([
     Route::get('reports/invoice-summary-by-salesperson', 'Business\Report\InvoiceSummaryBySalespersonController@index')->name('reports.invoice-summary-by-salesperson');
     Route::get('reports/invoice-summary-by-client-type', 'Business\Report\InvoiceSummaryByClientTypeReportController@index')->name('reports.invoice-summary-by-client-type');
     Route::get('reports/invoice-summary-by-client', 'Business\Report\InvoiceSummaryByClientReportController@index')->name('reports.invoice-summary-by-client');
+    Route::get('reports/face-sheet', 'Business\Report\FaceSheetReportController@index')->name('reports.face-sheet');
+    Route::get('reports/face-sheet/clients/print/{client}', 'Business\Report\FaceSheetReportController@generateClientFaceSheet');
+    Route::get('reports/face-sheet/caregivers/print/{caregiver}/{business}', 'Business\Report\FaceSheetReportController@generateCaregiverFaceSheet');
 
     Route::get('reports/batch-invoice/print/', 'Business\Report\BatchInvoiceReportController@print')->name('reports.batch-invoice-report-print');
     Route::get('reports/client-referrals', 'Business\Report\ClientReferralsReportController@index')->name('reports.client-referral-report');
