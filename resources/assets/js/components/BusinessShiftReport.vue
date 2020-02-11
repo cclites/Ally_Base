@@ -463,8 +463,7 @@
                         'status': item.status,
                         'business_id': item.business_id,
                         'Admin Note': item.admin_note,
-                        'Scheduled Time': item.scheduled_time,
-                        'scheduled_time_difference': item.scheduled_time_difference,
+                        'Scheduled Time': item.scheduled_start_time ? moment(item.scheduled_start_time).format('h:mm A') + ' - ' + moment(item.scheduled_end_time).format('h:mm A') + ` (${item.scheduled_time_difference})` : '-',
                         '_rowVariant': this.getRowVariant(item),
                     };
                 });
