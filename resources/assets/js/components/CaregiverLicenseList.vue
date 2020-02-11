@@ -23,8 +23,8 @@
                 :items=" filteredExpirations "
                 :fields="fields"
                 :filter="filter"
-                sort-by="expires_at"
-                :sort-desc=" true "
+                sort-by="expires_sort"
+                :sort-desc=" false "
                 no-sort-reset
             >
 
