@@ -38,7 +38,7 @@ class CreateUserAdminNoteRequest extends FormRequest
     public function filtered(): array
     {
         $data = $this->validated();
-        $data['creator_user_id'] = auth()->user()->id;
+        $data['creator_user_id'] = auth()->user()->impersonator() ? auth()->user()->impersonator()->id : auth()->user()->id;
         return $data;
     }
 }
