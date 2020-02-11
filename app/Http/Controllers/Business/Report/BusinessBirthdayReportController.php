@@ -3,21 +3,30 @@
 namespace App\Http\Controllers\Business\Report;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Reports\BirthdayReport;
-use App\Caregiver;
-use App\Client;
+use Illuminate\Http\Request;
 
-class BusinessBirthdayReportController extends Controller {
-    public function index(Request $request) {
+class BusinessBirthdayReportController extends Controller
+{
+    /**
+     * Get the user birthday report.
+     *
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\JsonResponse|\Illuminate\View\View
+     */
+    public function index(Request $request)
+    {
         if ($request->filled('json')) {
             $report = new BirthdayReport($request->type);
-            $report->includeContactInfo();
 
             $userId = $request->selectedId;
             $startDate = $request->start_date;
             $endDate = $request->end_date;
             $clientType = $request->client_type;
+
+            if (! $request->show_inactive) {
+                $report->filterActiveOnly();
+            }
 
             if ($userId != 'All' && $userId) {
                 $report->filterByClientId($userId);
@@ -37,16 +46,6 @@ class BusinessBirthdayReportController extends Controller {
         $type = $request->type == 'clients' ? 'clients' : 'caregivers';
         $type = ucfirst($type);
 
-        $clients = Client::forRequestedBusinesses();
-
-        $clientTypes = $clients->distinct('client_type')->get(['client_type'])->map(function ($client) {
-            return $client->client_type;
-        })->values();
-
-        $clientList = $clients->select('id')->get()->sortBy('name')->values();
-
-        $caregiverList = Caregiver::forRequestedBusinesses()->select('id')->get()->sortBy('name')->values();
-
-        return view('business.reports.user_birthday', compact('type', 'clientTypes', 'clientList', 'caregiverList'));
+        return view('business.reports.user_birthday', compact('type'));
     }
 }

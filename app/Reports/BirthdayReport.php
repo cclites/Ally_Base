@@ -21,8 +21,9 @@ class BirthdayReport extends BaseReport
 
     /**
      * BusinessClientBirthdayReport constructor.
+     * @param string $type
      */
-    public function __construct($type)
+    public function __construct(string $type)
     {
         $this->type = strtolower($type);
 
@@ -34,18 +35,6 @@ class BirthdayReport extends BaseReport
             $this->query = Caregiver::forRequestedBusinesses()
                                  ->with(['user.addresses', 'user.phoneNumbers']);
         }
-
-    }
-
-
-    public function includeContactInfo() {
-        // Add city & phone when data retrieved.
-        $this->formatters['add_contact_info'] = function($user) {
-            $user->city = $user->user->addresses[0]->city ?? 'Unknown';
-            $user->phone = $user->user->phoneNumbers[0]->national_number ?? 'Unknown';
-
-            return $user;
-        };
     }
 
     /**
@@ -56,6 +45,12 @@ class BirthdayReport extends BaseReport
         return $this->query;
     }
 
+    public function filterActiveOnly()
+    {
+        $this->query->whereHas('user', function ($q) {
+            $q->where('active', 1);
+        });
+    }
 
     public function filterByClientId(int $client_id) : self {
         $this->query->where($this->type . '.id', $client_id);
@@ -85,13 +80,21 @@ class BirthdayReport extends BaseReport
     /**
      * process the results
      *
-     * @return Collection
+     * @return iterable
      */
     protected function results() : iterable
     {
-        $record =  $this->query()->get()->sortBy($this->type . '.name');
-
-        return $record->values();
+        return $this->query()->get()
+            ->sortBy($this->type . '.name')
+            ->map(function ($role) {
+                return [
+                    'id' => $role->id,
+                    'name' => $role->nameLastFirst,
+                    'date_of_birth' => $role->date_of_birth,
+                    'city' => $role->user->addresses[0]->city ?? 'Unknown',
+                    'phone' => $role->user->phoneNumbers[0]->national_number ?? 'Unknown',
+                ];
+            })
+            ->values();
     }
-
 }
