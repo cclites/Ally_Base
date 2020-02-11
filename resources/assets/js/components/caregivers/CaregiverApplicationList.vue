@@ -43,6 +43,10 @@
                     Generate Report
                 </b-button>
             </b-col>
+            <b-col lg="2">
+                Applicant Name:<br />
+                <b-form-input v-model="search" placeholder="Type to Search" class="f-1" />
+            </b-col>
         </b-row>
 
         <loading-card v-show="loading"></loading-card>
@@ -109,6 +113,7 @@
                 totalRows: 0,
                 perPage: 15,
                 currentPage: 1,
+                search: '',
                 sortBy: null,
                 selectedItem: {},
                 loading: false,
@@ -142,7 +147,11 @@
                 ]
             }
         },
-
+        watch: {
+            search: _.debounce(function(){
+                this.reloadData();
+            }, 300)
+        },
         methods: {
             onFiltered(filteredItems) {
                 // Trigger pagination to update the number of buttons/pages due to filtering
@@ -154,7 +163,7 @@
             },
             reloadData() {
                 this.loading = true;
-                let url = `/business/caregivers/applications?json=1&start_date=${this.start_date}&end_date=${this.end_date}&status=${this.status}&archived=${this.archived}`;
+                let url = `/business/caregivers/applications?json=1&start_date=${this.start_date}&end_date=${this.end_date}&status=${this.status}&archived=${this.archived}&search=${this.search}`;
                 axios.get(url)
                     .then(response => {
                         this.items = response.data;
