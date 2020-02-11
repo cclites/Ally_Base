@@ -136,11 +136,6 @@
                         formatter: (value) => { return value ? 'Verified' : 'Unverified'; }
                     },
                     {
-                        key: 'admin_note',
-                        class: 'hidden-print',
-                        label: 'Admin Note',
-                    },
-                    {
                         key: 'actions',
                         class: 'hidden-print',
                         label: ' ',

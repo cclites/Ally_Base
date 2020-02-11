@@ -23,17 +23,14 @@ class ShiftHistoryItemResource extends Resource
         $hourlyRates = $shift->costs()->getHourlyRates();
         $totalRates = $shift->costs()->getTotalRates();
 
-        if( filled( $shift->schedule ) && $shift->checked_out_time ){
-
-            $time_difference = number_format( ( float )( ( $shift->schedule->duration / 60 ) - $shift->duration() ), 2, '.', '' );
-
-            $scheduled_start_time = $shift->schedule->getStartDateTime()->format( 'h:i A' );
-            $scheduled_end_time   = $shift->schedule->getEndDateTime()->format( 'h:i A' );
-            $scheduled_time = "$scheduled_start_time - $scheduled_end_time";
+        if (filled($shift->schedule) && $shift->checked_out_time) {
+            $time_difference = number_format(( float ) abs(($shift->schedule->duration / 60) - $shift->duration()), 2, '.', '');
+            $scheduled_start_time = $shift->schedule->getStartDateTime()->toDateTimeString();
+            $scheduled_end_time   = $shift->schedule->getEndDateTime()->toDateTimeString();
             $scheduled_time_difference = $time_difference;
-
         } else {
-            $scheduled_time = null;
+            $scheduled_start_time = null;
+            $scheduled_end_time = null;
             $scheduled_time_difference = null;
         }
 
@@ -77,12 +74,13 @@ class ShiftHistoryItemResource extends Resource
             'created_at' => optional($shift->created_at)->toDateTimeString(),
             'services' => $this->mapServices($shift),
 
-            'admin_note' => ( is_admin() || is_office_user() ) ? $shift->admin_note : null,
+            'admin_note' => (is_admin() || is_office_user()) ? $shift->admin_note : null,
 
-            'visit_edit_reason_id' => optional( $shift->visitEditReason )->formatted_name,
-            'visit_edit_action_id' => optional( $shift->visitEditAction )->formatted_name,
+            'visit_edit_reason_id' => optional($shift->visitEditReason)->formatted_name,
+            'visit_edit_action_id' => optional($shift->visitEditAction)->formatted_name,
 
-            'scheduled_time' => $scheduled_time,
+            'scheduled_start_time' => $scheduled_start_time,
+            'scheduled_end_time' => $scheduled_end_time,
             'scheduled_time_difference' => $scheduled_time_difference,
         ];
     }
@@ -97,7 +95,7 @@ class ShiftHistoryItemResource extends Resource
     {
         if ($shift->service) {
             return [$shift->service->code . '-' . Str::limit($shift->service->name, 8) . '(' . $shift->getRawDuration() . ')'];
-        } else if ($shift->services->count()) {
+        } elseif ($shift->services->count()) {
             return $shift->services->map(function (ShiftService $shiftService) {
                 return $shiftService->service->code . '-' . Str::limit($shiftService->service->name, 8) . '(' . $shiftService->duration . ')';
             });

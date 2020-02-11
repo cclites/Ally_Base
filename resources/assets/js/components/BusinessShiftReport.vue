@@ -179,6 +179,10 @@
                 </b-col>
             </b-row>
             <shift-history-table :fields="fields" :items="shiftHistoryItems">
+                <template slot="Admin Note" scope="row">
+
+                    {{ ( row.item.admin_note.length > 12 ? row.item.admin_note.substring( 0, 12 ) + '...' : row.item.admin_note ) }}
+                </template>
                 <template slot="actions" scope="row">
                     <span class="text-nowrap" v-b-tooltip.hover title="Shift ID for Admins Only" v-if="admin && row.item.id">ID: {{ row.item.id }}</span>
                     <div v-if="row.item.id">
@@ -391,27 +395,30 @@
                     'Invoiced',
                 ];
 
+                if( this.isOfficeUserOrAdmin ){
+
+                    fields.push( 'Admin Note' );
+                }
+
                 return fields;
             },
 
             fields() {
                 let fields = [];
                 for (let field of this.availableFields) {
-                    if (this.filteredFields.indexOf(field) !== -1) {
+                    if( this.filteredFields.indexOf(field) !== -1 && field == 'Admin Note' ){
+                        fields.push({
+                            key: field,
+                            formatter : v => v ? v.substring( 0, 12 ) + '...' : '',
+                            sortable: true,
+                            class: 'hidden-print'
+                        });
+                    } else if(this.filteredFields.indexOf(field) !== -1) {
                         fields.push({
                             'key': field,
                             'sortable': true,
                         });
                     }
-                }
-
-                if( this.isOfficeUserOrAdmin ){
-
-                    fields.push({
-                        key: 'admin_note',
-                        formatter : v => v ? v.substring( 0, 12 ) + '...' : '',
-                        class: 'hidden-print'
-                    });
                 }
 
                 fields.push({
@@ -455,9 +462,8 @@
                         'Services': item.services,
                         'status': item.status,
                         'business_id': item.business_id,
-                        'admin_note': item.admin_note,
-                        'Scheduled Time': item.scheduled_time,
-                        'scheduled_time_difference': item.scheduled_time_difference,
+                        'Admin Note': item.admin_note,
+                        'Scheduled Time': item.scheduled_start_time ? moment(item.scheduled_start_time).format('h:mm A') + ' - ' + moment(item.scheduled_end_time).format('h:mm A') + ` (${item.scheduled_time_difference})` : '-',
                         '_rowVariant': this.getRowVariant(item),
                     };
                 });
