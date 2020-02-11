@@ -477,6 +477,7 @@ Route::group([
     Route::resource('questions', 'Business\QuestionController');
     Route::get('communication/text-caregivers', 'Business\CommunicationController@createText')->name('communication.text-caregivers');
     Route::post('communication/text-caregivers', 'Business\CommunicationController@sendText')->name('communication.text-caregivers.store');
+    Route::post('communication/reply-to-reply', 'Business\CommunicationController@sendReplyToReply')->name('communication.text-caregivers.reply-to-reply');
     Route::put('communication/text-caregivers', 'Business\CommunicationController@saveRecipients')->name('communication.text-caregivers.recipients');
     Route::get('communication/sms-threads', 'Business\CommunicationController@threadIndex')->name('communication.sms-threads');
     Route::get('communication/sms-threads/{thread}', 'Business\CommunicationController@threadShow')->name('communication.sms-threads.show');

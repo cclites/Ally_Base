@@ -17,7 +17,7 @@ class SendTextRequest extends BusinessRequest
     {
         return [
             'message' => 'required|string|min:5|max:' . PhoneService::MAX_MESSAGE_LENGTH,
-            'recipients' => 'array',
+            'recipients' => 'array|required',
             'recipients.*' => 'integer',
             'can_reply' => 'boolean',
         ];

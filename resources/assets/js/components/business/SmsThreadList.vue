@@ -203,7 +203,7 @@ export default {
         },
 
         openThread(thread) {
-            window.location = `/business/communication/sms-threads/${thread.id}`;
+            window.open( `/business/communication/sms-threads/${thread.id}`, '_blank' );
         }
     },
 }
