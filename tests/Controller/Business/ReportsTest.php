@@ -88,8 +88,8 @@ class ReportsTest extends TestCase {
         $this->post('business/reports/birthdays', $data)
              ->assertSuccessful()
              ->assertJsonCount(2)
-             ->assertJsonFragment(["id" => $clients[0]->id, "email" => $clients[0]->email])
-             ->assertJsonFragment(["id" => $clients[1]->id, "email" => $clients[1]->email]);
+             ->assertJsonFragment(["id" => $clients[0]->id, "date_of_birth" => $clients[0]->date_of_birth])
+             ->assertJsonFragment(["id" => $clients[1]->id, "date_of_birth" => $clients[1]->date_of_birth]);
     }
 
     /** @test */
@@ -108,7 +108,7 @@ class ReportsTest extends TestCase {
         $this->post('business/reports/birthdays', $data)
              ->assertSuccessful()
              ->assertJsonCount(1)
-             ->assertJsonFragment(["id" => $clients[0]->id, "email" => $clients[0]->email]);
+             ->assertJsonFragment(["id" => $clients[0]->id, "date_of_birth" => $clients[0]->date_of_birth]);
     }
 
     /** @test */
@@ -133,7 +133,7 @@ class ReportsTest extends TestCase {
         $this->post('business/reports/birthdays', $data)
              ->assertSuccessful()
              ->assertJsonCount(1)
-             ->assertJsonFragment(["id" => $client1->id, "email" => $client1->email]);
+             ->assertJsonFragment(["id" => $client1->id, "date_of_birth" => $client1->date_of_birth]);
     }
 
     /** @test */
@@ -158,7 +158,7 @@ class ReportsTest extends TestCase {
         $this->post('business/reports/birthdays', $data)
              ->assertSuccessful()
              ->assertJsonCount(1)
-             ->assertJsonFragment(["id" => $client1->id, "email" => $client1->email]);
+             ->assertJsonFragment(["id" => $client1->id, "date_of_birth" => $client1->date_of_birth]);
     }
 
     /**
@@ -198,8 +198,8 @@ class ReportsTest extends TestCase {
         $this->post('business/reports/birthdays', $data)
              ->assertSuccessful()
              ->assertJsonCount(2)
-             ->assertJsonFragment(["id" => $clients[1]->id, "email" => $clients[1]->email])
-             ->assertJsonFragment(["id" => $clients[2]->id, "email" => $clients[2]->email]);
+             ->assertJsonFragment(["id" => $clients[1]->id, "date_of_birth" => $clients[1]->date_of_birth])
+             ->assertJsonFragment(["id" => $clients[2]->id, "date_of_birth" => $clients[2]->date_of_birth]);
     }
 
     /** @test */
@@ -216,7 +216,7 @@ class ReportsTest extends TestCase {
         $this->post('business/reports/birthdays', $data)
              ->assertSuccessful()
              ->assertJsonCount(2)
-             ->assertJsonFragment(["id" => $caregivers[0]->id, "email" => $caregivers[0]->email]);
+             ->assertJsonFragment(["id" => $caregivers[0]->id, "date_of_birth" => $caregivers[0]->date_of_birth]);
     }
 
     /** @test */
@@ -234,7 +234,7 @@ class ReportsTest extends TestCase {
         $this->post('business/reports/birthdays', $data)
              ->assertSuccessful()
              ->assertJsonCount(1)
-             ->assertJsonFragment(["id" => $caregivers[0]->id, "email" => $caregivers[0]->email]);
+             ->assertJsonFragment(["id" => $caregivers[0]->id, "date_of_birth" => $caregivers[0]->date_of_birth]);
     }
 
     /**
@@ -272,7 +272,7 @@ class ReportsTest extends TestCase {
         $this->get('business/reports/data/birthdays', $data)
              ->assertSuccessful()
              ->assertJsonCount(2)
-             ->assertJsonFragment(["id" => $caregivers[1]->id, "email" => $caregivers[1]->email])
-             ->assertJsonFragment(["id" => $caregivers[2]->id, "email" => $caregivers[2]->email]);
+             ->assertJsonFragment(["id" => $caregivers[1]->id, "date_of_birth" => $caregivers[1]->date_of_birth])
+             ->assertJsonFragment(["id" => $caregivers[2]->id, "date_of_birth" => $caregivers[2]->date_of_birth]);
     }
 }
