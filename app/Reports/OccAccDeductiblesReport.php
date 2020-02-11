@@ -40,8 +40,10 @@ class OccAccDeductiblesReport extends BusinessResourceReport
      */
     public function __construct()
     {
-        $this->query = Shift::with(['caregiver', 'client'])
-            ->whereAwaitingCaregiverDeposit();
+        $this->query = Shift::with([ 'business', 'caregiver' => function( $q ){
+
+            return $q->where( 'has_occ_acc', 1 );
+        }]);
     }
 
     /**
@@ -60,10 +62,10 @@ class OccAccDeductiblesReport extends BusinessResourceReport
      * @param string $start
      * @return $this
      */
-    public function forWeekStartingAt( $start )
+    public function forWeekEndingAt( $end )
     {
-        $this->start_date = $start;
-        $this->end_date   = Carbon::parse( $start )->addWeek()->format( 'm-d-Y' ); // format may be unneccesary here
+        $this->end_date   = $end;
+        $this->start_date = Carbon::parse( $end )->subWeek()->format( 'm-d-Y' ); // format may be unneccesary here
 
         return $this;
     }
@@ -101,47 +103,25 @@ class OccAccDeductiblesReport extends BusinessResourceReport
      */
     protected function results()
     {
-        $detail = $this->query()
-            ->forBusinesses([$this->businessId])
-            ->betweenDates($this->start_date, $this->end_date)
-            ->forCaregiver($this->caregiverId)
-            ->orderBy('checked_in_time')
+        return $this->query()
+            // ->forBusinesses([ $this->businessId ])
+            ->betweenDates( $this->start_date, $this->end_date )
+            ->forCaregiver( $this->caregiverId )
             ->get()
-            ->map(function ($item) {
+            ->map( function ( $shift ){
+
+                // CG name
+                // Registry
+                // Hours Worked
+                // OccAcc Deduction Total
+
                 return [
-                    'id' => $item->id,
-                    'caregiver_name' => $item->caregiver->name,
-                    'caregiver_id' => $item->caregiver->id,
-                    'caregiver_rate' => $item->caregiver_rate,
-                    'client_name' => $item->client->name,
-                    'client_id' => $item->client->id,
-                    // TODO: verify that this is the correct way to determine pay method
-                    'pay_method' => $item->daily_rates ? 'Daily' : 'Hourly',
-                    // -------
-                    // TODO: implement overtime hours:
-                    'hours_regular' => $item->duration(),
-                    'hours_overtime' => 0,
-                    // -------
-                    'caregiver_total' => $item->costs()->getCaregiverCost(true),
-                    'checked_in_time' => $item->checked_in_time->format('c'),
-                    'checked_out_time' => optional($item->checked_out_time)->format('c'),
-                    'total' => $item->costs()->getTotalCost(),
+
+                    'caregiver_name' => $shift->caregiver ? $shift->caregiver->name : 'NO NAME??',
+                    'registry'       => $shift->business ? $shift->business->name : 'NO NAME??',
+                    'hours_worked'   => $shift->duration, // should be a count or aggregate..
+                    'deduction'      => 1337
                 ];
             });
-
-        $summary = $detail->groupBy('caregiver_id')
-            ->map(function ($item) {
-                return [
-                    'caregiver_id' => $item->first()['caregiver_id'],
-                    'caregiver_name' => $item->first()['caregiver_name'],
-                    'hours_regular' => $item->sum('hours_regular'),
-                    'hours_overtime' => $item->sum('hours_overtime'),
-                    'caregiver_total' => $item->sum('caregiver_total'),
-                    'checked_in_time' => $item->min('checked_in_time'),
-                    'checked_out_time' => $item->max('checked_out_time'),
-                ];
-            })->values();
-
-        return collect(compact(['summary', 'detail']));
     }
 }

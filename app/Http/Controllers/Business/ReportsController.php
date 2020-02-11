@@ -1109,8 +1109,8 @@ class ReportsController extends BaseController
         if( $request->expectsJson() ){
 
             $data = $report->forRequestedBusinesses()
-                ->forWeekStartingAt( $request->start )
-                ->forCaregiver($request->caregiver)
+                ->forWeekEndingAt( $request->start )
+                ->forCaregiver( $request->caregiver )
                 ->rows();
 
             if ($request->has('export')) {

@@ -13,7 +13,7 @@
         </b-row>
         <b-row>
 
-            <b-col md="2">
+            <b-col md="3">
 
                 <business-location-form-group
                     v-model=" form.businesses "
@@ -22,7 +22,7 @@
                     :disabled=" form.busy "
                 />
             </b-col>
-            <b-col md="4">
+            <b-col md="6">
 
                 <b-row>
 
@@ -45,12 +45,12 @@
         </b-row>
         <b-row>
 
-            <b-col class="mb-3">
+            <b-col class="mb-3 d-flex justify-content-end">
 
                 <b-button-group>
 
-                    <b-button @click="fetch()" variant="info" class="mr-2" :disabled=" form.busy "><i class="fa mr-1"></i>Generate Report</b-button>
-                    <b-button @click="print()" :disabled=" form.busy "><i class="fa fa-print mr-1"></i>Print</b-button>
+                    <b-button @click="print()" :disabled=" form.busy "><i class="fa fa-print mr-2"></i>Print</b-button>
+                    <b-button @click="fetch()" variant="info" :disabled=" form.busy "><i class="fa"></i>Generate Report</b-button>
                 </b-button-group>
             </b-col>
         </b-row>
