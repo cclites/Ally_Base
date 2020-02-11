@@ -269,11 +269,11 @@ class CareMatch
                     $q->where($day , 1);
                 }
                 if($this->shiftStart){
-                    $q->orWhere('available_start_time', '>=', $this->shiftStart);
+                    $q->where('available_start_time', '>=', $this->shiftStart);
                 }
 
                 if($this->shiftEnd){
-                    $q->orWhere('available_end_time', '<=', $this->shiftEnd);
+                    $q->where('available_end_time', '<=', $this->shiftEnd);
                 }
                 if ($this->duration) {
                     $hours = $this->duration / 60;
