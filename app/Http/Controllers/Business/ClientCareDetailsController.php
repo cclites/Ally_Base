@@ -78,7 +78,14 @@ class ClientCareDetailsController extends BaseController
             ->flatten(1)
             ->toArray();
 
-        $html = response(view('print.business.client_care_details', ['client'=>$client, 'businessActivities'=>$businessActivities, 'clientActivityIds'=>$clientActivityIds]))->getContent();
+        $physicianName = $client->contacts()->where('relationship', 'physician')->pluck('name')->first();
+
+        $html = response(view('print.business.client_care_details', [
+            'client' => $client,
+            'businessActivities' => $businessActivities,
+            'clientActivityIds' => $clientActivityIds,
+            'physicianName' => $physicianName,
+        ]))->getContent();
 
         $snappy = \App::make('snappy.pdf');
         return new Response(

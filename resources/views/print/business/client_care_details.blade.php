@@ -80,11 +80,6 @@
 
     <div class="row">
         <b-col lg="4">
-
-            @php
-                $physicianName = $client->contacts()->where('relationship', 'physician')->pluck('name')->first();
-            @endphp
-
             Physician Name: {{ $physicianName ? $physicianName : "None Listed"}}
         </b-col>
     </div>
