@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Caregivers;
 
 use App\Address;
 use App\Business;
+use App\ClientExcludedCaregiver;
 use App\Responses\ErrorResponse;
 use App\Schedule;
 
@@ -20,8 +21,11 @@ class OpenShiftsController extends BaseController
             $setting  = $caregiver->role->businessesWithOpenShiftsFeature()->first()->open_shifts_setting; // this.. is a problem.. only if two locations are split 'limited' vs 'unlimited' in their settings.. this is why it would beed to be a drop-down
             $timezone = $caregiver->role->businesses->first()->timezone; // also the absense of a dropdown means that these locations better be in the same time zone so long as we scale..
 
+            $excluded = ClientExcludedCaregiver::where( 'caregiver_id', auth()->user()->id )->pluck( 'client_id' )->toArray();
+
             $query = Schedule::forRequestedBusinesses( $caregiver->role->businessesWithOpenShiftsFeature()->pluck( 'id' )->toArray() )
                 ->with([ 'client' ])
+                ->whereNotIn( 'client_id', $excluded )
                 ->inTheNextMonth( $timezone )
                 ->whereOpen()
                 ->ordered();
