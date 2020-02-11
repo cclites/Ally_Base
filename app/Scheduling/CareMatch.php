@@ -38,6 +38,11 @@ class CareMatch
     protected $startsAt;
 
     /**
+     * @var Carbon
+     */
+    protected $endsAt;
+
+    /**
      * @var array
      */
     protected $daysOfWeek = [];
@@ -71,6 +76,16 @@ class CareMatch
      * @var int
      */
     protected $limit = 500;
+
+    /**
+     * @var string
+     */
+    protected $shiftStart;
+
+    /**
+     * @var string
+     */
+    protected $shiftEnd;
 
     function matchesExistingAssignments(Client $client)
     {
@@ -108,6 +123,11 @@ class CareMatch
         $this->startsAt = $starts_at;
         $this->duration = $duration;
         return $this;
+    }
+
+    function matchesShiftTime(string $shift_start, string $shift_end){
+        $this->shiftStart = $shift_start;
+        $this->shiftEnd = $shift_end;
     }
 
     function matchesDaysOfTheWeek(array $days) {
@@ -230,8 +250,6 @@ class CareMatch
 
     protected function queryAvailabilityPreferences($builder)
     {
-        if (!$this->duration && !$this->startsAt) return;
-
         $builder->where(function($q) {
             $q->whereHas('availability', function ($q) {
 
@@ -240,16 +258,22 @@ class CareMatch
                     $q->where(function ($q) {
                         $end = $this->startsAt->copy()->addMinutes($this->duration);
                         $q->where($this->getTimeOfDay($this->startsAt->hour), 1)
-                          ->orWhere($this->getTimeOfDay($end->hour), 1)
-                          ->orWhere('available_start_time', '>=', $this->startsAt)
-                          ->orWhere('available_end_time', '<=', $this->end);
+                          ->orWhere($this->getTimeOfDay($end->hour), 1);
                     });
+
                     // Add start date to daysOfWeek
                     $this->daysOfWeek = array_merge($this->daysOfWeek, [$this->startsAt->format('l')]);
 
                 }
                 foreach($this->daysOfWeek as $day) {
                     $q->where($day , 1);
+                }
+                if($this->shiftStart){
+                    $q->orWhere('available_start_time', '>=', $this->shiftStart);
+                }
+
+                if($this->shiftEnd){
+                    $q->orWhere('available_end_time', '<=', $this->shiftEnd);
                 }
                 if ($this->duration) {
                     $hours = $this->duration / 60;

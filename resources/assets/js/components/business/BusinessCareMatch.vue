@@ -353,6 +353,8 @@
             makeForm() {
                 return new Form({
                     starts_at: this.getStartsAt(),
+                    shift_start: this.startTime ? this.startTime : null,
+                    shift_end: this.endTime ? this.endTime : null,
                     duration: this.getDuration(),
                     matches_activities: this.activities,
                     // matches_preferences: this.preferences,

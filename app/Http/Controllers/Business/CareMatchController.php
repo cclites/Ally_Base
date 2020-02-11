@@ -47,6 +47,10 @@ class CareMatchController extends BaseController
             $this->careMatch->matchesTime(Carbon::parse($request->starts_at, $client->business->getTimezone()), $request->duration);
         }
 
+        if($request->shift_start){
+            $this->careMatch->matchesShiftTime($request->shift_start, $request->shift_end);
+        }
+
         if ($request->matches_gender) {
             $preferences['gender'] = $request->matches_gender === 'client' ? optional($client->preferences)->gender : $request->matches_gender;
         }

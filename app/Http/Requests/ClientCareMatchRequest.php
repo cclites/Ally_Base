@@ -25,6 +25,8 @@ class ClientCareMatchRequest extends FormRequest
     {
         return [
             'starts_at' => 'nullable|date',
+            'start_time' => 'nullable|string',
+            'end_time' => 'nullable|string',
             'duration' => 'nullable|integer|required_if:exclude_overtime,1',
             'matches_activities' => 'nullable|numeric', // should be a decimal representing the minimum percent match
 //            'matches_preferences' => 'boolean',
