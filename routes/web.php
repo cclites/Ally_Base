@@ -311,7 +311,10 @@ Route::group([
     Route::resource('rate-codes', 'Business\RateCodeController');
 
     Route::get('reports', 'Business\ReportsController@index')->name('reports.index');
-    Route::get('reports/birthdays', 'Business\ReportsController@userBirthday')->name('reports.user_birthday');
+    Route::get('reports/birthdays', 'Business\Report\BusinessBirthdayReportController@index')->name('reports.user_birthday');
+    Route::post('reports/birthdays/', 'Business\Report\BusinessBirthdayReportController@index')->name('reports.user_birthday_data');
+
+
     Route::get('reports/anniversary', 'Business\ReportsController@caregiverAnniversary')->name('reports.caregiver_anniversary');
     Route::get('reports/caregiver-expirations', 'Business\Report\BusinessCaregiverExpirationsReportController@index')->name('reports.caregiver-expirations');
     Route::get('reports/credit-card-expiration', 'Business\ReportsController@creditCardExpiration')->name('reports.cc_expiration');
@@ -375,7 +378,6 @@ Route::group([
     Route::get('reports/prospect-directory', 'Business\ReportsController@prospectDirectory')->name('reports.prospect_directory');
     Route::get('reports/prospect-directory/download', 'Business\ReportsController@generateProspectDirectoryReport')->name('reports.prospect_directory.download');
 
-    Route::get('reports/data/birthdays', 'Business\ReportsController@userBirthdayData')->name('reports.data.user_birthday');
     Route::get('reports/data/shift/{id}', 'Business\ReportsController@shift')->name('reports.data.shift');
     Route::get('reports/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
     Route::get('reports/client_charges', 'Business\ReportsController@clientCharges')->name('reports.data.client_charges');
