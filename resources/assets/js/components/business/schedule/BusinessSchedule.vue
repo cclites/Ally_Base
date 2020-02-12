@@ -245,12 +245,11 @@
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
     import moment from 'moment';
-    import ScheduleRequestModal from "../../modals/ScheduleRequestModal";
     import HasOpenShiftsModal from '../../../mixins/HasOpenShiftsModal';
     import { mapActions, mapGetters } from 'vuex';
 
     export default {
-        components: {BusinessLocationFormGroup, ScheduleRequestModal},
+        components: {BusinessLocationFormGroup },
         props: {
             'business': Object,
             'caregiver': Object,
@@ -468,11 +467,6 @@
                 setNewStatus  : 'openShifts/setNewStatus',
                 setSelectedEvent  : 'openShifts/setSelectedEvent',
             }),
-            calendarRequestResponded( data ){
-
-                this.requestResponded( data );
-                this.fetchEvents(); // this should take care of background color, icon
-            },
             getFilteredEvents() {
                 let events = this.events;
 

@@ -55,13 +55,13 @@
 
                     <div v-if=" !hasRequest( data.item.request_status ) " class="d-flex" key="first-block">
 
-                        <b-button variant="success" size="sm" class="f-1 mr-1" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.UNINTERESTED ) " key="request">Not Interested</b-button>
-                        <b-button variant="primary" size="sm" class="f-1 ml-1" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.PENDING ) " key="request">Request Shift</b-button>
+                        <b-button variant="success" size="sm" class="f-1 mr-1" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.UNINTERESTED ) " key="request" :disabled=" form.busy ">Not Interested</b-button>
+                        <b-button variant="primary" size="sm" class="f-1 ml-1" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.PENDING ) " key="request" :disabled=" form.busy ">Request Shift</b-button>
                     </div>
 
                     <div v-if=" hasRequest( data.item.request_status ) " class="" key="second-block">
 
-                        <b-button variant="danger" size="sm" class="btn-block" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.CANCELLED ) " key="rescind">Cancel Request</b-button>
+                        <b-button variant="danger" size="sm" class="btn-block" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.CANCELLED ) " key="rescind" :disabled=" form.busy ">Cancel Request</b-button>
                     </div>
                 </transition>
             </template>

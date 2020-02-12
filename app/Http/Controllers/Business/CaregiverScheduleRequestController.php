@@ -34,7 +34,7 @@ class CaregiverScheduleRequestController extends BaseController
             $businesses = auth()->user()->role->businesses;
 
             $count = CaregiverScheduleRequest::forOpenSchedules()
-                ->whereActive()
+                ->wherePending()
                 ->forSchedulesInTheNextMonth( $businesses->first()->timezone )
                 ->whereIn( 'business_id', $businesses->pluck( 'id' )->toArray() )
                 ->count();
