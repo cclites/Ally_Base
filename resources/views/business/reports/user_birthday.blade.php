@@ -9,5 +9,5 @@
 @endsection
 
 @section('content')
-    <user-birthday-report type="{{ $type }}" />
+    <user-birthday-report type="{{ $type }}"/>
 @endsection

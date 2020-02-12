@@ -139,37 +139,17 @@ class Caregiver1099Controller extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
-     * @return Response
+     * @param UpdateCaregiver1099Request $request
+     * @param Caregiver1099 $caregiver1099
+     * @return ErrorResponse|SuccessResponse
      */
     public function update(UpdateCaregiver1099Request $request, Caregiver1099 $caregiver1099)
     {
-        $caregiver1099->fill($request->validated());
-
-        if (strpos($caregiver1099->client_ssn, "#") !== false) {
-            $this->validate($request, [
-                'client_ssn' => ['required', new ValidSSN(false)],
-            ]);
-            $caregiver1099->client_ssn = encrypt($caregiver1099->client_ssn);
-        } else {
-            unset($caregiver1099->client_ssn);
-        }
-
-        if (strpos($caregiver1099->caregiver_ssn, "#") !== false) {
-            $this->validate($request, [
-                'caregiver_ssn' => ['required', new ValidSSN(false)],
-            ]);
-            $caregiver1099->caregiver_ssn = encrypt($caregiver1099->caregiver_ssn);
-        } else {
-            unset($caregiver1099->caregiver_ssn);
-        }
-
-        if ($caregiver1099->save()) {
+        if ($caregiver1099->update($request->filtered())) {
             return new SuccessResponse("Caregiver 1099 has been updated");
         }
 
-        return new ErrorResponse("Unable to update Caregiver 1099");
+        return new ErrorResponse(500, "Unable to update Caregiver 1099");
     }
 
     /**

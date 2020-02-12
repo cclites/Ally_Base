@@ -23,8 +23,5 @@ yarn-error.log
 /*.sql.gz
 .project
 .DS_Store
-db-dump.sh
-logs.sh
-tellus.sh
 /testing.txt
 .phpunit.result.cache

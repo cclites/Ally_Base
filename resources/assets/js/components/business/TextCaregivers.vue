@@ -87,8 +87,8 @@
                         :disabled="submitting"
                         :state="state"
                     ></b-textarea>
-                    <input-help :form="form" field="message" :text=" `${form.message.length}/${maxLength} character limit` " :class=" form.message.length < maxLength ? 'text-warning' : 'text-danger' "></input-help>
-                    <b-form-invalid-feedback id="message-text-feedback" :class=" form.message.length < maxLength ? 'text-warning' : 'text-danger' ">{{ invalidFeedback }}</b-form-invalid-feedback>
+                    <input-help :form="form" field="message" :text=" `${form.message.length}/${maxLength} character limit` " :class=" textWarningClass( form.message.length ) "></input-help>
+                    <b-form-invalid-feedback id="message-text-feedback" :class=" textWarningClass( form.message.length ) ">{{ invalidFeedback }}</b-form-invalid-feedback>
                 </b-form-group>
                 <b-form-group>
                     <b-button variant="info" type="submit" :disabled="submitting || form.message.length >= maxLength">
@@ -179,6 +179,15 @@ export default {
     },
 
     methods: {
+
+        textWarningClass( length ){
+
+            if( length <= this.warningLength ) return 'text-success';
+
+            if( length <= this.maxLength ) return 'text-warning';
+
+            return 'text-danger';
+        },
         addUser(user) {
             this.removeUser(user.id);   // prevent duplicates
             this.selectedUsers.push(user);

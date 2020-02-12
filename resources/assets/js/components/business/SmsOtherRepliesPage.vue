@@ -8,13 +8,9 @@
                 header-text-variant="white"
                 header-bg-variant="info"
         >
-            <b-row>
-
-                <b-col>
-
-                    <p>Unsorted replies occur when text messages are received but unable to be matched to any recent thread. These replies are still created but - as the name suggests - unable to be matched to any specific thread and thus appear here</p>
-                </b-col>
-            </b-row>
+            <b-alert show variant="info">
+                When a Caregiver replies, the system will find any outgoing text messages that have been sent in the past two hours and assume that is the message they are replying to.  Any replies outside of the 2 hour window are considered 'unsorted' and will appear here.
+            </b-alert>
             <div class="d-flex mb-2">
                 <div class="f-1 d-flex align-items-baseline flex-col">
                     <business-location-form-group

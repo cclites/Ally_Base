@@ -42,7 +42,7 @@
                         key: 'date',
                         label: 'Start',
                         sortable: true,
-                        formatter: (value) => { return this.formatDateTimeFromUTC(value.date); },
+                        formatter: (value) => { return this.formatDateTimeFromUTC(value); },
                     },
                     {
                         key: 'caregiver',

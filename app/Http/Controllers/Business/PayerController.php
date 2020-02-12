@@ -118,7 +118,7 @@ class PayerController extends BaseController
             \DB::commit();
             return new SuccessResponse('Payer details updated successfully.', $payer->fresh());
         } catch (\Exception $ex) {
-            \Log::debug($ex->getMessage());
+            \Log::error($ex->getMessage());
             \DB::rollBack();
             return new ErrorResponse(500, 'An unexpected error occurred.  Please try again.');
         }

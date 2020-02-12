@@ -13,6 +13,7 @@ use App\Schedule;
 use App\Traits\ActiveBusiness;
 use App\SmsThread;
 use App\SmsThreadReply;
+use App\User;
 use Carbon\Carbon;
 
 class CommunicationController extends Controller
@@ -85,7 +86,7 @@ class CommunicationController extends Controller
      * Initiate SMS text blast.
      *
      * @param \App\Http\Requests\SendTextRequest $request
-     * @return \Illuminate\Http\Response
+     * @return ErrorResponse|SuccessResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function sendText(SendTextRequest $request)
@@ -95,6 +96,100 @@ class CommunicationController extends Controller
         // Scrub the recipients list
         $recipients = $request->getEligibleCaregivers();
         if ($recipients->count() == 0) {
+            if (filled($request->input('recipients'))) {
+                return new ErrorResponse(422, 'None of the selected recipients have SMS enabled for any contact numbers.');
+            }
+            return new ErrorResponse(422, 'You must have at least 1 recipient.');
+        }
+
+        // Get the business selection for which outgoing number to use.
+        $business = $request->getBusiness();
+        if (!$from = $request->getOutgoingNumber()) {
+            return new ErrorResponse(418, 'You cannot receive text message replies at this time because you have not been assigned a unique outgoing text messaging number, please contact Ally.');
+        }
+
+        // Create the SmsThread
+        $data = [
+            'business_id' => $business->id,
+            'from_number' => $from,
+            'message' => $request->message,
+            'can_reply' => $request->can_reply,
+            'sent_at' => Carbon::now(),
+            'user_id' => auth()->user()->id,
+        ];
+        $this->authorize('create', [SmsThread::class, $data]);
+        $thread = SmsThread::create($data);
+
+        $failed = [];
+        /** @var \App\Caregiver $recipient */
+        foreach ($recipients as $recipient) {
+            if ($number = $recipient->smsNumber) {
+                try {
+                    dispatch(new SendTextMessage($number->number(false), $request->message, $from, $debugMode));
+                    $thread->recipients()->create(['user_id' => $recipient->id, 'number' => $number->national_number]);
+
+                } catch (\Exception $ex) {
+                    app('sentry')->captureException($ex);
+                    $failed[] = "{$recipient->name} {$recipient->smsNumber->national_number}";
+                }
+            }
+        }
+
+        if( $id = $request->input( 'original_reply', false ) ){
+
+            $reply = SmsThreadReply::find( $id );
+            $reply->continued_thread_id = $thread->id;
+            $reply->save();
+        }
+
+        if (count($failed) > 0) {
+            return new ErrorResponse(500, "Message was sent but failed for the following users:\r\n" . join("\r\n", $failed));
+        }
+
+        if ($debugMode) {
+            dd([
+                'thread_data' => $data,
+                'recipients' => $recipients->map(function ($item) {
+                    return [
+                        'user_id' => $item->id,
+                        'name' => $item->name,
+                        'twilio_format' => $item->smsNumber->number(false),
+                        'number' => optional($item->smsNumber)->national_number,
+                    ];
+                }),
+                'failed' => $failed,
+            ]);
+        }
+
+        return new SuccessResponse('Text messages were successfully dispatched.', [ 'new_thread_id' => $thread->id ]);
+    }
+
+    /**
+     * Separate Command for handling replies-to-replies
+     *
+     * @param \App\Http\Requests\SendTextRequest $request
+     * @return ErrorResponse|SuccessResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function sendReplyToReply(SendTextRequest $request)
+    {
+        $debugMode = $request->debug == 1;
+
+        // Scrub the recipients list
+        $recipients = User::with( 'phoneNumbers' )
+            ->forRequestedBusinesses()
+            ->whereActive( 1 )
+            ->whereHas( 'phoneNumbers', function ( $q ) {
+
+                $q->where( 'receives_sms', 1 );
+            })
+            ->whereIn( 'id', $request->input( 'recipients' ) )
+            ->get()->toBase();
+
+        if ($recipients->count() == 0) {
+            if (filled($request->input('recipients'))) {
+                return new ErrorResponse(422, 'None of the selected recipients have SMS enabled for any contact numbers.');
+            }
             return new ErrorResponse(422, 'You must have at least 1 recipient.');
         }
 

@@ -590,6 +590,14 @@ class ClientController extends BaseController
     {
         $settings = $this->businessChain()->clientTypeSettings;
 
+        if (empty($settings)) {
+            return [
+                'caregiver_1099' => null,
+                'can_edit_send_1099' => 0,
+                'send_1099' => 0
+            ];
+        }
+
         if ($clientType == ClientType::MEDICAID || $clientType == ClientType::PRIVATE_PAY) {
             $caregiver1099 = $settings[$clientType . "_1099_from"]; //ally or client
             $canEdit1099 = $settings[$clientType . "_1099_edit"]; //can edit
@@ -600,13 +608,11 @@ class ClientController extends BaseController
             $send1099 = $settings["other_1099_default"];
         }
 
-        $data = [
+        return [
             'caregiver_1099' => $caregiver1099,
             'can_edit_send_1099' => $canEdit1099,
             'send_1099' => $send1099
         ];
-
-        return $data;
     }
 
     /**

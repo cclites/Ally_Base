@@ -1,4 +1,4 @@
-\<template>
+<template>
     <b-card
         header="Expirations"
         header-text-variant="white"
@@ -8,7 +8,7 @@
 
             <b-col lg="6" class="flex-column flex-sm-row">
 
-                <b-btn @click="createLicense()" variant="info" style="flex:1" class="my-1 d-flex d-sm-inline-block" :disabled=" alreadyCreating ">Add Custom Expiration ( this caregiver only )</b-btn>
+                <b-btn @click=" createExpirationModal = true " variant="info" style="flex:1" class="my-1 d-flex d-sm-inline-block" :disabled=" alreadyCreating ">Add Custom Expiration ( this caregiver only )</b-btn>
                 <b-btn to="/business/settings#expirations" variant="success" style="flex:1" class="my-1 d-flex d-sm-inline-block">Manage Default Expirations</b-btn>
                 <b-form-checkbox class="m-0 vertical-center" v-model=" hide_inapplicables ">Hide any expirations inapplicable to the caregiver</b-form-checkbox>
             </b-col>
@@ -23,7 +23,8 @@
                 :items=" filteredExpirations "
                 :fields="fields"
                 :filter="filter"
-                sort-by="actions"
+                sort-by="expires_sort"
+                :sort-desc=" false "
                 no-sort-reset
             >
 
@@ -98,45 +99,94 @@
                 <b-btn :disabled=" loading || updateList.length == 0 " class="ml-3" @click=" saveLicenses() " variant="success">Save Expirations</b-btn>
             </b-col>
         </b-row>
+
+        <b-modal id="expirationsModal" title="Expiration Details" v-model=" createExpirationModal ">
+
+            <b-container fluid>
+
+                <b-row class="d-flex flex-column">
+
+                    <b-form-group label="Expiration Date" label-for="expires_at">
+
+                        <date-picker
+                            v-model=" form.expires_at "
+                            name="expires_at"
+                        ></date-picker>
+                    </b-form-group>
+                    <b-form-group label="Expiration Name" label-for="name">
+
+                        <b-form-input
+                            id="name"
+                            name="name"
+                            type="text"
+                            v-model="form.name"
+                            >
+                        </b-form-input>
+                    </b-form-group>
+                    <b-form-group label="Expiration Description" label-for="description">
+
+                        <b-form-input
+                            id="description"
+                            name="description"
+                            type="text"
+                            v-model="form.description"
+                            >
+                        </b-form-input>
+                    </b-form-group>
+               </b-row>
+            </b-container>
+            <div slot="modal-footer">
+
+               <b-btn variant="default" @click=" createExpirationModal = false ">Close</b-btn>
+               <b-btn variant="info" @click=" saveLicense( form ) " >Save</b-btn>
+            </div>
+        </b-modal>
     </b-card>
 </template>
 
 <script>
+
     export default {
+
         props: {
+
             'caregiverId': {},
             'licenses': {},
         },
 
         data() {
+
             return {
+
+                createExpirationModal : false,
                 hide_inapplicables : true,
                 updateList : [],
                 loading: false,
                 filter: null,
+                form : {},
                 fields: [
                     {
                         key: 'name',
                         label: 'Name',
                         class: 'name-column',
-                        sortable: false,
+                        sortable: true,
                     },
                     {
                         key: 'expires_sort',
                         class: 'expiration-column',
                         label: 'Expiration Date',
-                        sortable: false,
+                        sortable: true,
                     },
                     {
                         key: 'description',
                         label: "Notes",
-                        sortable: false,
+                        sortable: true,
                     },
                     {
                         key: 'updated_at',
                         class: 'updated-column',
                         label: 'Last Updated',
-                        sortable: false,
+                        sortable: true,
                     },
                     {
                         key: 'actions',
@@ -151,6 +201,7 @@
 
         async mounted() {
 
+            this.createForm();
             this.fetchChainExpirations();
         },
 
@@ -282,6 +333,8 @@
                 form.submit( verb, url )
                     .then( response => {
 
+                        if( item.isNew ) this.chainExpirations.unshift( item );
+
                         item.updated_at = moment.utc( response.data.data.updated_at ).local().format( 'MM/DD/YYYY h:mm A' );
                         item.id         = response.data.data.id;
                         item.isNew      = false;
@@ -290,6 +343,7 @@
                     .finally( () => {
 
                         item.isLoading = false;
+                        this.createExpirationModal = false;
                     });
             },
             saveLicenses(){
@@ -359,6 +413,27 @@
 
                 let i = this.chainExpirations.findIndex( exp => exp.isNew )
                 this.chainExpirations.splice( i, 1 );
+            },
+            createForm(){
+
+                this.form = {
+
+                    expires_at  : moment().format( 'MM/DD/YYYY' ),
+                    tempId      : Math.floor( Math.random() * 10000 ),
+                    isNew       : true,
+                    isLoading   : false,
+                    name        : '',
+                    description : '',
+                    updated_at  : '',
+                    applicable  : true
+                };
+            }
+        },
+        watch: {
+
+            createExpirationModal( newVal, oldVal ){
+
+                this.createForm();
             }
         }
     }

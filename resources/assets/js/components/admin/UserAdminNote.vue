@@ -1,6 +1,6 @@
 <template>
 
-    <b-card header="Admin Note"
+    <b-card header="Ally Team Notes"
             header-bg-variant="info"
             header-text-variant="white">
 
@@ -73,7 +73,7 @@
                 return this.form.id ? 'Save Note' : 'Create Note';
             },
             headerText() {
-                return this.form.id ? 'Update Admin Note' : 'Add Admin Note';
+                return this.form.id ? 'Update Ally Team Note' : 'Add Ally Team Note';
             },
         },
         data() {

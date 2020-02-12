@@ -131,8 +131,6 @@ class ClientSetupController extends Controller
 
         $method = $this->validatePaymentMethod($request, $client->defaultPayment);
 
-        \Log::info($client->defaultPayment);
-
         if (! $client->setPaymentMethod($method)) {
             \DB::rollBack();
             return new ErrorResponse(500, 'There was an error saving your payment details.  Please try again.');
@@ -215,7 +213,6 @@ class ClientSetupController extends Controller
 
         $client->load(['addresses', 'defaultPayment', 'backupPayment', 'phoneNumbers']);
 
-        \Log::info($client);
         $termsFile = 'terms-inc.html';
         $termsUrl = url($termsFile);
 

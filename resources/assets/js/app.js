@@ -275,11 +275,11 @@ Vue.component('business-client-account-setup-report', require('./components/busi
 Vue.component('business-service-auth-ending-report', require('./components/business/reports/BusinessServiceAuthEndingReport'));
 Vue.component('business-service-auth-usage-report', require('./components/business/reports/BusinessServiceAuthUsageReport'));
 Vue.component('batch-invoice-report', require('./components/business/reports/BatchInvoiceReport'));
+Vue.component('face-sheet', require('./components/business/reports/FaceSheet'));
 
 Vue.component('payment-summary-by-payer', require('./components/business/reports/PaymentSummary'));
 Vue.component('invoice-summary-by-county', require('./components/business/reports/InvoiceSummaryByCountyReport'));
 Vue.component('invoice-summary-by-salesperson-report', require('./components/business/reports/InvoiceSummaryBySalesperson'));
-
 
 Vue.component('caregiver-create', require('./components/CaregiverCreate.vue'));
 Vue.component('caregiver-edit', require('./components/CaregiverEdit.vue'));

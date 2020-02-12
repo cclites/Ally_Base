@@ -150,8 +150,8 @@ class ClientPayer extends AuditableModel implements HasAllyFeeInterface
 
             return true;
         } catch (\Exception $ex) {
+            \Log::error($ex->getMessage());
             app('sentry')->captureException($ex);
-            \Log::debug($ex->getMessage());
             return false;
         }
     }

@@ -10,21 +10,21 @@ use App\Schedule;
 
 class OpenShiftRequestAccepted extends BaseNotification
 {
-    const DISABLED = true;
+    const DISABLED = false;
 
     /**
      * The label of the notification (used for preferences).
      *
      * @var string
      */
-    const TITLE = 'Caregiver Open Shift Request Accepted';
+    const TITLE = 'Get notified when a request for an open shift is accepted';
 
     /**
      * The template for the message to transmit.
      *
      * @var string
      */
-    const MESSAGE = 'Shift Request ACCEPTED! You will now work: #DATE#-#CLNAME# in zip #ZIP#. If you need to cancel, please call the office immediatley.';
+    const MESSAGE = 'Shift Request ACCEPTED! You will now work: #DATE#-#CLNAME# in zip #ZIP#. If you need to cancel, please call the office immediately.';
 
     /**
      * The related schedule.
@@ -32,6 +32,13 @@ class OpenShiftRequestAccepted extends BaseNotification
      * @var \App\Schedule
      */
     protected $schedule;
+
+    /**
+     * The related business.
+     *
+     * @var \App\Business
+     */
+    protected $business;
 
     /**
      * The action text.
@@ -46,10 +53,11 @@ class OpenShiftRequestAccepted extends BaseNotification
      * @var \App\Schedule $schedule
      * @return void
      */
-    public function __construct( $schedule )
+    public function __construct( $schedule, $business )
     {
         parent::__construct();
         $this->schedule = $schedule;
+        $this->business = $business;
         $this->url = route('business.clients.schedule', ['client' => $this->schedule->client]);
     }
 
@@ -74,7 +82,7 @@ class OpenShiftRequestAccepted extends BaseNotification
      */
     public function toSms($notifiable)
     {
-        return $this->toSmsFromBusiness( $notifiable, $this->client->business );
+        return $this->toSmsFromBusiness( $notifiable, $this->business );
     }
 
     /**

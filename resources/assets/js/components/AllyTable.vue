@@ -10,6 +10,7 @@
                 :sort-by.sync="sort"
                 @filtered="onFiltered"
                 :busy=" isBusy "
+                :empty-text="emptyText"
             >
                 <template v-for="field in columns" :slot="field.key || field" scope="data">
                     <slot v-bind="data" :name="field.key || field"> {{ renderCell(data.item, field) }}</slot>
@@ -54,6 +55,10 @@ export default {
         isBusy: {
             type: Boolean,
             default: () => false,
+        },
+        emptyText: {
+            type: String,
+            default: () => 'There are no records to show.',
         },
     },
 

@@ -140,7 +140,7 @@ class ActiveClientsReport extends BusinessResourceReport
     }
 
     /**
-     * Gets the percent of shfits verified by tele during
+     * Gets the percent of shifts verified by tele during
      * the given date range.
      *
      * @param [type] $range

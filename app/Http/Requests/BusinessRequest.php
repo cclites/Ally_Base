@@ -16,9 +16,12 @@ use Illuminate\Validation\Validator;
 abstract class BusinessRequest extends FormRequest
 {
     /**
-     * If true, preserve the validated data and don't add business_id to it.
+     * This is supposed to *not* add the business_id key
+     * to validated data array, but it doesn't not appear
+     * to work anymore in Laravel 6.0.  See UpdateBusinessRequest
      *
      * @var bool
+     * @deprecated
      */
     protected $preserveValidated = false;
 

@@ -284,7 +284,7 @@ class ShiftFactoryTest extends TestCase
     }
 
     /** @test */
-    public function it_calculates_overtimes_rates_for_fixed_rate_shfits()
+    public function it_calculates_overtimes_rates_for_fixed_rate_shifts()
     {
         $this->business->update(['ot_behavior' => 'both']);
         $rate = $this->createDefaultClientRate();

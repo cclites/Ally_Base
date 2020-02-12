@@ -106,9 +106,7 @@ class ScheduleAggregatorTest extends TestCase
         $start = Carbon::parse('-2 hours');
         $end = Carbon::parse('+2 hours');
 
-        \DB::enableQueryLog();
         $schedules = $this->aggregator->getSchedulesBetween($start, $end);
-        $log = \DB::getQueryLog();
         $this->assertCount(1, $schedules);
     }
 }

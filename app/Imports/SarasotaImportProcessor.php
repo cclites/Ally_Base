@@ -78,7 +78,7 @@ END;
 
             $carbon = new Carbon($this->worksheet->getValue('Date', $rowNo), $this->business->timezone);
             $time = $this->worksheet->getValue('StartTime', $rowNo);
-            $offset = $offset + (strtotime($time) - strtotime('00:00:00'));
+            $offset = $offset + (strtotime($time) - strtotime('1970-01-01 00:00:00'));
             return $carbon->addSeconds($offset);
         } catch( \Exception $e ){
 

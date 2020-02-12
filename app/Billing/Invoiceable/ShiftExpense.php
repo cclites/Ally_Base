@@ -209,9 +209,10 @@ class ShiftExpense extends InvoiceableModel
 
     /**
      * Note: This is a calculated field from the other rates
+     * @param null $allyRate
      * @return float
      */
-    public function getProviderRate(): float
+    public function getProviderRate($allyRate = null): float
     {
         return floatval(0);
     }

@@ -307,6 +307,6 @@ class ThirdPartyPayerReport extends BaseReport
             ];
         });
 
-        parent::download();
+        return parent::download();
     }
 }

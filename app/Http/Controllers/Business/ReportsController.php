@@ -682,30 +682,6 @@ class ReportsController extends BaseController
     }
 
     /**
-     * Display a listing of the users and their birthdays.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\Response
-     */
-    public function userBirthday(Request $request)
-    {
-        $type = $request->type == 'clients' ? 'clients' : 'caregivers';
-        $type = ucfirst($type);
-        return view('business.reports.user_birthday', compact('type'));
-    }
-
-    public function userBirthdayData(Request $request)
-    {
-        $type = strtolower($request->type) == 'clients' ? 'clients' : 'caregivers';
-
-        if($type == 'clients') {
-            return Client::forRequestedBusinesses()->get();
-        }
-
-        return Caregiver::forRequestedBusinesses()->get();
-    }
-
-    /**
      * Shows the list of prospective clients
      *
      * @return Response
@@ -1073,11 +1049,11 @@ class ReportsController extends BaseController
 
         $prospects = Prospect::select([
                 'id',
-                'business_id', 
+                'business_id',
                 'firstname',
                 'lastname',
                 'closed_loss',
-                'closed_win', 
+                'closed_win',
                 'referred_by',
                 'referral_source_id',
                 'had_assessment_scheduled',

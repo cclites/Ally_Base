@@ -85,7 +85,7 @@ class ServiceAuthCalculator
      */
     protected function getMatchingShiftsQuery(array $authPeriodDates) : Builder
     {
-        $query = Shift::with('services', 'service')
+        $query = Shift::with('services', 'service', 'client', 'client.user', 'shiftFlags')
             ->where('client_id', $this->auth->client_id)
             ->whereNotNull('checked_out_time')
             ->where(function ($q) use ($authPeriodDates) {

@@ -112,7 +112,10 @@
                         if (this.sync) {
                             self.events = cal.fullCalendar('clientEvents')
                         }
-                        self.$emit('event-render', ...args)
+                        self.$emit('event-render', ...args);
+
+                        // Use jQuery to hide the second day of overlapping shifts
+                        self.hideMultiDayShifts(args[0], args[1], args[2]);
                     },
 
                     eventDestroy(event) {
@@ -206,6 +209,33 @@
         },
 
         methods: {
+            /**
+             * Hide the events that are part of an overnight schedule
+             * and are not the day it starts. ALLY-183
+             */
+            hideMultiDayShifts(eventObj, $el, view) {
+                const spansMultipleDays = e => {
+                    if (!e.start || !e.end) {
+                        return false;
+                    }
+
+                    return e.start.format("D") !== e.end.format("D");
+                };
+
+                const isListView = $el.hasClass("fc-list-item");
+
+                if (isListView && spansMultipleDays(eventObj)) {
+                    // only hide if NOT start day
+
+                    const startDate = eventObj.start.format('LL');
+                    const selectedDate = view.calendar.currentDate.format('LL');
+
+                    if (startDate !== selectedDate) {
+                        $el.closest("tr").hide();
+                    }
+                }
+            },
+
             fireMethod(...options) {
                 $(this.$el).fullCalendar(...options)
             },

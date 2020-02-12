@@ -10,21 +10,21 @@
         <h5><b>Requests</b></h5>
         <div class="d-flex align-items-center mt-4">
 
-            <div class="font-bold f-1">Caregiver Name</div>
-            <div class="font-bold f-1">Request Date</div>
-            <div class="font-bold f-2">CG Worked with Client Prev.?</div>
-            <div class="font-bold f-1 text-center">Status</div>
-            <div class="font-bold f-1 text-center" style="min-width: 300px">Actions</div>
+            <div style="width: 25%" class="font-bold">Caregiver Name</div>
+            <div style="width: 15%" class="font-bold">Request Date</div>
+            <div style="width: 25%" class="font-bold">CG Worked with Client Prev.?</div>
+            <div style="width: 15%" class="font-bold">Status</div>
+            <div style="width: 20%; min-width: 300px" class="font-bold">Actions</div>
         </div>
         <div v-if=" !loading ">
 
             <div v-for=" request in requests " :key=" request.id " class="d-flex align-items-center my-2">
 
-                <div class="f-1">{{ request.nameLastFirst }}</div>
-                <div class="f-1">{{ formatDateFromUTC( request.created_at ) }}</div>
-                <div class="f-2">{{ request.caregiverClientRelationshipExists ? 'Yes' : 'No' }}</div>
-                <div class="f-1 text-right">{{ request.status | capitalize }}</div>
-                <div class="f-1 text-right" style="min-width: 300px">
+                <div style="width: 25%">{{ request.nameLastFirst }}</div>
+                <div style="width: 15%">{{ formatDateFromUTC( request.created_at ) }}</div>
+                <div style="width: 25%">{{ request.caregiverClientRelationshipExists ? 'Yes' : 'No' }}</div>
+                <div style="width: 15%">{{ request.status | capitalize }}</div>
+                <div style="width: 20%; min-width: 300px">
 
                     <transition name="slide-fade" mode="out-in" v-if=" request.status == 'pending' ">
 
@@ -155,7 +155,7 @@
                 axios.get( `/business/schedule/requests/${this.selectedScheduleId}` )
                     .then( response => {
 
-                        console.log( 'loaded: ', response );
+                        // console.log( 'loaded: ', response );
                         this.requests = response.data.data.requests;
                         this.schedule = response.data.data.schedule;
                     })
