@@ -173,6 +173,7 @@ Route::group([
     Route::put('update-payroll-policy/{id}', 'Business\SettingController@updatePayrollPolicy')->name('settings.updatePayrollPolicy');
     Route::resource('status-aliases', 'Business\StatusAliasController');
     Route::get('search', 'Business\QuickSearchController@index')->name('quick-search');
+    Route::resource('chain-settings', 'Business\BusinessChainController' );
 
     Route::get('sales-people/{business}', 'Business\SalesPersonController@index')->name('sales-people.index');
     Route::get('sales-people', 'Business\SalesPersonController@index')->name('sales-people.index');

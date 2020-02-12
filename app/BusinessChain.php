@@ -229,9 +229,8 @@ class BusinessChain extends AuditableModel
      */
     public function getHasAccessToOpenShiftsFeatureAttribute()
     {
-        return in_array( $this->open_shfits_setting, [ self::OPEN_SHIFTS_LIMITED, self::OPEN_SHIFTS_UNLIMITED ] );
+        return in_array( $this->open_shifts_setting, [ self::OPEN_SHIFTS_LIMITED, self::OPEN_SHIFTS_UNLIMITED ] );
     }
-
 
     /**
      * Get the Client deactivation reasons.

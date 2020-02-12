@@ -30,7 +30,8 @@ class SettingsRepository
             $defaultBusiness->calendar_caregiver_filter ? new CalendarCaregiverFilter($defaultBusiness->calendar_caregiver_filter) : null,
             $defaultBusiness->calendar_next_day_threshold ? new CalendarNextDayThreshold($defaultBusiness->calendar_next_day_threshold) : null,
             $defaultBusiness->id,
-            $chain->open_shifts_setting
+            $chain->open_shifts_setting,
+            $chain->id
         );
     }
 }

@@ -17,7 +17,7 @@ class OpenShiftsController extends BaseController
 
         if( request()->filled( 'json' ) ){
 
-            $setting  = $caregiver->role->businessesChains()->first()->open_shifts_setting;
+            $setting  = $caregiver->role->businessChains()->first()->open_shifts_setting;
             $timezone = $caregiver->role->businesses->first()->timezone;
 
             $excluded = ClientExcludedCaregiver::where( 'caregiver_id', auth()->user()->id )->pluck( 'client_id' )->toArray();

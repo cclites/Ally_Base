@@ -266,7 +266,7 @@
 
                             <b-form-group label="Enable Open Shift Feature" label-for="open_shifts_setting">
                                 <b-form-select id="open_shifts_setting"
-                                               v-model="officeUserSettings.open_shifts_setting"
+                                               v-model=" officeUserSettings.open_shifts_setting "
                                 >
                                     <option :value=" 'off' ">Off</option>
                                     <option :value=" 'unlimited' ">On - Caregivers see all open shifts for all clients</option>
@@ -275,6 +275,10 @@
                                 <input-help :form="businessSettings" field="open_shifts_setting"
                                             text="Enable the ability for Caregivers to volunteer for open shifts. Whether for clients they are currently referred to or optionally for all clients as well."></input-help>
                             </b-form-group>
+
+                            <b-btn @click=" updateChainSetting " variant="info" size="lg">
+                                Save Settings
+                            </b-btn>
                         </b-col>
                     </b-row>
                 </b-tab>
@@ -735,6 +739,21 @@
                     tellus_password: business.tellus_password ? '********' : '',
                     logo: business.logo,
                 });
+            },
+
+            async updateChainSetting() {
+
+                let form = new Form({
+
+                    open_shifts_setting : this.officeUserSettings.open_shifts_setting
+                });
+
+                form.put( `/business/chain-settings/${this.officeUserSettings.business_chain_id}` ) // TODO => have Jon vette this process
+                    .then( response => {
+
+                        console.log( 'return value from the request..', response );
+                    })
+                    .catch( e => console.log( 'error tho..', e ) );
             },
 
             async update() {
