@@ -4,6 +4,7 @@ namespace App\Reports;
 
 use App\Shift;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class OccAccDeductiblesReport extends BusinessResourceReport
 {
@@ -22,28 +23,30 @@ class OccAccDeductiblesReport extends BusinessResourceReport
     protected $end_date;
 
     /**
-     * The caregiver ID.
+     * The businesses IDs.
      *
-     * @var int
+     * @var Array
      */
-    protected $caregiverId;
-
-    /**
-     * The business ID.
-     *
-     * @var int
-     */
-    protected $businessId;
+    protected $businesses;
 
     /**
      * constructor.
      */
     public function __construct()
     {
-        $this->query = Shift::with([ 'business', 'caregiver' => function( $q ){
-
-            return $q->where( 'has_occ_acc', 1 );
-        }]);
+        $this->query = DB::table( 'shifts' )
+            ->leftJoin( 'businesses as business', 'shifts.business_id', '=', 'business.id' )
+            ->leftJoin( 'caregivers as caregiver', 'shifts.caregiver_id', '=', 'caregiver.id' )
+            ->leftJoin( 'users as user', 'shifts.caregiver_id', '=', 'user.id' )
+            ->select([
+                "user.id as user_id",
+                DB::raw( "CONCAT(user.firstname, ' ', user.lastname) as caregiver_name" ),
+                "business.name as registry",
+                DB::raw( "SEC_TO_TIME(SUM(TO_SECONDS(shifts.checked_out_time) - TO_SECONDS(shifts.checked_in_time))) AS duration" ),
+            ])
+            ->groupBy([ 'user_id', 'registry' ])
+            ->where( 'caregiver.has_occ_acc', '1' )
+            ->whereNotNull( 'shifts.checked_out_time' );
     }
 
     /**
@@ -64,8 +67,8 @@ class OccAccDeductiblesReport extends BusinessResourceReport
      */
     public function forWeekEndingAt( $end )
     {
-        $this->end_date   = $end;
-        $this->start_date = Carbon::parse( $end )->subWeek()->format( 'm-d-Y' ); // format may be unneccesary here
+        $this->start_date = Carbon::parse( $end )->subWeek()->format( 'Y-m-d 00:00:00' );
+        $this->end_date   = Carbon::parse( $end )->format( 'Y-m-d 23:59:59' );
 
         return $this;
     }
@@ -84,14 +87,14 @@ class OccAccDeductiblesReport extends BusinessResourceReport
     }
 
     /**
-     * Set filter for business.
+     * Set filter for businesses.
      *
      * @param $id
      * @return $this
      */
-    public function forBusiness($id)
+    public function forTheFollowingBusinesses( $ids )
     {
-        $this->businessId = $id;
+        $this->businesses = $ids;
 
         return $this;
     }
@@ -103,25 +106,25 @@ class OccAccDeductiblesReport extends BusinessResourceReport
      */
     protected function results()
     {
-        return $this->query()
-            // ->forBusinesses([ $this->businessId ])
-            ->betweenDates( $this->start_date, $this->end_date )
-            ->forCaregiver( $this->caregiverId )
-            ->get()
-            ->map( function ( $shift ){
+        $query = $this->query()
+            ->whereBetween( 'checked_in_time', [ $this->start_date, $this->end_date ]);
 
-                // CG name
-                // Registry
-                // Hours Worked
-                // OccAcc Deduction Total
+        if( $this->businesses ) $query->whereIn( 'business.id', [ $this->businesses ]);
 
-                return [
+        $deduction = config( 'ally.occ_acc_deductible' );
 
-                    'caregiver_name' => $shift->caregiver ? $shift->caregiver->name : 'NO NAME??',
-                    'registry'       => $shift->business ? $shift->business->name : 'NO NAME??',
-                    'hours_worked'   => $shift->duration, // should be a count or aggregate..
-                    'deduction'      => 1337
-                ];
+        $results = $query->get()
+            ->map( function ( $shift ) use ( $deduction ){
+
+                $time_worked = Carbon::createFromFormat( 'H:i:s', $shift->duration );
+                $duration = $time_worked->hour + ( round( $time_worked->minute / 60, 2 ) );
+
+                // return the minimum betweeen 9.00 and ( duration * deduction )
+                $shift->deduction = min( 9.00, round( $deduction * $duration, 2 ) );
+
+                return $shift;
             });
+
+        return $results;
     }
 }

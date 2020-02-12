@@ -81,8 +81,11 @@
 <script>
 
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
+    import FormatsNumbers from '../../../mixins/FormatsNumbers';
 
     export default {
+
+        mixins : [ FormatsNumbers ],
 
         components: { BusinessLocationFormGroup },
 
@@ -97,15 +100,12 @@
 
                     json        : 1,
                     businesses  : '',
-                    caregiver   : '',
-                    client      : '',
-                    client_type : '',
                     end_date    : moment().startOf( 'week' ).format( 'MM/DD/YYYY' ),
                 }),
                 fields: [
 
                     {
-                        key: 'name',
+                        key: 'caregiver_name',
                         label: 'CG Name',
                     },
                     {
@@ -113,9 +113,9 @@
                         label: 'Registry',
                     },
                     {
-                        key: 'hours',
+                        key: 'duration',
                         label: 'Hours Worked',
-                        formatter: (val) => this.numberFormat(val)
+                        // formatter: (val) => this.numberFormat(val)
                     },
                     {
                         key: 'deduction',
@@ -150,9 +150,11 @@
                     .then( ({ data }) => {
 
                         console.log( 'the results: ', data );
+                        this.items = data;
                     })
                     .catch(() => {
 
+                        this.items = [];
                     })
                     .finally( () => {
 
