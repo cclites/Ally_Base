@@ -65,14 +65,13 @@ class BirthdayReport extends BaseReport
     }
 
     public function filterByDateRange(string $startDate, string $endDate) : self {
-        // Dates must be formatted as follows: YYYY/MM/DD
-        $startDate = Carbon::createFromFormat('m/d/Y', $startDate)->format('Y/m/d');
-        $endDate = Carbon::createFromFormat('m/d/Y', $endDate)->format('Y/m/d');
+        $startDate = new Carbon($startDate);
+        $endDate = new Carbon($endDate);
 
+        // Filter by months for now
         $this->query->select($this->type . '.*')->join('users', 'users.id', '=', $this->type . '.id');
-        $this->query->whereRaw(
-            'DATE_ADD(`users`.`date_of_birth`, INTERVAL YEAR(CURDATE()) - YEAR(`users`.`date_of_birth`) + IF(DAYOFYEAR(CURDATE()) > DAYOFYEAR(`users`.`date_of_birth`), 1, 0) YEAR) BETWEEN "'.$startDate.'" AND "'.$endDate.'"'
-        );
+        $this->query->whereMonth('date_of_birth', '>=', $startDate->month)
+                    ->whereMonth('date_of_birth', '<=', $endDate->month);
 
         return $this;
     }
