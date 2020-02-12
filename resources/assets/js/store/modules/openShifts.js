@@ -5,14 +5,20 @@ const state = {
 
     openShifts : [],
     requests   : [],
-    openShiftsModalActive : false
+    onSchedulePage : false,
+    openShiftsModalActive : false,
+    selectedEvent : null, // TODO => this is going to need to be a part of a larger refactor to bring the schedule into vuex.. now that multiple components from different views are using the same data... this is too big for this specific task
+    triggerBusinessScheduleToAct : false, // TODO => this again is a really wierd way to have the modal component communicate to the businessSchedule component.. cross component communication like this shouldn't be necessary - but this is the bandaide to get us through tomorrow
+    newStatus : null,
+    newCaregiverName : '',
 };
 
 // getters
 const getters = {
 
-    requests       : state => state.requests,
-    openShifts     : state => Object.values( state.openShifts ),
+    triggerBusinessScheduleToAct : state => state.triggerBusinessScheduleToAct,
+    requests   : state => state.requests,
+    openShifts : state => Object.values( state.openShifts ),
     mappedShifts( state, getters ){
 
         return getters.openShifts.map( e => {
@@ -30,7 +36,12 @@ const getters = {
         });
     },
     newShiftsCount : ( state, getters ) => getters.mappedShifts.filter( e => !e.request_status ).length,
-    openShiftsModalActive : state => state.openShiftsModalActive
+    openShiftsModalActive : state => state.openShiftsModalActive,
+    selectedEvent : state => state.selectedEvent,
+    selectedScheduleId : state => state.selectedEvent ? state.selectedEvent.id : null,
+    onSchedulePage : state => state.onSchedulePage,
+    newStatus : state => state.newStatus,
+    newCaregiverName : state => state.newCaregiverName,
 };
 
 // mutations
@@ -52,13 +63,26 @@ const mutations = {
 
         state.requests.push( req );
     },
-    toggleOpenShiftsModal : state => state.openShiftsModalActive = !state.openShiftsModalActive
+    toggleOpenShiftsModal : state => state.openShiftsModalActive = !state.openShiftsModalActive,
+    setSelectedEvent : ( state, event ) => state.selectedEvent = event,
+    setNewCaregiverName : ( state, name ) => state.newCaregiverName = name,
+    establishWeAreOnSchedulePage : state => state.onSchedulePage = true,
+    triggerBusinessScheduleToAct : ( state, bool ) => state.triggerBusinessScheduleToAct = bool,
+    setNewStatus : ( state, value ) => state.newStatus = value,
+    decrementScheduleEvent( state, index ){
+
+        // console.log( 'index: ', index );
+        // console.log( 'state shifts: ', state.openShifts );
+        let event = state.openShifts[ index ];
+        event.requests_count--;
+    }
 };
 
 // actions
 const actions = {
     // major refactor to vuex in store for the future
 
+    establishWeAreOnSchedulePage : context => context.commit( 'establishWeAreOnSchedulePage' ),
     setShiftsAndRequests( context, data ){
 
         context.commit( 'setOpenShifts', Object.values( data.events ) );
@@ -77,7 +101,30 @@ const actions = {
             if( openShiftIndex ) context.commit( 'updateOpenShifts', { index: openShiftIndex, status: data.status } );
         }
     },
-    toggleOpenShiftsModal : context => context.commit( 'toggleOpenShiftsModal' ),
+    toggleOpenShiftsModal( context, event = null ){
+
+        const e = event ? {
+
+            id               : event.id,
+            requests_count   : event.requests_count,
+            background_color : event.background_color
+        } : null;
+        context.commit( 'setSelectedEvent', e );
+        context.commit( 'toggleOpenShiftsModal' );
+    },
+    setSelectedEvent: ( context, event ) => context.commit( 'setSelectedEvent', event ),
+    setNewCaregiverName: ( context, name ) => context.commit( 'setNewCaregiverName', name ),
+    emitToScheduleViaVuex( context, data ){
+
+        context.commit( 'setNewStatus', data.status );
+        context.commit( 'setSelectedEvent', data.schedule );
+        context.commit( 'setNewCaregiverName', data.caregiverName );
+        context.commit( 'triggerBusinessScheduleToAct', true );
+    },
+    toggleTrigger: ( context, bool ) => context.commit( 'triggerBusinessScheduleToAct', bool ),
+    setNewStatus: ( context, status ) => context.commit( 'setNewStatus', status ),
+    decrementScheduleEvent: ( context, index ) => context.commit( 'decrementScheduleEvent', index ),
+
 };
 
 export default {

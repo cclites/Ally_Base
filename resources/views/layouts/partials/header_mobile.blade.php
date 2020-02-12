@@ -41,8 +41,8 @@
                 <!-- ============================================================== -->
                 <!-- Open Shifts Feature -->
                 <!-- ============================================================== -->
-                @if( is_office_user() && Auth::user()->can( 'view-open-shifts', [ $active_business ] ) )
-                    <open-shifts-icon business="{{ $active_business ?? null }}"></open-shifts-icon>
+                @if( is_office_user() && Auth::user()->can( 'view-open-shifts' ) )
+                    <open-shifts-icon></open-shifts-icon>
                 @endif
                 @if(Auth::check() && in_array(Auth::user()->role_type, ['office_user', 'caregiver']))
                     <tasks-icon role="{{ Auth::user()->role_type }}"></tasks-icon>

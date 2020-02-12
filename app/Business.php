@@ -293,10 +293,6 @@ class Business extends AuditableModel implements ChargeableInterface, Reconcilab
     const TYPE_FRANCHISOR = 'Franchisor';
     const TYPE_REGISTRY = 'Registry';
 
-    const OPEN_SHIFTS_DISABLED = 'off';
-    const OPEN_SHIFTS_LIMITED = 'limited';
-    const OPEN_SHIFTS_UNLIMITED = 'unlimited';
-
     ///////////////////////////////////////////
     /// Relationship Methods
     ///////////////////////////////////////////

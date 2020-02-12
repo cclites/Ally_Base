@@ -161,6 +161,15 @@ class OfficeUser extends AuditableModel implements UserRole, BelongsToChainsInte
         return $this->belongsTo(Business::class, 'default_business_id', 'id');
     }
 
+    /**
+     * first pass at the ability for features to be enabled/disabled based upon whether or not any of the associated businesses have the feature..
+     */
+    public function getHasAccessToOpenShiftsFeatureAttribute()
+    {
+
+        return $this->businessChain->has_access_to_open_shifts_feature;
+    }
+
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
