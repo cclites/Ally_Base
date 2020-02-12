@@ -219,7 +219,6 @@
 
                 updateRequestStatus    : 'openShifts/updateRequestStatus',
                 toggleOpenShiftsModal  : 'openShifts/toggleOpenShiftsModal',
-                setSelectedEvent       : 'openShifts/setSelectedEvent',
                 emitToScheduleViaVuex  : 'openShifts/emitToScheduleViaVuex',
                 decrementScheduleEvent : 'openShifts/decrementScheduleEvent',
             }),
@@ -232,7 +231,7 @@
                 let schedule = this.events.find( e => e.id === data.request.schedule_id );
 
                 // 1. only applicable when on the schedule calendar page, set to true from the mounted() method on BusinessSchedule.. this is soooo ugly im so sorry
-                if( this.onSchedulePage ) this.emitToScheduleViaVuex({ status: status, schedule : _.cloneDeep( schedule ) });
+                if( this.onSchedulePage ) this.emitToScheduleViaVuex({ status: status, schedule : _.cloneDeep( schedule ), caregiverName : data.request.nameLastFirst });
 
                 if( status == this.OPEN_SHIFTS_STATUS.DENIED ){
 

@@ -327,6 +327,7 @@
                 triggerBusinessScheduleToAct : 'openShifts/triggerBusinessScheduleToAct',
                 vuexSelectedScheduleId       : 'openShifts/selectedScheduleId',
                 vuexSelectedEvent            : 'openShifts/selectedEvent',
+                newCaregiverName             : 'openShifts/newCaregiverName',
                 newStatus                    : 'openShifts/newStatus',
             }),
             requestEvents(){
@@ -465,6 +466,7 @@
                 establishWeAreOnSchedulePage : 'openShifts/establishWeAreOnSchedulePage',
                 toggleTrigger : 'openShifts/toggleTrigger',
                 setNewStatus  : 'openShifts/setNewStatus',
+                setNewCaregiverName  : 'openShifts/setNewCaregiverName',
                 setSelectedEvent  : 'openShifts/setSelectedEvent',
             }),
             getFilteredEvents() {
@@ -833,22 +835,29 @@
                     })
             },
 
-            updateEvent(id, data) {
+            updateEvent( id, data, status = null ) {
+
                 this.saveScrollPosition();
-                let event = this.events.find(item => {
+                let event = this.events.find( item => {
+
                     return item.id === id;
                 });
+
                 // console.log( 'found event here:', event );
-                if (event) {
-                    event.backgroundColor = this.getEventBackground(data);
-                    event.note = data.note;
-                    event.requests_count = data.requests_count;
-                    event.status = data.status;
+                if( event ){
+
+                    if( status && status == this.OPEN_SHIFTS_STATUS.APPROVED ) event.caregiver = _.cloneDeep( this.newCaregiverName );
+                    event.backgroundColor = this.getEventBackground( data, status );
+                    event.note            = data.note;
+                    event.requests_count  = data.requests_count;
+                    event.status          = data.status;
                 }
             },
 
-            getEventBackground(event) {
-                return !event.caregiver_id ? '#d9c01c' : event.backgroundColor || '#1c81d9';
+            getEventBackground( event, status = null ){
+
+                if( status && status == this.OPEN_SHIFTS_STATUS.APPROVED ) return '#1c81d9';
+                return !event.caregiver_id ? '#d9c01c' : '#1c81d9';
             },
 
             loadFiltersData() {
@@ -1091,6 +1100,7 @@
                     this.handleCalendarPropogation( _.cloneDeep( this.newStatus ) );
                     this.setNewStatus( null );
                     this.setSelectedEvent( null );
+                    this.setNewCaregiverName( null );
                     this.toggleTrigger( false );
                 }
             },

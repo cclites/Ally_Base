@@ -10,6 +10,7 @@ const state = {
     selectedEvent : null, // TODO => this is going to need to be a part of a larger refactor to bring the schedule into vuex.. now that multiple components from different views are using the same data... this is too big for this specific task
     triggerBusinessScheduleToAct : false, // TODO => this again is a really wierd way to have the modal component communicate to the businessSchedule component.. cross component communication like this shouldn't be necessary - but this is the bandaide to get us through tomorrow
     newStatus : null,
+    newCaregiverName : '',
 };
 
 // getters
@@ -40,6 +41,7 @@ const getters = {
     selectedScheduleId : state => state.selectedEvent ? state.selectedEvent.id : null,
     onSchedulePage : state => state.onSchedulePage,
     newStatus : state => state.newStatus,
+    newCaregiverName : state => state.newCaregiverName,
 };
 
 // mutations
@@ -63,13 +65,14 @@ const mutations = {
     },
     toggleOpenShiftsModal : state => state.openShiftsModalActive = !state.openShiftsModalActive,
     setSelectedEvent : ( state, event ) => state.selectedEvent = event,
+    setNewCaregiverName : ( state, name ) => state.newCaregiverName = name,
     establishWeAreOnSchedulePage : state => state.onSchedulePage = true,
     triggerBusinessScheduleToAct : ( state, bool ) => state.triggerBusinessScheduleToAct = bool,
     setNewStatus : ( state, value ) => state.newStatus = value,
     decrementScheduleEvent( state, index ){
 
         // console.log( 'index: ', index );
-        // console.log( 'state shfits: ', state.openShifts );
+        // console.log( 'state shifts: ', state.openShifts );
         let event = state.openShifts[ index ];
         event.requests_count--;
     }
@@ -109,14 +112,13 @@ const actions = {
         context.commit( 'setSelectedEvent', e );
         context.commit( 'toggleOpenShiftsModal' );
     },
-    setSelectedEvent( context, event ){
-
-        context.commit( 'setSelectedEvent', event );
-    },
+    setSelectedEvent: ( context, event ) => context.commit( 'setSelectedEvent', event ),
+    setNewCaregiverName: ( context, name ) => context.commit( 'setNewCaregiverName', name ),
     emitToScheduleViaVuex( context, data ){
 
         context.commit( 'setNewStatus', data.status );
         context.commit( 'setSelectedEvent', data.schedule );
+        context.commit( 'setNewCaregiverName', data.caregiverName );
         context.commit( 'triggerBusinessScheduleToAct', true );
     },
     toggleTrigger: ( context, bool ) => context.commit( 'triggerBusinessScheduleToAct', bool ),
