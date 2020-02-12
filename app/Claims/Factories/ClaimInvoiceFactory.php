@@ -439,6 +439,8 @@ class ClaimInvoiceFactory
             'service_id' => $service->id,
             'service_name' => $service->name,
             'service_code' => $service->code,
+            'service_code_mod1' => $service->mod1,
+            'service_code_mod2' => $service->mod2,
             'activities' => $shift->activities->implode('code', ','),
             'caregiver_comments' => $shift->caregiver_comments,
             'client_signature_id' => optional($shift->clientSignature)->id,

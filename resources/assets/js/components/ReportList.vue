@@ -267,7 +267,6 @@
                     },
 
                     // Shared between admin and office users
-
                     {
                         name: 'Reconciliation Report',
                         url: 'reports/reconciliation',
@@ -611,6 +610,24 @@
                         category: 5,
                         allowed: ['office_user'],
                     },
+
+                    {
+                        name: 'Client Face Sheet',
+                        url: 'reports/face-sheet?role=client',
+                        description: 'Generate Client Face Sheet',
+                        category: 2,
+                        allowed: ['office_user'],
+                    },
+
+                    {
+                        name: 'Caregiver Face Sheet',
+                        url: 'reports/face-sheet?role=caregiver',
+                        description: 'Generate Caregiver Face Sheet',
+                        category: 3,
+                        allowed: ['office_user'],
+                    },
+
+
                     // {
                     //     name: 'Batch Invoice',
                     //     url: 'reports/batch-invoice',

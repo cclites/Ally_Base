@@ -261,7 +261,7 @@ class Payer extends AuditableModel implements BelongsToChainsInterface, Contacta
             
             return true;
         } catch (\Exception $ex) {
-            \Log::debug($ex->getMessage());
+            \Log::error($ex->getMessage());
             return false;
         }
     }

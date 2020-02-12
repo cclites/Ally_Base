@@ -179,6 +179,27 @@ function filter_dates(...$dates) {
 }
 
 /**
+ * 4 represents fourths, 8 represents eights, and so..
+ * 
+ * floor or ceil for rounding up/down obviously
+ */
+function round_to_fraction( $number, $fraction = 4, $direction = 'floor' ){
+
+    switch( $direction ){
+
+        case 'floor':
+
+            return floor( $number * $fraction ) / $fraction;
+        case 'ceil':
+
+            return ceil( $number * $fraction ) / $fraction;
+        default:
+
+            return null;
+    }
+}
+
+/**
  * Handle input of date and time, output to ISO
  *
  * @param $date

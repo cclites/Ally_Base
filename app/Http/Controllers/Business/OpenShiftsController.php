@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Business;
 
+use App\Responses\ErrorResponse;
 use App\Schedule;
 use App\Scheduling\OpenShiftRequestStatus;
 use Illuminate\Http\Request;
@@ -10,13 +11,13 @@ class OpenShiftsController extends BaseController
 {
     public function index(Request $request)
     {
-        if( !is_office_user() ) abort( 403 );
-
-        $chain = $this->businessChain();
+        if( !is_office_user() || !auth()->user()->can( 'view-open-shifts' ) ) return new ErrorResponse( 403, 'Invalid registry setting' );
 
         if( request()->filled( 'json' ) ){
 
-            $results = Schedule::forRequestedBusinesses()
+            $chain = $this->businessChain();
+
+            $results = Schedule::forRequestedBusinesses( auth()->user()->role->businesses->pluck( 'id' )->toArray() )
                 ->whereHas( 'scheduleRequests', function( $q ){
 
                     return $q->whereActive();
@@ -49,14 +50,5 @@ class OpenShiftsController extends BaseController
 
             return [ 'events' => $schedules, 'requests' => [] ];
         }
-
-        // deprecated, changed open shifts to be a modal
-        return view_component( 'open-shifts',
-            'Open Shifts',
-            [ 'businesses' => $chain->id, 'role_type' => auth()->user()->role_type ],
-            [
-                'Home' => route('home')
-            ]
-        );
     }
 }

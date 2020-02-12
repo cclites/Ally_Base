@@ -12,6 +12,17 @@
                         <b-form-input v-model="form.code" type="text" />
                         <input-help :form="form" field="code"></input-help>
                     </b-form-group>
+                    <div class="d-flex justify-content-between">
+
+                        <b-form-group label="Mod One" label-for="mod1">
+                            <b-form-input v-model="form.mod1" type="text" />
+                            <input-help :form="form" field="mod1"></input-help>
+                        </b-form-group>
+                        <b-form-group label="Mod Two" label-for="mod2">
+                            <b-form-input v-model="form.mod2" type="text" />
+                            <input-help :form="form" field="mod2"></input-help>
+                        </b-form-group>
+                    </div>
                     <div class="form-check">
                         <label class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input" name="default" v-model="form.default" value="1">
@@ -73,6 +84,8 @@
                 return new Form({
                     name: defaults.name,
                     code: defaults.code,
+                    mod1: defaults.mod1,
+                    mod2: defaults.mod2,
                     default: defaults.default
                 });
             },
@@ -84,7 +97,8 @@
                 this.form.submit(method, url)
                     .then(response => {
                         this.$emit('saved', response.data.data);
-                        this.showModal = false;
+                        // this.showModal = false;
+                        this.$emit('input', false)
                     })
                     .finally(() => this.loading = false)
             },
@@ -95,10 +109,10 @@
                 this.form = this.makeForm(this.source);
                 this.showModal = val;
             },
-            showModal(val) {
-                this.$emit('input', val);
-                this.$emit('saved', response.data.data);
-            }
+            // showModal(val) {
+            //     this.$emit('input', val);
+            //     this.$emit('saved', response.data.data);
+            // }
         }
     }
 </script>

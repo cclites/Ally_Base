@@ -15,7 +15,6 @@ use App\Claims\ClaimInvoice;
 use App\TellusTypecode;
 use Carbon\Carbon;
 use App\Business;
-use App\Shift;
 
 class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransmitterInterface
 {
@@ -163,8 +162,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         } catch (ClaimTransmissionException $ex) {
             throw $ex;
         } catch (\Exception $ex) {
+            \Log::error($ex->getMessage());
             app('sentry')->captureException($ex);
-            \Log::info($ex);
             throw new ClaimTransmissionException('An error occurred while trying to submit data to the Tellus API server.  Please try again or contact Ally.');
         }
 
@@ -198,8 +197,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'SourceSystem' => $this->tcLookup('SourceSystem', 'ALLY'),
             'Jurisdiction' => $this->tcLookup('Jurisdiction', $service->state),
             'Payer' => $this->tcLookup('Payer', $claim->payer_code),
-            'Plan' => $this->tcLookup('Plan', $claim->plan_code), // FMSP is only Acceptable Value
-            // 'Program'                => $this->tcLookup('Program', 'PACE'), // OPTIONAL, PACE is only Acceptable Value
+            'Plan' => $this->tcLookup('Plan', $claim->plan_code),
+            // 'Program'                => $this->tcLookup('Program', 'PACE'), // OPTIONAL
             'DeliverySystem' => $this->tcLookup('DeliverySystem', 'MCOR'), // FFFS or MCOR.. no way to derive this from our system yet.
             'ProviderName' => $business->name,
             'ProviderMedicaidId' => $business->medicaid_id,
@@ -222,20 +221,20 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'ServiceZip' => $service->zip,
             'VisitId' => $item->id,
             'ServiceCode' => $service->service_code,
-            'ServiceCodeMod1' => '', // OPTIONAL
-            'ServiceCodeMod2' => '', // OPTIONAL
+            'ServiceCodeMod1' => $service->service_code_mod1 ?? null, // OPTIONAL
+            'ServiceCodeMod2' => $service->service_code_mod2 ?? null, // OPTIONAL
             'DiagnosisCode1' => $diagnosisCodes[0],
             'DiagnosisCode2' => $diagnosisCodes[1], // OPTIONAL && TODO
             'DiagnosisCode3' => $diagnosisCodes[2], // OPTIONAL && TODO
             'DiagnosisCode4' => $diagnosisCodes[3], // OPTIONAL && TODO
             'StartVerificationType' => $this->tcLookup('StartVerificationType', $this->getVerificationType($service->evv_method_in)), // OPTIONAL
             'EndVerificationType' => $this->tcLookup('EndVerificationType', $this->getVerificationType($service->evv_method_out)), // OPTIONAL
-            'ScheduledStartDateTime' => $service->scheduled_start_time->setTimezone( $business->timezone )->format($this->timeFormat), // OPTIONAL
-            'ScheduledEndDateTime' => $service->scheduled_end_time->setTimezone( $business->timezone )->format($this->timeFormat), // OPTIONAL
+            'ScheduledStartDateTime' => $service->scheduled_start_time->format($this->timeFormat), // OPTIONAL
+            'ScheduledEndDateTime' => $service->scheduled_end_time->format($this->timeFormat), // OPTIONAL
             'ScheduledLatitude' => '',
             'ScheduledLongitude' => '',
-            'ActualStartDateTime' => $service->evv_start_time->setTimezone($business->timezone)->format($this->timeFormat), // OPTIONAL
-            'ActualEndDateTime' => $service->evv_end_time->setTimezone($business->timezone)->format($this->timeFormat), // OPTIONAL
+            'ActualStartDateTime' => $service->evv_start_time->format($this->timeFormat), // OPTIONAL
+            'ActualEndDateTime' => $service->evv_end_time->format($this->timeFormat), // OPTIONAL
             'ActualStartLatitude' => '',
             'ActualStartLongitude' => '',
             'ActualEndLatitude' => '',
@@ -268,7 +267,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         ];
 
         // Set start EVV data (if exists)
-        if ($service->evv_method_in == Shift::METHOD_GEOLOCATION && filled($service->checked_in_latitude) && filled($service->checked_in_longitude)) {
+        if ($service->evv_method_in == ClaimableService::EVV_METHOD_GEOLOCATION && filled($service->checked_in_latitude) && filled($service->checked_in_longitude)) {
             $data['ScheduledLatitude'] = $service->latitude ?? ''; // OPTIONAL
             $data['ScheduledLongitude'] = $service->longitude ?? ''; // OPTIONAL
             $data['ActualStartLatitude'] = $service->checked_in_latitude; //OPTIONAL
@@ -276,7 +275,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
         }
 
         // Set end EVV data (if exists)
-        if ($service->evv_method_out == Shift::METHOD_GEOLOCATION && filled($service->checked_out_latitude) && filled($service->checked_out_longitude)) {
+        if ($service->evv_method_out == ClaimableService::EVV_METHOD_GEOLOCATION && filled($service->checked_out_latitude) && filled($service->checked_out_longitude)) {
             $data['ActualEndLatitude'] = $service->checked_out_latitude; // OPTIONAL
             $data['ActualEndLongitude'] = $service->checked_out_longitude; //OPTIONAL
             $data['ScheduledEndLatitude'] = $service->latitude ?? ''; // OPTIONAL
@@ -382,7 +381,7 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
     }
 
     /**
-     * Convert the shifts check in or out method into
+     * Convert the claimable services check in or out method into
      * a valid VerificationType.
      *
      * @param string|null $checkedInOutMethod
@@ -391,9 +390,9 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
     protected function getVerificationType(?string $checkedInOutMethod)
     {
         switch ($checkedInOutMethod) {
-            case Shift::METHOD_TELEPHONY:
+            case ClaimableService::EVV_METHOD_TELEPHONY:
                 return 'IVR';
-            case Shift::METHOD_GEOLOCATION:
+            case ClaimableService::EVV_METHOD_GEOLOCATION:
                 return 'GPS';
             default:
                 return 'NON';

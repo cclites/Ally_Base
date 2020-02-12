@@ -20,7 +20,7 @@
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Related Client Invoice" label-for="client_invoice_id" class="bold">
-                        <div v-for="invoice in claim.invoices" key="invoice.id">
+                        <div v-for="invoice in claim.invoices" :key=" invoice.id ">
                             <label>
                                 <a :href="`/business/client/invoices/${invoice.id}`" target="_blank">
                                     #{{ invoice.name }}

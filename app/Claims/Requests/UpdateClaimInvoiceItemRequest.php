@@ -74,6 +74,8 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
             ],
             'service_name' => 'required_if:claimable_type,' . ClaimableService::class . '',
             'service_code' => 'nullable|string',
+            'service_code_mod1' => 'nullable|string',
+            'service_code_mod2' => 'nullable|string',
             'activities' => 'nullable|string',
             'caregiver_comments' => 'nullable|string',
 
@@ -163,6 +165,8 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
                     'service_id',
                     'service_name',
                     'service_code',
+                    'service_code_mod1',
+                    'service_code_mod2',
                     'activities',
                     'caregiver_comments',
 

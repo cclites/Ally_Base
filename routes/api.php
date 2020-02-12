@@ -26,6 +26,7 @@ Route::redirect('/caregiver/greeting', url('/api/telefony'));
 
 Route::group(['prefix' => 'telefony', 'as' => 'telefony.'], function() {
     Route::get('/', 'Api\Telefony\TelefonyGreetingController@greeting')->name('greeting');
+    Route::post('/', 'Api\Telefony\TelefonyGreetingController@greeting')->name('greeting-post');
     Route::post('/check-in-or-out', 'Api\Telefony\TelefonyGreetingController@checkInOrOut')->name('check-in-or-out');
 
     Route::post('check-in/response', 'Api\Telefony\TelefonyCheckInController@checkInResponse')->name('check-in.response');

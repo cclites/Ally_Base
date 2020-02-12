@@ -69,9 +69,8 @@ class QuickbooksSettingsController extends BaseController
                 ->getAuthorizationUrl());
 
         } catch (\Exception $ex) {
-
+            \Log::error($ex->getMessage());
             app('sentry')->captureException($ex);
-            \Log::info($ex);
             return new ErrorResponse(500, 'Quickbooks API not configured.');
 
         }
@@ -141,7 +140,7 @@ class QuickbooksSettingsController extends BaseController
             return redirect(route('business.quickbooks.index'));
 
         } catch (\Exception $ex) {
-            \Log::info($ex);
+            \Log::error($ex->getMessage());
             app('sentry')->captureException($ex);
             return new ErrorResponse(500, 'An error occurred while trying to connect to your Quickbooks account.  Please try again.');
         }

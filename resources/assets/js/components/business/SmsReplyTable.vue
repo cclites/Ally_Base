@@ -14,14 +14,15 @@
             </template>
             <template slot="user" scope="row">
                 <span v-if="! row.item.user" class="text-muted">Unknown</span>
-                <span v-else><a :href="userLink(row.item.user)">{{ row.item.user.name }}</a></span>
+                <span v-else><a :href="userLink(row.item.user)" target="_blank">{{ row.item.user.name }}</a></span>
             </template>
             <template slot="from_number" scope="row">
                 {{ formatPhone(row.item.from_number) }}
             </template>
             <template slot="actions" scope="row">
 
-                <a :href=" `/business/communication/sms-threads/${row.item.continued_thread_id}` " v-if=" row.item.continued_thread_id " target="_blank">continued</a>
+                <p v-if=" !row.item.user " class="text-muted">no user</p>
+                <a :href=" `/business/communication/sms-threads/${row.item.continued_thread_id}` " v-else-if=" row.item.continued_thread_id " target="_blank">continued</a>
                 <b-button variant="info" @click=" replyText( row.item ) " v-else>Reply</b-button>
             </template>
         </b-table>
@@ -120,11 +121,9 @@ export default {
             return '(' + phone.substr(0, 3) + ') ' + phone.substr(3, 3) + '-' + phone.substr(6);
         },
 
-        userLink(user) {
-            if (user.role == 'client') {
-                return `/business/clients/${user.id}`;
-            }
-            return `/business/caregivers/${user.id}`;
+        userLink( user ){
+
+            return `/business/${user.role_type}s/${user.id}`;
         },
         replyText( reply ){
 

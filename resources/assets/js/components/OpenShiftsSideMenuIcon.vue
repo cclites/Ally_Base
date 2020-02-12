@@ -16,11 +16,6 @@
 
         props : {
 
-            business : {
-
-                type : String,
-                default : null
-            },
             route : String
         },
         data() {
@@ -34,11 +29,7 @@
             ...mapGetters({
 
                 total : 'openShifts/newShiftsCount'
-            }),
-            current_business(){
-
-                return this.business ? JSON.parse( this.business ) : null;
-            }
+            })
         },
         async mounted() {
 
@@ -56,9 +47,8 @@
 
                 let form = new Form({
 
-                    businesses : this.current_business.id,
-                    count      : true,
-                    json       : true
+                    count : true,
+                    json  : true
                 });
 
                 form.get( '/schedule/open-shifts' )
