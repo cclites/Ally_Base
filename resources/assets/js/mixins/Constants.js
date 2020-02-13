@@ -118,6 +118,23 @@ export default {
             },
 
             /**
+             * Schedule constants
+             */
+            SCHEDULE_STATUS : {
+
+                ATTENTION_REQUIRED : 'ATTENTION_REQUIRED',
+                HOSPITAL_HOLD      : 'HOSPITAL_HOLD',
+                CAREGIVER_CANCELED : 'CAREGIVER_CANCELED',
+                CLIENT_CANCELED    : 'CLIENT_CANCELED',
+                CAREGIVER_NOSHOW   : 'CAREGIVER_NOSHOW',
+                CLOCKED_IN         : 'CLOCKED_IN',
+                MISSED_CLOCK_IN    : 'MISSED_CLOCK_IN',
+                CONFIRMED          : 'CONFIRMED',
+                UNCONFIRMED        : 'UNCONFIRMED',
+                OPEN_SHIFT         : 'OPEN_SHIFT',
+            },
+
+            /**
              * Claims
              */
             CLAIM_INVOICE_TYPES: {
