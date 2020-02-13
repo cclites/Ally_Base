@@ -28,10 +28,10 @@ class BirthdayReport extends BaseReport {
 
         if ($this->type == 'clients') {
             $this->query = Client::forRequestedBusinesses()
-                                 ->with(['user.addresses', 'user.phoneNumbers']);
+                                 ->with(['user', 'addresses', 'phoneNumbers']);
         } else {
             $this->query = Caregiver::forRequestedBusinesses()
-                                    ->with(['user.addresses', 'user.phoneNumbers']);
+                                    ->with(['user', 'addresses', 'phoneNumbers']);
         }
     }
 
@@ -76,44 +76,17 @@ class BirthdayReport extends BaseReport {
         return $this->query()->get()
                     ->sortBy($this->type . '.name')
                     ->map(function ($role) {
-                        $phoneNumber = !empty($role->user->phoneNumbers[0]) ? $this->parsePhoneNumber($role->user->phoneNumbers[0]->national_number) : '-';
-                        $street_address = !empty($role->user->addresses[0]) ? $this->parseStreetAddress($role->user->addresses[0]) : '-';
-
                         return [
                             'id'             => $role->id,
                             'name'           => $role->nameLastFirst,
                             'date_of_birth'  => $role->date_of_birth,
-                            'street_address' => $street_address,
-                            'city'           => $role->user->addresses[0]->city ?? '-',
-                            'state'          => $role->user->addresses[0]->state ?? '-',
-                            'zip'            => $role->user->addresses[0]->zip ?? '-',
-                            'phone'          => $phoneNumber,
+                            'street_address' => optional($role->address)->street_address,
+                            'city'           => optional($role->address)->city ?? '-',
+                            'state'          => optional($role->address)->state ?? '-',
+                            'zip'            => optional($role->address)->zip ?? '-',
+                            'phone'          => optional($role->phoneNumber)->number(),
                         ];
                     })
                     ->values();
-    }
-
-    /**
-     * format phone numbers
-     *
-     * @return string
-     */
-    protected function parsePhoneNumber($phoneNumber) {
-        $areaCode = substr($phoneNumber, 0, 3);
-        $nextThree = substr($phoneNumber, 3, 3);
-        $lastFour = substr($phoneNumber, 6, 4);
-
-        return '(' . $areaCode . ') ' . $nextThree . '-' . $lastFour;
-    }
-
-    /**
-     * format street address
-     *
-     * @return string
-     */
-    protected function parseStreetAddress($address) {
-        $address2 = $address->address2 ?? '';
-
-        return $address->address1 . ' ' . $address2;
     }
 }

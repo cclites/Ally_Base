@@ -49,7 +49,7 @@
                     Filter by {{type}} birthday
                 </b-form-checkbox>
             </b-col>
-            <b-col lg="3">
+            <b-col lg="3" v-show="showDateRange" >
                 <b-form-group label="Upcoming Birthdays" class="f-1 mx-1">
 
                     <b-form-input v-model="search.days" placeholder="Birthdays in next xx days" type="number"/>
