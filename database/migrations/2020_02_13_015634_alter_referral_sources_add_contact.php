@@ -14,11 +14,11 @@ class AlterReferralSourcesAddContact extends Migration
     public function up()
     {
         Schema::table('referral_sources', function(Blueprint $table){
-            $table->string('contact_address_street');
-            $table->string('contact_address_street2')->nullable();
-            $table->string('contact_address_city');
-            $table->string('contact_address_state');
-            $table->string('contact_address_zip');
+            $table->string('contact_address_street', 150);
+            $table->string('contact_address_street2', 50)->nullable();
+            $table->string('contact_address_city', 100);
+            $table->string('contact_address_state', 50);
+            $table->string('contact_address_zip', 10);
         });
     }
 
