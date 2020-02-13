@@ -15,7 +15,7 @@ class AlterReferralSourcesAddContact extends Migration
     {
         Schema::table('referral_sources', function(Blueprint $table){
             $table->string('contact_address_street');
-            $table->string('contact_address_street2')->nullable()->default(null);
+            $table->string('contact_address_street2')->nullable();
             $table->string('contact_address_city');
             $table->string('contact_address_state');
             $table->string('contact_address_zip');
