@@ -88,6 +88,40 @@ abstract class BusinessRequest extends FormRequest
         return $this->addBusinessInput(parent::validated());
     }
 
+    // TODO => I saw that I deleted these two below functions.. not sure why I'd do that.. but let me leave this comment here in case i need to find this fast again
+
+    /**
+     * Get the business ID from the request, defaulting to a
+     * single business if the user only has 1 attached.
+     *
+     * @param \App\User|null $user
+     * @return array|string
+     */
+    public function getBusinessId(User $user = null)
+    {
+        if (!$user) $user = \Auth::user();
+
+        $businessIds = $user->getBusinessIds();
+        $default = count($businessIds) === 1 ? current($businessIds) : null;
+
+        return $this->input('business_id') ?: $default;
+    }
+
+    /**
+     * Get the business from the request, defaulting to a
+     * single business if the user only has 1 attached.
+     *
+     * @param \App\User|null $user
+     * @return \App\Business|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     */
+    public function getBusiness(User $user = null)
+    {
+        return Business::findOrFail($this->getBusinessId($user));
+    }
+
+    // END TODO =>
+
     /**
      * Get the business chain from the request.
      *
