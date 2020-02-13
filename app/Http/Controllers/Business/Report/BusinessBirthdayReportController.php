@@ -20,8 +20,6 @@ class BusinessBirthdayReportController extends Controller
             $report = new BirthdayReport($request->type);
 
             $userId = $request->selectedId;
-            $startDate = $request->start_date;
-            $endDate = $request->end_date;
             $clientType = $request->client_type;
 
             if (! $request->show_inactive) {
@@ -37,7 +35,7 @@ class BusinessBirthdayReportController extends Controller
             }
 
             if ($request->filterDates) {
-                $report->filterByDateRange($startDate, $endDate);
+                $report->filterByDateRange($request->days);
             }
 
             return response()->json($report->rows());
