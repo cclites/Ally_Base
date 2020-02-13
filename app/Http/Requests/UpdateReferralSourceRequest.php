@@ -22,7 +22,12 @@ class UpdateReferralSourceRequest extends FormRequest
         return [
             'organization' => 'nullable',
             'contact_name' => 'nullable',
-            'phone' => ['nullable', new PhonePossible()],
+            'phone' => ['required', new PhonePossible()],
+            'contact_address_street' => 'required|string|max:150',
+            'contact_address_street2' => 'nullable|string|max:150',
+            'contact_address_city' => 'required|string|max:150',
+            'contact_address_state' => 'required|string|max:150',
+            'contact_address_zip' => 'required|string|digits:5',
             'active' => 'boolean',
             'type' => 'required|in:'. join(',', ReferralSource::validTypes()),
 

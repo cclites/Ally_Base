@@ -64,7 +64,6 @@ class ReferralSourceController extends BaseController
         if( empty( $data[ 'organization' ] ) ) $data[ 'organization' ] = $data[ 'contact_name' ];
 
         $this->authorize('create', [ReferralSource::class, $data]);
-
         if ($referralSource = $this->businessChain()->referralSources()->create($data)->fresh()) {
             return new CreatedResponse('The referral source has been created!', $referralSource);
         }
