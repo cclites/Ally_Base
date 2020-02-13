@@ -120,6 +120,12 @@
 
             async submitForm(){
 
+                if( this.form.recipients.length < 1 ){
+
+                    alerts.addMessage( 'error', 'You must have a recipient to reply to!' );
+                    return;
+                }
+
                 if ( this.form.message.length > this.maxLength ) {
 
                     this.form.addError( 'Message', `A maximum character count of ${this.maxLength} is applied to text messages` );
