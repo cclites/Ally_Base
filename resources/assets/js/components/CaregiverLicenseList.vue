@@ -246,8 +246,9 @@
             },
             addToUpdateList( item, val ){
 
+                console.log( 'the item: ', item );
                 if( !this.updateList.includes( item.tempId ) ) this.updateList.push( item.tempId );
-                if( this.updateList.includes( item.tempId ) && [ null, '' ].includes( val ) ){
+                if( this.updateList.includes( item.tempId ) && [ null, '' ].includes( item.id ) && [ null, '' ].includes( val ) ){
 
                     const index = this.updateList.findIndex( tempId => tempId == item.tempId );
                     this.updateList.splice( index, 1 );
