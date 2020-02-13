@@ -34,7 +34,11 @@ class FaceSheetReportController
             ->values()
             ->unique();
 
-        $html = response(view('business.clients.client_face_sheet', ['client'=>$client, 'activities'=>$activities]))->getContent();
+        $html = response(view('business.clients.client_face_sheet', [
+            'client'=>$client,
+            'activities'=>$activities,
+            'override_ally_logo' => $client->business->logo,
+        ]))->getContent();
         $snappy = \App::make('snappy.pdf');
 
         return new Response(

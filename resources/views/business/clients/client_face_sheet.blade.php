@@ -16,7 +16,9 @@
             color: #fff;
         }
         .client-info, .client-info th, .client-info td,
+        .preferences-info, .preferences-info th, .preferences-info td,
         .contact-info, .contact-info th, .contact-info td,
+        .notes-info, .notes-info th, .notes-info td,
         .profile-info, .profile-info th, .profile-info td,
         .address-info, .address-info th, .address-info td,
         .services-info, .services-info th, .services-info td,
@@ -36,13 +38,6 @@
             text-align: center;
         }
 
-        .logo_header img,
-        .avatar img{
-            height: auto;
-            width: 20%;
-            border: none;
-        }
-
         .heading span{
             width: 48%;
             display: inline-block;
@@ -53,7 +48,7 @@
     <table class="logo_header">
         <tr>
             <td>
-                <img src="{{ $client->business->logo }}" alt="{{ $client->business->name }}">
+                @include('layouts.partials.print_logo')
             </td>
             <td>
                 {{ $client->business->name }}<br>
@@ -94,6 +89,7 @@
                     {{ \Carbon\Carbon::parse( $client->date_of_birth )->format( 'm-d-Y' ) }}
                 </td>
             </tr>
+
         </tbody>
     </table>
 
@@ -216,6 +212,29 @@
     </table>
 
     {{-- Power of attorney (do not have) --}}
+    <table class="preferences-info">
+        <thead>
+            <tr>
+                <th colspan="3">CAREGIVER PREFERENCES:</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <p>Gender:</p>
+                    {{ $client->preferences ? $client->preferences->gender : '' }}
+                </td>
+                <td>
+                    <p>Certification:</p>
+                    {{ $client->preferences ? $client->preferences->license : '' }}
+                </td>
+                <td>
+                    <p>Language:</p>
+                    {{ $client->preferences ? ucfirst($client->preferences->language) : ''}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
     <table class="profile-info">
         <thead>
@@ -226,7 +245,7 @@
         <tbody>
             <tr>
                 <td>
-                    @if($client->careDetails && $client->careDetails->smoker == 1)
+                    @if($client->preferences && $client->preferences->smokes == 1)
                         <input type="checkbox" checked="checked">
                     @else
                         <input type="checkbox">
@@ -234,20 +253,28 @@
                     Smoker
                 </td>
                 <td>
-
-                    @if($client->careDetails && count($client->careDetails->pets))
+                    Pets in Home
+                    <br>
+                    @if($client->preferences && $client->preferences->pets_dogs)
                         <input type="checkbox" checked="checked">
                     @else
                         <input type="checkbox">
                     @endif
+                    Dogs
 
-                    Pets in Home &nbsp;&nbsp; Type:
-                    @if($client->careDetails && count($client->careDetails->pets))
-                        @foreach($client->careDetails->pets as $pet)
-                        {{ $pet . "  "}}
-                        @endforeach
-                     @endif
+                    @if($client->preferences && $client->preferences->pets_cats)
+                        <input type="checkbox" checked="checked">
+                    @else
+                        <input type="checkbox">
+                    @endif
+                    Cats
 
+                    @if($client->preferences && $client->preferences->pets_birds)
+                        <input type="checkbox" checked="checked">
+                    @else
+                        <input type="checkbox">
+                    @endif
+                    Birds
                 </td>
             </tr>
         </tbody>
@@ -298,11 +325,11 @@
 
     <table class="services-info">
         <thead>
-        <tr>
-            <th>
-                Requested Services:
-            </th>
-        </tr>
+            <tr>
+                <th>
+                    Requested Services:
+                </th>
+            </tr>
         </thead>
         <tbody>
         @if( count($activities) )
@@ -318,6 +345,31 @@
                 </td>
             </tr>
         @endif
+        </tbody>
+    </table>
+
+    <table class="notes-info">
+        <thead>
+            <tr>
+                <th>Requested Services Notes:</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if( count($client->carePlans) )
+                @foreach($client->carePlans as $plan)
+                <tr>
+                    <td>
+                        {{ $plan->notes }}
+                    </td>
+                </tr>
+                @endforeach
+            @else
+                <tr>
+                    <td>
+                        No Requested Services Notes
+                    </td>
+                </tr>
+            @endif
         </tbody>
     </table>
 
