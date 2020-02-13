@@ -38,13 +38,6 @@
             text-align: center;
         }
 
-        .logo_header img,
-        .avatar img{
-            height: auto;
-            width: 20%;
-            border: none;
-        }
-
         .heading span{
             width: 48%;
             display: inline-block;
@@ -52,14 +45,10 @@
 
     </style>
 
-    @php
-        Log::info($client->preferences);
-    @endphp
-
     <table class="logo_header">
         <tr>
             <td>
-                <img src="{{ $client->business->logo }}" alt="{{ $client->business->name }}">
+                @include('layouts.partials.print_logo')
             </td>
             <td>
                 {{ $client->business->name }}<br>
