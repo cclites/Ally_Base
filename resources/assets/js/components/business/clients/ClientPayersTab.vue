@@ -27,7 +27,7 @@
                     </b-btn>
                 </template>
                 <template slot="payer_id" scope="row">
-                    <b-select v-model="row.item.payer_id" class="form-control-sm w-auto">
+                    <b-select v-model="row.item.payer_id" class="form-control-sm w-auto" @change="row.item.id = null">
                         <option :value="0">({{ client.name }})</option>
                         <option v-for="payer in payerOptions" :value="payer.id" :key="payer.id">{{ payer.name }}</option>
                         <option :value="1">OFFLINE</option>
