@@ -249,6 +249,7 @@
     import ManageCalendar from '../../../mixins/ManageCalendar';
     import LocalStorage from "../../../mixins/LocalStorage";
     import FormatsDates from "../../../mixins/FormatsDates";
+    import Constants from "../../../mixins/Constants";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
@@ -885,9 +886,9 @@
             },
 
             getEventBackground( event, status = null ){
-                return event.backgroundColor || '#1c81d9';
-                // if( status && status == this.OPEN_SHIFTS_STATUS.APPROVED ) return '#1c81d9';
-                // return !event.caregiver_id ? '#d9c01c' : '#1c81d9';
+
+                if( status && status == this.OPEN_SHIFTS_STATUS.APPROVED ) return '#1c81d9';
+                return event.caregiver === 'OPEN' ? '#d9c01c' : ( event.backgroundColor || '#1c81d9' );
             },
 
             loadFiltersData() {
@@ -1173,7 +1174,7 @@
             },
         },
 
-        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers, FormatsStrings, HasOpenShiftsModal ],
+        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers, FormatsStrings, HasOpenShiftsModal, Constants],
     }
 </script>
 
