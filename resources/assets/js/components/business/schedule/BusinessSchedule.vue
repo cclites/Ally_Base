@@ -855,9 +855,9 @@
             },
 
             getEventBackground( event, status = null ){
-
-                if( status && status == this.OPEN_SHIFTS_STATUS.APPROVED ) return '#1c81d9';
-                return !event.caregiver_id ? '#d9c01c' : '#1c81d9';
+                return event.backgroundColor || '#1c81d9';
+                // if( status && status == this.OPEN_SHIFTS_STATUS.APPROVED ) return '#1c81d9';
+                // return !event.caregiver_id ? '#d9c01c' : '#1c81d9';
             },
 
             loadFiltersData() {
