@@ -121,6 +121,7 @@ class OccAccDeductiblesReport extends BusinessResourceReport
 
                 // return the minimum betweeen 9.00 and ( duration * deduction )
                 $shift->deduction = min( 9.00, round( $deduction * $duration, 2 ) );
+                $shift->selected = 0;
 
                 return $shift;
             });

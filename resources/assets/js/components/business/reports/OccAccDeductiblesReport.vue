@@ -70,9 +70,23 @@
 
                 <template slot="actions" scope="row">
 
-                    <b-btn size="sm" @click=" selectCaregiver( row.item ) ">Select</b-btn>
+                    <b-form-checkbox
+                        :id=" `cg-checkbox-${row.item.user_id}` "
+                        v-model=" row.item.selected "
+                        :name=" `cg-checkbox-${row.item.user_id}` "
+                        value="1"
+                        unchecked-value="0"
+                    ></b-form-checkbox>
                 </template>
             </b-table>
+            </b-col>
+        </b-row>
+        <b-row>
+
+            <b-col>
+
+                <h3>Selected CGs</h3>
+                <p v-for=" ( s, i ) in selectedCaregivers " :key=" i ">{{ s.caregiver_name }}</p>
             </b-col>
         </b-row>
     </b-card>
@@ -135,6 +149,10 @@
             startDate(){
 
                 return moment( this.form.end_date ).subtract( 7, 'day' ).format( 'MM/DD/YYYY' );
+            },
+            selectedCaregivers(){
+
+                return this.items.filter( i => i.selected == "1" );
             }
         },
 
