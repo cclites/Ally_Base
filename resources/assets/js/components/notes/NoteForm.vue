@@ -241,6 +241,7 @@
                     tags: data.tags || "",
                     type: data.type || "other",
                     call_direction: data.call_direction || "inbound",
+                    template_id: data.template_id || null,
                     modal: this.modal, // added so controller doesn't send redirect response
                 });
             },
@@ -249,6 +250,11 @@
                 setTimeout(() => {
                     this.form.title = this.noteTemplate.short_name;
                     this.form.body = this.noteTemplate.note;
+                    if(typeof this.noteTemplate === 'string' && this.noteTemplate.length === 0){
+                        this.form.template_id = null;
+                    } else {
+                        this.form.template_id = this.noteTemplate.id;
+                    }
                 });
             }
         },

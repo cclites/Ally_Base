@@ -91,6 +91,10 @@ class Note extends AuditableModel implements BelongsToBusinessesInterface
         return $this->belongsTo('App\User', 'created_by');
     }
 
+    public function template(){
+        return $this->belongsTo('App\NoteTemplate', 'template_id');
+    }
+
     // **********************************************************
     // ScrubsForSeeding Methods
     // **********************************************************
