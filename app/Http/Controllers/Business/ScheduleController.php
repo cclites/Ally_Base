@@ -15,6 +15,7 @@ use App\Http\Requests\UpdateScheduleRequest;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
+use App\Responses\Resources\ScheduleEvents;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Responses\Resources\Schedule as ScheduleResponse;
 use App\Responses\SuccessResponse;
@@ -29,6 +30,7 @@ use App\Shifts\RateFactory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Client;
+use Illuminate\Http\Response;
 
 class ScheduleController extends BaseController
 {
@@ -62,6 +64,10 @@ class ScheduleController extends BaseController
 
         $events = new ScheduleEventsResponse( $schedules );
         $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
+
+        if($request->filled('print')){
+            return $this->generatePrintableSchedule($events->toArray(), $start, $end);
+        }
 
         return [
             'kpis' => $events->kpis(),
@@ -674,4 +680,35 @@ class ScheduleController extends BaseController
         }
         return false;
     }
+
+    public function generatePrintableSchedule($events, Carbon $start, Carbon $end)
+    {
+        //\Log::info($events);
+        //die();
+
+        //ScheduleEventsResponse
+
+        $diff = $start->diffInDays($end);
+
+        if($diff == 1){ //daily
+            //$html = $this->dailyScheduleAsPdf($events, $start, $end);
+        }elseif($diff == 7){ //weekly
+            //$html = $this->weeklyScheduleAsPdf($events, $start, $end);
+        }else{
+            $calendar = new \App\Scheduling\Calendar();
+            $html = $calendar->generateMonthlyCalendar($events, $start, $end);
+            $html = response(view('print.business.calendar', ['html'=>$html]))->getContent();
+        }
+
+        $snappy = \App::make('snappy.pdf');
+        return new Response(
+            $snappy->getOutputFromHtml($html),
+            200,
+            array(
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . standard_filename('schedule', 'care details', 'pdf') . '"'
+            )
+        );
+    }
+
 }
