@@ -45,27 +45,33 @@
         </b-row>
         <b-row>
 
-            <b-col class="mb-3 d-flex justify-content-end">
+            <b-col class="mb-3 d-flex justify-content-between">
 
+                <div>
+                <transition name="slide-fade" mode="out-in">
+
+                    <b-button @click="generateDeductibles()" variant="primary" :disabled=" form.busy || generating " v-if=" selectedCaregivers.length > 0 ">Create Deposit Adjustment</b-button>
+                </transition>
+                </div>
                 <b-button-group>
 
-                    <b-button @click="print()" :disabled=" form.busy "><i class="fa fa-print mr-2"></i>Print</b-button>
-                    <b-button @click="fetch()" variant="info" :disabled=" form.busy "><i class="fa"></i>Generate Report</b-button>
+                    <b-button @click="print()" :disabled=" form.busy || generating "><i class="fa fa-print mr-2"></i>Print</b-button>
+                    <b-button @click="fetch()" variant="info" :disabled=" form.busy || generating ">Generate Report</b-button>
                 </b-button-group>
             </b-col>
         </b-row>
-
-        <loading-card v-if=" form.busy " text="Loading Report"></loading-card>
 
         <b-row>
 
             <b-col>
 
+                <loading-card v-if=" form.busy " text="Loading Report"></loading-card>
                 <b-table bordered striped hover show-empty
                     :items=" items "
                     :fields=" fields "
                     :sort-by.sync=" sortBy "
                     :sort-desc.sync=" sortDesc "
+                    v-else
                 >
 
                 <template slot="actions" scope="row">
@@ -79,14 +85,6 @@
                     ></b-form-checkbox>
                 </template>
             </b-table>
-            </b-col>
-        </b-row>
-        <b-row>
-
-            <b-col>
-
-                <h3>Selected CGs</h3>
-                <p v-for=" ( s, i ) in selectedCaregivers " :key=" i ">{{ s.caregiver_name }}</p>
             </b-col>
         </b-row>
     </b-card>
@@ -107,9 +105,10 @@
 
             return {
 
-                items    : [],
-                sortBy   : 'name',
-                sortDesc : true,
+                generating : false,
+                items      : [],
+                sortBy     : 'name',
+                sortDesc   : true,
                 form: new Form({
 
                     json        : 1,
@@ -158,16 +157,11 @@
 
         methods: {
 
-            selectCaregiver( caregiver ){
-
-                console.log( 'fucking selected: ', caregiver );
-            },
             async fetch() {
 
-                this.form.get( '/business/reports/occ-acc-deductibles' )
+                this.form.get( '/business/occ-acc-deductibles' )
                     .then( ({ data }) => {
 
-                        console.log( 'the results: ', data );
                         this.items = data;
                     })
                     .catch(() => {
@@ -178,21 +172,33 @@
 
                     });
             },
-        },
+            generateDeductibles(){
 
-        async mounted() {
+                this.generating = true;
 
-            // this.form.start_date = moment().format('MM/DD/YYYY');
-            // this.form.end_date = moment().add(30, 'day').format('MM/DD/YYYY');
-        },
+                const inputs = this.selectedCaregivers.map( c => {
 
-        watch: {
+                    return {
 
-            // async 'form.businesses'(newValue, oldValue) {
-            //     if (newValue != oldValue) {
-            //         await this.fetchOptions();
-            //     }
-            // }
-        },
+                        'caregiver_id' : c.user_id,
+                        'amount'       : c.deduction
+                    }
+                });
+
+                let form = new Form( inputs );
+                form.post( '/business/occ-acc-deductibles' )
+                    .then( ( data ) => {
+
+                        // this.selectedCaregivers.forEach( c => {
+                        //     // this may not be necessaery.. leaving it here just in case
+
+                        //     const index = this.items.findIndex( i => i.user_id == c.user_id );
+                        //     this.items.splice( index, 1 );
+                        // });
+                    })
+                    .catch( err => {})
+                    .finally( () => this.generating = false );
+            }
+        }
     }
 </script>

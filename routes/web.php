@@ -379,7 +379,7 @@ Route::group([
     Route::get('reports/prospect-directory', 'Business\ReportsController@prospectDirectory')->name('reports.prospect_directory');
     Route::get('reports/prospect-directory/download', 'Business\ReportsController@generateProspectDirectoryReport')->name('reports.prospect_directory.download');
 
-    Route::get('reports/occ-acc-deductibles', 'Business\ReportsController@occAccDeductiblesReport')->name('reports.occ_acc_deductibles');
+    Route::resource( 'occ-acc-deductibles', 'Business\OccAccDeductiblesController' );
 
     Route::get('reports/data/birthdays', 'Business\ReportsController@userBirthdayData')->name('reports.data.user_birthday');
     Route::get('reports/data/shift/{id}', 'Business\ReportsController@shift')->name('reports.data.shift');

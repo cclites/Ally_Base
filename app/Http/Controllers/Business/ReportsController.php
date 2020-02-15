@@ -2,18 +2,14 @@
 
 namespace App\Http\Controllers\Business;
 
-use App\Billing\Service;
 use App\Http\Requests\TimesheetReportRequest;
-use App\ReferralSource;
 use App\Reports\PayrollReport;
-use App\Shifts\ShiftStatusManager;
 use Auth;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
 use App\Caregiver;
 use App\Prospect;
 use App\Client;
-use App\EmergencyContact;
 use App\Billing\Payments\Methods\CreditCard;
 use App\Billing\Deposit;
 use App\Billing\GatewayTransaction;
@@ -23,27 +19,18 @@ use App\Reports\ClientCaregiversReport;
 use App\Reports\ClientChargesReport;
 use App\Reports\ProviderReconciliationReport;
 use App\Reports\ScheduledPaymentsReport;
-use App\Reports\ScheduledVsActualReport;
 use App\Reports\ShiftsReport;
-use App\Reports\ClientDirectoryReport;
-use App\Reports\CaregiverDirectoryReport;
 use App\Reports\ProspectDirectoryReport;
 use App\Responses\ErrorResponse;
-use App\Schedule;
-use App\Scheduling\ScheduleAggregator;
 use App\Shift;
 use App\Shifts\AllyFeeCalculator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use App\Reports\EVVReport;
-use App\CustomField;
 use App\OfficeUser;
-use App\Reports\OccAccDeductiblesReport;
-use App\Responses\SuccessResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
-use Twilio\Rest\Taskrouter\V1\Workspace\TaskQueue\TaskQueuesStatisticsInstance;
 
 class ReportsController extends BaseController
 {
@@ -1072,34 +1059,5 @@ class ReportsController extends BaseController
             ->get();
 
             return $prospects;
-    }
-
-    /**
-     * Gather a report for all Caregivers who receive OccAcc deductibles
-     * @param Request $request
-     *
-     * @return array
-     */
-    public function occAccDeductiblesReport( Request $request, OccAccDeductiblesReport $report )
-    {
-        if( $request->expectsJson() ){
-
-            $data = $report->forTheFollowingBusinesses( $request->businesses )
-                ->forWeekEndingAt( $request->end_date )
-                ->rows();
-
-            if ($request->has('export')) {
-                return $report->setDateFormat('m/d/Y g:i A', $this->business()->timezone)
-                    ->download();
-            }
-
-            return response()->json( $data );
-        }
-
-        return view_component( 'occ-acc-deductibles-report', 'OccAcc Deductibles Report', [], [
-
-            'Home'    => route( 'home' ),
-            'Reports' => route( 'business.reports.index' )
-        ]);
     }
 }
