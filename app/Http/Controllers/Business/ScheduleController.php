@@ -15,6 +15,7 @@ use App\Http\Requests\UpdateScheduleRequest;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
+use App\Responses\Resources\ScheduleEvents;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Responses\Resources\Schedule as ScheduleResponse;
 use App\Responses\SuccessResponse;
@@ -30,6 +31,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Client;
 use App\ScheduleFreeFloatingNote;
+use Illuminate\Http\Response;
 
 class ScheduleController extends BaseController
 {
@@ -61,22 +63,27 @@ class ScheduleController extends BaseController
         $end = Carbon::parse($request->input('end', 'First day of next month'));
         $schedules = $query->whereBetween('starts_at', [$start, $end])->get();
 
-        $events = new ScheduleEventsResponse( $schedules );
-        $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
+        $events = new ScheduleEventsResponse($schedules);
+        $events->setTitleCallback(function (Schedule $schedule) {
+            return $this->businessScheduleTitle($schedule);
+        });
 
-        $notes = ScheduleFreeFloatingNote::forRequestedBusinesses()->whereBetween( 'start_date', [ $start, $end ] )->get()->map( function( $note ){
-
-            $note->start           = Carbon::parse( $note->start_date )->format( 'Y-m-d' );
+        $notes = ScheduleFreeFloatingNote::forRequestedBusinesses()->whereBetween('start_date', [ $start, $end ])->get()->map(function ($note) {
+            $note->start           = Carbon::parse($note->start_date)->format('Y-m-d');
             $note->title           = 'Schedule Note'; // necessary for rendering the title of the object on the calendar
             $note->caregiver       = 'Schedule Note'; // necessary for rendering the title of the object on the calendar
             $note->client          = 'Schedule Note'; // necessary for rendering the title of the object on the calendar
-            $note->start_time      = Carbon::parse( $note->start )->format( 'm/d/Y' );
+            $note->start_time      = Carbon::parse($note->start)->format('m/d/Y');
             $note->backgroundColor = '#3bc1ff';
             $note->resourceId      = 13377331; // must match the id of the "resource" in BusinessSchedule.vue
             $note->service_types   = []; // necessary to be blank for our front-end code
 
             return $note;
         });
+        
+        if ($request->filled('print')) {
+            return $this->generatePrintableSchedule($events->toArray(), $start, $end);
+        }
 
         return [
             'kpis' => $events->kpis(),
@@ -252,7 +259,7 @@ class ScheduleController extends BaseController
         $weekdayInt = (int) $schedule->weekday;
         $weekdayText = $dowMap[$weekdayInt];
 
-        switch($request->input('group_update')) {
+        switch ($request->input('group_update')) {
             case 'total_all':
                 $editor->updateGroup($schedule->group, $schedule, $updatedData, $request->getNotes(), $services);
                 \DB::commit();
@@ -285,13 +292,15 @@ class ScheduleController extends BaseController
         $services = $request->getServices();
 
         if (count($services)) {
-            foreach($services as $service) {
-                if ($service['client_rate'] === null) continue;
+            foreach ($services as $service) {
+                if ($service['client_rate'] === null) {
+                    continue;
+                }
                 if (app(RateFactory::class)->hasNegativeProviderFee($client, $service['client_rate'], $service['caregiver_rate'])) {
                     return false;
                 }
             }
-        } else if ($request->client_rate !== null) {
+        } elseif ($request->client_rate !== null) {
             if (app(RateFactory::class)->hasNegativeProviderFee($client, $request->client_rate, $request->caregiver_rate)) {
                 return false;
             }
@@ -335,7 +344,9 @@ class ScheduleController extends BaseController
         }
 
         $events = new ScheduleEventsResponse(collect([$schedule]));
-        $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
+        $events->setTitleCallback(function (Schedule $schedule) {
+            return $this->businessScheduleTitle($schedule);
+        });
         $data = $events->toArray()[0];
 
         return new SuccessResponse('The schedule has been updated.', $data);
@@ -689,5 +700,35 @@ class ScheduleController extends BaseController
             return true;
         }
         return false;
+    }
+
+    public function generatePrintableSchedule($events, Carbon $start, Carbon $end)
+    {
+        //\Log::info($events);
+        //die();
+
+        //ScheduleEventsResponse
+
+        $diff = $start->diffInDays($end);
+
+        if ($diff == 1) { //daily
+            //$html = $this->dailyScheduleAsPdf($events, $start, $end);
+        } elseif ($diff == 7) { //weekly
+            //$html = $this->weeklyScheduleAsPdf($events, $start, $end);
+        } else {
+            $calendar = new \App\Scheduling\Calendar();
+            $html = $calendar->generateMonthlyCalendar($events, $start, $end);
+            $html = response(view('print.business.calendar', ['html'=>$html]))->getContent();
+        }
+
+        $snappy = \App::make('snappy.pdf');
+        return new Response(
+            $snappy->getOutputFromHtml($html),
+            200,
+            array(
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . standard_filename('schedule', 'care details', 'pdf') . '"'
+            )
+        );
     }
 }

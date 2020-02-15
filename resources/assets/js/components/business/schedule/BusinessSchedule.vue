@@ -249,10 +249,12 @@
     import ManageCalendar from '../../../mixins/ManageCalendar';
     import LocalStorage from "../../../mixins/LocalStorage";
     import FormatsDates from "../../../mixins/FormatsDates";
+
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
     import moment from 'moment';
+    import html2canvas from 'html2canvas';
     import HasOpenShiftsModal from '../../../mixins/HasOpenShiftsModal';
     import { mapActions, mapGetters } from 'vuex';
     import Constants from '../../../mixins/Constants';
@@ -482,6 +484,7 @@
                 setNewCaregiverName          : 'openShifts/setNewCaregiverName',
                 setSelectedEvent             : 'openShifts/setSelectedEvent',
             }),
+
             getFilteredEvents() {
                 let events = this.events;
 
@@ -1111,7 +1114,21 @@
             },
 
             printCalendar() {
-                window.print();
+
+                window.location = this.eventsUrl + "&print=1";
+
+                //console.log(this.eventsUrl + "&print=1");
+                //window.print();
+
+                //this.$refs.calendar.printCalendar();
+
+                /**
+                 * Needed parameters:
+                 *
+                 * Start
+                 * End
+                 * statusFilters
+                 */
             },
         },
 
