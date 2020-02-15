@@ -246,7 +246,6 @@
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
     import moment from 'moment';
-    import html2canvas from 'html2canvas';
     import HasOpenShiftsModal from '../../../mixins/HasOpenShiftsModal';
     import { mapActions, mapGetters } from 'vuex';
 

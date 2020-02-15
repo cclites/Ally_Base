@@ -62,9 +62,17 @@ class ScheduleController extends BaseController
         $end = Carbon::parse($request->input('end', 'First day of next month'));
 
         //Add filter for printing
+        /*
         if($request->filled('print') && $request->filled('status_filters')){
-            \Log::info($request->status_filters);
-        }
+
+           //$filters = explode(',', $request->status_filters);
+
+            //\Log::info($filters);
+
+            //foreach($filters as $filter){
+                $query->where('status', 'OPEN_SHIFT');
+            //}
+        }*/
 
         $schedules = $query->whereBetween('starts_at', [$start, $end])->get();
 
