@@ -61,6 +61,12 @@ class ScheduleController extends BaseController
 
         $start = Carbon::parse($request->input('start', 'First day of this month'));
         $end = Carbon::parse($request->input('end', 'First day of next month'));
+
+        //Add filter for printing
+        if($request->filled('print') && $request->filled('status_filters')){
+            \Log::info($request->status_filters);
+        }
+
         $schedules = $query->whereBetween('starts_at', [$start, $end])->get();
 
         $events = new ScheduleEventsResponse($schedules);

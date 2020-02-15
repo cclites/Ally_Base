@@ -91,7 +91,6 @@ class Calendar extends Model
         }
 
         return $eventMap;
-
     }
 
     public function dateSpan($day){
