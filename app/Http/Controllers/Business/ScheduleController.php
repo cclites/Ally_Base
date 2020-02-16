@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Billing\ClientRate;
 use App\Billing\ScheduleService;
+use App\Business;
 use App\Exceptions\AutomaticCaregiverAssignmentException;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
@@ -83,7 +84,15 @@ class ScheduleController extends BaseController
         });
         
         if ($request->filled('print')) {
-            return $this->generatePrintableSchedule($events->toArray(), $start, $end, $request->status_filters);
+            return $this->generatePrintableSchedule(
+                $events->toArray(),
+                $start,
+                $end,
+                $request->status_filters,
+                $request->client_id,
+                $request->caregiver_id,
+                $this->business()->name
+            );
         }
 
         return [
@@ -703,13 +712,21 @@ class ScheduleController extends BaseController
         return false;
     }
 
-    public function generatePrintableSchedule($events, Carbon $start, Carbon $end, ?string $filters)
+    public function generatePrintableSchedule($events, Carbon $start, Carbon $end, ?string $filters, ?int $clientId, ?int $caregiverId, ?string $businessName)
     {
         $diff = $start->diffInDays($end);
 
         $html = "No Report";
 
-        $calendar = new \App\Scheduling\Calendar($events, $start, $end, $filters);
+        $calendar = new \App\Scheduling\Calendar(
+            $events,
+            $start,
+            $end,
+            $filters,
+            $clientId,
+            $caregiverId,
+            $businessName
+        );
 
         if ($diff == 1) { //daily
             $html = $calendar->generateDailyCalendar();
