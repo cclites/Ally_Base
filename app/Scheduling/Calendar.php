@@ -19,6 +19,12 @@ class Calendar extends Model
 
     protected $filters;
 
+    protected $clientId;
+
+    protected $caregiverId;
+
+    protected $businessName;
+
     protected $startDay;
 
     protected $endDay;
@@ -29,12 +35,15 @@ class Calendar extends Model
 
     const DAY_INDEX = 7;
 
-    public function __construct($events, Carbon $start,  Carbon $end, ?string $filters)
+    public function __construct($events, Carbon $start,  Carbon $end, ?string $filters, ?int $clientId, ?int $caregiverId, ?string $businessName)
     {
         $this->events = $events;
         $this->start = $start;
         $this->end = $end;
         $this->filters = $filters;
+        $this->clientId = $clientId;
+        $this->caregiverId = $caregiverId;
+        $this->businessName = $businessName;
     }
 
     public function generateMonthlyCalendar( )
@@ -68,10 +77,11 @@ class Calendar extends Model
 
         // represents an index to know to quit adding calendar days
         $daysInMonth = $startDay->daysInMonth;
+        $year = $startDay->format("Y");
 
         $filteredEvents = $this->buildEventsMap();
 
-        $html = "<h2>$monthName</h2>";
+        $html = $this->headerSpan() . "<h2>$monthName - $year</h2>";
 
         $html .= "<table>" .
                     "<thead>" .
@@ -134,7 +144,7 @@ class Calendar extends Model
 
         $filteredEvents = $this->buildEventsMap();
 
-        $html = "<h2>" . $startDay->format('m-d-y') . " - " . $endDay->format('m-d-y')  . "</h2>";
+        $html = $this->headerSpan() . "<h2>" . $startDay->format('F d, Y') . " - " . $endDay->format('F d, Y')  . "</h2>";
 
         $html .= "<table>" .
             "<thead>" .
@@ -174,7 +184,7 @@ class Calendar extends Model
         $day = $this->start->format("j");
         $filteredEvents = $this->buildEventsMap();
 
-        $html = "<h2>" . $startDay->format('F d, Y') . "</h2>";
+        $html = $this->headerSpan() . "<h2>" . $startDay->format('F d, Y') . "</h2>";
 
         $html .= "<table>" .
                  "<thead>" .
@@ -225,14 +235,6 @@ class Calendar extends Model
         return $eventMap;
     }
 
-    public function dateSpan($day){
-        return "<div class='day'>$day</div>";
-    }
-
-    public function eventSpan($event){
-        return "<div class='event' style='background-color:" . $event['backgroundColor'] . ";'>" . $event['client'] . "<br>" . $event['caregiver']. "<br>" . $event['start_time'] . "<br>" . $event['end_time'] . "</div>";
-    }
-
     public function filterEvents(){
 
         $filters = explode(",", $this->filters);
@@ -248,5 +250,31 @@ class Calendar extends Model
                 $this->filteredEvents[] = $event;
             }
         }
+    }
+
+    public function headerSpan(){
+        $html = "<div><h4>" . $this->businessName . "</h4>";
+
+        if(isset($this->clientId)){
+            $name =  \App\Client::find($this->clientId)->name;
+            $html .= "<div>Client: $name</div>";
+        }
+
+        if(isset($this->caregiverId)){
+            $name =  \App\Caregiver::find($this->caregiverId)->name;
+            $html .= "<div>Caregiver: $name</div>";
+        }
+
+        $html .= "</div>";
+
+        return $html;
+    }
+
+    public function dateSpan($day){
+        return "<div class='day'>$day</div>";
+    }
+
+    public function eventSpan($event){
+        return "<div class='event' style='background-color:" . $event['backgroundColor'] . ";'>" . $event['client'] . "<br>" . $event['caregiver']. "<br>" . $event['start_time'] . "<br>" . $event['end_time'] . "</div>";
     }
 }
