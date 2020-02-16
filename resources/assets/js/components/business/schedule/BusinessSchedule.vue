@@ -517,7 +517,6 @@
                     }
                 }
 
-
                 let resources = items.map(item => {
                     let kpis = this.getKpis(this.resourceIdField, item.id);
                     return {
