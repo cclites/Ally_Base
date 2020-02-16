@@ -62,19 +62,6 @@ class ScheduleController extends BaseController
         $start = Carbon::parse($request->input('start', 'First day of this month'));
         $end = Carbon::parse($request->input('end', 'First day of next month'));
 
-        //Add filter for printing
-        /*
-        if($request->filled('print') && $request->filled('status_filters')){
-
-           //$filters = explode(',', $request->status_filters);
-
-            //\Log::info($filters);
-
-            //foreach($filters as $filter){
-                $query->where('status', 'OPEN_SHIFT');
-            //}
-        }*/
-
         $schedules = $query->whereBetween('starts_at', [$start, $end])->get();
 
         $events = new ScheduleEventsResponse($schedules);
@@ -96,7 +83,7 @@ class ScheduleController extends BaseController
         });
         
         if ($request->filled('print')) {
-            return $this->generatePrintableSchedule($events->toArray(), $start, $end);
+            return $this->generatePrintableSchedule($events->toArray(), $start, $end, $request->status_filters);
         }
 
         return [
@@ -716,24 +703,23 @@ class ScheduleController extends BaseController
         return false;
     }
 
-    public function generatePrintableSchedule($events, Carbon $start, Carbon $end)
+    public function generatePrintableSchedule($events, Carbon $start, Carbon $end, ?string $filters)
     {
-        //\Log::info($events);
-        //die();
-
-        //ScheduleEventsResponse
-
         $diff = $start->diffInDays($end);
 
+        $html = "No Report";
+
+        $calendar = new \App\Scheduling\Calendar($events, $start, $end, $filters);
+
         if ($diff == 1) { //daily
-            //$html = $this->dailyScheduleAsPdf($events, $start, $end);
+            $html = $calendar->generateDailyCalendar();
         } elseif ($diff == 7) { //weekly
-            //$html = $this->weeklyScheduleAsPdf($events, $start, $end);
+            $html = $calendar->generateWeeklyCalendar();
         } else {
-            $calendar = new \App\Scheduling\Calendar();
-            $html = $calendar->generateMonthlyCalendar($events, $start, $end);
-            $html = response(view('print.business.calendar', ['html'=>$html]))->getContent();
+            $html = $calendar->generateMonthlyCalendar();
         }
+
+        $html = response(view('print.business.calendar', ['html'=>$html]))->getContent();
 
         $snappy = \App::make('snappy.pdf');
         return new Response(
