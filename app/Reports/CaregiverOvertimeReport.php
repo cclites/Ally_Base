@@ -159,9 +159,9 @@ class CaregiverOvertimeReport extends BaseReport
                 $worked += $shift->duration();
                 $futureScheduled += $shift->remaining();
             }
-            $futureScheduled += $client->schedules()
+            $futureScheduled += Schedule::startsBetweenDates($this->timezone, 'now', $this->end)
                 ->where('caregiver_id', $caregiver->id)
-                ->startsBetweenDates($this->timezone, 'now', $this->end)
+                ->where('client_id', $client->id)
                 ->sum('duration');
             $total = round($worked + $futureScheduled, 2);
             return [
