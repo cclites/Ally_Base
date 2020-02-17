@@ -1,6 +1,6 @@
 <template>
 
-    <b-modal title="Bulk Delete Schedules" v-model="showModal" size="lg" class="modal-fit-more">
+    <b-modal title="Schedule Free Floating Note Creator" v-model="showModal" size="lg" class="modal-fit-more">
 
         <b-container fluid>
 
@@ -8,22 +8,19 @@
 
                 <b-col>
 
-                    <b-card title="Create Free Floating Schedule Note">
+                    <b-form-group label="Date" label-for="start_date" style="margin-bottom: 0;">
 
-                        <b-form-group label="End Date" label-for="date" style="margin-bottom: 0;">
+                        <date-picker v-model="form.start_date" />
+                        <input-help :form=" form " field="start_date" text="" />
+                    </b-form-group>
+                    <b-form-group label="Notes" label-for="body">
 
-                            <date-picker v-model="form.date" />
-                            <input-help :form=" form " field="date" text="" />
-                        </b-form-group>
-                        <b-form-group label="Notes" label-for="notes">
-
-                            <b-textarea id="notes"
-                                        :rows="3"
-                                        v-model=" form.notes "
-                            />
-                            <input-help :form="form" field="notes" text="Enter the notes for this schedule day" />
-                        </b-form-group>
-                    </b-card>
+                        <b-textarea id="body"
+                                    :rows="3"
+                                    v-model=" form.body "
+                        />
+                        <input-help :form="form" field="body" text="Enter notes for this schedule day" />
+                    </b-form-group>
                 </b-col>
             </b-row>
         </b-container>
@@ -47,7 +44,12 @@
 
         props: {
 
-            'value' : Boolean,
+            'value'       : Boolean,
+            'business_id' : {
+
+                Type    : Number,
+                Default : 0
+            }
         },
 
         data() {
@@ -57,8 +59,9 @@
                 daysOfWeek : ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'],
                 form       : new Form({
 
-                    date  : moment().format( 'MM/DD/YYYY' ),
-                    notes : ''
+                    start_date  : moment().format( 'MM/DD/YYYY' ),
+                    body        : '',
+                    business_id : null
                 }),
             }
         },
@@ -102,6 +105,12 @@
 
         watch: {
 
+            value(){
+
+                this.form.start_date  = moment().format( 'MM/DD/YYYY' );
+                this.form.body        = '';
+                this.form.business_id = this.business_id;
+            }
         }
     }
 </script>

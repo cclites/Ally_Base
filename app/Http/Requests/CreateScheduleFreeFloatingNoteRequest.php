@@ -25,8 +25,9 @@ class CreateScheduleFreeFloatingNoteRequest extends FormRequest
     {
         return [
 
-            'date'  => 'required|date',
-            'notes' => 'required|string'
+            'start_date'  => 'required|date',
+            'business_id' => 'required|exists:businesses,id',
+            'body'        => 'required|string'
         ];
     }
 }
