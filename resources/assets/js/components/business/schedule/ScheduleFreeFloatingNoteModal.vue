@@ -105,13 +105,13 @@
                 this.form.submit( action, '/business/schedule-free-floating-notes' + ( this.isEditing ? `/${this.form.id}` : '' ) )
                     .then( res => {
 
-                        console.log( 'THE RESPONSE: ', res );
+                        // console.log( 'THE RESPONSE: ', res );
                         this.$emit( 'refresh-events' );
                         this.showModal = false;
                     })
                     .catch( err => {
 
-                        console.log( 'THE ERROR: ', err );
+                        // console.log( 'THE ERROR: ', err );
                     });
             },
             resetForm( note = null ){
