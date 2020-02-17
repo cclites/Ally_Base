@@ -262,7 +262,7 @@ class Calendar extends Model
             $html .= "<div>Client: $name</div>";
         }
 
-        if(isset($this->caregiverId)){
+        if(isset($this->caregiverId) && $this->caregiverId != 0){
             $name =  \App\Caregiver::find($this->caregiverId)->name;
             $html .= "<div>Caregiver: $name</div>";
         }
