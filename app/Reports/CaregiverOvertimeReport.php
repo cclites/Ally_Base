@@ -4,6 +4,7 @@
 namespace App\Reports;
 
 use App\Caregiver;
+use App\Client;
 use App\Schedule;
 use App\Shift;
 use Carbon\Carbon;
@@ -37,8 +38,8 @@ class CaregiverOvertimeReport extends BaseReport
     public function __construct()
     {
         $this->query = Caregiver::forRequestedBusinesses()
-                        ->with('schedules')
-                        ->ordered();
+            ->with('schedules')
+            ->ordered();
     }
 
     /**
@@ -89,47 +90,86 @@ class CaregiverOvertimeReport extends BaseReport
     /**
      * process the results
      *
-     * @return Collection
+     * @return \Illuminate\Support\Collection
      */
     protected function results() : iterable
     {
-        $record = $this->query
-                    ->groupBy('caregivers.id')
-                    ->get()->map(function(Caregiver $caregiver){
+        return $this->query
+            ->groupBy('caregivers.id')
+            ->get()
+            ->map(function(Caregiver $caregiver){
+                $worked = 0;
+                $futureScheduled = 0;
 
-                    $worked = 0;
-                    $futureScheduled = 0;
-                    $total = 0;
+                foreach($caregiver->shifts()->whereBetween( 'checked_in_time', [$this->start, $this->end] )->where('checked_out_time', '!=', null )->get() as $shift) {
+                    $worked += $shift->duration();
+                }
 
-                    foreach($caregiver->shifts()->whereBetween( 'checked_in_time', [$this->start, $this->end] )->where('checked_out_time', '!=', null )->get() as $shift) {
-                        $worked += $shift->duration();
-                    }
+                foreach($caregiver->shifts()->whereBetween( 'checked_in_time', [$this->start, $this->end] )->where('checked_out_time', null )->get() as $shift) {
+                    $worked += $shift->duration();
+                    $futureScheduled += $shift->remaining();
+                }
 
-                    foreach($caregiver->shifts()->whereBetween( 'checked_in_time', [$this->start, $this->end] )->where('checked_out_time', null )->get() as $shift) {
-                        $worked += $shift->duration();
-                        $futureScheduled += $shift->remaining();
-                    }
+                $duration = Schedule::startsBetweenDates($this->timezone, 'now', $this->end)
+                    ->where('caregiver_id', $caregiver->id)
+                    ->sum('duration');
 
-                    $duration = Schedule::startsBetweenDates($this->timezone, 'now', $this->end)
-                            ->where('caregiver_id', $caregiver->id)
-                            ->sum('duration');
+                $futureScheduled += $duration;
 
-                    $futureScheduled += $duration;
+                $worked = round($worked, 2);
+                $futureScheduled = round($futureScheduled / 60, 2);
+                $total = round($worked + $futureScheduled, 2);
 
-                    $worked = round($worked, 2);
-                    $futureScheduled = round($futureScheduled / 60, 2);
-                    $total = round($worked + $futureScheduled, 2);
+                $clients = $this->getClientsForCaregiver($caregiver);
 
-                    return [
-                        'firstname'=>$caregiver->first_name,
-                        'lastname'=>$caregiver->last_name,
-                        'worked' => $worked,
-                        'future_scheduled' => $futureScheduled,
-                        'total' => $total,
-                    ];
+                return [
+                    'firstname'=>$caregiver->first_name,
+                    'lastname'=>$caregiver->last_name,
+                    'worked' => $this->roundTimeToNearestInterval($worked),
+                    'future_scheduled' => $this->roundTimeToNearestInterval($futureScheduled),
+                    'total' => $this->roundTimeToNearestInterval($total),
+                    'clients' => $clients
+                ];
+            })
+            ->values();
+    }
 
-            });
+    /**
+     * @param float $time
+     * @param int $interval
+     * @return float
+     */
+    private function roundTimeToNearestInterval($time, $interval = 25){
+        $decimalPart = ($time - floor($time)) * 100;
+        return floatval(floor($time).'.'.(ceil($decimalPart / $interval) * $interval));
+    }
+    private function getClientsForCaregiver(Caregiver $caregiver){
+        /*$clients = $caregiver->clients()->whereHas('shifts', function($query){
 
-             return $record->values();
+        });*/
+        return $caregiver->clients()->get()->map(function(Client $client) use ($caregiver){
+            $worked = 0;
+            $futureScheduled = 0;
+
+            foreach($client->shifts()->where('caregiver_id', $caregiver->id)->whereBetween( 'checked_in_time', [$this->start, $this->end] )->where('checked_out_time', '!=', null )->get() as $shift) {
+                $worked += $shift->duration();
+            }
+
+            foreach($client->shifts()->where('caregiver_id', $caregiver->id)->whereBetween( 'checked_in_time', [$this->start, $this->end] )->where('checked_out_time', null )->get() as $shift) {
+                $worked += $shift->duration();
+                $futureScheduled += $shift->remaining();
+            }
+            $futureScheduled += Schedule::startsBetweenDates($this->timezone, 'now', $this->end)
+                ->where('caregiver_id', $caregiver->id)
+                ->where('client_id', $client->id)
+                ->sum('duration');
+            $total = round($worked + $futureScheduled, 2);
+            return [
+                'name' => $client->name,
+                'worked' => $this->roundTimeToNearestInterval($worked),
+                'future_scheduled' => $this->roundTimeToNearestInterval($futureScheduled),
+                'total' => $this->roundTimeToNearestInterval($total)
+            ];
+        })->values();
     }
 }
