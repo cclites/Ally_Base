@@ -9,7 +9,7 @@ use App\Responses\Resources\ScheduleEvents;
 
 class Calendar extends Model
 {
-    protected $daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    protected $daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
     protected $events;
 
@@ -70,8 +70,10 @@ class Calendar extends Model
         $monthIndex = 0;
         /*****************************************************************************/
 
-        //represents the day of the week on which the month starts
-        $sDay = $startDay->dayOfWeek;
+        //represents the day of the week on which the month starts. Since the view
+        //displays the calendar starting on Monday, need to subtract one from the
+        //start day.
+        $sDay = $startDay->dayOfWeek - 1;
 
         $monthName = $startDay->monthName;
 
