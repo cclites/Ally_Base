@@ -161,6 +161,7 @@
         <schedule-free-floating-note-modal
             v-model="createFreeFloatingNoteModal"
             @refresh-events="fetchEvents( true )"
+            :business_id=" filterBusinessId "
         />
 
         <schedule-clock-out-modal v-model="clockOutModal"
@@ -273,11 +274,13 @@
 
         data() {
             return {
+
+                free_floating_notes : [],
                 loading: false,
                 filtersReady: false,
                 filterCaregiverId: (this.caregiver) ? this.caregiver.id : -1,
                 filterClientId: (this.client) ? this.client.id : -1,
-                filterBusinessId: (this.client) ? this.client.business_id : "",
+                filterBusinessId: (this.client) ? this.client.business_id : null,
                 header: {
                     left:   'prev,next today',
                     center: 'title',
@@ -390,7 +393,7 @@
                             },
                             render: function(resource, el) {
                                 // need client/caregiver link
-                                if (resource.title !== 'Open Shifts') {
+                                if( ![ 'Notes', 'Open Shifts' ].includes( resource.title ) ){
                                     let link = `<a href='/business/${resource.role}/${resource.id}' target='_blank'>${resource.title}</a>`;
                                     el.html(link);
                                 }
@@ -471,10 +474,10 @@
             ...mapActions({
 
                 establishWeAreOnSchedulePage : 'openShifts/establishWeAreOnSchedulePage',
-                toggleTrigger : 'openShifts/toggleTrigger',
-                setNewStatus  : 'openShifts/setNewStatus',
-                setNewCaregiverName  : 'openShifts/setNewCaregiverName',
-                setSelectedEvent  : 'openShifts/setSelectedEvent',
+                toggleTrigger                : 'openShifts/toggleTrigger',
+                setNewStatus                 : 'openShifts/setNewStatus',
+                setNewCaregiverName          : 'openShifts/setNewCaregiverName',
+                setSelectedEvent             : 'openShifts/setSelectedEvent',
             }),
             getFilteredEvents() {
                 let events = this.events;
@@ -500,7 +503,9 @@
                     })
                 }
 
-                return events;
+                const notes = this.free_floating_notes;
+
+                return notes.concat( events );
             },
 
             currentTime() {
@@ -521,7 +526,6 @@
                         items = items.filter(client => client.business_id == this.filterBusinessId);
                     }
                 }
-
 
                 let resources = items.map(item => {
                     let kpis = this.getKpis(this.resourceIdField, item.id);
@@ -545,6 +549,15 @@
                         projected: openkpis.PROJECTED.hours.toFixed(0),
                     });
                 }
+
+                resources.unshift({
+                    id: 13377331,
+                    title: 'Notes',
+                    role: this.resourceIdField === 'client_id' ? 'clients' : 'caregivers',
+                    scheduled: '-',
+                    completed: '-',
+                    projected: '-',
+                });
 
                 if ( this.filteredClientResources || this.filteredCaregiverResources ) {
                     let filtered = [this.filterClientId, this.filterCaregiverId];
@@ -826,6 +839,9 @@
                 this.loading = true;
                 axios.get(this.eventsUrl)
                     .then( ({ data }) => {
+
+                        this.free_floating_notes = data.free_floating_notes;
+
                         this.events = data.events.map(event => {
                             event.resourceId = event[this.resourceIdField];
                             event.backgroundColor = this.getEventBackground(event);
@@ -996,7 +1012,7 @@
             },
 
             renderTimelineWeekEvent(content, event, note, requests) {
-                let data = [this.getEventPersonName(event), `${event.start_time} - ${event.end_time}`, ...event.service_types];
+                let data = [this.getEventPersonName(event), `${event.start_time}` + ( event.end_time ? `- ${event.end_time}` : '' ), ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
