@@ -25,6 +25,7 @@ class CreateScheduleFreeFloatingNoteRequest extends FormRequest
     {
         return [
 
+            'id'          => 'nullable|exists:schedule_free_floating_notes,id',
             'start_date'  => 'required|date',
             'business_id' => 'required|exists:businesses,id',
             'body'        => 'required|string'

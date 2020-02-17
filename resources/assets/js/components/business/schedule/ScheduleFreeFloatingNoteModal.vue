@@ -38,9 +38,11 @@
 
 <script>
 
+    import UtilityFunctions from '../../../mixins/UtilityFunctions';
+
     export default {
 
-        mixins: [],
+        mixins: [ UtilityFunctions ],
 
         props: {
 
@@ -49,7 +51,12 @@
 
                 Type    : Number,
                 Default : 0
-            }
+            },
+            'selectedScheduleNote' : {
+
+                Type    : Object,
+                Default : {}
+            },
         },
 
         data() {
@@ -59,6 +66,7 @@
                 daysOfWeek : ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'],
                 form       : new Form({
 
+                    id          : null,
                     start_date  : moment().format( 'MM/DD/YYYY' ),
                     body        : '',
                     business_id : null
@@ -78,6 +86,10 @@
 
                     this.$emit( 'input', value );
                 }
+            },
+            isEditing(){
+
+                return !!this.selectedScheduleNote.id;
             }
         },
 
@@ -89,7 +101,8 @@
 
             save() {
 
-                this.form.post( '/business/schedule-free-floating-notes' )
+                const action = this.isEditing ? 'patch' : 'post';
+                this.form.submit( action, '/business/schedule-free-floating-notes' + ( this.isEditing ? `/${this.form.id}` : '' ) )
                     .then( res => {
 
                         console.log( 'THE RESPONSE: ', res );
@@ -101,15 +114,21 @@
                         console.log( 'THE ERROR: ', err );
                     });
             },
+            resetForm( note = null ){
+
+                this.form.id          = ( note && note.id ) ? note.id : null;
+                this.form.start_date  = ( note && note.start_date ) ? moment( note.start_date ).format( 'MM/DD/YYYY' ) : moment().format( 'MM/DD/YYYY' );
+                this.form.body        = ( note && note.body ) ? note.body : '';
+                this.form.business_id = this.business_id;
+            }
         },
 
         watch: {
 
-            value(){
+            value( newVal, oldVal ){
 
-                this.form.start_date  = moment().format( 'MM/DD/YYYY' );
-                this.form.body        = '';
-                this.form.business_id = this.business_id;
+                const note = this.objectIsEmpty( this.selectedScheduleNote ) ? null : _.cloneDeep( this.selectedScheduleNote );
+                this.resetForm( note );
             }
         }
     }
