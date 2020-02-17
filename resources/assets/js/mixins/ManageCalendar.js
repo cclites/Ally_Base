@@ -11,6 +11,17 @@ export default {
         createSchedule({start, end, jsEvent, view, resource} = {}) {
             this.hidePreview();
 
+            if( resource && resource.title == 'Notes' ){
+                // catch the response for Schedule Notes and prevent the schedule-create modal from appearing
+
+                this.selectedScheduleNote = {
+
+                    start_date : end ? moment( end._d ).format( 'MM/DD/YYYY' ) : null
+                };
+                this.createFreeFloatingNoteModal = true;
+                return;
+            }
+
             const acceptableTimeViews = ['timelineDay', 'agendaWeek'];
             if (view && !acceptableTimeViews.includes(view.name)) {
                 // timelineWeek and month always show 12am-12am, ignore the times for those views (always use 8am start)
@@ -42,6 +53,15 @@ export default {
 
         async editSchedule(event, jsEvent, view) {
             this.hidePreview();
+
+            if( event.resourceId == this.SCHEDULE_FREE_FLOATING_NOTES_RESOURCE_ID ){
+                // catch the resourceId for the Schedule Notes and prevent the schedule modal from appearing
+
+                this.selectedScheduleNote        = event;
+                this.createFreeFloatingNoteModal = true;
+                return;
+            }
+
             this.selectedSchedule = {};
             this.scheduleModal = true;
             try {

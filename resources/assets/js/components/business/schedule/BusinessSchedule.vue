@@ -130,8 +130,8 @@
         </div>
 
         <schedule-notes-modal v-model="notesModal"
-                                :event="selectedEvent"
-                                @updateEvent="updateEvent"
+            :event="selectedEvent"
+            @updateEvent="updateEvent"
         />
 
         <business-schedule-modal :model.sync="scheduleModal"
@@ -162,6 +162,7 @@
             v-model="createFreeFloatingNoteModal"
             @refresh-events="fetchEvents( true )"
             :business_id=" filterBusinessId "
+            :selectedScheduleNote=" selectedScheduleNote "
         />
 
         <schedule-clock-out-modal v-model="clockOutModal"
@@ -254,6 +255,7 @@
     import moment from 'moment';
     import HasOpenShiftsModal from '../../../mixins/HasOpenShiftsModal';
     import { mapActions, mapGetters } from 'vuex';
+    import Constants from '../../../mixins/Constants';
 
     export default {
         components: {BusinessLocationFormGroup },
@@ -275,6 +277,7 @@
         data() {
             return {
 
+                selectedScheduleNote : {},
                 free_floating_notes : [],
                 loading: false,
                 filtersReady: false,
@@ -551,7 +554,7 @@
                 }
 
                 resources.unshift({
-                    id: 13377331,
+                    id: this.SCHEDULE_FREE_FLOATING_NOTES_RESOURCE_ID,
                     title: 'Notes',
                     role: this.resourceIdField === 'client_id' ? 'clients' : 'caregivers',
                     scheduled: '-',
@@ -690,6 +693,9 @@
             // },
 
             eventHover(event, jsEvent, view) {
+
+                if( event.resourceId == this.SCHEDULE_FREE_FLOATING_NOTES_RESOURCE_ID ) return; // no preview for schedule notes for now
+
                 let target = null;
 
                 if ($(jsEvent.currentTarget).is('a')) {
@@ -703,7 +709,8 @@
                 }
 
                 this.previewTimer = setTimeout(function (event, target) {
-                    axios.get('/business/schedule/' + event.id + '/preview')
+
+                    axios.get( '/business/schedule/' + event.id + '/preview' )
                         .then(response => {
                             this.hoverShift = response.data;
                             this.showPreview(target, event.id);
@@ -1109,16 +1116,16 @@
 
         watch: {
 
+            createFreeFloatingNoteModal( newVal, oldVal ){
+
+                if( !newVal ) this.selectedScheduleNote = null;
+            },
             triggerBusinessScheduleToAct( newVal, oldVal ) {
 
                 if( newVal ){
                     // i want to run updateEvent() with the current data from Vuex! YES
                     // this is honestly a really convoluted solution that needs to immediately be replaced
 
-                    // console.log( 'vuex ID: ', _.cloneDeep( this.vuexSelectedScheduleId ) );
-                    // console.log( 'vuex Event: ', _.cloneDeep( this.vuexSelectedEvent ) );
-                    // console.log( 'new value: ', newVal );
-                    // console.log( 'old value: ', oldVal );
                     this.selectedEvent = _.cloneDeep( this.vuexSelectedEvent );
                     this.handleCalendarPropogation( _.cloneDeep( this.newStatus ) );
                     this.setNewStatus( null );
@@ -1165,7 +1172,7 @@
             },
         },
 
-        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers, FormatsStrings, HasOpenShiftsModal],
+        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers, FormatsStrings, HasOpenShiftsModal ],
     }
 </script>
 
