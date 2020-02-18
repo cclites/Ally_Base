@@ -452,6 +452,13 @@
                         category: 6,
                         allowed: ['office_user'],
                     },
+                    {
+                        name: 'Available Shifts',
+                        url: 'reports/available-shifts',
+                        description: 'Available shifts report',
+                        category: 6,
+                        allowed: ['office_user'],
+                    },
                     // { Removed as per ALLY-1394
                     //     name: 'Clients Missing Payment Methods',
                     //     url: 'reports/clients-missing-payment-methods',

@@ -203,6 +203,7 @@ Vue.component('payroll-summary-report', require('./components/business/reports/P
 
 Vue.component('business-payment-history', require('./components/BusinessPaymentHistory.vue'));
 Vue.component('business-printable-schedules', require('./components/business/reports/PrintableSchedules'));
+Vue.component('business-available-shifts', require('./components/business/reports/AvailableShiftReport'));
 Vue.component('business-overtime-report', require('./components/BusinessOvertimeReport.vue'));
 Vue.component('business-rate-codes', require('./components/business/rate_codes/BusinessRateCodes'));
 Vue.component('business-reconciliation-report', require('./components/BusinessReconciliationReport'));

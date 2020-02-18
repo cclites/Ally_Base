@@ -34,7 +34,8 @@ class DropdownResourceController extends BaseController
         'marketing-clients',
         'clients-for-chain',
         'services',
-        'visit-edit-codes'
+        'visit-edit-codes',
+        'cities',
     ];
 
     /**
@@ -144,5 +145,30 @@ class DropdownResourceController extends BaseController
         $visitEditReasons = new VisitEditReasonResource( VisitEditReason::all() );
         $visitEditActions = new VisitEditActionResource( VisitEditAction::all() );
         return response()->json([ 'reasons' => $visitEditReasons, 'actions' => $visitEditActions ]);
+    }
+
+    public function cities(Request $request){
+
+        $cities = [];
+
+        $cities = Client::forRequestedBusinesses()
+                    ->with(['addresses'])
+                    ->get()
+                    ->map(function($client) use ($cities){
+
+                        $city = $client->addresses->first()["city"];
+
+                        if(!in_array($city, $cities)){
+                            return $city;
+                        }
+                        return;
+
+                    })->filter()
+                    ->toArray();
+
+        $cities = array_unique($cities);
+        sort($cities, SORT_STRING);
+
+        return response()->json($cities);
     }
 }
