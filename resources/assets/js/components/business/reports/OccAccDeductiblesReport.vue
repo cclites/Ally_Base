@@ -162,7 +162,7 @@
                 this.form.get( '/business/occ-acc-deductibles' )
                     .then( ({ data }) => {
 
-                        this.items = data;
+                        this.items = Object.values( data );
                     })
                     .catch(() => {
 

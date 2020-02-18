@@ -2,6 +2,9 @@
 
 namespace App\Reports;
 
+use App\Caregiver;
+use App\Shift;
+use App\Shifts\DurationCalculator;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -29,26 +32,17 @@ class OccAccDeductiblesReport extends BusinessResourceReport
     protected $businesses;
 
     /**
+     * The relevant caregivers
+     *
+     */
+    protected $caregivers;
+
+    /**
      * constructor.
      */
     public function __construct()
     {
-        $this->query = DB::table( 'shifts' )
-            ->leftJoin( 'businesses as business', 'shifts.business_id', '=', 'business.id' )
-            ->leftJoin( 'caregivers as caregiver', 'shifts.caregiver_id', '=', 'caregiver.id' )
-            ->leftJoin( 'users as user', 'shifts.caregiver_id', '=', 'user.id' )
-            ->select([
 
-                "user.id as user_id",
-                DB::raw( "CONCAT(user.firstname, ' ', user.lastname) as caregiver_name" ),
-                "business.name as registry",
-                "business.id as registry_id",
-                "business.shift_rounding_method as rounding_method",
-                DB::raw( "SEC_TO_TIME(SUM(TO_SECONDS(shifts.checked_out_time) - TO_SECONDS(shifts.checked_in_time))) AS duration" ),
-            ])
-            ->groupBy([ 'user_id', 'registry', 'rounding_method', 'registry_id' ])
-            ->where( 'caregiver.has_occ_acc', '1' )
-            ->whereNotNull( 'shifts.checked_out_time' );
     }
 
     /**
@@ -107,45 +101,44 @@ class OccAccDeductiblesReport extends BusinessResourceReport
      */
     protected function results()
     {
-        $query = $this->query()
-            ->whereBetween( 'shifts.checked_in_time', [ $this->start_date, $this->end_date ])
-            ->whereIn( 'business.id', $this->businesses );
-
         $deduction = config( 'ally.occ_acc_deductible' );
 
-        $results = $query->get()->map( function ( $shift ) use ( $deduction ){
+        // grab all shifts with caregiver info and business info
+        // scope to businesses and time frame and caregiver with occacc
+        // go through each shift and calculate duration
+        $results = Shift::forRequestedBusinesses()
+            ->whereBetween( 'checked_in_time', [ $this->start_date, $this->end_date ])
+            ->whereNotNull( 'checked_out_time' )
+            ->with([ 'business', 'caregiver' ])
+            ->whereHas( 'caregiver', function( $q ){
 
-            $time_worked = Carbon::createFromFormat( 'H:i:s', $shift->duration );
+                return $q->where( 'has_occ_acc', '1' );
+            })->get()
+            ->groupBy( 'caregiver_id', 'business_id' )
+            ->map( function( $shift_aggregate ) use ( $deduction ) {
 
-            // apply the respective registry's rounding method..
-            switch( $shift->rounding_method ){
+                $duration = 0;
+                foreach( $shift_aggregate as $shift ){
 
-                case 'individual':
-                    // round the minutes to the nearest quarter-hour first, then convert to hours rounding to 2 decimals
+                    $user_id        = $shift->caregiver_id;
+                    $caregiver_name = $shift->caregiver->nameLastFirst;
+                    $registry_name  = $shift->business->name;
+                    $registry_id    = $shift->business->id;
 
-                    $shift->duration = add( $time_worked->hour, divide( multiply( floor( multiply( divide( $time_worked->minute, 60 ), 4 ) ), 15 ), 60 ) );
-                    break;
-                case 'none':
-                    // no special rounding, do nothing
+                    // this will automatically take the rounding method and aggregate the durations properly
+                    $duration += $shift->duration();
+                }
 
-                    $shift->duration = add( $time_worked->hour, divide( $time_worked->minute, 60 ) );
-                    break;
-                case 'shift': // the db default value
-                default:
-                    // shift rounding, rounds it to 0.25 so use the round_to_fraction method with default values
+                return [
 
-                    $shift->duration = round_to_fraction( add( $time_worked->hour, divide( $time_worked->minute, 60 ) ) );
-                    break;
-            }
-            // individual rounding
-            // no rounding
-
-            // return the minimum betweeen 9.00 and ( duration * deduction )
-            $shift->deduction = min( 9.00, multiply( $deduction, $shift->duration ) );
-            $shift->selected = 0;
-
-            return $shift;
-        });
+                    'user_id'        => $user_id,
+                    'caregiver_name' => $caregiver_name,
+                    'registry'       => $registry_name,
+                    'registry_id'    => $registry_id,
+                    'duration'       => $duration,
+                    'deduction'      => min( 9.00, multiply( $duration, $deduction ) )
+                ];
+            });
 
         return $results;
     }
