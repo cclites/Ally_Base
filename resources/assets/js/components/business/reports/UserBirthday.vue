@@ -94,8 +94,8 @@
                 loading: false,
                 showEmpty: true,
                 showDateRange: false,
-                search: {
-                    filterDates: false,
+                search: new Form({
+                    filterDates: 0,
                     selectedId: 'All',
                     type: this.type,
                     json: 1,
@@ -103,7 +103,7 @@
                     client_type: '',
                     show_inactive: false,
                     days: ''
-                },
+                }),
                 data: [],
                 fields: [
                     {
@@ -204,13 +204,13 @@
             async fetch() {
                 this.loading = true;
                 if (this.showDateRange) {
-                    this.search.filterDates = true;
+                    this.search.filterDates = 1;
                 }
 
-                axios.post('/business/reports/birthdays/', this.search)
+                this.search.get(`/business/reports/birthdays`)
                     .then(({ data }) => {
                         this.data = data;
-                        this.search.filterDates = false;
+                        this.search.filterDates = 0;
                         this.loading = false;
                     })
                     .catch (() => {})
