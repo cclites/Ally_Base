@@ -91,7 +91,7 @@ class ScheduleController extends BaseController
                 $request->status_filters,
                 $request->client_id,
                 $request->caregiver_id,
-                $this->business()->name
+                $this->business()
             );
         }
 
@@ -712,7 +712,7 @@ class ScheduleController extends BaseController
         return false;
     }
 
-    public function generatePrintableSchedule($events, Carbon $start, Carbon $end, ?string $filters, ?int $clientId, ?int $caregiverId, ?string $businessName)
+    public function generatePrintableSchedule($events, Carbon $start, Carbon $end, ?string $filters, ?int $clientId, ?int $caregiverId, Business $business)
     {
         $diff = $start->diffInDays($end);
 
@@ -725,7 +725,7 @@ class ScheduleController extends BaseController
             $filters,
             $clientId,
             $caregiverId,
-            $businessName
+            $business
         );
 
         if ($diff == 1) { //daily

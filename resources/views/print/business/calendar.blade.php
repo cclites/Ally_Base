@@ -46,7 +46,7 @@
             min-height: 100px;
         }
 
-        h2{
+        h2, h5{
             text-align: center;
         }
     </style>

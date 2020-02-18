@@ -5,11 +5,12 @@ namespace App\Scheduling;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use App\Business;
 use App\Responses\Resources\ScheduleEvents;
 
 class Calendar extends Model
 {
-    protected $daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    protected $daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
     protected $events;
 
@@ -23,7 +24,7 @@ class Calendar extends Model
 
     protected $caregiverId;
 
-    protected $businessName;
+    protected $business;
 
     protected $startDay;
 
@@ -35,7 +36,7 @@ class Calendar extends Model
 
     const DAY_INDEX = 7;
 
-    public function __construct($events, Carbon $start,  Carbon $end, ?string $filters, ?int $clientId, ?int $caregiverId, ?string $businessName)
+    public function __construct($events, Carbon $start,  Carbon $end, ?string $filters, ?int $clientId, ?int $caregiverId, Business $business)
     {
         $this->events = $events;
         $this->start = $start;
@@ -43,13 +44,18 @@ class Calendar extends Model
         $this->filters = $filters;
         $this->clientId = $clientId;
         $this->caregiverId = $caregiverId;
-        $this->businessName = $businessName;
+        $this->business = $business;
     }
 
-    public function generateMonthlyCalendar( )
+    public function generateMonthlyCalendar(): string
     {
-        $this->startDay = $startDay = $this->start->endOfMonth()->addMinute();
-        $this->endDay = $this->end->startOfMonth();
+
+        if($this->start->format('j') != 1){
+            $this->start = $this->start->endOfMonth()->addMinute();
+        }
+
+        $this->startDay = $startDay = $this->start->copy();
+        $this->endDay = $this->start->copy()->endOfMonth();
 
         /**************************************************************************
          * The following are counters used to render the calendar, and
@@ -70,10 +76,11 @@ class Calendar extends Model
         $monthIndex = 0;
         /*****************************************************************************/
 
-        //represents the day of the week on which the month starts. Since the view
-        //displays the calendar starting on Monday, need to subtract one from the
-        //start day.
-        $sDay = $startDay->dayOfWeek - 1;
+        // Represents the day of the week on which the month starts.
+        // $sDay uses calendar_start_week as an offset for registries
+        // that do no start their week on a Sunday
+
+        $sDay = $startDay->dayOfWeek - ($this->business->chain->calendar_week_start);
 
         $monthName = $startDay->monthName;
 
@@ -83,13 +90,13 @@ class Calendar extends Model
 
         $filteredEvents = $this->buildEventsMap();
 
-        $html = $this->headerSpan() . "<h2>$monthName - $year</h2>";
+        $html = $this->headerSpan() . "<h5>$monthName - $year</h5>";
 
         $html .= "<table>" .
                     "<thead>" .
                         "<tr>";
 
-        foreach($this->daysOfWeek as $day){
+        foreach($this->orderDaysOfWeek() as $day){
             $html .=        "<th>$day</th>";
         }
 
@@ -132,8 +139,8 @@ class Calendar extends Model
         return $html;
     }
 
-    public function generateWeeklyCalendar(){
-
+    public function generateWeeklyCalendar(): string
+    {
         $this->startDay = $startDay = $this->start;
         $this->endDay = $endDay = $this->end->subDay();
 
@@ -146,13 +153,13 @@ class Calendar extends Model
 
         $filteredEvents = $this->buildEventsMap();
 
-        $html = $this->headerSpan() . "<h2>" . $startDay->format('F d, Y') . " - " . $endDay->format('F d, Y')  . "</h2>";
+        $html = $this->headerSpan() . "<h5>" . $startDay->format('F d, Y') . " - " . $endDay->format('F d, Y')  . "</h5>";
 
         $html .= "<table>" .
             "<thead>" .
             "<tr>";
 
-        foreach($this->daysOfWeek as $day){
+        foreach($this->orderDaysOfWeek() as $day){
             $html .=        "<th>$day</th>";
         }
 
@@ -176,8 +183,8 @@ class Calendar extends Model
         return $html;
     }
 
-    public function generateDailyCalendar(){
-
+    public function generateDailyCalendar(): string
+    {
         $startDay = $this->start->copy();
         $this->startDay = $startDay;
         $this->endDay = $endDay = $this->end;
@@ -186,7 +193,7 @@ class Calendar extends Model
         $day = $this->start->format("j");
         $filteredEvents = $this->buildEventsMap();
 
-        $html = $this->headerSpan() . "<h2>" . $startDay->format('F d, Y') . "</h2>";
+        $html = $this->headerSpan() . "<h5>" . $startDay->format('F d, Y') . "</h5>";
 
         $html .= "<table>" .
                  "<thead>" .
@@ -210,8 +217,8 @@ class Calendar extends Model
         return $html;
     }
 
-    public function buildEventsMap(){
-
+    public function buildEventsMap(): array
+    {
         $eventMap = [];
 
         if(filled($this->filters)){
@@ -251,32 +258,58 @@ class Calendar extends Model
             if(in_array($event['shift_status'], $filters)){
                 $this->filteredEvents[] = $event;
             }
+
+            //TODO: Add other filters
         }
     }
 
-    public function headerSpan(){
-        $html = "<div><h4>" . $this->businessName . "</h4>";
+    public function headerSpan(): string
+    {
+        $html = "<div><h4>" . $this->business->name . "</h4>" .
+                "<h6>". $this->business->getPhoneNumber()->number ."</h6>";
 
         if(isset($this->clientId)){
-            $name =  \App\Client::find($this->clientId)->name;
-            $html .= "<div>Client: $name</div>";
+            $client = \App\Client::find($this->clientId);
+            $client =  $client->nameLastFirst() . ", " . $client->getPhoneNumber()->number;
+        }else{
+            $client = "All Clients ";
         }
 
         if(isset($this->caregiverId) && $this->caregiverId != 0){
-            $name =  \App\Caregiver::find($this->caregiverId)->name;
-            $html .= "<div>Caregiver: $name</div>";
+            $caregiver =  \App\Caregiver::find($this->caregiverId)->nameLastFirst();
+        }else{
+            $caregiver = "All Caregivers";
         }
+
+        $html .= "<div style='text-align: center;'>Schedules for $client - visits by $caregiver</div>";
 
         $html .= "</div>";
 
         return $html;
     }
 
-    public function dateSpan($day){
+    public function dateSpan($day): string
+    {
         return "<div class='day'>$day</div>";
     }
 
-    public function eventSpan($event){
-        return "<div class='event' style='background-color:" . $event['backgroundColor'] . ";'>" . $event['client'] . "<br>" . $event['caregiver']. "<br>" . $event['start_time'] . "<br>" . $event['end_time'] . "</div>";
+    public function eventSpan($event): string
+    {
+        return "<div class='event'>" . $event['client'] . "<br>" . $event['caregiver']. "<br>" . $event['start_time'] . "<br>" . $event['end_time'] . "</div>";
+    }
+
+    public function orderDaysOfWeek(): array
+    {
+
+        if( $this->business->chain->calendar_week_start > 0){
+
+            $slicedDays = array_slice($this->daysOfWeek, $this->business->chain->calendar_week_start);
+            $reordered = array_splice($this->daysOfWeek, 0,  $this->business->chain->calendar_week_start);
+            $daysArray = array_merge($slicedDays, $reordered);
+
+            return $daysArray;
+        }
+
+        return $this->daysOfWeek;
     }
 }

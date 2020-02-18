@@ -1113,21 +1113,7 @@
             },
 
             printCalendar() {
-
                 window.location = this.eventsUrl + "&print=1&status_filters=" + this.statusFilters ;
-
-                //console.log(this.eventsUrl + "&print=1");
-                //window.print();
-
-                //this.$refs.calendar.printCalendar();
-
-                /**
-                 * Needed parameters:
-                 *
-                 * Start
-                 * End
-                 * statusFilters
-                 */
             },
         },
 
