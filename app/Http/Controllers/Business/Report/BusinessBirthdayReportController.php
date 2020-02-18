@@ -34,7 +34,7 @@ class BusinessBirthdayReportController extends Controller
                 $report->filterByClientType($clientType);
             }
 
-            if ($request->filterDates) {
+            if ($request->filterDates == 1 && filled($request->days)) {
                 $report->filterByDateRange($request->days);
             }
 
