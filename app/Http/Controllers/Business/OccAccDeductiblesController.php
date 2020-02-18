@@ -56,7 +56,7 @@ class OccAccDeductiblesController extends BaseController
 
         foreach( $data as $deductible ) {
 
-            $amount = (float) $deductible[ 'amount' ] * -1;
+            $amount = multiply( $deductible[ 'amount' ], -1 );
 
             $caregiver = Caregiver::findOrFail( $deductible[ 'caregiver_id' ] );
 

@@ -42,9 +42,11 @@ class OccAccDeductiblesReport extends BusinessResourceReport
                 "user.id as user_id",
                 DB::raw( "CONCAT(user.firstname, ' ', user.lastname) as caregiver_name" ),
                 "business.name as registry",
+                "business.id as registry_id",
+                "business.shift_rounding_method as rounding_method",
                 DB::raw( "SEC_TO_TIME(SUM(TO_SECONDS(shifts.checked_out_time) - TO_SECONDS(shifts.checked_in_time))) AS duration" ),
             ])
-            ->groupBy([ 'user_id', 'registry' ])
+            ->groupBy([ 'user_id', 'registry', 'registry_id', 'rounding_method' ])
             ->where( 'caregiver.has_occ_acc', '1' )
             ->whereNotNull( 'shifts.checked_out_time' );
     }
@@ -94,7 +96,7 @@ class OccAccDeductiblesReport extends BusinessResourceReport
      */
     public function forTheFollowingBusinesses( $ids )
     {
-        $this->businesses = $ids;
+        $this->businesses = $ids ?? auth()->user()->role->businesses->pluck( 'id' );
 
         return $this;
     }
@@ -113,14 +115,37 @@ class OccAccDeductiblesReport extends BusinessResourceReport
 
         $deduction = config( 'ally.occ_acc_deductible' );
 
-        $results = $query->get()
-            ->map( function ( $shift ) use ( $deduction ){
+        $results = $query->get();
+
+        $results->map( function ( $shift ) use ( $deduction ){
 
                 $time_worked = Carbon::createFromFormat( 'H:i:s', $shift->duration );
-                $duration = $time_worked->hour + ( round( $time_worked->minute / 60, 2 ) );
+
+                // apply the respective registry's rounding method..
+                switch( $shift->rounding_method ){
+
+                    case 'individual':
+                        // round the minutes to the nearest quarter-hour first, then convert to hours rounding to 2 decimals
+
+                        $shift->duration = add( $time_worked->hour, divide( multiply( floor( multiply( divide( $time_worked->minute, 60 ), 4 ) ), 15 ), 60 ) );
+                        break;
+                    case 'none':
+                        // no special rounding, do nothing
+
+                        $shift->duration = add( $time_worked->hour, divide( $time_worked->minute, 60 ) );
+                        break;
+                    case 'shift': // the db default value
+                    default:
+                        // shift rounding, rounds it to 0.25 so use the round_to_fraction method with default values
+
+                        $shift->duration = round_to_fraction( add( $time_worked->hour, divide( $time_worked->minute, 60 ) ) );
+                        break;
+                }
+                // individual rounding
+                // no rounding
 
                 // return the minimum betweeen 9.00 and ( duration * deduction )
-                $shift->deduction = min( 9.00, round( $deduction * $duration, 2 ) );
+                $shift->deduction = min( 9.00, multiply( $deduction, $shift->duration ) );
                 $shift->selected = 0;
 
                 return $shift;
