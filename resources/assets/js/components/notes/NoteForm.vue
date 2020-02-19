@@ -241,9 +241,14 @@
                     tags: data.tags || "",
                     type: data.type || "other",
                     call_direction: data.call_direction || "inbound",
-                    template_id: data.template_id || null,
+                    template_id: data.template_id,
                     modal: this.modal, // added so controller doesn't send redirect response
                 });
+                if(data.template_id !== null){
+                    this.noteTemplate = this.templates.find((template) => {
+                        return template.id == data.template_id;
+                    });
+                }
             },
 
             onChangeTemplate() {
