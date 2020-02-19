@@ -241,6 +241,7 @@
     import ManageCalendar from '../../../mixins/ManageCalendar';
     import LocalStorage from "../../../mixins/LocalStorage";
     import FormatsDates from "../../../mixins/FormatsDates";
+
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
@@ -469,6 +470,7 @@
                 setNewCaregiverName  : 'openShifts/setNewCaregiverName',
                 setSelectedEvent  : 'openShifts/setSelectedEvent',
             }),
+
             getFilteredEvents() {
                 let events = this.events;
 
@@ -1080,7 +1082,7 @@
             },
 
             printCalendar() {
-                window.print();
+                window.location = this.eventsUrl + "&print=1&status_filters=" + this.statusFilters ;
             },
         },
 

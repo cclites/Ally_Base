@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Billing\ClientRate;
 use App\Billing\ScheduleService;
+use App\Business;
 use App\Exceptions\AutomaticCaregiverAssignmentException;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
@@ -15,6 +16,7 @@ use App\Http\Requests\UpdateScheduleRequest;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
+use App\Responses\Resources\ScheduleEvents;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Responses\Resources\Schedule as ScheduleResponse;
 use App\Responses\SuccessResponse;
@@ -29,6 +31,8 @@ use App\Shifts\RateFactory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Client;
+
+use Illuminate\Http\Response;
 
 class ScheduleController extends BaseController
 {
@@ -58,10 +62,25 @@ class ScheduleController extends BaseController
 
         $start = Carbon::parse($request->input('start', 'First day of this month'));
         $end = Carbon::parse($request->input('end', 'First day of next month'));
+
         $schedules = $query->whereBetween('starts_at', [$start, $end])->get();
 
-        $events = new ScheduleEventsResponse( $schedules );
-        $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
+        $events = new ScheduleEventsResponse($schedules);
+        $events->setTitleCallback(function (Schedule $schedule) {
+            return $this->businessScheduleTitle($schedule);
+        });
+
+        if ($request->filled('print')) {
+            return $this->generatePrintableSchedule(
+                $events->toArray(),
+                $start,
+                $end,
+                $request->status_filters,
+                $request->client_id,
+                $request->caregiver_id,
+                $this->business()
+            );
+        }
 
         return [
             'kpis' => $events->kpis(),
@@ -236,7 +255,7 @@ class ScheduleController extends BaseController
         $weekdayInt = (int) $schedule->weekday;
         $weekdayText = $dowMap[$weekdayInt];
 
-        switch($request->input('group_update')) {
+        switch ($request->input('group_update')) {
             case 'total_all':
                 $editor->updateGroup($schedule->group, $schedule, $updatedData, $request->getNotes(), $services);
                 \DB::commit();
@@ -269,13 +288,15 @@ class ScheduleController extends BaseController
         $services = $request->getServices();
 
         if (count($services)) {
-            foreach($services as $service) {
-                if ($service['client_rate'] === null) continue;
+            foreach ($services as $service) {
+                if ($service['client_rate'] === null) {
+                    continue;
+                }
                 if (app(RateFactory::class)->hasNegativeProviderFee($client, $service['client_rate'], $service['caregiver_rate'])) {
                     return false;
                 }
             }
-        } else if ($request->client_rate !== null) {
+        } elseif ($request->client_rate !== null) {
             if (app(RateFactory::class)->hasNegativeProviderFee($client, $request->client_rate, $request->caregiver_rate)) {
                 return false;
             }
@@ -319,7 +340,9 @@ class ScheduleController extends BaseController
         }
 
         $events = new ScheduleEventsResponse(collect([$schedule]));
-        $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
+        $events->setTitleCallback(function (Schedule $schedule) {
+            return $this->businessScheduleTitle($schedule);
+        });
         $data = $events->toArray()[0];
 
         return new SuccessResponse('The schedule has been updated.', $data);
@@ -673,5 +696,52 @@ class ScheduleController extends BaseController
             return true;
         }
         return false;
+    }
+
+    /**
+     * Generate Calendar PDF view of Schedule events.
+     *
+     * @param $events
+     * @param Carbon $start
+     * @param Carbon $end
+     * @param string|null $filters
+     * @param int|null $clientId
+     * @param int|null $caregiverId
+     * @param Business $business
+     * @return Response
+     */
+    public function generatePrintableSchedule($events, Carbon $start, Carbon $end, ?string $filters, ?int $clientId, ?int $caregiverId, Business $business)
+    {
+        $diff = $start->diffInDays($end);
+
+        $calendar = new \App\Scheduling\PrintableCalendarFactory(
+            $events,
+            $start,
+            $end,
+            $filters,
+            $clientId,
+            $caregiverId,
+            $business
+        );
+
+        if($diff == 1){ //daily
+            $html = $calendar->generateDailyCalendar();
+        }elseif($diff == 7){ //weekly
+            $html = $calendar->generateWeeklyCalendar();
+        }else{
+            $html = $calendar->generateMonthlyCalendar();
+        }
+
+        $html = response(view('print.business.calendar', ['html'=>$html]))->getContent();
+
+        $snappy = \App::make('snappy.pdf');
+        return new Response(
+            $snappy->getOutputFromHtml($html),
+            200,
+            array(
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . standard_filename('schedule', 'schedule', 'pdf') . '"'
+            )
+        );
     }
 }
