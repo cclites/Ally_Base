@@ -225,6 +225,12 @@ abstract class BaseImport extends Command
             }, $a_z),
             array_map(function ($val) {
                 return 'B' . $val;
+            }, $a_z),
+            array_map(function ($val) {
+                return 'C' . $val;
+            }, $a_z),
+            array_map(function ($val) {
+                return 'D' . $val;
             }, $a_z)
         );
 
