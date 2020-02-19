@@ -619,7 +619,7 @@ class ScheduleController extends BaseController
         $schedule = Schedule::make([
             'caregiver_id' => $request->caregiver,
             'client_id' => $request->client,
-            'starts_at' => Carbon::parse($request->starts_at, auth()->user()->officeUser->getTimezone()),
+            'starts_at' => Carbon::parse($request->starts_at, auth()->user()->officeUser->getTimezone())->format( 'Y-m-d H:i:s' ),
             'duration' => $request->duration,
             'payer_id' => $request->payer_id,
             'service_id' => $request->service_id,

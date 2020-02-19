@@ -123,12 +123,15 @@
                 this.chosenRequest = request;
                 this.busy = true;
 
+                console.log( 'the request: ', _.cloneDeep( request ) );
+                console.log( 'the schedule: ', _.cloneDeep( this.schedule ) );
+
                 let form = new Form({
 
                     caregiver  : request.caregiver_id,
                     client     : request.client_id,
-                    duration   : this.getDuration(),
-                    starts_at  : this.getStartsAt(),
+                    duration   : this.schedule.duration,
+                    starts_at  : moment( this.schedule.start ),
                     id         : this.schedule.id,
                     payer_id   : this.schedule.payer_id,
                     service_id : this.schedule.service_id,
