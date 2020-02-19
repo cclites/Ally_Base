@@ -55,7 +55,6 @@
                         <b-btn variant="info" @click="createSchedule()"><i class="fa fa-plus"></i> Schedule Shift</b-btn>
                         <b-btn variant="primary" @click="bulkUpdateModal = !bulkUpdateModal" v-if="!officeUserSettings.enable_schedule_groups">Update Schedules</b-btn>
                         <b-btn variant="danger" @click="bulkDeleteModal = !bulkDeleteModal">Delete Schedules</b-btn>
-                        <b-btn variant="info" @click="createFreeFloatingNoteModal = !createFreeFloatingNoteModal"><i class="fa fa-plus"></i> Add Note</b-btn>
                     </b-col>
                 </b-row>
             </b-col>
@@ -130,8 +129,8 @@
         </div>
 
         <schedule-notes-modal v-model="notesModal"
-            :event="selectedEvent"
-            @updateEvent="updateEvent"
+                                :event="selectedEvent"
+                                @updateEvent="updateEvent"
         />
 
         <business-schedule-modal :model.sync="scheduleModal"
@@ -156,13 +155,6 @@
                                     :pass-clients="clients"
                                     :pass-caregivers="caregivers"
                                     @refresh-events="fetchEvents(true)"
-        />
-
-        <schedule-free-floating-note-modal
-            v-model="createFreeFloatingNoteModal"
-            @refresh-events="fetchEvents( true )"
-            :business_id=" filterBusinessId "
-            :selectedScheduleNote=" selectedScheduleNote "
         />
 
         <schedule-clock-out-modal v-model="clockOutModal"
@@ -255,7 +247,6 @@
     import moment from 'moment';
     import HasOpenShiftsModal from '../../../mixins/HasOpenShiftsModal';
     import { mapActions, mapGetters } from 'vuex';
-    import Constants from '../../../mixins/Constants';
 
     export default {
         components: {BusinessLocationFormGroup },
@@ -276,14 +267,11 @@
 
         data() {
             return {
-
-                selectedScheduleNote : {},
-                free_floating_notes : [],
                 loading: false,
                 filtersReady: false,
                 filterCaregiverId: (this.caregiver) ? this.caregiver.id : -1,
                 filterClientId: (this.client) ? this.client.id : -1,
-                filterBusinessId: (this.client) ? this.client.business_id : null,
+                filterBusinessId: (this.client) ? this.client.business_id : "",
                 header: {
                     left:   'prev,next today',
                     center: 'title',
@@ -293,7 +281,6 @@
                 caregivers: this.caregiver ? [this.caregiver] : [],
                 bulkUpdateModal: false,
                 bulkDeleteModal: false,
-                createFreeFloatingNoteModal: false,
                 notesModal: false,
                 clockOutModal: false,
                 selectedEvent: {},
@@ -396,7 +383,7 @@
                             },
                             render: function(resource, el) {
                                 // need client/caregiver link
-                                if( ![ 'Notes', 'Open Shifts' ].includes( resource.title ) ){
+                                if (resource.title !== 'Open Shifts') {
                                     let link = `<a href='/business/${resource.role}/${resource.id}' target='_blank'>${resource.title}</a>`;
                                     el.html(link);
                                 }
@@ -477,15 +464,15 @@
             ...mapActions({
 
                 establishWeAreOnSchedulePage : 'openShifts/establishWeAreOnSchedulePage',
-                toggleTrigger                : 'openShifts/toggleTrigger',
-                setNewStatus                 : 'openShifts/setNewStatus',
-                setNewCaregiverName          : 'openShifts/setNewCaregiverName',
-                setSelectedEvent             : 'openShifts/setSelectedEvent',
+                toggleTrigger : 'openShifts/toggleTrigger',
+                setNewStatus  : 'openShifts/setNewStatus',
+                setNewCaregiverName  : 'openShifts/setNewCaregiverName',
+                setSelectedEvent  : 'openShifts/setSelectedEvent',
             }),
             getFilteredEvents() {
                 let events = this.events;
 
-                // console.log( 'fetched events: ', events );
+                // console.log( events );
 
                 if (this.statusFilters.length) {
                     events = events.filter(event => {
@@ -506,9 +493,7 @@
                     })
                 }
 
-                const notes = this.free_floating_notes;
-
-                return notes.concat( events );
+                return events;
             },
 
             currentTime() {
@@ -529,6 +514,7 @@
                         items = items.filter(client => client.business_id == this.filterBusinessId);
                     }
                 }
+
 
                 let resources = items.map(item => {
                     let kpis = this.getKpis(this.resourceIdField, item.id);
@@ -552,15 +538,6 @@
                         projected: openkpis.PROJECTED.hours.toFixed(0),
                     });
                 }
-
-                resources.unshift({
-                    id: this.SCHEDULE_FREE_FLOATING_NOTES_RESOURCE_ID,
-                    title: 'Notes',
-                    role: this.resourceIdField === 'client_id' ? 'clients' : 'caregivers',
-                    scheduled: '-',
-                    completed: '-',
-                    projected: '-',
-                });
 
                 if ( this.filteredClientResources || this.filteredCaregiverResources ) {
                     let filtered = [this.filterClientId, this.filterCaregiverId];
@@ -693,9 +670,6 @@
             // },
 
             eventHover(event, jsEvent, view) {
-
-                if( event.resourceId == this.SCHEDULE_FREE_FLOATING_NOTES_RESOURCE_ID ) return; // no preview for schedule notes for now
-
                 let target = null;
 
                 if ($(jsEvent.currentTarget).is('a')) {
@@ -709,8 +683,7 @@
                 }
 
                 this.previewTimer = setTimeout(function (event, target) {
-
-                    axios.get( '/business/schedule/' + event.id + '/preview' )
+                    axios.get('/business/schedule/' + event.id + '/preview')
                         .then(response => {
                             this.hoverShift = response.data;
                             this.showPreview(target, event.id);
@@ -846,9 +819,6 @@
                 this.loading = true;
                 axios.get(this.eventsUrl)
                     .then( ({ data }) => {
-
-                        this.free_floating_notes = data.free_floating_notes;
-
                         this.events = data.events.map(event => {
                             event.resourceId = event[this.resourceIdField];
                             event.backgroundColor = this.getEventBackground(event);
@@ -931,7 +901,6 @@
             },
 
             renderEvent: function( event, element, view ) {
-
                 let note = '';
                 let requests = '';
 
@@ -1011,7 +980,7 @@
             },
 
             renderTimelineDayEvent(content, event, note, requests) {
-                let data = [`${this.getEventPersonName(event)} ${event.start_time}` + ( event.end_time ? `- ${event.end_time}` : '' ) + ( event.body ? ( ' ' + event.body.substr( 0, 10 ) + ( event.body.length > 10 ? '...' : '' ) ) : '' ), ...event.service_types];
+                let data = [`${this.getEventPersonName(event)} ${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
@@ -1020,7 +989,7 @@
             },
 
             renderTimelineWeekEvent(content, event, note, requests) {
-                let data = [this.getEventPersonName(event), `${event.start_time}` + ( event.end_time ? `- ${event.end_time}` : '' ), ...event.service_types];
+                let data = [this.getEventPersonName(event), `${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
@@ -1029,7 +998,7 @@
             },
 
             renderAgendaWeekEvent(content, event, note, requests) {
-                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time}` + ( event.end_time ? `- ${event.end_time}` : '' ), ...event.service_types];
+                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
@@ -1038,7 +1007,7 @@
             },
 
             renderDefaultEvent(content, event, note, requests) {
-                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time}` + ( event.end_time ? `- ${event.end_time}` : '' ), ...event.service_types];
+                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`, ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
@@ -1117,16 +1086,16 @@
 
         watch: {
 
-            createFreeFloatingNoteModal( newVal, oldVal ){
-
-                if( !newVal ) this.selectedScheduleNote = null;
-            },
             triggerBusinessScheduleToAct( newVal, oldVal ) {
 
                 if( newVal ){
                     // i want to run updateEvent() with the current data from Vuex! YES
                     // this is honestly a really convoluted solution that needs to immediately be replaced
 
+                    // console.log( 'vuex ID: ', _.cloneDeep( this.vuexSelectedScheduleId ) );
+                    // console.log( 'vuex Event: ', _.cloneDeep( this.vuexSelectedEvent ) );
+                    // console.log( 'new value: ', newVal );
+                    // console.log( 'old value: ', oldVal );
                     this.selectedEvent = _.cloneDeep( this.vuexSelectedEvent );
                     this.handleCalendarPropogation( _.cloneDeep( this.newStatus ) );
                     this.setNewStatus( null );
@@ -1173,7 +1142,7 @@
             },
         },
 
-        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers, FormatsStrings, HasOpenShiftsModal ],
+        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers, FormatsStrings, HasOpenShiftsModal],
     }
 </script>
 

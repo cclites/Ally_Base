@@ -29,7 +29,6 @@ use App\Shifts\RateFactory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Client;
-use App\ScheduleFreeFloatingNote;
 
 class ScheduleController extends BaseController
 {
@@ -64,24 +63,9 @@ class ScheduleController extends BaseController
         $events = new ScheduleEventsResponse( $schedules );
         $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
 
-        $notes = ScheduleFreeFloatingNote::forRequestedBusinesses()->whereBetween( 'start_date', [ $start, $end ] )->get()->map( function( $note ){
-
-            $note->start           = Carbon::parse( $note->start_date )->format( 'Y-m-d' );
-            $note->title           = 'Schedule Note'; // necessary for rendering the title of the object on the calendar
-            $note->caregiver       = 'Schedule Note'; // necessary for rendering the title of the object on the calendar
-            $note->client          = 'Schedule Note'; // necessary for rendering the title of the object on the calendar
-            $note->start_time      = Carbon::parse( $note->start )->format( 'm/d/Y' );
-            $note->backgroundColor = '#3bc1ff';
-            $note->resourceId      = 13377331; // must match the id of the "resource" in BusinessSchedule.vue
-            $note->service_types   = []; // necessary to be blank for our front-end code
-
-            return $note;
-        });
-
         return [
             'kpis' => $events->kpis(),
             'events' => $events->toArray(),
-            'free_floating_notes' => $notes
         ];
     }
 
