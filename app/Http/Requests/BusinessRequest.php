@@ -88,8 +88,6 @@ abstract class BusinessRequest extends FormRequest
         return $this->addBusinessInput(parent::validated());
     }
 
-    // TODO => I saw that I deleted these two below functions.. not sure why I'd do that.. but let me leave this comment here in case i need to find this fast again
-
     /**
      * Get the business ID from the request, defaulting to a
      * single business if the user only has 1 attached.
@@ -119,8 +117,6 @@ abstract class BusinessRequest extends FormRequest
     {
         return Business::findOrFail($this->getBusinessId($user));
     }
-
-    // END TODO =>
 
     /**
      * Get the business chain from the request.
