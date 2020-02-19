@@ -101,20 +101,21 @@ export default {
              * Schedule constants
              */
             SCHEDULE_STATUS : {
-                OK: 'OK',
+
+                OK                 : 'OK',
                 ATTENTION_REQUIRED : 'ATTENTION_REQUIRED',
                 CAREGIVER_CANCELED : 'CAREGIVER_CANCELED',
                 CLIENT_CANCELED    : 'CLIENT_CANCELED',
                 CAREGIVER_NOSHOW   : 'CAREGIVER_NOSHOW',
-                OPEN_SHIFT         : 'OPEN_SHIFT',
+                OPEN_SHIFT         : 'OPEN_SHIFT', // is this right?
                 HOSPITAL_HOLD      : 'HOSPITAL_HOLD',
 
                 // related shift statuses:
-                SCHEDULED: 'SCHEDULED',
-                MISSED_CLOCK_IN: 'MISSED_CLOCK_IN',
-                CLOCKED_IN: 'CLOCKED_IN',
-                CONFIRMED: 'CONFIRMED',
-                UNCONFIRMED: 'UNCONFIRMED',
+                SCHEDULED       : 'SCHEDULED',
+                MISSED_CLOCK_IN : 'MISSED_CLOCK_IN',
+                CLOCKED_IN      : 'CLOCKED_IN',
+                CONFIRMED       : 'CONFIRMED',
+                UNCONFIRMED     : 'UNCONFIRMED',
             },
 
             /**
