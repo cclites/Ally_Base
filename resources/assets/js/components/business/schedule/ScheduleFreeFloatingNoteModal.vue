@@ -24,13 +24,15 @@
                 </b-col>
             </b-row>
         </b-container>
-        <div slot="modal-footer">
+        <div slot="modal-footer" class="w-100">
 
-            <b-btn variant="default" @click=" showModal = false ">Close</b-btn>
-            <b-btn variant="info" @click=" save() " :disabled=" form.busy ">
+            <b-btn v-if=" isEditing " variant="danger" @click=" deleteNote() ">Delete</b-btn>
+
+            <b-btn variant="default" @click=" showModal = false " class="pull-right">Close</b-btn>
+            <b-btn variant="info" @click=" save() " :disabled=" form.busy " class="pull-right">
 
                 <i class="fa fa-spinner fa-spin" v-show=" form.busy "></i>
-                Create Note
+                {{ isEditing ? 'Save Edit' : 'Create Note' }}
             </b-btn>
         </div>
     </b-modal>
@@ -89,7 +91,7 @@
             },
             isEditing(){
 
-                return !!this.selectedScheduleNote.id;
+                return this.selectedScheduleNote && !!this.selectedScheduleNote.id;
             }
         },
 
@@ -99,6 +101,23 @@
 
         methods: {
 
+            deleteNote(){
+
+                if( !confirm( 'Are you sure you want to delete this schedule note?' ) ) return;
+
+                let form = new Form();
+                form.submit( 'delete', `/business/schedule-free-floating-notes/${this.form.id}` )
+                    .then( res => {
+
+                        // console.log( 'THE RESPONSE: ', res );
+                        this.$emit( 'refresh-events' );
+                        this.showModal = false;
+                    })
+                    .catch( err => {
+
+                        // console.log( 'THE ERROR: ', err );
+                    });
+            },
             save() {
 
                 const action = this.isEditing ? 'patch' : 'post';

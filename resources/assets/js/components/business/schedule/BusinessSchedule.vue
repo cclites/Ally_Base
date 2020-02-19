@@ -485,7 +485,7 @@
             getFilteredEvents() {
                 let events = this.events;
 
-                console.log( 'fetched events: ', events );
+                // console.log( 'fetched events: ', events );
 
                 if (this.statusFilters.length) {
                     events = events.filter(event => {
@@ -931,6 +931,7 @@
             },
 
             renderEvent: function( event, element, view ) {
+
                 let note = '';
                 let requests = '';
 
@@ -1010,7 +1011,7 @@
             },
 
             renderTimelineDayEvent(content, event, note, requests) {
-                let data = [`${this.getEventPersonName(event)} ${event.start_time} - ${event.end_time}`, ...event.service_types];
+                let data = [`${this.getEventPersonName(event)} ${event.start_time}` + ( event.end_time ? `- ${event.end_time}` : '' ) + ( event.body ? ( ' ' + event.body.substr( 0, 10 ) + ( event.body.length > 10 ? '...' : '' ) ) : '' ), ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
@@ -1028,7 +1029,7 @@
             },
 
             renderAgendaWeekEvent(content, event, note, requests) {
-                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`, ...event.service_types];
+                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time}` + ( event.end_time ? `- ${event.end_time}` : '' ), ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),
@@ -1037,7 +1038,7 @@
             },
 
             renderDefaultEvent(content, event, note, requests) {
-                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time} - ${event.end_time}`, ...event.service_types];
+                let data = [`C: ${event.client}`, `CG: ${event.caregiver}`, `${event.start_time}` + ( event.end_time ? `- ${event.end_time}` : '' ), ...event.service_types];
                 let title = $('<span/>', {
                     class: 'fc-title',
                     html: data.join('<br/>'),

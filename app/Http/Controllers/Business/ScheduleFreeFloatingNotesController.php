@@ -36,4 +36,15 @@ class ScheduleFreeFloatingNotesController extends BaseController
         if( $schedule_free_floating_note->update( $data ) ) return new SuccessResponse( 'Successfully saved schedule note!', $request->validated() );
         else return new ErrorResponse( 500, 'Error saving schedule note, please try again!' );
     }
+
+    /**
+     * Kill the resource
+     *
+     * @param  \Illuminate\Http\CreateScheduleFreeFloatingNoteRequest $request
+     */
+    public function destroy( ScheduleFreeFloatingNote $schedule_free_floating_note )
+    {
+        if( $schedule_free_floating_note->delete() ) return new SuccessResponse( 'Successfully deleted schedule note!' );
+        else return new ErrorResponse( 500, 'Error deleting schedule note, please try again!' );
+    }
 }
