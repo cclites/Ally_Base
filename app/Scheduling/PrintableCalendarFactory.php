@@ -8,7 +8,7 @@ use Carbon\Carbon;
 use App\Business;
 use App\Responses\Resources\ScheduleEvents;
 
-class Calendar extends Model
+class PrintableCalendarFactory extends Model
 {
     protected $daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -252,6 +252,7 @@ class Calendar extends Model
 
             if(in_array('OPEN', $filters) && $event['caregiver'] === 'OPEN'){
                 $this->filteredEvents[] = $event;
+                $this->caregiverId = 0;
                 continue;
             }
 
@@ -275,13 +276,15 @@ class Calendar extends Model
             $client = "All Clients ";
         }
 
-        if(isset($this->caregiverId) && $this->caregiverId != 0){
-            $caregiver =  \App\Caregiver::find($this->caregiverId)->nameLastFirst();
+        if(isset($this->caregiverId) && $this->caregiverId != 0) {
+            $caregiver = " visits by " . \App\Caregiver::find($this->caregiverId)->nameLastFirst();
+        }else if($this->caregiverId == 0){
+            $caregiver = "Open Shifts";
         }else{
-            $caregiver = "All Caregivers";
+            $caregiver = "visits by All Caregivers";
         }
 
-        $html .= "<div style='text-align: center;'>Schedules for $client - visits by $caregiver</div>";
+        $html .= "<div style='text-align: center;'>Schedules for $client - $caregiver</div>";
 
         $html .= "</div>";
 

@@ -697,7 +697,7 @@ class ScheduleController extends BaseController
 
         $html = "No Report";
 
-        $calendar = new \App\Scheduling\Calendar(
+        $calendar = new \App\Scheduling\PrintableCalendarFactory(
             $events,
             $start,
             $end,
