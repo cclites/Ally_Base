@@ -58,7 +58,27 @@
                     >
                         <template slot="client_services" scope="row">
                             <div v-for="(service, index) in row.item.client_services" :key="index">
-                                {{ service }}
+                                {{ service[0].service_name }}
+                            </div>
+                        </template>
+                        <template slot="day" scope="row">
+                            <div v-for="(service, index) in row.item.client_services" :key="index">
+                                {{ service[0].day }}
+                            </div>
+                        </template>
+                        <template slot="date" scope="row">
+                            <div v-for="(service, index) in row.item.client_services" :key="index">
+                                {{ service[0].date }}
+                            </div>
+                        </template>
+                        <template slot="start_time" scope="row">
+                            <div v-for="(service, index) in row.item.client_services" :key="index">
+                                {{ service[0].start_time }}
+                            </div>
+                        </template>
+                        <template slot="end_time" scope="row">
+                            <div v-for="(service, index) in row.item.client_services" :key="index">
+                                {{ service[0].end_time }}
                             </div>
                         </template>
                     </b-table>
@@ -104,12 +124,12 @@
                 fields: [
                     { key: 'client_name', label: 'Client', sortable: true, },
                     { key: 'client_city', label: 'City', sortable: true, },
-                    { key: 'client_services', label: 'Services', sortable: false, },
                     { key: 'case_manager', label: 'Case Manager', sortable: true, },
-                    { key: 'day', label: 'Day', sortable: true, },
-                    { key: 'date', label: 'Date', sortable: true, },
-                    { key: 'start_time', label: 'Start Time', sortable: true, },
-                    { key: 'end_time', label: 'End Time', sortable: true, },
+                    { key: 'client_services', label: 'Services', sortable: false, },
+                    { key: 'day', label: 'Day', sortable: false, },
+                    { key: 'date', label: 'Date', sortable: false, },
+                    { key: 'start_time', label: 'Start Time', sortable: false, },
+                    { key: 'end_time', label: 'End Time', sortable: false, },
                 ],
                 clients:'',
                 cities:'',
@@ -204,7 +224,10 @@
             },
 
             print(){
-                let url = 'available-shifts?export=1';
+                //let url = 'available-shifts?export=1';
+                //$(".table").print();
+                //window.location =
+                window.location = this.form.toQueryString('available-shifts?export=1');
             }
 
         },

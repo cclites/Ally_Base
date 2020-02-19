@@ -65,6 +65,7 @@ class AvailableShiftReport extends BaseReport
     protected function results()
     {
         return $this->query
+            ->orderBy('starts_at')
             ->get()
             ->groupBy('client_id')
             ->values()
@@ -81,7 +82,6 @@ class AvailableShiftReport extends BaseReport
                     }
 
                     return collect($services)->map(function($service) use($item){
-
                         return [
                             'service_name' => $service,
                             'day'=>$item->starts_at->format('l'),
@@ -99,6 +99,6 @@ class AvailableShiftReport extends BaseReport
                     'case_manager' => $schedule->first()->client->case_manager,
                 ];
 
-            });
+            })->sortBy('client_name');
     }
 }

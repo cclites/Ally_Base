@@ -6,13 +6,19 @@ namespace App\Http\Controllers\Business\Report;
 use App\Business;
 use App\Http\Controllers\Controller;
 use App\Reports\AvailableShiftReport;
-use App\Schedule;
+use Carbon\Carbon;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 
 class AvailableShiftsReportController extends Controller
 {
     public function index(Request $request, AvailableShiftReport $report){
+
+        $business = Business::find($request->businesses);
+
+        $this->authorize('read', $business);
 
         if( filled($request->json) || filled($request->export) ){
 
@@ -26,7 +32,19 @@ class AvailableShiftsReportController extends Controller
             );
 
             if ( filled($request->export) ) {
-                return $report;
+                $rows = $report->rows();
+
+                $client = [];
+                $start = (new Carbon($request->start . ' 00:00:00'))->format('m/d/Y');
+                $end = (new Carbon($request->end . ' 23:59:59'))->format('m/d/Y');
+                $city = $request->city;
+
+                if($request->client_id && $request->client_id > 0){
+                    $client = \App\Client::find($request->client_id);
+                }
+
+                $pdf = PDF::loadView('business.reports.print.available_shift_report', compact('rows', 'business', 'client', 'start', 'end', 'city'));
+                return $pdf->download(strtolower(Str::slug( 'Available Shifts')) . '.pdf');
             }
 
             return response()->json($report->rows());
@@ -42,6 +60,10 @@ class AvailableShiftsReportController extends Controller
                 'Reports' => route('business.reports.index')
             ]
         );
+
+    }
+
+    public function export($report){
 
     }
 
