@@ -698,12 +698,21 @@ class ScheduleController extends BaseController
         return false;
     }
 
+    /**
+     * Generate Calendar PDF view of Schedule events.
+     *
+     * @param $events
+     * @param Carbon $start
+     * @param Carbon $end
+     * @param string|null $filters
+     * @param int|null $clientId
+     * @param int|null $caregiverId
+     * @param Business $business
+     * @return Response
+     */
     public function generatePrintableSchedule($events, Carbon $start, Carbon $end, ?string $filters, ?int $clientId, ?int $caregiverId, Business $business)
     {
         $diff = $start->diffInDays($end);
-
-        $html = "No Report";
-
 
         $calendar = new \App\Scheduling\PrintableCalendarFactory(
             $events,
@@ -731,7 +740,7 @@ class ScheduleController extends BaseController
             200,
             array(
                 'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename="' . standard_filename('schedule', 'care details', 'pdf') . '"'
+                'Content-Disposition' => 'attachment; filename="' . standard_filename('schedule', 'schedule', 'pdf') . '"'
             )
         );
     }
