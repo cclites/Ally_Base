@@ -888,7 +888,7 @@
             getEventBackground( event, status = null ){
 
                 if( status && status == this.OPEN_SHIFTS_STATUS.APPROVED ) return '#1c81d9';
-                return event.caregiver === 'OPEN' ? '#d9c01c' : ( event.backgroundColor || '#1c81d9' );
+                return ( event.caregiver === 'OPEN' && event.status != 'HOSPITAL_HOLD' ) ? '#d9c01c' : ( event.backgroundColor || '#1c81d9' );
             },
 
             loadFiltersData() {
