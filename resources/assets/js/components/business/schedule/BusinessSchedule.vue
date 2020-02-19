@@ -847,17 +847,18 @@
                 });
 
                 if( event ){
-                    if( status && status == this.OPEN_SHIFTS_STATUS.APPROVED ) {
-                        event.caregiver = _.cloneDeep( this.newCaregiverName );
-                    }
+
+                    if( status && status == this.OPEN_SHIFTS_STATUS.APPROVED ) event.caregiver = _.cloneDeep( this.newCaregiverName ); // populate the caregiver name when a request is approved
+
                     event.note            = data.note;
                     event.requests_count  = data.requests_count;
                     event.status          = data.status;
-                    event.backgroundColor = this.getEventBackground(event);
+                    event.backgroundColor = this.getEventBackground(event, status);
                 }
             },
 
-            getEventBackground( event ){
+            getEventBackground( event, status = null ){
+
                 if (event.resourceId == this.FREE_FLOATING_NOTE_IDENTIFIER) {
                     return '#3bc1ff';
                 }
@@ -902,7 +903,7 @@
                     return '#ad92b0';
                 }
 
-                if (! event.caregiver_id || event.status === this.SCHEDULE_STATUS.OPEN_SHIFT) {
+                if ( status != this.OPEN_SHIFTS_STATUS.APPROVED && ( !event.caregiver_id || event.status === this.SCHEDULE_STATUS.OPEN_SHIFT ) ) {
                     // Open shift
                     return '#d9c01c';
                 }
