@@ -258,6 +258,7 @@ Vue.component('report-column-picker', require('./components/business/reports/Rep
 Vue.component('client-stats', require('./components/business/reports/ClientStats'));
 Vue.component('caregiver-stats', require('./components/business/reports/CaregiverStats'));
 Vue.component('projected-billing-report', require('./components/business/reports/ProjectedBillingReport'));
+Vue.component('occ-acc-deductibles-report', require('./components/business/reports/OccAccDeductiblesReport'));
 Vue.component('business-payroll-export-report', require('./components/business/reports/BusinessPayrollExportReport'));
 Vue.component('business-medicaid-billing-report', require('./components/business/reports/BusinessMedicaidBillingReport'));
 Vue.component('business-payer-list', require('./components/business/PayerList'));
