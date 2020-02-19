@@ -19,7 +19,7 @@
                             <date-picker v-model="form.end" name="end_date"></date-picker>
                         </b-form-group>
                         <b-form-group label="Client" class="mr-2">
-                            <b-form-select v-model="form.client" :disabled="loadingClients">
+                            <b-form-select v-model="form.client_id" :disabled="loadingClients">
                                 <option value="">All</option>
                                 <option v-for="item in clients" :value="item.id">{{ item.nameLastFirst }}</option>
                             </b-form-select>
@@ -96,7 +96,7 @@
                     businesses: '',
                     start: moment().format('MM/DD/YYYY'),
                     end:  moment().add(7, "days").format('MM/DD/YYYY'),
-                    client: '',
+                    client_id: '',
                     city: '',
                     service: '',
                     inactive: false,
@@ -204,7 +204,7 @@
             },
 
             print(){
-                let url = 'available-shifts?print=1';
+                let url = 'available-shifts?export=1';
             }
 
         },

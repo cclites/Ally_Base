@@ -14,25 +14,22 @@ class AvailableShiftsReportController extends Controller
 {
     public function index(Request $request, AvailableShiftReport $report){
 
-        //$this->authorize('read', Business::find($request->businesses));
-
-        if($request->json || $request->print){
+        if( filled($request->json) || filled($request->export) ){
 
             $report->applyFilters(
                 $request->businesses,
                 $request->start,
                 $request->end,
-                $request->client,
+                $request->client_id,
                 $request->city,
                 $request->service
             );
 
-            if ($request->print) {
+            if ( filled($request->export) ) {
                 return $report;
             }
 
             return response()->json($report->rows());
-
 
         }
 
