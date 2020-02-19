@@ -256,10 +256,10 @@
     import moment from 'moment';
     import HasOpenShiftsModal from '../../../mixins/HasOpenShiftsModal';
     import { mapActions, mapGetters } from 'vuex';
-    import Constants from '../../../mixins/Constants';
 
     export default {
         components: {BusinessLocationFormGroup },
+        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers, FormatsStrings, HasOpenShiftsModal, Constants],
         props: {
             'business': Object,
             'caregiver': Object,
@@ -555,7 +555,7 @@
                 }
 
                 resources.unshift({
-                    id: this.SCHEDULE_FREE_FLOATING_NOTES_RESOURCE_ID,
+                    id: this.FREE_FLOATING_NOTE_IDENTIFIER,
                     title: 'Notes',
                     role: this.resourceIdField === 'client_id' ? 'clients' : 'caregivers',
                     scheduled: '-',
@@ -695,7 +695,7 @@
 
             eventHover(event, jsEvent, view) {
 
-                if( event.resourceId == this.SCHEDULE_FREE_FLOATING_NOTES_RESOURCE_ID ) return; // no preview for schedule notes for now
+                if( event.resourceId == this.FREE_FLOATING_NOTE_IDENTIFIER ) return; // no preview for schedule notes for now
 
                 let target = null;
 
@@ -874,21 +874,72 @@
                     return item.id === id;
                 });
 
-                // console.log( 'found event here:', event );
                 if( event ){
-
-                    if( status && status == this.OPEN_SHIFTS_STATUS.APPROVED ) event.caregiver = _.cloneDeep( this.newCaregiverName );
-                    event.backgroundColor = this.getEventBackground( data, status );
+                    if( status && status == this.OPEN_SHIFTS_STATUS.APPROVED ) {
+                        event.caregiver = _.cloneDeep( this.newCaregiverName );
+                    }
                     event.note            = data.note;
                     event.requests_count  = data.requests_count;
                     event.status          = data.status;
+                    event.backgroundColor = this.getEventBackground(event);
                 }
             },
 
-            getEventBackground( event, status = null ){
+            getEventBackground( event ){
+                if (event.resourceId == this.FREE_FLOATING_NOTE_IDENTIFIER) {
+                    return '#3bc1ff';
+                }
 
-                if( status && status == this.OPEN_SHIFTS_STATUS.APPROVED ) return '#1c81d9';
-                return ( event.caregiver === 'OPEN' && event.status != 'HOSPITAL_HOLD' ) ? '#d9c01c' : ( event.backgroundColor || '#1c81d9' );
+                if (event.status === this.SCHEDULE_STATUS.ATTENTION_REQUIRED) {
+                    return '#C30000';
+                }
+
+                if (event.status === this.SCHEDULE_STATUS.HOSPITAL_HOLD) {
+                    return '#9881e9';
+                }
+
+                if (event.status === this.SCHEDULE_STATUS.CAREGIVER_CANCELED) {
+                    return '#ff8c00';
+                }
+
+                if (event.status === this.SCHEDULE_STATUS.CLIENT_CANCELED) {
+                    return '#730073';
+                }
+
+                if (event.status == this.SCHEDULE_STATUS.CAREGIVER_NOSHOW) {
+                    return '#63cbc7';
+                }
+
+                if (event.has_overtime) {
+                    return '#fc4b6c';
+                }
+
+                if (event.shift_status === this.SCHEDULE_STATUS.CLOCKED_IN) {
+                    return '#27c11e';
+                }
+
+                if (event.shift_status === this.SCHEDULE_STATUS.MISSED_CLOCK_IN) {
+                    return '#E468B2';
+                }
+
+                if (event.shift_status === this.SCHEDULE_STATUS.CONFIRMED) {
+                    return '#849290';
+                }
+
+                if (event.shift_status === this.SCHEDULE_STATUS.UNCONFIRMED) {
+                    return '#ad92b0';
+                }
+
+                if (! event.caregiver_id || event.status === this.SCHEDULE_STATUS.OPEN_SHIFT) {
+                    // Open shift
+                    return '#d9c01c';
+                }
+
+                if (event.added_to_past) {
+                    return '#124aa5';
+                }
+
+                return '#1c81d9';
             },
 
             loadFiltersData() {
@@ -1173,8 +1224,6 @@
                 this.fetchEvents();
             },
         },
-
-        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers, FormatsStrings, HasOpenShiftsModal, Constants],
     }
 </script>
 

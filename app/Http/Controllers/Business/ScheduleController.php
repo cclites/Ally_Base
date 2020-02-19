@@ -71,8 +71,7 @@ class ScheduleController extends BaseController
             $note->caregiver       = 'Schedule Note'; // necessary for rendering the title of the object on the calendar
             $note->client          = 'Schedule Note'; // necessary for rendering the title of the object on the calendar
             $note->start_time      = Carbon::parse( $note->start )->format( 'm/d/Y' );
-            $note->backgroundColor = '#3bc1ff';
-            $note->resourceId      = 13377331; // must match the id of the "resource" in BusinessSchedule.vue
+            $note->resourceId      = ScheduleFreeFloatingNote::FREE_FLOATING_NOTE_IDENTIFIER; // must match the id of the "resource" in BusinessSchedule.vue
             $note->service_types   = []; // necessary to be blank for our front-end code
 
             return $note;

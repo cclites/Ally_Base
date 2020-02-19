@@ -16,4 +16,9 @@ class ScheduleFreeFloatingNote extends BaseModel implements BelongsToBusinessesI
     protected $orderedColumn = 'created_at';
     protected $casts = [];
 
+    /*
+     * Identifier for schedule notes on the front-end.
+     */
+    const FREE_FLOATING_NOTE_IDENTIFIER = 13377331;
+    
 }

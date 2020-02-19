@@ -470,7 +470,6 @@ Vue.directive('tooltip', function(el, binding){
     })
 });
 
-
 const app = new Vue({
     el: '#main-wrapper',
     store,

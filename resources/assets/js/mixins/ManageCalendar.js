@@ -54,7 +54,7 @@ export default {
         async editSchedule(event, jsEvent, view) {
             this.hidePreview();
 
-            if( event.resourceId == this.SCHEDULE_FREE_FLOATING_NOTES_RESOURCE_ID ){
+            if( event.resourceId == this.FREE_FLOATING_NOTE_IDENTIFIER ){
                 // catch the resourceId for the Schedule Notes and prevent the schedule modal from appearing
 
                 this.selectedScheduleNote        = event;
