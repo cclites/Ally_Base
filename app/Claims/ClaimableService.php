@@ -279,7 +279,11 @@ class ClaimableService extends AuditableModel implements ClaimableInterface
             return collect();
         }
 
-        return Activity::whereIn('code', collect(explode(',', $this->activities)))
+        return Activity::where(function ($q) {
+                $q->where('business_id', null)
+                    ->orWhere('business_id', $this->shift->business_id);
+            })
+            ->whereIn('code', collect(explode(',', $this->activities)))
             ->get();
     }
 

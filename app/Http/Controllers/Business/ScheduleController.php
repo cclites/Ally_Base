@@ -31,6 +31,8 @@ use App\Shifts\RateFactory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Client;
+use App\ScheduleFreeFloatingNote;
+
 use Illuminate\Http\Response;
 
 class ScheduleController extends BaseController
@@ -64,8 +66,35 @@ class ScheduleController extends BaseController
 
         $schedules = $query->whereBetween('starts_at', [$start, $end])->get();
 
-        $events = new ScheduleEventsResponse( $schedules );
-        $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
+        $events = new ScheduleEventsResponse($schedules);
+        $events->setTitleCallback(function (Schedule $schedule) {
+            return $this->businessScheduleTitle($schedule);
+        });
+
+        $notes = ScheduleFreeFloatingNote::forRequestedBusinesses()->whereBetween('start_date', [ $start, $end ])->get()->map(function ($note) {
+            $note->start           = Carbon::parse($note->start_date)->format('Y-m-d');
+            $note->title           = 'Schedule Note'; // necessary for rendering the title of the object on the calendar
+            $note->caregiver       = 'Schedule Note'; // necessary for rendering the title of the object on the calendar
+            $note->client          = 'Schedule Note'; // necessary for rendering the title of the object on the calendar
+            $note->start_time      = Carbon::parse($note->start)->format('m/d/Y');
+            $note->backgroundColor = '#3bc1ff';
+            $note->resourceId      = 13377331; // must match the id of the "resource" in BusinessSchedule.vue
+            $note->service_types   = []; // necessary to be blank for our front-end code
+
+            return $note;
+        });
+        
+        if ($request->filled('print')) {
+            return $this->generatePrintableSchedule(
+                $events->toArray(),
+                $start,
+                $end,
+                $request->status_filters,
+                $request->client_id,
+                $request->caregiver_id,
+                $this->business()
+            );
+        }
 
         if($request->filled('print')){
             return $this->generatePrintableSchedule(
@@ -82,6 +111,7 @@ class ScheduleController extends BaseController
         return [
             'kpis' => $events->kpis(),
             'events' => $events->toArray(),
+            'free_floating_notes' => $notes
         ];
     }
 
@@ -252,7 +282,7 @@ class ScheduleController extends BaseController
         $weekdayInt = (int) $schedule->weekday;
         $weekdayText = $dowMap[$weekdayInt];
 
-        switch($request->input('group_update')) {
+        switch ($request->input('group_update')) {
             case 'total_all':
                 $editor->updateGroup($schedule->group, $schedule, $updatedData, $request->getNotes(), $services);
                 \DB::commit();
@@ -285,13 +315,15 @@ class ScheduleController extends BaseController
         $services = $request->getServices();
 
         if (count($services)) {
-            foreach($services as $service) {
-                if ($service['client_rate'] === null) continue;
+            foreach ($services as $service) {
+                if ($service['client_rate'] === null) {
+                    continue;
+                }
                 if (app(RateFactory::class)->hasNegativeProviderFee($client, $service['client_rate'], $service['caregiver_rate'])) {
                     return false;
                 }
             }
-        } else if ($request->client_rate !== null) {
+        } elseif ($request->client_rate !== null) {
             if (app(RateFactory::class)->hasNegativeProviderFee($client, $request->client_rate, $request->caregiver_rate)) {
                 return false;
             }
@@ -335,7 +367,9 @@ class ScheduleController extends BaseController
         }
 
         $events = new ScheduleEventsResponse(collect([$schedule]));
-        $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
+        $events->setTitleCallback(function (Schedule $schedule) {
+            return $this->businessScheduleTitle($schedule);
+        });
         $data = $events->toArray()[0];
 
         return new SuccessResponse('The schedule has been updated.', $data);
@@ -697,6 +731,7 @@ class ScheduleController extends BaseController
 
         $html = "No Report";
 
+
         $calendar = new \App\Scheduling\PrintableCalendarFactory(
             $events,
             $start,
@@ -707,7 +742,7 @@ class ScheduleController extends BaseController
             $business
         );
 
-        if($diff == 1){ //daily
+        if($diff == 1){ 
             $html = $calendar->generateDailyCalendar();
         }elseif($diff == 7){ //weekly
             $html = $calendar->generateWeeklyCalendar();
@@ -727,5 +762,4 @@ class ScheduleController extends BaseController
             )
         );
     }
-
 }

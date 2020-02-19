@@ -257,6 +257,7 @@ class Caregiver extends AuditableModel implements
         'pets_dogs_okay',
         'pets_cats_okay',
         'pets_birds_okay',
+        'has_occ_acc',
         'ethnicity',
         'uses_ein_number',
     ];

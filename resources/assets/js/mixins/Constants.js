@@ -92,6 +92,8 @@ export default {
                 UNINTERESTED : 'uninterested'
             },
 
+            SCHEDULE_FREE_FLOATING_NOTES_RESOURCE_ID : 13377331, // totally arbitrary
+
             /**
              * Claims
              */

@@ -2,18 +2,14 @@
 
 namespace App\Http\Controllers\Business;
 
-use App\Billing\Service;
 use App\Http\Requests\TimesheetReportRequest;
-use App\ReferralSource;
 use App\Reports\PayrollReport;
-use App\Shifts\ShiftStatusManager;
 use Auth;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
 use App\Caregiver;
 use App\Prospect;
 use App\Client;
-use App\EmergencyContact;
 use App\Billing\Payments\Methods\CreditCard;
 use App\Billing\Deposit;
 use App\Billing\GatewayTransaction;
@@ -23,25 +19,18 @@ use App\Reports\ClientCaregiversReport;
 use App\Reports\ClientChargesReport;
 use App\Reports\ProviderReconciliationReport;
 use App\Reports\ScheduledPaymentsReport;
-use App\Reports\ScheduledVsActualReport;
 use App\Reports\ShiftsReport;
-use App\Reports\ClientDirectoryReport;
-use App\Reports\CaregiverDirectoryReport;
 use App\Reports\ProspectDirectoryReport;
 use App\Responses\ErrorResponse;
-use App\Schedule;
-use App\Scheduling\ScheduleAggregator;
 use App\Shift;
 use App\Shifts\AllyFeeCalculator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use App\Reports\EVVReport;
-use App\CustomField;
 use App\OfficeUser;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
-use Twilio\Rest\Taskrouter\V1\Workspace\TaskQueue\TaskQueuesStatisticsInstance;
 
 class ReportsController extends BaseController
 {
@@ -1070,65 +1059,5 @@ class ReportsController extends BaseController
             ->get();
 
             return $prospects;
-    }
-
-    /**
-     * Organize the shifts data into the required format for a full financial revenue report
-     * @param Request $request
-     *
-     * @return array
-     */
-    private function organizeRevenueReport(Request $request)
-    {
-        $report = new ShiftsReport();
-        $report->orderBy('checked_in_time');
-        $this->addShiftReportFilters($report, $request);
-        $data = $report->rows();
-        $groupedByDate = [];
-
-        foreach ($data as $i => $shiftReport) {
-            // grouped by week
-            $date = (new Carbon($shiftReport['checked_in_time']))->startOfWeek()->format('m/d/Y');
-
-            if(isset($groupedByDate[$date])) {
-                $groupedByDate[$date][] = $shiftReport;
-            }else {
-                $groupedByDate[$date] = [$shiftReport];
-            }
-        }
-
-        /* Add days with no shift worked
-        $numberOfDays = (new Carbon($request->start_date))->diffInDays((new Carbon($request->end_date)));
-        for ($i=0; $i < $numberOfDays; $i++) {
-            $date = (new Carbon($request->start_date))->addDays($i+1);
-            $formattedDate = $date->format('m/d/Y');
-            if($formattedDate == '08/10/2018') {
-                echo 'i:'.$i;
-            }
-            if($date->diffInDays((new Carbon($request->end_date))) < 0) {
-                break;
-            }
-
-            if(!isset($groupedByDate[$formattedDate])) {
-                $groupedByDate[$formattedDate] = [];
-            }
-        }*/
-
-        foreach ($groupedByDate as $date => $itemsArray) {
-            $total = [
-                'revenue' => 0.0,
-                'wages' => 0.0,
-                'profit' => 0.0,
-            ];
-
-            foreach ($itemsArray as $entry) {
-                $total['revenue'] += (float) $entry['provider_total'] + (float) $entry['caregiver_total'];
-                $total['wages'] += (float) $entry['caregiver_total'];
-                $total['profit'] += (float) $entry['provider_total'];
-            }
-
-            $groupedByDate[$date] = $total;
-        }
-        return $groupedByDate;
     }
 }

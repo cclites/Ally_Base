@@ -203,6 +203,13 @@
                         allowed: ['admin'],
                     },
                     {
+                        name: 'OccAcc Deductible Report',
+                        url: '/business/occ-acc-deductibles',
+                        description: 'Allows you to select any 1-week timeframe and calculate OccAcc deductions for each eligible caregiver',
+                        category: 3,
+                        allowed: ['office_user'],
+                    },
+                    {
                         name: 'Active Clients Report',
                         url: 'reports/active-clients',
                         description: '',
