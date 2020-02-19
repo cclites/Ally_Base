@@ -251,7 +251,7 @@ class PrintableCalendarFactory
 
             if(in_array('OPEN', $filters) && $event['caregiver'] === 'OPEN'){
                 $this->filteredEvents[] = $event;
-                $this->caregiverId = 0;
+                //$this->caregiverId = 0;
                 continue;
             }
 
@@ -265,6 +265,8 @@ class PrintableCalendarFactory
 
     public function headerSpan(): string
     {
+        $filters = explode(",", $this->filters);
+
         $html = "<div><h4>" . $this->business->name . "</h4>" .
                 "<h6>". $this->business->getPhoneNumber()->number ."</h6>";
 
@@ -277,7 +279,7 @@ class PrintableCalendarFactory
 
         if(isset($this->caregiverId) && $this->caregiverId != 0) {
             $caregiver = " visits by " . \App\Caregiver::find($this->caregiverId)->nameLastFirst();
-        }else if($this->caregiverId == 0){
+        }else if($this->caregiverId === 0 || in_array('OPEN', $filters)){
             $caregiver = "Open Shifts";
         }else{
             $caregiver = "visits by All Caregivers";
