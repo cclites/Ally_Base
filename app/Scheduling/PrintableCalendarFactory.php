@@ -3,12 +3,11 @@
 namespace App\Scheduling;
 
 use Carbon\CarbonPeriod;
-use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use App\Business;
-use App\Responses\Resources\ScheduleEvents;
 
-class PrintableCalendarFactory extends Model
+
+class PrintableCalendarFactory
 {
     protected $daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
