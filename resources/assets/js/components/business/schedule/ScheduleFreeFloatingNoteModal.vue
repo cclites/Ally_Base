@@ -40,11 +40,7 @@
 
 <script>
 
-    import UtilityFunctions from '../../../mixins/UtilityFunctions';
-
     export default {
-
-        mixins: [ UtilityFunctions ],
 
         props: {
 
@@ -146,7 +142,7 @@
 
             value( newVal, oldVal ){
 
-                const note = this.objectIsEmpty( this.selectedScheduleNote ) ? null : _.cloneDeep( this.selectedScheduleNote );
+                const note = _.isEmpty( this.selectedScheduleNote ) ? null : _.cloneDeep( this.selectedScheduleNote );
                 this.resetForm( note );
             }
         }
