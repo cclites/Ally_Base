@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers\Business\Report;
 
+use App\Business;
 use App\Http\Controllers\Controller;
 use App\Reports\AvailableShiftReport;
 use App\Schedule;
@@ -13,12 +14,12 @@ class AvailableShiftsReportController extends Controller
 {
     public function index(Request $request, AvailableShiftReport $report){
 
+        //$this->authorize('read', Business::find($request->businesses));
+
         if($request->json || $request->print){
 
-            $report = Schedule::forRequestedBusinesses()
-                        ->with(['client', 'services']);
-
             $report->applyFilters(
+                $request->businesses,
                 $request->start,
                 $request->end,
                 $request->client,
@@ -30,7 +31,7 @@ class AvailableShiftsReportController extends Controller
                 return $report;
             }
 
-            return response()->json($report);
+            return response()->json($report->rows());
 
 
         }

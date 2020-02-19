@@ -56,7 +56,11 @@
                             :current-page="currentPage"
                             :per-page="perPage"
                     >
-
+                        <template slot="client_services" scope="row">
+                            <div v-for="(service, index) in row.item.client_services" :key="index">
+                                {{ service }}
+                            </div>
+                        </template>
                     </b-table>
 
                     <b-row v-if="this.items.length > 0">
@@ -131,7 +135,9 @@
             this.fetchCities();
         },
 
-        computed: {},
+        computed: {
+
+        },
 
         methods: {
 
@@ -181,13 +187,14 @@
             },
 
             fetchReportData(){
-                let url = 'reports/available-shifts?json=1';
+                let url = 'available-shifts?json=1';
 
                 this.fetchData = true;
 
                 this.form.get(url)
                     .then( ({ data }) => {
                         this.items = data;
+                        this.totalRows = this.items.length;
                     })
                     .catch(() => {
                     })
@@ -197,7 +204,7 @@
             },
 
             print(){
-                let url = 'reports/available-shifts?print=1';
+                let url = 'available-shifts?print=1';
             }
 
         },
