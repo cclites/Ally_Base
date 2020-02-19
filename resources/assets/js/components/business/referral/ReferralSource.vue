@@ -44,6 +44,21 @@
                     <template slot="phone" scope="row">
                         <mask-input :value="row.item.phone" v-model="row.item.phone" type="phone"></mask-input>
                     </template>
+                    <template slot="contact_address_street" scope="row">
+                        <b-form-input :value="row.item.contact_address_street" v-model="row.item.contact_address_street"></b-form-input>
+                    </template>
+                    <template slot="contact_address_street2" scope="row">
+                        <b-form-input :value="row.item.contact_address_street2" v-model="row.item.contact_address_street2"></b-form-input>
+                    </template>
+                    <template slot="contact_address_city" scope="row">
+                        <b-form-input :value="row.item.contact_address_city" v-model="row.item.contact_address_city"></b-form-input>
+                    </template>
+                    <template slot="contact_address_state" scope="row">
+                        <b-form-input :value="row.item.contact_address_state" v-model="row.item.contact_address_state"></b-form-input>
+                    </template>
+                    <template slot="contact_address_zip" scope="row">
+                        <b-form-input :value="row.item.contact_address_zip" v-model="row.item.contact_address_zip"></b-form-input>
+                    </template>
 
                     <template slot="actions" scope="row">
                         <b-btn size="sm" @click="update(row.item)" class="mt-1">
@@ -101,7 +116,31 @@
                         label: 'Phone',
                         sortable: true,
                     },
-
+                    {
+                        key: 'contact_address_street',
+                        label: 'Address Street',
+                        sortable: false,
+                    },
+                    {
+                        key: 'contact_address_street2',
+                        label: 'Street Line 2',
+                        sortable: false,
+                    },
+                    {
+                        key: 'contact_address_city',
+                        label: 'City',
+                        sortable: false,
+                    },
+                    {
+                        key: 'contact_address_state',
+                        label: 'State',
+                        sortable: false,
+                    },
+                    {
+                        key: 'contact_address_zip',
+                        label: 'Zip',
+                        sortable: false,
+                    },
                     'actions'
                 ]
             }
@@ -115,6 +154,11 @@
             update(resourceData){
                 let form = new Form({
                     contact_name: resourceData.contact_name,
+                    contact_address_street: resourceData.contact_address_street,
+                    contact_address_street2: resourceData.contact_address_street2,
+                    contact_address_city: resourceData.contact_address_city,
+                    contact_address_state: resourceData.contact_address_state,
+                    contact_address_zip: resourceData.contact_address_zip,
                     phone: resourceData.phone,
                     id: resourceData.source_id,
                     active: resourceData.active,
@@ -189,6 +233,11 @@
             add(){
                this.items.push({
                     contact_name: '',
+                    contact_address_street: '',
+                    contact_address_street2: null,
+                    contact_address_city: '',
+                    contact_address_state: '',
+                    contact_address_zip: '',
                     phone: '',
                     id: '',
                     active: true,

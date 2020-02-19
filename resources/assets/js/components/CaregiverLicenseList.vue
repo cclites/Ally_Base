@@ -34,7 +34,7 @@
                         :disabled=" !!row.item.chain_expiration_type_id "
                         :class=" row.item.applicable ? '' : 'text-muted' "
                         v-model=" row.item.name "
-                        @change.native=" addToUpdateList( row.item ) "
+                        @change.native=" addToUpdateList( row.item, row.item.name ) "
                     ></b-form-input>
                 </template>
                 <template slot="description" scope="row">
@@ -43,7 +43,7 @@
                         v-if=" row.item.applicable "
                         v-model=" row.item.description "
                         :state=" nameState( row.item.description ) "
-                        @change.native=" addToUpdateList( row.item ) "
+                        @change.native=" addToUpdateList( row.item, row.item.description ) "
                         trim
                     ></b-form-input>
                     <b-form-invalid-feedback id="input-live-feedback">
@@ -54,7 +54,7 @@
                     <date-picker
                         v-if=" row.item.applicable "
                         v-model=" row.item.expires_at "
-                        @input=" addToUpdateList( row.item ) "
+                        @input=" addToUpdateList( row.item, row.item.expires_at ) "
                     ></date-picker>
                 </template>
                 <template slot="updated_at" scope="row">
@@ -244,9 +244,15 @@
                     this.saveLicense( item );
                 }
             },
-            addToUpdateList( item ){
+            addToUpdateList( item, val ){
 
+                console.log( 'the item: ', item );
                 if( !this.updateList.includes( item.tempId ) ) this.updateList.push( item.tempId );
+                if( this.updateList.includes( item.tempId ) && [ null, '' ].includes( item.id ) && [ null, '' ].includes( val ) ){
+
+                    const index = this.updateList.findIndex( tempId => tempId == item.tempId );
+                    this.updateList.splice( index, 1 );
+                }
             },
             nameState( value ) {
 

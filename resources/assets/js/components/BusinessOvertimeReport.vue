@@ -67,9 +67,17 @@
                     <template scope="total">
 
                     </template>
+                    <template slot="worked" scope="data">
+                        <a href="javascript: void(0);">{{ data.item.worked }}</a>
+                    </template>
                 </b-table>
                 <b-modal :id="infoModal.id" size="lg" :title="infoModal.title" ok-only @hide="resetInfoModal">
-                    <b-table bordered striped :items="infoModal.clients" :fields="infoModal.fields">
+                    <b-table bordered striped
+                             :items="infoModal.clients"
+                             :fields="infoModal.fields"
+                             :sort-by.sync="infoModal.sortBy"
+                             :sort-desc.sync="infoModal.sortDesc"
+                    >
 
                     </b-table>
                 </b-modal>
@@ -113,13 +121,13 @@
                 selectedItem: {},
                 fields: [
                     {
-                        key: 'firstname',
-                        label: 'First Name',
+                        key: 'lastname',
+                        label: 'Last Name',
                         sortable: true,
                     },
                     {
-                        key: 'lastname',
-                        label: 'Last Name',
+                        key: 'firstname',
+                        label: 'First Name',
                         sortable: true,
                     },
                     {
@@ -153,10 +161,12 @@
                     id: 'client-modal',
                     title: 'Clients',
                     clients: [],
+                    sortBy: 'total',
+                    sortDesc: true,
                     fields: [
                         {
                             key: 'name',
-                            label: 'Name',
+                            label: 'Client Name',
                             sortable: true,
                         },
                         {
@@ -182,6 +192,7 @@
         methods: {
             selectRow(item, index, event){
                 this.infoModal.clients = item.clients;
+                this.infoModal.title = item.firstname+' '+item.lastname+' Hours Detail';
                 this.$root.$emit('bv::show::modal', this.infoModal.id, event.target);
             },
             resetInfoModal(){

@@ -49,32 +49,19 @@
                     Filter by {{type}} birthday
                 </b-form-checkbox>
             </b-col>
-            <b-col lg="3" v-show="showDateRange">
-                <b-form-group label="Start Date">
-                    <date-picker
-                            class="mb-1"
-                            name="start_date"
-                            v-model="search.start_date"
-                            placeholder="Start Date"
-                    ></date-picker>
+            <b-col lg="3" v-show="showDateRange" >
+                <b-form-group label="Upcoming Birthdays" class="f-1 mx-1">
+
+                    <b-form-input v-model="search.days" placeholder="Birthdays in next xx days" type="number"/>
                 </b-form-group>
             </b-col>
-            <b-col lg="3" v-show="showDateRange">
-                <b-form-group label="End Date">
-                    <date-picker
-                            class="mb-1"
-                            v-model="search.end_date"
-                            name="end_date"
-                            placeholder="End Date"
-                    ></date-picker>
-                </b-form-group>
-            </b-col>
+
         </b-row>
 
         <loading-card v-if="loading"/>
 
         <div v-else class="table-responsive">
-            <ally-table id="user-birthday" :columns="fields" :items="items" sort-by="name">
+            <ally-table id="user-birthday" :columns="fields" :items="items" :per-page="50" sort-by="name">
                 <template slot="name" scope="data">
                     <a :href="`/business/${type.toLowerCase()}/${data.item.id}`">{{ data.item.name }}</a>
                 </template>
@@ -108,8 +95,6 @@
                 showEmpty: true,
                 showDateRange: false,
                 search: {
-                    start_date: moment().format('MM/DD/YYYY'),
-                    end_date: moment().format('MM/DD/YYYY'),
                     filterDates: false,
                     selectedId: 'All',
                     type: this.type,
@@ -117,6 +102,7 @@
                     businesses: '',
                     client_type: '',
                     show_inactive: false,
+                    days: ''
                 },
                 data: [],
                 fields: [
@@ -133,8 +119,26 @@
                         shouldShow: true,
                     },
                     {
+                        key: 'street_address',
+                        label: 'Address',
+                        sortable: true,
+                        shouldShow: true,
+                    },
+                    {
                         key: 'city',
                         label: 'City',
+                        sortable: true,
+                        shouldShow: true,
+                    },
+                    {
+                        key: 'state',
+                        label: 'State',
+                        sortable: true,
+                        shouldShow: true,
+                    },
+                    {
+                        key: 'zip',
+                        label: 'Zip',
                         sortable: true,
                         shouldShow: true,
                     },
