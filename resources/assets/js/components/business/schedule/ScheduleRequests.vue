@@ -123,9 +123,6 @@
                 this.chosenRequest = request;
                 this.busy = true;
 
-                console.log( 'the request: ', _.cloneDeep( request ) );
-                console.log( 'the schedule: ', _.cloneDeep( this.schedule ) );
-
                 let form = new Form({
 
                     caregiver  : request.caregiver_id,

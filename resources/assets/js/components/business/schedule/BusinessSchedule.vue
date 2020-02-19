@@ -859,10 +859,6 @@
 
             getEventBackground( event, status = null ){
 
-                if (event.resourceId == this.FREE_FLOATING_NOTE_IDENTIFIER) {
-                    return '#3bc1ff';
-                }
-
                 if (event.status === this.SCHEDULE_STATUS.ATTENTION_REQUIRED) {
                     return '#C30000';
                 }
