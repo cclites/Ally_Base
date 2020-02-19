@@ -256,8 +256,8 @@ class TellusClaimTransmitter extends BaseClaimTransmitter implements ClaimTransm
             'VisitStatus' => $this->tcLookup('VisitStatus', 'COMP'), // OPTIONAL, Hardcoded to 'Completed' on purpose
             // 'MissedVisitReason'      => '', // OPTIONAL
             // 'MissedVisitActionTaken' => '', // OPTIONAL
-            // 'InvoiceUnits'           => '', // OPTIONAL && TODO
-            // 'InvoiceAmount'          => '13.37', // OPTIONAL && TODO
+            'InvoiceUnits'           => $item->units, // OPTIONAL
+            'InvoiceAmount'          => $item->amount, // OPTIONAL
             'ScheduledEndLatitude' => '',
             'ScheduledEndLongitude' => '',
             // 'PaidAmount'             => '13.37', // OPTIONAL && TODO

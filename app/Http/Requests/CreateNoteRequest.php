@@ -20,6 +20,7 @@ class CreateNoteRequest extends BusinessRequest
             'type' => 'nullable|string',
             'title' => 'nullable|string|max:100',
             'body' => 'required|string',
+            'template_id' => 'nullable|exists:note_templates,id'
         ];
     }
 }

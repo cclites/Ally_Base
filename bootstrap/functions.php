@@ -147,6 +147,27 @@ function multiply($operand1, $operand2, $decimals=2): float
 }
 
 /**
+ * 4 represents fourths ( i.e 0.25 ), 8 represents eights ( i.e 0.125 ), and so..
+ * 
+ * floor or ceil for rounding up/down obviously
+ */
+function round_to_fraction( $number, $fraction = 4, $direction = 'floor' ){
+
+    switch( $direction ){
+
+        case 'floor':
+
+            return divide( floor( multiply( $number, $fraction ) ), $fraction, $fraction );
+        case 'ceil':
+
+            return divide( ceil( multiply( $number, $fraction ) ), $fraction, $fraction );
+        default:
+
+            return null;
+    }
+}
+
+/**
  * Displays up to 4 decimal places, with a minimum of 2 decimal places, trimming unnecessary zeroes
  *
  * @param mixed $number
@@ -176,27 +197,6 @@ function filter_dates(...$dates) {
     return array_map(function($date) {
         return filter_date($date);
     }, $dates);
-}
-
-/**
- * 4 represents fourths, 8 represents eights, and so..
- * 
- * floor or ceil for rounding up/down obviously
- */
-function round_to_fraction( $number, $fraction = 4, $direction = 'floor' ){
-
-    switch( $direction ){
-
-        case 'floor':
-
-            return floor( $number * $fraction ) / $fraction;
-        case 'ceil':
-
-            return ceil( $number * $fraction ) / $fraction;
-        default:
-
-            return null;
-    }
 }
 
 /**

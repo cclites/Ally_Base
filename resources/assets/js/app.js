@@ -233,6 +233,7 @@ Vue.component('business-franchise-reports', require('./components/business/franc
 Vue.component('business-franchise-payments', require('./components/business/franchise/FranchisePayments.vue'));
 Vue.component('bulk-update-schedule-modal', require('./components/business/schedule/BulkUpdateScheduleModal'));
 Vue.component('bulk-delete-schedule-modal', require('./components/business/schedule/BulkDeleteScheduleModal'));
+Vue.component('schedule-free-floating-note-modal', require('./components/business/schedule/ScheduleFreeFloatingNoteModal'));
 Vue.component('schedule-notes-modal', require('./components/business/schedule/ScheduleNotesModal'));
 Vue.component('schedule-clock-out-modal', require('./components/business/schedule/ScheduleClockOutModal'));
 Vue.component('business-caregiver-pay-statements', require('./components/business/caregivers/CaregiverPayStatementsTab'));
@@ -259,6 +260,7 @@ Vue.component('report-column-picker', require('./components/business/reports/Rep
 Vue.component('client-stats', require('./components/business/reports/ClientStats'));
 Vue.component('caregiver-stats', require('./components/business/reports/CaregiverStats'));
 Vue.component('projected-billing-report', require('./components/business/reports/ProjectedBillingReport'));
+Vue.component('occ-acc-deductibles-report', require('./components/business/reports/OccAccDeductiblesReport'));
 Vue.component('business-payroll-export-report', require('./components/business/reports/BusinessPayrollExportReport'));
 Vue.component('business-medicaid-billing-report', require('./components/business/reports/BusinessMedicaidBillingReport'));
 Vue.component('business-payer-list', require('./components/business/PayerList'));
