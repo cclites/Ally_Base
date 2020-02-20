@@ -77,15 +77,11 @@ class ReportsTest extends TestCase {
 
     /** @test */
     public function client_birthday_report_returns_all_clients() {
-        $data = [
-            'type' => 'clients',
-            'json' => 1
-        ];
         $clients = factory(Client::class, 2)->create([
             'business_id' => $this->business->id
         ]);
 
-        $this->post('business/reports/birthdays', $data)
+        $this->get('business/reports/birthdays?type=clients&json=1')
              ->assertSuccessful()
              ->assertJsonCount(2)
              ->assertJsonFragment(["id" => $clients[0]->id, "date_of_birth" => $clients[0]->date_of_birth])
@@ -104,8 +100,7 @@ class ReportsTest extends TestCase {
             'selectedId' => $clients[0]->id
         ];
 
-
-        $this->post('business/reports/birthdays', $data)
+        $this->get('business/reports/birthdays?' . http_build_query($data))
              ->assertSuccessful()
              ->assertJsonCount(1)
              ->assertJsonFragment(["id" => $clients[0]->id, "date_of_birth" => $clients[0]->date_of_birth]);
@@ -130,7 +125,7 @@ class ReportsTest extends TestCase {
             'id'              => 'All',
         ];
 
-        $this->post('business/reports/birthdays', $data)
+        $this->get('business/reports/birthdays?' . http_build_query($data))
              ->assertSuccessful()
              ->assertJsonCount(1)
              ->assertJsonFragment(["id" => $client1->id, "date_of_birth" => $client1->date_of_birth]);
@@ -155,7 +150,7 @@ class ReportsTest extends TestCase {
             'id'              => $client1->id,
         ];
 
-        $this->post('business/reports/birthdays', $data)
+        $this->get('business/reports/birthdays?' . http_build_query($data))
              ->assertSuccessful()
              ->assertJsonCount(1)
              ->assertJsonFragment(["id" => $client1->id, "date_of_birth" => $client1->date_of_birth]);
@@ -195,7 +190,7 @@ class ReportsTest extends TestCase {
 
         $this->withoutExceptionHandling();
 
-        $this->post('business/reports/birthdays', $data)
+        $this->get('business/reports/birthdays?' . http_build_query($data))
              ->assertSuccessful()
              ->assertJsonCount(2)
              ->assertJsonFragment(["id" => $clients[1]->id, "date_of_birth" => $clients[1]->date_of_birth])
@@ -213,7 +208,7 @@ class ReportsTest extends TestCase {
             $caregiver->businesses()->attach($this->business);
         });
 
-        $this->post('business/reports/birthdays', $data)
+        $this->get('business/reports/birthdays?' . http_build_query($data))
              ->assertSuccessful()
              ->assertJsonCount(2)
              ->assertJsonFragment(["id" => $caregivers[0]->id, "date_of_birth" => $caregivers[0]->date_of_birth]);
@@ -231,7 +226,7 @@ class ReportsTest extends TestCase {
             'json'       => 1
         ];
 
-        $this->post('business/reports/birthdays', $data)
+        $this->get('business/reports/birthdays?' . http_build_query($data))
              ->assertSuccessful()
              ->assertJsonCount(1)
              ->assertJsonFragment(["id" => $caregivers[0]->id, "date_of_birth" => $caregivers[0]->date_of_birth]);

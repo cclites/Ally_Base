@@ -105,6 +105,8 @@ class UpdateBusinessRequest extends BusinessRequest
             unset($data['business_id']);
         }
 
+        $data['sce_shifts_in_progress'] = 0; // OVERRIDE TO ALWAYS DISABLE THIS OPTION
+
         return $data;
     }
 }
