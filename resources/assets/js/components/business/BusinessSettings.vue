@@ -421,17 +421,17 @@
                                 </b-form-select>
                                 <input-help :form="businessSettings" field="shift_confirmation_email" class="text-danger" text="Note: You will then need to enable this for each client on their profile."></input-help>
                             </b-form-group>
-                            <div class="pl-5">
-                                <b-form-group label="Include visits in progress" label-for="sce_shifts_in_progress">
-                                    <b-form-select id="sce_shifts_in_progress"
-                                                   :disabled="businessSettings.auto_confirm == 1 || true"
-                                                   v-model="businessSettings.sce_shifts_in_progress"
-                                    >
-                                        <option :value="0">No</option>
-                                        <option :value="1">Yes</option>
-                                    </b-form-select>
-                                </b-form-group>
-                            </div>
+<!--                            <div class="pl-5">-->
+<!--                                <b-form-group label="Include visits in progress" label-for="sce_shifts_in_progress">-->
+<!--                                    <b-form-select id="sce_shifts_in_progress"-->
+<!--                                                   :disabled="businessSettings.auto_confirm == 1 || true"-->
+<!--                                                   v-model="businessSettings.sce_shifts_in_progress"-->
+<!--                                    >-->
+<!--                                        <option :value="0">No</option>-->
+<!--                                        <option :value="1">Yes</option>-->
+<!--                                    </b-form-select>-->
+<!--                                </b-form-group>-->
+<!--                            </div>-->
                             <div>
                                 <small class="form-text text-muted">Shift Confirmation Email Example:</small>
                                 <img src="/images/shift-confirmation-email-example.png" class="email-example-img mb-1" />

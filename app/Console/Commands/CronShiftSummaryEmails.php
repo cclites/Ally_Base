@@ -96,8 +96,6 @@ class CronShiftSummaryEmails extends Command
         $report = new UnconfirmedShiftsReport();
         $results = $report->between(Carbon::parse('2017-01-01'), $this->cutOffDateTime($business->timezone))
             ->includeConfirmed()
-            ->includeClockedIn()
-            ->includeInProgress()
             ->forBusinesses($business->id)
             ->forClients($clients)
             ->maskNames()
