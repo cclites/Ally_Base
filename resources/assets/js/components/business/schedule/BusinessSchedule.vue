@@ -241,7 +241,7 @@
     import ManageCalendar from '../../../mixins/ManageCalendar';
     import LocalStorage from "../../../mixins/LocalStorage";
     import FormatsDates from "../../../mixins/FormatsDates";
-
+    import Constants from "../../../mixins/Constants";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
@@ -251,6 +251,7 @@
 
     export default {
         components: {BusinessLocationFormGroup },
+        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers, FormatsStrings, HasOpenShiftsModal, Constants],
         props: {
             'business': Object,
             'caregiver': Object,
@@ -845,21 +846,69 @@
                     return item.id === id;
                 });
 
-                // console.log( 'found event here:', event );
                 if( event ){
 
-                    if( status && status == this.OPEN_SHIFTS_STATUS.APPROVED ) event.caregiver = _.cloneDeep( this.newCaregiverName );
-                    event.backgroundColor = this.getEventBackground( data, status );
+                    if( status && status == this.OPEN_SHIFTS_STATUS.APPROVED ) event.caregiver = _.cloneDeep( this.newCaregiverName ); // populate the caregiver name when a request is approved
+
                     event.note            = data.note;
                     event.requests_count  = data.requests_count;
                     event.status          = data.status;
+                    event.backgroundColor = this.getEventBackground(event, status);
                 }
             },
 
             getEventBackground( event, status = null ){
-                return event.backgroundColor || '#1c81d9';
-                // if( status && status == this.OPEN_SHIFTS_STATUS.APPROVED ) return '#1c81d9';
-                // return !event.caregiver_id ? '#d9c01c' : '#1c81d9';
+
+                if (event.status === this.SCHEDULE_STATUS.ATTENTION_REQUIRED) {
+                    return '#C30000';
+                }
+
+                if (event.status === this.SCHEDULE_STATUS.HOSPITAL_HOLD) {
+                    return '#9881e9';
+                }
+
+                if (event.status === this.SCHEDULE_STATUS.CAREGIVER_CANCELED) {
+                    return '#ff8c00';
+                }
+
+                if (event.status === this.SCHEDULE_STATUS.CLIENT_CANCELED) {
+                    return '#730073';
+                }
+
+                if (event.status == this.SCHEDULE_STATUS.CAREGIVER_NOSHOW) {
+                    return '#63cbc7';
+                }
+
+                if (event.has_overtime) {
+                    return '#fc4b6c';
+                }
+
+                if (event.shift_status === this.SCHEDULE_STATUS.CLOCKED_IN) {
+                    return '#27c11e';
+                }
+
+                if (event.shift_status === this.SCHEDULE_STATUS.MISSED_CLOCK_IN) {
+                    return '#E468B2';
+                }
+
+                if (event.shift_status === this.SCHEDULE_STATUS.CONFIRMED) {
+                    return '#849290';
+                }
+
+                if (event.shift_status === this.SCHEDULE_STATUS.UNCONFIRMED) {
+                    return '#ad92b0';
+                }
+
+                if ( status != this.OPEN_SHIFTS_STATUS.APPROVED && ( !event.caregiver_id || event.status === this.SCHEDULE_STATUS.OPEN_SHIFT ) ) {
+                    // Open shift
+                    return '#d9c01c';
+                }
+
+                if (event.added_to_past) {
+                    return '#124aa5';
+                }
+
+                return '#1c81d9';
             },
 
             loadFiltersData() {
@@ -1143,8 +1192,6 @@
                 this.fetchEvents();
             },
         },
-
-        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers, FormatsStrings, HasOpenShiftsModal],
     }
 </script>
 
