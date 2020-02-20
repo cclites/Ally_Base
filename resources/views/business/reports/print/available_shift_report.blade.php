@@ -52,32 +52,32 @@
         <tbody>
             @foreach($rows as $row)
                 <tr>
-                    <td>{{ $row["client_name"] }}</td>
-                    <td>{{ $row["client_city"] }}</td>
-                    <td>{{ $row["case_manager"] }}</td>
+                    <td style="vertical-align: top;">{{ $row["client_name"] }}</td>
+                    <td style="vertical-align: top;">{{ $row["client_city"] }}</td>
+                    <td style="vertical-align: top;">{{ $row["case_manager"] }}</td>
                     <td>
-                        @foreach($row["client_services"][0] as $service)
-                            {{ $service["service_name"] }}<br>
+                        @foreach($row["client_services"] as $service)
+                            {{ $service[0]['service_name'] }}<br>
                         @endforeach
                     </td>
                     <td>
-                        @foreach($row["client_services"][0] as $service)
-                            {{ $service["day"] }}<br>
+                        @foreach($row["client_services"] as $service)
+                            {{ $service[0]["day"] }}<br>
                         @endforeach
                     </td>
                     <td>
-                        @foreach($row["client_services"][0] as $service)
-                            {{ $service["date"] }}<br>
+                        @foreach($row["client_services"] as $service)
+                            {{ $service[0]["date"] }}<br>
                         @endforeach
                     </td>
                     <td>
-                        @foreach($row["client_services"][0] as $service)
-                            {{ $service["start_time"] }}<br>
+                        @foreach($row["client_services"] as $service)
+                            {{ $service[0]["start_time"] }}<br>
                         @endforeach
                     </td>
                     <td>
-                        @foreach($row["client_services"][0] as $service)
-                            {{ $service["end_time"] }}<br>
+                        @foreach($row["client_services"] as $service)
+                            {{ $service[0]["end_time"] }}<br>
                         @endforeach
                     </td>
                 </tr>

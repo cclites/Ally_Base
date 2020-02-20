@@ -224,9 +224,6 @@
             },
 
             print(){
-                //let url = 'available-shifts?export=1';
-                //$(".table").print();
-                //window.location =
                 window.location = this.form.toQueryString('available-shifts?export=1');
             }
 

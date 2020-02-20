@@ -16,10 +16,6 @@ class AvailableShiftsReportController extends Controller
 {
     public function index(Request $request, AvailableShiftReport $report){
 
-        $business = Business::find($request->businesses);
-
-        $this->authorize('read', $business);
-
         if( filled($request->json) || filled($request->export) ){
 
             $report->applyFilters(
@@ -32,12 +28,13 @@ class AvailableShiftsReportController extends Controller
             );
 
             if ( filled($request->export) ) {
-                $rows = $report->rows();
+                $rows = $report->rows()->values()->toArray();
 
                 $client = [];
                 $start = (new Carbon($request->start . ' 00:00:00'))->format('m/d/Y');
                 $end = (new Carbon($request->end . ' 23:59:59'))->format('m/d/Y');
                 $city = $request->city;
+                $business = Business::find($request->businesses);
 
                 if($request->client_id && $request->client_id > 0){
                     $client = \App\Client::find($request->client_id);
@@ -47,7 +44,9 @@ class AvailableShiftsReportController extends Controller
                 return $pdf->download(strtolower(Str::slug( 'Available Shifts')) . '.pdf');
             }
 
-            return response()->json($report->rows());
+            $data = $report->rows()->values()->toArray();
+
+            return response()->json($data);
 
         }
 
