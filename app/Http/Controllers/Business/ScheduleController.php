@@ -707,10 +707,10 @@ class ScheduleController extends BaseController
      * @param string|null $filters
      * @param int|null $clientId
      * @param int|null $caregiverId
-     * @param Business $business
+     * @param $business
      * @return Response
      */
-    public function generatePrintableSchedule($events, Carbon $start, Carbon $end, ?string $filters, ?int $clientId, ?int $caregiverId, Business $business)
+    public function generatePrintableSchedule($events, Carbon $start, Carbon $end, ?string $filters, ?int $clientId, ?int $caregiverId, $business)
     {
         $diff = $start->diffInDays($end);
 
