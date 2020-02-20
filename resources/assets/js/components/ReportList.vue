@@ -14,6 +14,7 @@
                             :items="items[category.id]"
                             :fields="fields"
                             @filtered="onFiltered"
+                            sort-by="name"
                     >
                         <template slot="name" scope="row">
                             <a :href="row.item.url">{{ row.item.name }}</a>
