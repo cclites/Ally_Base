@@ -453,19 +453,20 @@
                         allowed: ['office_user'],
                     },
                     {
-                        name: 'Printable Schedules',
+                        name: 'Open Shifts List',
+                        url: 'reports/available-shifts',
+                        description: 'Open shifts report in list view',
+                        category: 6,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Printable Schedules Calendar',
                         url: 'reports/printable-schedule',
                         description: 'Print schedules to PDF to be used for on call or offline purposes',
                         category: 6,
                         allowed: ['office_user'],
                     },
-                    {
-                        name: 'Open Shifts List View',
-                        url: 'reports/available-shifts',
-                        description: 'Available shifts report',
-                        category: 6,
-                        allowed: ['office_user'],
-                    },
+
                     // { Removed as per ALLY-1394
                     //     name: 'Clients Missing Payment Methods',
                     //     url: 'reports/clients-missing-payment-methods',

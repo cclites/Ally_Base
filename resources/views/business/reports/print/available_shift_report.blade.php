@@ -29,8 +29,9 @@
     </h3>
 
     <p>
-        Open Shifts List View <br>
-        Filters: {{ $client ? $client->nameLastFirst() : 'All Clients - By Client' }}
+        Open Shifts List View for {{ $client ? $client->nameLastFirst() : 'All Clients - By Client' }}
+        <br>
+        Filters: {{ $filters ? implode( ", ", $filters) : 'None' }}
     </p>
 
     <h5>

@@ -10,7 +10,7 @@ use Carbon\Carbon;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-
+use App\Billing\Service;
 
 class AvailableShiftsReportController extends Controller
 {
@@ -30,6 +30,7 @@ class AvailableShiftsReportController extends Controller
             if ( filled($request->export) ) {
                 $rows = $report->rows()->values()->toArray();
 
+                $filters = [];
                 $client = [];
                 $start = (new Carbon($request->start . ' 00:00:00'))->format('m/d/Y');
                 $end = (new Carbon($request->end . ' 23:59:59'))->format('m/d/Y');
@@ -38,9 +39,18 @@ class AvailableShiftsReportController extends Controller
 
                 if($request->client_id && $request->client_id > 0){
                     $client = \App\Client::find($request->client_id);
+                    $filters[] = 'Client';
                 }
 
-                $pdf = PDF::loadView('business.reports.print.available_shift_report', compact('rows', 'business', 'client', 'start', 'end', 'city'));
+                if(filled($request->city)){
+                    $filters[] = "City";
+                }
+
+                if(filled($request->service)){
+                    $filters[] = Service::where('id', $request->service)->pluck('name')->first();
+                }
+
+                $pdf = PDF::loadView('business.reports.print.available_shift_report', compact('rows', 'business', 'client', 'start', 'end', 'city', 'filters'));
                 return $pdf->download(strtolower(Str::slug( 'Available Shifts')) . '.pdf');
             }
 
