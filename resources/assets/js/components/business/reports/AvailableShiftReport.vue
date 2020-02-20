@@ -229,7 +229,12 @@
 
         },
 
-        watch: {},
+        watch: {
+            'form.businesses'(newValue, oldValue) {
+                this.fetchClients();
+                this.fetchCities();
+            }
+        },
     }
 </script>
 

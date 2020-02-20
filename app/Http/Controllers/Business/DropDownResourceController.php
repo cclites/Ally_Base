@@ -147,27 +147,18 @@ class DropdownResourceController extends BaseController
         return response()->json([ 'reasons' => $visitEditReasons, 'actions' => $visitEditActions ]);
     }
 
-    public function cities(Request $request){
-
-        $cities = [];
-
+    public function cities(Request $request)
+    {
         $cities = Client::forRequestedBusinesses()
-                    ->with(['addresses'])
-                    ->get()
-                    ->map(function($client) use ($cities){
-
-                        $city = $client->addresses->first()["city"];
-
-                        if(!in_array($city, $cities)){
-                            return $city;
-                        }
-                        return;
-
-                    })->filter()
-                    ->toArray();
-
-        $cities = array_unique($cities);
-        sort($cities, SORT_STRING);
+            ->with(['addresses'])
+            ->get()
+            ->map(function (\App\Client $client) {
+                return optional($client->address)->city;
+            })
+            ->unique()
+            ->filter()
+            ->sortBy(null, SORT_NATURAL|SORT_FLAG_CASE)
+            ->values();
 
         return response()->json($cities);
     }
