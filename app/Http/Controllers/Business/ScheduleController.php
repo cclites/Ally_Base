@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Business;
 use App\Billing\ClientRate;
 use App\Billing\ScheduleService;
 use App\Business;
+use App\BusinessChain;
 use App\Exceptions\AutomaticCaregiverAssignmentException;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
@@ -71,6 +72,11 @@ class ScheduleController extends BaseController
         });
 
         if ($request->filled('print')) {
+            $selectedBusiness = null;
+            if (filled($request->businesses)) {
+                $selectedBusiness = Business::findOrFail($request->businesses)->first();
+            }
+
             return $this->generatePrintableSchedule(
                 $events->toArray(),
                 $start,
@@ -78,7 +84,8 @@ class ScheduleController extends BaseController
                 $request->status_filters,
                 $request->client_id,
                 $request->caregiver_id,
-                $this->business()
+                $this->businessChain(),
+                $selectedBusiness
             );
         }
 
@@ -707,10 +714,11 @@ class ScheduleController extends BaseController
      * @param string|null $filters
      * @param int|null $clientId
      * @param int|null $caregiverId
-     * @param $business
+     * @param BusinessChain $chain
+     * @param Business|null $business
      * @return Response
      */
-    public function generatePrintableSchedule($events, Carbon $start, Carbon $end, ?string $filters, ?int $clientId, ?int $caregiverId, $business)
+    public function generatePrintableSchedule($events, Carbon $start, Carbon $end, ?string $filters, ?int $clientId, ?int $caregiverId, BusinessChain $chain, ?Business $business)
     {
         $diff = $start->diffInDays($end);
 
@@ -721,6 +729,7 @@ class ScheduleController extends BaseController
             $filters,
             $clientId,
             $caregiverId,
+            $chain,
             $business
         );
 
