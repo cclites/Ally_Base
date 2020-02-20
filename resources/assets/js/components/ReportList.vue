@@ -203,9 +203,9 @@
                         allowed: ['admin'],
                     },
                     {
-                        name: 'OccAcc Deductible Report',
+                        name: 'Occupational Accident Insurance Deduction Report',
                         url: '/business/occ-acc-deductibles',
-                        description: 'Allows you to select any 1-week timeframe and calculate OccAcc deductions for each eligible caregiver',
+                        description: 'Allows you to select any 1-week time-frame and calculate OccAcc deductions for each eligible caregiver',
                         category: 3,
                         allowed: ['office_user'],
                     },
