@@ -36,7 +36,8 @@ class AvailableShiftReport extends BaseReport
         $this->start = (new Carbon($start . ' 00:00:00'));
         $this->end = (new Carbon($end . ' 23:59:59'));
 
-        $this->query->whereBetween('starts_at', [$this->start, $this->end]);
+        $this->query->whereBetween('starts_at', [$this->start, $this->end])
+                    ->whereNull('caregiver_id');
 
         if(filled($client)){
             $this->query->where('client_id', $client);

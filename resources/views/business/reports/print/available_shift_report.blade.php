@@ -29,11 +29,12 @@
     </h3>
 
     <p>
-        Available Reports for {{ $client ? $client->nameLastFirst() : 'All Clients By Client' }}
+        Open Shifts List View <br>
+        Filters: {{ $client ? $client->nameLastFirst() : 'All Clients - By Client' }}
     </p>
 
     <h5>
-        {{ $start }} - {{ $end }}   Location: {{ $city ? $city : 'All Locations' }}
+    {{-- {{ $start }} - {{ $end }}   Location: {{ $city ? $city : 'All Locations' }} --}}
     </h5>
 
     <table>

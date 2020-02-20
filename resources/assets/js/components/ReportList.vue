@@ -460,7 +460,7 @@
                         allowed: ['office_user'],
                     },
                     {
-                        name: 'Available Shifts',
+                        name: 'Open Shifts List View',
                         url: 'reports/available-shifts',
                         description: 'Available shifts report',
                         category: 6,
