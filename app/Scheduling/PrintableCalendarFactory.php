@@ -2,6 +2,7 @@
 
 namespace App\Scheduling;
 
+use App\BusinessChain;
 use Carbon\CarbonPeriod;
 use Carbon\Carbon;
 use App\Business;
@@ -25,6 +26,8 @@ class PrintableCalendarFactory
 
     protected $business;
 
+    protected $chain;
+
     protected $startDay;
 
     protected $endDay;
@@ -35,7 +38,7 @@ class PrintableCalendarFactory
 
     const DAY_INDEX = 7;
 
-    public function __construct($events, Carbon $start,  Carbon $end, ?string $filters, ?int $clientId, ?int $caregiverId, Business $business)
+    public function __construct($events, Carbon $start,  Carbon $end, ?string $filters, ?int $clientId, ?int $caregiverId, BusinessChain $chain, ?Business $business)
     {
         $this->events = $events;
         $this->start = $start;
@@ -43,6 +46,7 @@ class PrintableCalendarFactory
         $this->filters = $filters;
         $this->clientId = $clientId;
         $this->caregiverId = $caregiverId;
+        $this->chain = $chain;
         $this->business = $business;
     }
 
@@ -79,7 +83,7 @@ class PrintableCalendarFactory
         // $sDay uses calendar_start_week as an offset for registries
         // that do no start their week on a Sunday
 
-        $sDay = $startDay->dayOfWeek - ($this->business->chain->calendar_week_start);
+        $sDay = $startDay->dayOfWeek - ($this->chain->calendar_week_start);
 
         $monthName = $startDay->monthName;
 
@@ -267,8 +271,12 @@ class PrintableCalendarFactory
     {
         $filters = explode(",", $this->filters);
 
-        $html = "<div><h4>" . $this->business->name . "</h4>" .
-                "<h6>". $this->business->getPhoneNumber()->number ."</h6>";
+        $name = $this->business ? $this->business->name : $this->chain->name;
+
+        $html = "<div><h4>$name</h4>";
+        if (filled($this->business)) {
+            $html .= "<h6>" . $this->business->getPhoneNumber()->number . "</h6>";
+        }
 
         if(isset($this->clientId)){
             $client = \App\Client::find($this->clientId);
@@ -305,10 +313,10 @@ class PrintableCalendarFactory
     public function orderDaysOfWeek(): array
     {
 
-        if( $this->business->chain->calendar_week_start > 0){
+        if( $this->chain->calendar_week_start > 0){
 
-            $slicedDays = array_slice($this->daysOfWeek, $this->business->chain->calendar_week_start);
-            $reordered = array_splice($this->daysOfWeek, 0,  $this->business->chain->calendar_week_start);
+            $slicedDays = array_slice($this->daysOfWeek, $this->chain->calendar_week_start);
+            $reordered = array_splice($this->daysOfWeek, 0,  $this->chain->calendar_week_start);
             $daysArray = array_merge($slicedDays, $reordered);
 
             return $daysArray;

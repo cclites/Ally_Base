@@ -10,7 +10,11 @@ use App\Shift;
 use App\Timesheet;
 use App\User;
 
-
+/**
+ * Trait ActiveBusiness
+ * Do not use this !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * @deprecated
+ */
 trait ActiveBusiness
 {
     protected $override;
