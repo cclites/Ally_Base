@@ -92,11 +92,16 @@
                         <date-picker id="application_date" v-model="form.application_date"></date-picker>
                     </b-form-group>
                     <b-form-group>
-                        <business-referral-source-select v-model="form.referral_source_id" source-type="caregiver" :caregiver="true" :show-active-only="1"></business-referral-source-select>
-                        <input-help :form="form" field="referred_by" text="Enter how the caregiver was referred." />
+                        <business-referral-source-select
+                            v-model="form.referral_source_id"
+                            source-type="caregiver"
+                            :caregiver="true"
+                            :show-active-only="1"
+                            help-text="Enter how the caregiver was referred."
+                        />
                     </b-form-group>
                     <b-form-group>
-                        <b-form-checkbox v-model="form.has_occ_acc" value="1" unchecked-value="0">Has OccAcc Deduction</b-form-checkbox>
+                        <b-form-checkbox v-model="form.has_occ_acc" value="1" unchecked-value="0">Has Occupational Accident Insurance Deduction</b-form-checkbox>
                     </b-form-group>
                 </b-col>
                 <b-col lg="6">

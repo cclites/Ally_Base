@@ -8,6 +8,9 @@
                     <option value="">No Referral Source</option>
                     <option v-for="source in filteredSources" :value="source.id" :key="source.id">{{ source.organization }} - {{ source.contact_name }}</option>
                 </b-form-select>
+                <small v-if="helpText" class="form-text text-muted">
+                    <span>{{ helpText }}</span>
+                </small>
             </b-form-group>
         </b-col>
         <b-col md="4" class="mt-1">
@@ -29,7 +32,7 @@
     export default {
         name: "ReferralSourceSelect",
 
-        props: ['value', 'sourceType', 'businessId', 'caregiver', 'showActiveOnly'],
+        props: ['value', 'sourceType', 'businessId', 'caregiver', 'showActiveOnly', 'helpText'],
 
         data() {
 
