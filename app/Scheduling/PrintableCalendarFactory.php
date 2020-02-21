@@ -58,7 +58,7 @@ class PrintableCalendarFactory
         }
 
         $this->startDay = $startDay = $this->start->copy();
-        $this->endDay = $this->start->copy()->endOfMonth();
+        $this->endDay = $this->start->copy()->endOfMonth()->addDay();
 
         /**************************************************************************
          * The following are counters used to render the calendar, and
@@ -145,9 +145,9 @@ class PrintableCalendarFactory
     public function generateWeeklyCalendar(): string
     {
         $this->startDay = $startDay = $this->start;
-        $this->endDay = $endDay = $this->end->subDay();
+        $this->endDay = $endDay = $this->end;
 
-        $period = CarbonPeriod::create($startDay, $endDay);
+        $period = CarbonPeriod::create($startDay, $endDay->copy()->subDay());
         $daysOfWeek = [];
 
         foreach ($period as $date) {
