@@ -64,9 +64,9 @@
                     <div id="table" class="table-responsive">
                         <b-table
                             bordered striped hover show-empty
-                            :items=" items "
+                            :items="itemProvider"
                             :fields="fields"
-                            :current-page.sync="currentPage"
+                            :current-page="currentPage"
                             :per-page="perPage"
                             :sort-by.sync="sortBy"
                             :sort-desc.sync="sortDesc"
@@ -116,7 +116,7 @@
             return {
                 loading: false,
                 busy: false,
-                items : [],
+                //items : [],
                 statusAliases: [],
                 directoryType: 'client',
                 filters: new Form({
@@ -190,10 +190,6 @@
         },
 
         methods: {
-            loadTable() {
-
-                this.itemProvider();
-            },
 
             itemProvider() {
 
@@ -202,10 +198,10 @@
                 return this.filters.get(`/business/reports/client-directory?&page=${this.currentPage}&perpage=${this.perPage}&sort=${sort}&desc=${this.sortDesc}`)
                     .then( ({ data }) => {
                         this.totalRows = data.total;
-                        this.items = data.rows || [];
+                        return data.rows || [];
                     })
                     .catch(() => {
-                        this.items = [];
+                        return [];
                     })
                     .finally(() => {
                         this.loading = false;

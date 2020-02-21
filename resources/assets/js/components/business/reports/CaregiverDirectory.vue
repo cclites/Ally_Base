@@ -59,9 +59,9 @@
                     <div id="table" class="table-responsive">
                         <b-table
                             bordered striped hover show-empty
-                            :items="items"
+                            :items="itemProvider"
                             :fields="fields"
-                            :current-page.sync="currentPage"
+                            :current-page="currentPage"
                             :per-page="perPage"
                             :sort-by.sync="sortBy"
                             :sort-desc.sync="sortDesc"
@@ -114,7 +114,7 @@
                     status_alias_id: '',
                     json: 1
                 }),
-                items: [],
+                //items: [],
                 loading: false,
                 busy: false,
                 statusAliases: [],
@@ -187,11 +187,11 @@
                     .then( ({ data }) => {
 
                         this.totalRows = data.total;
-                        this.items = data.rows || [];
+                        return data.rows || [];
                     })
                     .catch(() => {
 
-                        this.items = [];
+                        return [];
                     })
                     .finally(() => {
 
