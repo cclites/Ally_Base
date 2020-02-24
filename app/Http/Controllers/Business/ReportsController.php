@@ -1060,4 +1060,65 @@ class ReportsController extends BaseController
 
             return $prospects;
     }
+
+    /**
+     * Organize the shifts data into the required format for a full financial revenue report
+     * @param Request $request
+     *
+     * @return array
+     * @throws \Exception
+     */
+    private function organizeRevenueReport(Request $request)
+    {
+        $report = new ShiftsReport();
+        $report->orderBy('checked_in_time');
+        $this->addShiftReportFilters($report, $request);
+        $data = $report->rows();
+        $groupedByDate = [];
+
+        foreach ($data as $i => $shiftReport) {
+            // grouped by week
+            $date = (new Carbon($shiftReport['checked_in_time']))->startOfWeek()->format('m/d/Y');
+
+            if(isset($groupedByDate[$date])) {
+                $groupedByDate[$date][] = $shiftReport;
+            }else {
+                $groupedByDate[$date] = [$shiftReport];
+            }
+        }
+
+        /* Add days with no shift worked
+        $numberOfDays = (new Carbon($request->start_date))->diffInDays((new Carbon($request->end_date)));
+        for ($i=0; $i < $numberOfDays; $i++) {
+            $date = (new Carbon($request->start_date))->addDays($i+1);
+            $formattedDate = $date->format('m/d/Y');
+            if($formattedDate == '08/10/2018') {
+                echo 'i:'.$i;
+            }
+            if($date->diffInDays((new Carbon($request->end_date))) < 0) {
+                break;
+            }
+
+            if(!isset($groupedByDate[$formattedDate])) {
+                $groupedByDate[$formattedDate] = [];
+            }
+        }*/
+
+        foreach ($groupedByDate as $date => $itemsArray) {
+            $total = [
+                'revenue' => 0.0,
+                'wages' => 0.0,
+                'profit' => 0.0,
+            ];
+
+            foreach ($itemsArray as $entry) {
+                $total['revenue'] += (float) $entry['provider_total'] + (float) $entry['caregiver_total'];
+                $total['wages'] += (float) $entry['caregiver_total'];
+                $total['profit'] += (float) $entry['provider_total'];
+            }
+
+            $groupedByDate[$date] = $total;
+        }
+        return $groupedByDate;
+    }
 }
