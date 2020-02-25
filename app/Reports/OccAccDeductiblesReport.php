@@ -107,6 +107,7 @@ class OccAccDeductiblesReport extends BusinessResourceReport
         // scope to businesses and time frame and caregiver with occacc
         // go through each shift and calculate duration
         $results = Shift::forRequestedBusinesses()
+            ->whereConfirmed()
             ->whereBetween( 'checked_in_time', [ $this->start_date, $this->end_date ])
             ->whereNotNull( 'checked_out_time' )
             ->with([ 'business', 'caregiver' ])
