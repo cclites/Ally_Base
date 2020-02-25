@@ -62,7 +62,7 @@ class ScheduleController extends BaseController
         }
 
         $start = Carbon::parse($request->input('start', 'First day of this month'));
-        $end = Carbon::parse($request->input('end', 'First day of next month'));
+        $end = Carbon::parse($request->input('end', 'First day of next month'))->subSecond(1);
 
         $schedules = $query->whereBetween('starts_at', [$start, $end])->get();
 
