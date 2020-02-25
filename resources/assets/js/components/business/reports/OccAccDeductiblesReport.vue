@@ -50,7 +50,7 @@
                 <div>
                 <transition name="slide-fade" mode="out-in">
 
-                    <b-button @click="generateDeductibles()" variant="primary" :disabled=" form.busy || generating " v-if=" selectedCaregivers.length > 0 ">Create Deposit Adjustment</b-button>
+                    <b-button @click="generateDeductibles()" variant="primary" :disabled=" form.busy || generating " v-if=" isAdmin && selectedCaregivers.length > 0 ">Create Deposit Adjustment</b-button>
                 </transition>
                 </div>
                 <b-button-group>
@@ -79,6 +79,7 @@
                     <b-form-checkbox
                         :id=" `cg-checkbox-${row.item.user_id}` "
                         v-model=" row.item.selected "
+                        @click.native=" selectCaregiver( row.item.user_id, row.item.selected ) "
                         :name=" `cg-checkbox-${row.item.user_id}` "
                         :value=" 1 "
                         :unchecked-value=" 0 "
@@ -110,11 +111,12 @@
                 items      : [],
                 sortBy     : 'name',
                 sortDesc   : true,
+                selectedCaregivers : [],
                 form: new Form({
 
                     json        : 1,
                     businesses  : '',
-                    end_date    : null,
+                    end_date    : moment().startOf( 'week' ).format( 'MM/DD/YYYY' ),
                 }),
                 fields: [
 
@@ -154,8 +156,9 @@
                 if( this.isAdmin ){
 
                     fields.push({
-                        key: 'actions',
-                        label: 'Select'
+
+                        key   : 'actions',
+                        label : 'Select'
                     });
                 }
                 return fields;
@@ -163,16 +166,16 @@
             startDate(){
 
                 return moment( this.form.end_date ).subtract( 7, 'day' ).format( 'MM/DD/YYYY' );
-            },
-            selectedCaregivers(){
-
-                let shit = this.items.filter( i => i.selected == 1 );
-                return shit;
             }
         },
 
         methods: {
 
+            selectCaregiver( user_id, value ){
+
+                this.items.find( i => i.user_id == user_id ).selected = value;
+                this.selectedCaregivers = this.items.filter( i => i.selected == 1 );
+            },
             async fetch() {
 
                 this.form.get( '/business/occ-acc-deductibles' )
