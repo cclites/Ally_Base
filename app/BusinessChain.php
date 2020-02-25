@@ -296,14 +296,6 @@ class BusinessChain extends AuditableModel
     //// Instance Methods
     ////////////////////////////////////
 
-    public function calendarStartOfWeekBy( $type = 'day', $value )
-    {
-
-        if( $type == 'day' ) return array_flip( self::CALENDAR_START_OF_WEEK )[ $value ] ?? null;
-        else if( $type == 'value' ) return self::CALENDAR_START_OF_WEEK[ $value ] ?? null;
-        else return null;
-    }
-
     public function getCaregiverApplicationUrl()
     {
         return route('business_chain_routes.apply', ['slug' => $this->slug]);
