@@ -4,7 +4,7 @@
             header-text-variant="white"
             header-bg-variant="info"
     >
-        <b-row>
+        <b-row v-if=" isAdmin ">
 
             <b-col>
 
@@ -68,7 +68,7 @@
                 <loading-card v-if=" form.busy " text="Loading Report"></loading-card>
                 <b-table bordered striped hover show-empty
                     :items=" items "
-                    :fields=" fields "
+                    :fields=" computedFields "
                     :sort-by.sync=" sortBy "
                     :sort-desc.sync=" sortDesc "
                     v-else
@@ -80,8 +80,8 @@
                         :id=" `cg-checkbox-${row.item.user_id}` "
                         v-model=" row.item.selected "
                         :name=" `cg-checkbox-${row.item.user_id}` "
-                        value="1"
-                        unchecked-value="0"
+                        :value=" 1 "
+                        :unchecked-value=" 0 "
                     ></b-form-checkbox>
                 </template>
             </b-table>
@@ -94,10 +94,11 @@
 
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
     import FormatsNumbers from '../../../mixins/FormatsNumbers';
+    import Constants from '../../../mixins/Constants';
 
     export default {
 
-        mixins : [ FormatsNumbers ],
+        mixins : [ FormatsNumbers, Constants ],
 
         components: { BusinessLocationFormGroup },
 
@@ -113,7 +114,7 @@
 
                     json        : 1,
                     businesses  : '',
-                    end_date    : moment().startOf( 'week' ).format( 'MM/DD/YYYY' ),
+                    end_date    : null,
                 }),
                 fields: [
 
@@ -134,24 +135,39 @@
                         key: 'deduction',
                         label: 'OccAcc Deduction',
                         formatter: (val) => this.moneyFormat(val)
-                    },
-                    {
-                        key: 'actions',
-                        label: 'Select'
                     }
                 ],
             }
         },
 
+        mounted(){
+
+            // respect the registry's start of week
+            this.form.end_date = moment().day( this.officeUserSettings.calendar_week_start ).format( 'MM/DD/YYYY' );
+        },
+
         computed : {
 
+            computedFields(){
+
+                const fields = this.fields;
+                if( this.isAdmin ){
+
+                    fields.push({
+                        key: 'actions',
+                        label: 'Select'
+                    });
+                }
+                return fields;
+            },
             startDate(){
 
                 return moment( this.form.end_date ).subtract( 7, 'day' ).format( 'MM/DD/YYYY' );
             },
             selectedCaregivers(){
 
-                return this.items.filter( i => i.selected == "1" );
+                let shit = this.items.filter( i => i.selected == 1 );
+                return shit;
             }
         },
 

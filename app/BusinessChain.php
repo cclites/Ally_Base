@@ -107,6 +107,17 @@ class BusinessChain extends AuditableModel
     const OPEN_SHIFTS_LIMITED = 'limited';
     const OPEN_SHIFTS_UNLIMITED = 'unlimited';
 
+    const CALENDAR_START_OF_WEEK = [
+
+        0 => 'sunday',
+        1 => 'monday',
+        2 => 'tuesday',
+        3 => 'wednesday',
+        4 => 'thursday',
+        5 => 'friday',
+        6 => 'saturday'
+    ];
+
     ////////////////////////////////////
     //// Static Methods
     ////////////////////////////////////
@@ -284,6 +295,14 @@ class BusinessChain extends AuditableModel
     ////////////////////////////////////
     //// Instance Methods
     ////////////////////////////////////
+
+    public function calendarStartOfWeekBy( $type = 'day', $value )
+    {
+
+        if( $type == 'day' ) return array_flip( self::CALENDAR_START_OF_WEEK )[ $value ] ?? null;
+        else if( $type == 'value' ) return self::CALENDAR_START_OF_WEEK[ $value ] ?? null;
+        else return null;
+    }
 
     public function getCaregiverApplicationUrl()
     {
