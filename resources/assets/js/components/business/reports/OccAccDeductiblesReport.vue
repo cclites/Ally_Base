@@ -165,7 +165,7 @@
             },
             startDate(){
 
-                return moment( this.form.end_date ).subtract( 7, 'day' ).format( 'MM/DD/YYYY' );
+                return moment( this.form.end_date ).subtract( 6, 'day' ).format( 'MM/DD/YYYY' );
             }
         },
 
