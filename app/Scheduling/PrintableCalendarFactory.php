@@ -60,9 +60,6 @@ class PrintableCalendarFactory
         $this->startDay = $startDay = $this->start->copy();
         $this->endDay = $this->start->copy()->endOfMonth();
 
-        \Log::info("this->startDay: " . $this->startDay);
-
-
         /**************************************************************************
          * The following are counters used to render the calendar, and
          * determine the correct start day on the calendar, and which day to
@@ -95,8 +92,6 @@ class PrintableCalendarFactory
         if($sDay < 0){
             $sDay = 7 - $this->chain->calendar_week_start;
         }
-
-        \Log::info("sDay: " . $sDay);
 
         $monthName = $startDay->monthName;
 
