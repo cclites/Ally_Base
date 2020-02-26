@@ -85,6 +85,14 @@ class PrintableCalendarFactory
 
         $sDay = $startDay->dayOfWeek - ($this->chain->calendar_week_start);
 
+        //If sunday is the start day (day 0) and the registry calendar starts on
+        //Monday, offset. This is a calculated number because a chain can start
+        //their week on any day of the month. Most start their week on a Monday,
+        //just a few start their week on a Sunday.
+        if($sDay < 0){
+            $sDay = 7 - $this->chain->calendar_week_start;
+        }
+
         $monthName = $startDay->monthName;
 
         // represents an index to know to quit adding calendar days
