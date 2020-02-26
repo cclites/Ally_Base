@@ -60,6 +60,9 @@ class PrintableCalendarFactory
         $this->startDay = $startDay = $this->start->copy();
         $this->endDay = $this->start->copy()->endOfMonth();
 
+        \Log::info("this->startDay: " . $this->startDay);
+
+
         /**************************************************************************
          * The following are counters used to render the calendar, and
          * determine the correct start day on the calendar, and which day to
@@ -84,6 +87,16 @@ class PrintableCalendarFactory
         // that do no start their week on a Sunday
 
         $sDay = $startDay->dayOfWeek - ($this->chain->calendar_week_start);
+
+        //If sunday is the start day (day 0) and the registry calendar starts on
+        //Monday, offset. This is a calculated number because a chain can start
+        //their week on any day of the month. Most start their week on a Monday,
+        //just a few start their week on a Sunday.
+        if($sDay < 0){
+            $sDay = 7 - $this->chain->calendar_week_start;
+        }
+
+        \Log::info("sDay: " . $sDay);
 
         $monthName = $startDay->monthName;
 
