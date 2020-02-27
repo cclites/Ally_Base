@@ -325,6 +325,11 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
             ->withTrashed();
     }
 
+    public function occAccDeductible()
+    {
+        return $this->hasMany( 'App\OccAccDeductible' );
+    }
+
     public function caregiver()
     {
         return $this->belongsTo(Caregiver::class)

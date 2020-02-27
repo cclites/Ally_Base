@@ -26,7 +26,9 @@ class OccAccDeductiblesRequest extends FormRequest
         return [
 
             '*.caregiver_id' => 'required|exists:caregivers,id',
-            '*.amount'       => 'required'
+            '*.amount'       => 'required',
+            '*.start_date'   => 'required',
+            '*.end_date'     => 'required'
         ];
     }
 }

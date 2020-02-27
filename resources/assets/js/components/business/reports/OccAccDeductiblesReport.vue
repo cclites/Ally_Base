@@ -147,7 +147,7 @@
 
             startDate(){
 
-                return moment( this.form.end_date ).subtract( 7, 'day' ).format( 'MM/DD/YYYY' );
+                return moment( this.form.end_date ).subtract( 6, 'day' ).format( 'MM/DD/YYYY' );
             },
             selectedCaregivers(){
 
@@ -181,7 +181,9 @@
                     return {
 
                         'caregiver_id' : c.user_id,
-                        'amount'       : c.deduction
+                        'amount'       : c.deduction,
+                        'start_date'   : this.startDate,
+                        'end_date'     : this.form.end_date
                     }
                 });
 

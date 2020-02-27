@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Business;
 
 use App\Caregiver;
 use App\Http\Requests\OccAccDeductiblesRequest;
+use App\OccAccDeductible;
 use App\Payments\SingleDepositProcessor;
 use App\Reports\OccAccDeductiblesReport;
 use App\Responses\CreatedResponse;
+use App\Shift;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class OccAccDeductiblesController extends BaseController
@@ -60,7 +63,30 @@ class OccAccDeductiblesController extends BaseController
 
             $caregiver = Caregiver::findOrFail( $deductible[ 'caregiver_id' ] );
 
-            SingleDepositProcessor::generateCaregiverAdjustmentInvoice( $caregiver, $amount, 'OccAcc' );
+            $invoice = SingleDepositProcessor::generateCaregiverAdjustmentInvoice( $caregiver, $amount, 'OccAcc' );
+
+            // create the occAccDeductioon record
+            $occAccDeductible = OccAccDeductible::create([
+
+                'caregiver_id'         => $caregiver->id,
+                'caregiver_invoice_id' => $invoice->id,
+                'amount'               => $amount,
+                'week_start'           => $deductible[ 'start_date' ],
+                'week_end'             => $deductible[ 'end_date' ],
+            ]);
+
+            // run this shift query to associate all shifts to this caregiver
+
+            $shifts = Shift::whereBetween( 'checked_in_time',[
+
+                Carbon::parse( $deductible[ 'start_date' ] )->startOfDay(),
+                Carbon::parse( $deductible[ 'end_date' ] )->endOfDay()
+            ])
+            ->whereNotNull( 'checked_out_time' )
+            ->where( 'caregiver_id', $caregiver->id )
+            ->get();
+
+            $occAccDeductible->shifts()->attach( $shifts );
         }
 
         \DB::commit();
