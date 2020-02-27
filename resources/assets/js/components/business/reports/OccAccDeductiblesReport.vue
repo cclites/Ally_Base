@@ -55,7 +55,8 @@
                 </div>
                 <b-button-group>
 
-                    <b-button @click="exportReport()" :disabled=" form.busy || generating "><i class="fa fa-file-excel-o mr-2"></i>Export Past Reports</b-button>
+                    <b-button @click="exportReport()" :disabled=" form.busy || generating " v-if=" isAdmin "><i class="fa fa-file-excel-o mr-2"></i>Export Past Reports</b-button>
+                    <b-button @click="selectAll()" :disabled=" form.busy || generating " variant="success">Select All</b-button>
                     <b-button @click="fetch()" variant="info" :disabled=" form.busy || generating ">Generate Report</b-button>
                 </b-button-group>
             </b-col>
@@ -172,6 +173,24 @@
 
         methods: {
 
+            selectAll(){
+
+                if( this.selectedCaregivers.length == this.items.length ){
+
+                    this.items.forEach( item => {
+
+                        item.selected = 0;
+                    });
+                } else {
+
+                    this.items.forEach( item => {
+
+                        item.selected = 1;
+                    });
+                }
+
+                this.selectedCaregivers = this.items.filter( i => i.selected == 1 );
+            },
             exportReport(){
 
                 this.form.export = 1;
