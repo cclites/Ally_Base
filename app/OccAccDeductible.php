@@ -19,7 +19,7 @@ class OccAccDeductible extends Model
         return $this->belongsTo('App\Billing\CaregiverInvoice');
     }
 
-    public function shift()
+    public function shifts()
     {
         return $this->hasMany( 'App\Shift' );
     }

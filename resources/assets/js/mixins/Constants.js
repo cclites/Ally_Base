@@ -99,13 +99,13 @@ export default {
 
             CALENDAR_START_OF_WEEK : {
 
-                SUNDAY    : 0,
-                MONDAY    : 1,
-                TUESDAY   : 2,
-                WEDNESDAY : 3,
-                THURSDAY  : 4,
-                FRIDAY    : 5,
-                SATURDAY  : 6,
+                0 : 'sunday',
+                1 : 'monday',
+                2 : 'tuesday',
+                3 : 'wednesday',
+                4 : 'thursday',
+                5 : 'friday',
+                6 : 'saturday',
             },
 
             /**

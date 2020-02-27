@@ -30,14 +30,14 @@
 
                         <b-form-group label="Start Date">
 
-                            <date-picker v-model=" startDate " :disabled=" true " :readonly=" true " />
+                            <date-picker v-model=" form.start_date " :disabled=" form.busy " />
                         </b-form-group>
                     </b-col>
                     <b-col>
 
                         <b-form-group label="End Date">
 
-                            <date-picker v-model=" form.end_date " :disabled=" form.busy " />
+                            <date-picker v-model=" endDate " :disabled=" true " :readonly=" true " />
                         </b-form-group>
                     </b-col>
                 </b-row>
@@ -116,7 +116,7 @@
 
                     json        : 1,
                     businesses  : '',
-                    end_date    : moment().startOf( 'week' ).format( 'MM/DD/YYYY' ),
+                    start_date  : moment().startOf( 'week' ).format( 'MM/DD/YYYY' ),
                 }),
                 fields: [
 
@@ -145,7 +145,7 @@
         mounted(){
 
             // respect the registry's start of week
-            this.form.end_date = moment().day( this.officeUserSettings.calendar_week_start ).format( 'MM/DD/YYYY' );
+            this.form.start_date = moment().day( this.officeUserSettings.calendar_week_start ).format( 'MM/DD/YYYY' );
         },
 
         computed : {
@@ -163,9 +163,9 @@
                 }
                 return fields;
             },
-            startDate(){
+            endDate(){
 
-                return moment( this.form.end_date ).subtract( 6, 'day' ).format( 'MM/DD/YYYY' );
+                return moment( this.form.start_date ).add( 6, 'day' ).format( 'MM/DD/YYYY' );
             }
         },
 
@@ -177,6 +177,14 @@
                 this.selectedCaregivers = this.items.filter( i => i.selected == 1 );
             },
             async fetch() {
+
+                // console.log( moment( this.form.start_date ).format( 'd' ), this.officeUserSettings.calendar_week_start );
+
+                if( moment( this.form.start_date ).format( 'd' ) != this.officeUserSettings.calendar_week_start ){
+
+                    alerts.addMessage( 'error', `You must select a week starting with ${this.CALENDAR_START_OF_WEEK[ this.officeUserSettings.calendar_week_start ]}` );
+                    return;
+                }
 
                 this.form.get( '/business/occ-acc-deductibles' )
                     .then( ({ data }) => {
@@ -201,8 +209,9 @@
 
                         'caregiver_id' : c.user_id,
                         'amount'       : c.deduction,
-                        'start_date'   : this.startDate,
-                        'end_date'     : this.form.end_date
+                        'start_date'   : this.form.start_date,
+                        'end_date'     : this.endDate,
+                        'businesses'   : c.registry_id
                     }
                 });
 
@@ -210,12 +219,8 @@
                 form.post( '/business/occ-acc-deductibles' )
                     .then( ( data ) => {
 
-                        // this.selectedCaregivers.forEach( c => {
-                        //     // this may not be necessaery.. leaving it here just in case
-
-                        //     const index = this.items.findIndex( i => i.user_id == c.user_id );
-                        //     this.items.splice( index, 1 );
-                        // });
+                        this.selectedCaregivers = [];
+                        this.fetch(); // this will automatically clear all the items that were just used
                     })
                     .catch( err => {})
                     .finally( () => this.generating = false );

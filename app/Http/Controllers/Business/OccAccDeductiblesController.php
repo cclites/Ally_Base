@@ -11,6 +11,7 @@ use App\Responses\CreatedResponse;
 use App\Shift;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OccAccDeductiblesController extends BaseController
 {
@@ -25,9 +26,7 @@ class OccAccDeductiblesController extends BaseController
     {
         if( $request->expectsJson() ){
 
-            $data = $report->forTheFollowingBusinesses( $request->businesses )
-                ->forWeekEndingAt( $request->end_date )
-                ->rows();
+            $data = $report->forWeekStartingAt( $request->start_date )->rows();
 
             if ($request->has('export')) {
                 return $report->setDateFormat('m/d/Y g:i A', $this->business()->timezone)
@@ -71,22 +70,28 @@ class OccAccDeductiblesController extends BaseController
                 'caregiver_id'         => $caregiver->id,
                 'caregiver_invoice_id' => $invoice->id,
                 'amount'               => $amount,
-                'week_start'           => $deductible[ 'start_date' ],
-                'week_end'             => $deductible[ 'end_date' ],
+                'week_start'           => filter_date( $deductible[ 'start_date' ] ),
+                'week_end'             => filter_date( $deductible[ 'end_date' ] ),
             ]);
 
-            // run this shift query to associate all shifts to this caregiver
+            // DB::enableQueryLog();
 
-            $shifts = Shift::whereBetween( 'checked_in_time',[
+            // run this shift query to associate all shifts to this deductible
+            $shifts = Shift::forRequestedBusinesses([ $deductible[ 'businesses' ] ])
+                ->whereConfirmed()
+                ->whereHasntBeenUsedForOccAccDeductible()
+                ->forCaregiver( $caregiver->id )
+                ->whereBetween( 'checked_in_time',[
 
-                Carbon::parse( $deductible[ 'start_date' ] )->startOfDay(),
-                Carbon::parse( $deductible[ 'end_date' ] )->endOfDay()
-            ])
-            ->whereNotNull( 'checked_out_time' )
-            ->where( 'caregiver_id', $caregiver->id )
-            ->get();
+                    Carbon::parse( $deductible[ 'start_date' ] )->format( 'Y-m-d 00:00:00' ),
+                    Carbon::parse( $deductible[ 'end_date' ] )->format( 'Y-m-d 23:59:59' )
+                ])
+                ->whereNotNull( 'checked_out_time' )
+                ->get();
 
-            $occAccDeductible->shifts()->attach( $shifts );
+            // dd( DB::getQueryLog(), $shifts, Carbon::parse( $deductible[ 'start_date' ] )->format( 'Y-m-d 00:00:00' ), Carbon::parse( $deductible[ 'end_date' ] )->format( 'Y-m-d 23:59:59' ) );
+
+            $occAccDeductible->shifts()->saveMany( $shifts );
         }
 
         \DB::commit();

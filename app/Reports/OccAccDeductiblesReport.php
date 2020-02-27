@@ -61,10 +61,10 @@ class OccAccDeductiblesReport extends BusinessResourceReport
      * @param string $start
      * @return $this
      */
-    public function forWeekEndingAt( $end )
+    public function forWeekStartingAt( $start )
     {
-        $this->start_date = Carbon::parse( $end )->subWeek()->format( 'Y-m-d 00:00:00' );
-        $this->end_date   = Carbon::parse( $end )->format( 'Y-m-d 23:59:59' );
+        $this->start_date = Carbon::parse( $start )->format( 'Y-m-d 00:00:00' );
+        $this->end_date   = Carbon::parse( $start )->addDays( 6 )->format( 'Y-m-d 23:59:59' );
 
         return $this;
     }
@@ -83,18 +83,6 @@ class OccAccDeductiblesReport extends BusinessResourceReport
     }
 
     /**
-     * Set filter for businesses.
-     *
-     * @param $id
-     * @return $this
-     */
-    public function forTheFollowingBusinesses( $ids )
-    {
-        $this->businesses = $ids ? [ $ids ] : auth()->user()->role->businesses->pluck( 'id' );
-        return $this;
-    }
-
-    /**
      * Return the collection of rows matching report criteria
      *
      * @return \Illuminate\Support\Collection
@@ -107,6 +95,7 @@ class OccAccDeductiblesReport extends BusinessResourceReport
         // scope to businesses and time frame and caregiver with occacc
         // go through each shift and calculate duration
         $results = Shift::forRequestedBusinesses()
+            ->whereHasntBeenUsedForOccAccDeductible()
             ->whereConfirmed()
             ->whereBetween( 'checked_in_time', [ $this->start_date, $this->end_date ])
             ->whereNotNull( 'checked_out_time' )
