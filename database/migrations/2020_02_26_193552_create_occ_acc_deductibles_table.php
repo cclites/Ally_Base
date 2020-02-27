@@ -22,8 +22,20 @@ class CreateOccAccDeductiblesTable extends Migration
             $table->dateTime( 'week_end' );
             $table->timestamps();
 
-            $table->foreign( 'caregiver_id' )->references( 'id' )->on( 'caregivers' )->onDelete( 'CASCADE' );
-            $table->foreign( 'caregiver_invoice_id' )->references( 'id' )->on( 'caregiver_invoices' )->onDelete( 'CASCADE' );
+            $table->foreign( 'caregiver_id' )->references( 'id' )->on( 'caregivers' )->onDelete( 'RESTRICT' );
+            $table->foreign( 'caregiver_invoice_id' )->references( 'id' )->on( 'caregiver_invoices' )->onDelete( 'RESTRICT' );
+        });
+
+        Schema::create('occ_acc_deductible_shifts', function (Blueprint $table) {
+            $table->increments('id');
+            $table->unsignedInteger('deductible_id');
+            $table->unsignedInteger('shift_id');
+            $table->decimal( 'duration', 9, 2 );
+            $table->decimal( 'amount', 9, 2 );
+            $table->timestamps();
+
+            $table->foreign( 'deductible_id' )->references( 'id' )->on( 'occ_acc_deductibles' )->onDelete( 'RESTRICT' );
+            $table->foreign( 'shift_id' )->references( 'id' )->on( 'shifts' )->onDelete( 'RESTRICT' );
         });
     }
 
@@ -34,6 +46,7 @@ class CreateOccAccDeductiblesTable extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('occ_acc_deductible_shifts');
         Schema::dropIfExists('occ_acc_deductibles');
     }
 }

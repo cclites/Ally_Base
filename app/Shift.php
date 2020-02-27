@@ -325,11 +325,6 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
             ->withTrashed();
     }
 
-    public function occAccDeductible()
-    {
-        return $this->belongsTo( 'App\OccAccDeductible' );
-    }
-
     public function caregiver()
     {
         return $this->belongsTo(Caregiver::class)
@@ -1350,18 +1345,6 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     {
         return $query->where('verified', 1)
             ->whereNotNull('checked_in_latitude');
-    }
-
-    /**
-     * A query scope for filtering shifts that already have a relationship to an OccAccDeductible
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $builder
-     * @param array $caregiverIds
-     * @return void
-     */
-    public function scopeWhereHasntBeenUsedForOccAccDeductible( Builder $builder )
-    {
-        $builder->whereDoesntHave( 'occAccDeductible' );
     }
 
     /**

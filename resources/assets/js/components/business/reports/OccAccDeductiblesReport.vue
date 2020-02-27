@@ -50,7 +50,7 @@
                 <div>
                 <transition name="slide-fade" mode="out-in">
 
-                    <b-button @click="generateDeductibles()" variant="primary" :disabled=" form.busy || generating " v-if=" isAdmin && selectedCaregivers.length > 0 ">Create Deposit Adjustment</b-button>
+                    <b-button @click="generateDeductibles()" variant="primary" :disabled=" form.busy || generating " v-if=" isAdmin && selectedCaregivers.length > 0 ">Create Deposit Adjustments</b-button>
                 </transition>
                 </div>
                 <b-button-group>
@@ -122,7 +122,7 @@
 
                     {
                         key: 'caregiver_name',
-                        label: 'CG Name',
+                        label: 'Caregiver Name',
                     },
                     {
                         key: 'registry',
