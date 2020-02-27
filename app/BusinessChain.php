@@ -107,6 +107,17 @@ class BusinessChain extends AuditableModel
     const OPEN_SHIFTS_LIMITED = 'limited';
     const OPEN_SHIFTS_UNLIMITED = 'unlimited';
 
+    const CALENDAR_START_OF_WEEK = [
+
+        0 => 'sunday',
+        1 => 'monday',
+        2 => 'tuesday',
+        3 => 'wednesday',
+        4 => 'thursday',
+        5 => 'friday',
+        6 => 'saturday'
+    ];
+
     ////////////////////////////////////
     //// Static Methods
     ////////////////////////////////////

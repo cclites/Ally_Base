@@ -21,6 +21,7 @@ class OfficeUserSettings implements JsonSerializable
     private $default_business_id;
     private $open_shifts_setting;
     private $business_chain_id;
+    private $calendar_week_start;
 
     public function __construct(
         bool $scheduling = true,
@@ -32,7 +33,8 @@ class OfficeUserSettings implements JsonSerializable
         ?CalendarNextDayThreshold $calendar_next_day_threshold = null,
         int $default_business_id = null,
         string $open_shifts_setting = null,
-        string $business_chain_id = null
+        string $business_chain_id = null,
+        int $calendar_week_start = null
     )
     {
         $this->scheduling = $scheduling;
@@ -45,6 +47,7 @@ class OfficeUserSettings implements JsonSerializable
         $this->default_business_id = $default_business_id;
         $this->open_shifts_setting = $open_shifts_setting;
         $this->business_chain_id = $business_chain_id;
+        $this->calendar_week_start = $calendar_week_start;
     }
 
     function scheduling(): bool
@@ -90,5 +93,10 @@ class OfficeUserSettings implements JsonSerializable
     function open_shifts_setting(): string
     {
         return $this->open_shifts_setting;
+    }
+
+    function calendar_week_start(): string
+    {
+        return $this->calendar_week_start;
     }
 }

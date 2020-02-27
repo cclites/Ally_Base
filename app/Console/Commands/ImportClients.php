@@ -94,6 +94,8 @@ class ImportClients extends BaseImport
             'business_id' => $this->business()->id,
             'hic' => $this->resolve('HIC', $row),
             'status_alias_id' => $statusAlias->id ?? null,
+            'inquiry_date' => $this->resolve('Initial Contact', $row) ?: null,
+            'service_start_date' => $this->resolve('Start Date', $row) ?: null,
         ];
 
         // Prevent Duplicates
@@ -103,7 +105,6 @@ class ImportClients extends BaseImport
         }
         else if (!$data['email']) {
             $data['username'] = Str::slug($data['firstname'] . $data['lastname'] . mt_rand(100,9999));
-
         }
 
         /** @var Client $client */

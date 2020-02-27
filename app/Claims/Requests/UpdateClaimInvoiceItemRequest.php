@@ -186,7 +186,8 @@ class UpdateClaimInvoiceItemRequest extends FormRequest
                 $data['scheduled_start_time'] = Carbon::parse($data['shift_start_date'] . ' ' . $data['shift_start_time'], $timezone)->setTimezone('UTC');
                 $data['scheduled_end_time'] = Carbon::parse($data['shift_end_date'] . ' ' . $data['shift_end_time'], $timezone)->setTimezone('UTC');
                 $data['visit_start_time'] = Carbon::parse($data['service_start_date'] . ' ' . $data['service_start_time'], $timezone)->setTimezone('UTC');
-                $data['visit_end_time'] = $data['visit_start_time']->copy()->addHours($data['units']);
+                $duration = multiply($data['units'], 60);
+                $data['visit_end_time'] = $data['visit_start_time']->copy()->addMinutes($duration);
 
                 unset($data['units'], $data['shift_start_date'], $data['shift_end_date'], $data['shift_start_time'], $data['shift_end_time'], $data['service_start_date'], $data['service_start_time']);
 

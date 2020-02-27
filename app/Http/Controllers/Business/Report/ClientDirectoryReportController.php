@@ -32,7 +32,7 @@ class ClientDirectoryReportController extends BaseController
                 ->setClientTypeFilter($request->client_type)
                 ->setStatusAliasFilter($request->status_alias_id)
                 ->setActiveFilter($request->active)
-                ->setPageCount(50)
+                ->setPageCount($request->perpage)
                 ->setCurrentPage($page)
                 ->setSort($sortBy, $sortOrder)
                 ->setForExport($request->export == '1');
