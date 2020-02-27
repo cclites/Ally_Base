@@ -55,7 +55,7 @@
                 </div>
                 <b-button-group>
 
-                    <b-button @click="print()" :disabled=" form.busy || generating "><i class="fa fa-print mr-2"></i>Print</b-button>
+                    <b-button @click="exportReport()" :disabled=" form.busy || generating "><i class="fa fa-file-excel-o mr-2"></i>Export Past Reports</b-button>
                     <b-button @click="fetch()" variant="info" :disabled=" form.busy || generating ">Generate Report</b-button>
                 </b-button-group>
             </b-col>
@@ -117,6 +117,7 @@
                     json        : 1,
                     businesses  : '',
                     start_date  : moment().startOf( 'week' ).format( 'MM/DD/YYYY' ),
+                    export      : 0
                 }),
                 fields: [
 
@@ -171,6 +172,23 @@
 
         methods: {
 
+            exportReport(){
+
+                this.form.export = 1;
+                this.form.get( '/business/occ-acc-deductibles' )
+                    .then( ({ data }) => {
+
+
+                    })
+                    .catch(() => {
+
+
+                    })
+                    .finally( () => {
+
+                        this.form.export = 0;
+                    });
+            },
             selectCaregiver( user_id, value ){
 
                 this.items.find( i => i.user_id == user_id ).selected = value;

@@ -30,8 +30,9 @@ class OccAccDeductiblesController extends BaseController
 
             $data = $report->forWeekStartingAt( $request->start_date )->rows();
 
-            if ($request->has('export')) {
-                return $report->setDateFormat('m/d/Y g:i A', auth()->user()->getTimezone())
+            if( $request->has( 'export' ) && $request->export == 1 ) {
+
+                return $report->setDateFormat( 'm/d/Y g:i A', auth()->user()->getTimezone() )
                     ->download();
             }
 
@@ -102,8 +103,8 @@ class OccAccDeductiblesController extends BaseController
             $occAccDeductible->shifts()->createMany($shifts);
         }
 
-        dd(OccAccDeductible::with('shifts')->get()->toArray());
-//        \DB::commit();
+        // dd(OccAccDeductible::with('shifts')->get()->toArray());
+       \DB::commit();
 
         return new CreatedResponse( count( $data ) . " deductible invoices created." );
     }
