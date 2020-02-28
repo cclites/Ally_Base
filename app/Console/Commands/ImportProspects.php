@@ -34,7 +34,7 @@ class ImportProspects extends ImportClients
             'firstname' => $this->resolve('First Name', $row),
             'lastname' => $this->resolve('Last Name', $row),
             'client_type' => $this->resolve('Client Type', $row) ?: 'private_pay',
-            'date_of_birth' => $this->resolve('Date of Birth', $row),
+            'date_of_birth' => filter_date($this->resolve('Date of Birth', $row)),
             'email' => $this->resolve('Email', $row),
             'address1' => $this->resolve('Address1', $row),
             'address2' => $this->resolve('Address2', $row),
@@ -45,7 +45,10 @@ class ImportProspects extends ImportClients
             'phone' => $this->resolve('Phone', $row) ?: $this->resolve('Phone1', $row),
             // New import fields 2019-12-10:
             'closed_loss' => $this->resolve('ClosedLoss', $row) == 'Y' ? true : false,
+            'initial_call_date' => filter_date($this->resolve('Initial Contact', $row)),
         ];
+
+        $data['had_initial_call'] = $data['initial_call_date'] ? 1 : 0;
 
         // Format and validate phone number
         if ($data['phone']) {
