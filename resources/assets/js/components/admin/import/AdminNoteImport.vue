@@ -27,7 +27,7 @@
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-bordered">
+                    <table class="table table-bordered" :key="">
                         <thead>
                         <tr>
                             <th>Row #</th>
@@ -41,17 +41,18 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <admin-note-import-id-row v-for="row in paginated"
+                        <admin-note-import-id-row v-for=" row in paginated "
                             :clients="clients"
                             :caregivers="caregivers"
                             :note.sync="row.note"
                             :identifiers="row.identifiers"
-                            :key="row.index"
-                            :index="row.index"
+                            :key="row.note.rowNo"
+                            :index="row.note.rowNo"
                             @swapIdentifiers=" swapIdentifiers "
                             @mappedIdentifier="mapIdentifier"
                             @createClient="loadCreateClient"
                             @createCaregiver="loadCreateCaregiver"
+                            @removeRow="removeRow"
                         ></admin-note-import-id-row>
                         </tbody>
                     </table>
@@ -203,6 +204,14 @@
 
         methods: {
 
+            removeRow( rowNo ){
+
+                console.log( rowNo, this.imported.findIndex( data => data.note.rowNo == rowNo ) );
+                if( !confirm( 'remove this record?' ) ) return;
+                const index = this.imported.findIndex( data => data.note.rowNo == rowNo );
+                this.imported.splice( index, 1 );
+                this.loadFiltered();
+            },
             swapIdentifiers( rowNo ){
 
                 let found = this.imported.find( data => data.note.rowNo == rowNo );
@@ -212,7 +221,7 @@
             },
             loadFiltered()
             {
-                let filtered = this.imported.slice(0);
+                let filtered = this.imported.filter( i => !i.dontImport ).slice(0);
 
                 filtered = this.imported.map((item, index) => {
                     item.index = index;

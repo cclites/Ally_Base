@@ -1,59 +1,65 @@
 <template>
-    <tr>
-        <td>{{ model.rowNo }}</td>
-        <td><input type="text" class="form-control" v-model=" model.title " /></td>
-        <td><input type="text" class="form-control" v-model=" model.type " /></td>
-        <td :id="`clientIdentifier${index}`">{{ identifiers.client_name }}</td>
-        <td>
-            <b-popover :show.sync="clientPopover"
-                       :target="`clientIdentifier${index}`"
-                       placement="top"
-            >
-                <template slot="title">
-                    Client Mapping <b-button size="sm" @click="emitCreateClient()">Create a New Client</b-button>
-                </template>
-                <div class="form-group" v-if="clientPopover">
-                    <select2 class="form-control" v-model="model.client_id" ref="client">
-                        <option v-for="client in clients" :value="client.id" :key="client.id">{{ client.nameLastFirst }}</option>
-                    </select2>
-                </div>
-                <div class="form-group">
-                    <b-button variant="info" @click="saveMapping('client')">Save Mapping</b-button>
-                    <b-button variant="default" @click="clientPopover = false">Close</b-button>
-                </div>
-            </b-popover>
-            <span class="red bold" v-if="!model.client_id">Unmapped</span>
-            <span v-else>{{ mappedClientName }}</span>
-            <b-btn @click="clientPopover = !clientPopover" variant="info" size="sm"><i class="fa fa-edit"></i></b-btn>
-            <b-btn @click=" swapNames( model ) " variant="info" size="sm"><i class="fa fa-exchange"></i></b-btn>
-        </td>
-        <td :id="`cgIdentifier${index}`">{{ identifiers.caregiver_name }}</td>
-        <td>
-            <b-popover :show.sync="caregiverPopover"
-                       :target="`cgIdentifier${index}`"
-                       placement="top"
-            >
-                <template slot="title">
-                    Caregiver Mapping <b-button size="sm" @click="emitCreateCaregiver()">Create a New Caregiver</b-button>
-                </template>
-                <div class="form-group" v-if="caregiverPopover">
-                    <select2 class="form-control" v-model="model.caregiver_id" ref="caregiver">
-                        <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
-                    </select2>
-                </div>
-                <div class="form-group">
-                    <b-button variant="info" @click="saveMapping('caregiver')">Save Mapping</b-button>
-                    <b-button variant="default" @click="caregiverPopover = false">Close</b-button>
-                </div>
-            </b-popover>
-            <span class="red bold" v-if="!model.caregiver_id">Unmapped</span>
-            <span v-else>{{ mappedCaregiverName }}</span>
-            <b-btn @click="caregiverPopover = !caregiverPopover" variant="info" size="sm"><i class="fa fa-edit"></i></b-btn>
-        </td>
-        <td><input type="text" class="form-control" v-model="model.body" /></td>
-        <td><input type="text" class="form-control" v-model="model.tags" /></td>
-        <td><input type="text" class="form-control short" v-model="model.created_by" /></td>
-    </tr>
+    <transition mode="out-in" name="slide-fade">
+
+        <tr>
+            <td class="d-flex align-items-center">
+                <b-btn @click=" removeRow( model ) " variant="danger" size="sm" class="mr-2"><i class="fa fa-trash"></i></b-btn>
+                {{ model.rowNo }}
+            </td>
+            <td><input type="text" class="form-control" v-model=" model.title " /></td>
+            <td><input type="text" class="form-control" v-model=" model.type " /></td>
+            <td :id="`clientIdentifier${index}`">{{ identifiers.client_name }}</td>
+            <td>
+                <b-popover :show.sync="clientPopover"
+                        :target="`clientIdentifier${index}`"
+                        placement="top"
+                >
+                    <template slot="title">
+                        Client Mapping <b-button size="sm" @click="emitCreateClient()">Create a New Client</b-button>
+                    </template>
+                    <div class="form-group" v-if="clientPopover">
+                        <select2 class="form-control" v-model="model.client_id" ref="client">
+                            <option v-for="client in clients" :value="client.id" :key="client.id">{{ client.nameLastFirst }}</option>
+                        </select2>
+                    </div>
+                    <div class="form-group">
+                        <b-button variant="info" @click="saveMapping('client')">Save Mapping</b-button>
+                        <b-button variant="default" @click="clientPopover = false">Close</b-button>
+                    </div>
+                </b-popover>
+                <span class="red bold" v-if="!model.client_id">Unmapped</span>
+                <span v-else>{{ mappedClientName }}</span>
+                <b-btn @click="clientPopover = !clientPopover" variant="info" size="sm"><i class="fa fa-edit"></i></b-btn>
+                <b-btn @click=" swapNames( model ) " variant="info" size="sm"><i class="fa fa-exchange"></i></b-btn>
+            </td>
+            <td :id="`cgIdentifier${index}`">{{ identifiers.caregiver_name }}</td>
+            <td>
+                <b-popover :show.sync="caregiverPopover"
+                        :target="`cgIdentifier${index}`"
+                        placement="top"
+                >
+                    <template slot="title">
+                        Caregiver Mapping <b-button size="sm" @click="emitCreateCaregiver()">Create a New Caregiver</b-button>
+                    </template>
+                    <div class="form-group" v-if="caregiverPopover">
+                        <select2 class="form-control" v-model="model.caregiver_id" ref="caregiver">
+                            <option v-for="caregiver in caregivers" :value="caregiver.id" :key="caregiver.id">{{ caregiver.nameLastFirst }}</option>
+                        </select2>
+                    </div>
+                    <div class="form-group">
+                        <b-button variant="info" @click="saveMapping('caregiver')">Save Mapping</b-button>
+                        <b-button variant="default" @click="caregiverPopover = false">Close</b-button>
+                    </div>
+                </b-popover>
+                <span class="red bold" v-if="!model.caregiver_id">Unmapped</span>
+                <span v-else>{{ mappedCaregiverName }}</span>
+                <b-btn @click="caregiverPopover = !caregiverPopover" variant="info" size="sm"><i class="fa fa-edit"></i></b-btn>
+            </td>
+            <td><input type="text" class="form-control" v-model="model.body" /></td>
+            <td><input type="text" class="form-control" v-model="model.tags" /></td>
+            <td><input type="text" class="form-control short" v-model="model.created_by" /></td>
+        </tr>
+    </transition>
 </template>
 
 <script>
@@ -87,6 +93,10 @@
 
         methods: {
 
+            removeRow( model ){
+
+                this.$emit( 'removeRow', model.rowNo );
+            },
             swapNames( model ){
 
                 this.$emit( 'swapIdentifiers', model.rowNo );
