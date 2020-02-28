@@ -104,31 +104,35 @@
                         label: 'Deductible ID',
                     },
                     {
-                        key: 'chain_name',
-                        label: 'Chain Name',
+                        key: 'first_name',
+                        label: 'First Name',
                     },
                     {
-                        key: 'caregiver_id',
-                        label: 'Caregiver ID',
-                    },
-                    {
-                        key: 'caregiver_invoice_id',
-                        label: 'Related Invoice',
-                    },
-                    {
-                        key: 'amount',
-                        label: 'Deductible Amount',
+                        key: 'last_name',
+                        label: 'Last Name',
                     },
                     {
                         key: 'week_start',
-                        label: 'Deductible Week Start',
+                        label: 'Premium Period Begin Date',
                         formatter: (val) => this.formatDateFromUTC( val )
                     },
                     {
                         key: 'week_end',
-                        label: 'Deductible Week End',
+                        label: 'Premium Period End Date',
                         formatter: (val) => this.formatDateFromUTC( val )
-                    }
+                    },
+                    {
+                        key: 'hours_worked',
+                        label: 'Hours Worked',
+                    },
+                    {
+                        key: 'deduction_amount',
+                        label: 'Deductible Amount',
+                    },
+                    {
+                        key: 'certificate_number',
+                        label: 'Certificate Number',
+                    },
                 ],
             }
         },

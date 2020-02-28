@@ -73,6 +73,7 @@ class OccAccDeductiblesHistoryReport extends BusinessResourceReport
 
             $q->forRequestedBusinesses();
         })
+        ->with([ 'shifts', 'caregiver', 'caregiver.phoneNumber', 'caregiver.address' ])
         ->whereBetween( 'created_at', [
 
             $this->start_date,
@@ -81,10 +82,25 @@ class OccAccDeductiblesHistoryReport extends BusinessResourceReport
         ->get()
         ->map( function( $deductible ){
 
-            $caregiver = Caregiver::find( $deductible->caregiver_id );
-            $chain_name = $caregiver->businessChains->first()->name;
-            $deductible->chain_name = $chain_name;
-            return $deductible;
+            // $chain_name = $deductible->caregiver->businessChains->first()->name; may be needed.. not sure.. i suspect it will be asked for
+            // $deductible->chain_name = $chain_name;
+
+            return [
+
+                'id'                 => $deductible->id,
+                'first_name'         => $deductible->caregiver->firstname,
+                'last_name'          => $deductible->caregiver->lastname,
+                'dob'                => $deductible->caregiver->date_of_birth,
+                'address'            => $deductible->caregiver->address->street_address,
+                'city'               => $deductible->caregiver->address->city,
+                'state'              => $deductible->caregiver->address->state,
+                'zip'                => $deductible->caregiver->address->zip,
+                'phone_number'       => $deductible->caregiver->phoneNumber,
+                'email'              => $deductible->caregiver->email,
+                'hours_worked'       => $deductible->shifts->sum( 'duration' ),
+                'deduction_amount'   => $deductible->amount,
+                'certificate_number' => $deductible->caregiver->certificate_number
+            ];
         });
 
         return $results;
