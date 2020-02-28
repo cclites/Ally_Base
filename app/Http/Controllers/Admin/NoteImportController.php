@@ -119,8 +119,8 @@ class NoteImportController extends Controller
             if( empty( $caregiverName ) && empty( $clientName ) ){
                 // this is a wierd position.. neither matched.. just arbitrarily assign the names to different spots..
 
-                $clientName    = $names[ 0 ];
-                $caregiverName = $names[ 1 ];
+                $clientName    = $names[ 0 ] ?? null;
+                $caregiverName = $names[ 1 ] ?? null;
             }
 
 
@@ -128,8 +128,8 @@ class NoteImportController extends Controller
                 // create a note using the details of the row
 
                 'business_id'  => $this->business->id,
-                'caregiver_id' => empty( $caregiver_id ) ? null : $caregiver_id,
-                'client_id'    => empty( $client_id    ) ? null : $client_id,
+                'caregiver_id' => $caregiver_id ?? null,
+                'client_id'    => $client_id ?? null,
                 'title'        => $this->worksheet->getValue( 'Subject', $rowNo ),
                 'body'         => $this->worksheet->getValue( 'Description', $rowNo ),
                 'tags'         => $this->worksheet->getValue( 'Activity Tags', $rowNo ),
@@ -161,7 +161,7 @@ class NoteImportController extends Controller
             return $value != $matchedName;
         }));
 
-        return $untaken[ 0 ];
+        return $untaken[ 0 ] ?? null;
     }
 
 
