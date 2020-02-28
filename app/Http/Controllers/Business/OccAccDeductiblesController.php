@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Business;
 
 use App\Caregiver;
-use App\Http\Requests\OccAccDeductiblesRequest;
+use App\Http\Requests\OccAccDeductiblesReportRequest;
 use App\OccAccDeductible;
-use App\OccAccDeductibleShift;
 use App\Payments\SingleDepositProcessor;
 use App\Reports\OccAccDeductiblesReport;
 use App\Responses\CreatedResponse;
@@ -30,12 +29,6 @@ class OccAccDeductiblesController extends BaseController
 
             $data = $report->forWeekStartingAt( $request->start_date )->rows();
 
-            if( $request->has( 'export' ) && $request->export == 1 ) {
-
-                return $report->setDateFormat( 'm/d/Y g:i A', auth()->user()->getTimezone() )
-                    ->download();
-            }
-
             return response()->json( $data );
         }
 
@@ -49,10 +42,10 @@ class OccAccDeductiblesController extends BaseController
     /**
      * Store a new CaregiverRestriction
      *
-     * @param OccAccDeductiblesRequest $request
+     * @param OccAccDeductiblesReportRequest $request
      * @return CreatedResponse
      */
-    public function store( OccAccDeductiblesRequest $request )
+    public function store( OccAccDeductiblesReportRequest $request )
     {
         $data = $request->validated();
         $deduction = config( 'ally.occ_acc_deductible' );
@@ -103,8 +96,7 @@ class OccAccDeductiblesController extends BaseController
             $occAccDeductible->shifts()->createMany($shifts);
         }
 
-        // dd(OccAccDeductible::with('shifts')->get()->toArray());
-       DB::commit();
+        DB::commit();
 
         return new CreatedResponse( count( $data ) . " deductible invoices created." );
     }

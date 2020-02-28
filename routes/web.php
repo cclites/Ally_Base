@@ -378,7 +378,8 @@ Route::group([
     Route::get('reports/prospect-directory', 'Business\ReportsController@prospectDirectory')->name('reports.prospect_directory');
     Route::get('reports/prospect-directory/download', 'Business\ReportsController@generateProspectDirectoryReport')->name('reports.prospect_directory.download');
 
-    Route::resource( 'occ-acc-deductibles', 'Business\OccAccDeductiblesController' );
+    Route::resource( 'occ-acc-deductibles', 'Business\OccAccDeductiblesController', [ 'only' => [ 'index', 'store' ] ] );
+    Route::resource( 'occ-acc-deductibles-history', 'Business\OccAccDeductiblesHistoryController', [ 'only' => [ 'index' ] ] );
 
     Route::get('reports/data/birthdays', 'Business\ReportsController@userBirthdayData')->name('reports.data.user_birthday');
     Route::get('reports/data/shift/{id}', 'Business\ReportsController@shift')->name('reports.data.shift');

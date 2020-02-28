@@ -211,6 +211,13 @@
                         allowed: ['office_user', 'admin'],
                     },
                     {
+                        name: 'OccAcc History Report',
+                        url: '/business/occ-acc-deductibles-history',
+                        description: 'View and export a history of OccAcc Adjustments',
+                        category: 5,
+                        allowed: ['admin'],
+                    },
+                    {
                         name: 'Active Clients Report',
                         url: 'reports/active-clients',
                         description: '',

@@ -8,7 +8,7 @@
 
             <b-col>
 
-                <b-alert show variant="info">View Deductibles for every Caregiver, then select individual caregivers to generate their adjustments.</b-alert>
+                <b-alert show variant="info">View Deductibles for every Caregiver, then select individual caregivers to generate their adjustments. You are only seeing this because you are an admin</b-alert>
             </b-col>
         </b-row>
         <b-row>
@@ -43,6 +43,7 @@
                 </b-row>
             </b-col>
         </b-row>
+
         <b-row>
 
             <b-col class="mb-3 d-flex justify-content-between">
@@ -74,18 +75,18 @@
                     v-else
                 >
 
-                <template slot="actions" scope="row">
+                    <template slot="actions" scope="row">
 
-                    <b-form-checkbox
-                        :id=" `cg-checkbox-${row.item.user_id}` "
-                        v-model=" row.item.selected "
-                        @click.native=" selectCaregiver( row.item.user_id, row.item.selected ) "
-                        :name=" `cg-checkbox-${row.item.user_id}` "
-                        :value=" 1 "
-                        :unchecked-value=" 0 "
-                    ></b-form-checkbox>
-                </template>
-            </b-table>
+                        <b-form-checkbox
+                            :id=" `cg-checkbox-${row.item.user_id}` "
+                            v-model=" row.item.selected "
+                            @click.native=" selectCaregiver( row.item.user_id, row.item.selected ) "
+                            :name=" `cg-checkbox-${row.item.user_id}` "
+                            :value=" 1 "
+                            :unchecked-value=" 0 "
+                        ></b-form-checkbox>
+                    </template>
+                </b-table>
             </b-col>
         </b-row>
     </b-card>
@@ -107,17 +108,17 @@
 
             return {
 
-                generating : false,
-                items      : [],
-                sortBy     : 'name',
-                sortDesc   : true,
+                generating         : false,
+                items              : [],
+                sortBy             : 'name',
+                sortDesc           : true,
                 selectedCaregivers : [],
                 form: new Form({
 
-                    json        : 1,
-                    businesses  : '',
-                    start_date  : moment().startOf( 'week' ).format( 'MM/DD/YYYY' ),
-                    export      : 0
+                    json       : 1,
+                    businesses : '',
+                    start_date : moment().startOf( 'week' ).format( 'MM/DD/YYYY' ),
+                    export     : 0,
                 }),
                 fields: [
 
@@ -139,13 +140,13 @@
                         label: 'OccAcc Deduction',
                         formatter: (val) => this.moneyFormat(val)
                     }
-                ],
+                ]
             }
         },
 
         mounted(){
 
-            // respect the registry's start of week
+            // respect the registry's start of week, unless an admin
             if( !this.isAdmin ) this.form.start_date = moment().day( this.officeUserSettings.calendar_week_start ).format( 'MM/DD/YYYY' );
         },
 
@@ -198,6 +199,7 @@
             async fetch() {
 
                 // console.log( moment( this.form.start_date ).format( 'd' ), this.officeUserSettings.calendar_week_start );
+                this.selectedCaregivers = [];
 
                 if( !this.isAdmin && moment( this.form.start_date ).format( 'd' ) != this.officeUserSettings.calendar_week_start ){
 

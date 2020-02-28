@@ -2,8 +2,13 @@
 
 namespace App;
 
+use App\Traits\BelongsToOneBusiness;
+
 class OccAccDeductible extends AuditableModel
 {
+
+    use BelongsToOneBusiness;
+
     /**
      * The attributes that aren't mass assignable.
      *

@@ -2,11 +2,8 @@
 
 namespace App\Reports;
 
-use App\Caregiver;
 use App\Shift;
-use App\Shifts\DurationCalculator;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class OccAccDeductiblesReport extends BusinessResourceReport
 {
@@ -30,12 +27,6 @@ class OccAccDeductiblesReport extends BusinessResourceReport
      * @var Array
      */
     protected $businesses;
-
-    /**
-     * The relevant caregivers
-     *
-     */
-    protected $caregivers;
 
     /**
      * constructor.
@@ -65,19 +56,6 @@ class OccAccDeductiblesReport extends BusinessResourceReport
     {
         $this->start_date = Carbon::parse( $start )->format( 'Y-m-d 00:00:00' );
         $this->end_date   = Carbon::parse( $start )->addDays( 6 )->format( 'Y-m-d 23:59:59' );
-
-        return $this;
-    }
-
-    /**
-     * Set filter for caregiver.
-     *
-     * @param $id
-     * @return $this
-     */
-    public function forCaregiver($id)
-    {
-        $this->caregiverId = $id;
 
         return $this;
     }

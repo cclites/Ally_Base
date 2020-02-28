@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class OccAccDeductiblesRequest extends FormRequest
+class OccAccDeductiblesReportRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -28,7 +28,7 @@ class OccAccDeductiblesRequest extends FormRequest
             '*.caregiver_id' => 'required|exists:caregivers,id',
             '*.start_date'   => 'required',
             '*.end_date'     => 'required',
-            '*.businesses'   => 'required|array'
+            '*.businesses'   => 'nullable|array'
         ];
     }
 }
