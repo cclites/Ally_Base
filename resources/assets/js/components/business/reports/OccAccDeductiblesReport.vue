@@ -55,8 +55,7 @@
                 </div>
                 <b-button-group>
 
-                    <b-button @click="exportReport()" :disabled=" form.busy || generating " v-if=" isAdmin "><i class="fa fa-file-excel-o mr-2"></i>Export Past Reports</b-button>
-                    <b-button @click="selectAll()" :disabled=" form.busy || generating " variant="success">Select All</b-button>
+                    <b-button @click="selectAll()" :disabled=" form.busy || generating ">Select All</b-button>
                     <b-button @click="fetch()" variant="info" :disabled=" form.busy || generating ">Generate Report</b-button>
                 </b-button-group>
             </b-col>
@@ -147,7 +146,7 @@
         mounted(){
 
             // respect the registry's start of week
-            this.form.start_date = moment().day( this.officeUserSettings.calendar_week_start ).format( 'MM/DD/YYYY' );
+            if( !this.isAdmin ) this.form.start_date = moment().day( this.officeUserSettings.calendar_week_start ).format( 'MM/DD/YYYY' );
         },
 
         computed : {
@@ -191,23 +190,6 @@
 
                 this.selectedCaregivers = this.items.filter( i => i.selected == 1 );
             },
-            exportReport(){
-
-                this.form.export = 1;
-                this.form.get( '/business/occ-acc-deductibles' )
-                    .then( ({ data }) => {
-
-
-                    })
-                    .catch(() => {
-
-
-                    })
-                    .finally( () => {
-
-                        this.form.export = 0;
-                    });
-            },
             selectCaregiver( user_id, value ){
 
                 this.items.find( i => i.user_id == user_id ).selected = value;
@@ -217,7 +199,7 @@
 
                 // console.log( moment( this.form.start_date ).format( 'd' ), this.officeUserSettings.calendar_week_start );
 
-                if( moment( this.form.start_date ).format( 'd' ) != this.officeUserSettings.calendar_week_start ){
+                if( !this.isAdmin && moment( this.form.start_date ).format( 'd' ) != this.officeUserSettings.calendar_week_start ){
 
                     alerts.addMessage( 'error', `You must select a week starting with ${this.CALENDAR_START_OF_WEEK[ this.officeUserSettings.calendar_week_start ]}` );
                     return;
@@ -245,10 +227,9 @@
                     return {
 
                         'caregiver_id' : c.user_id,
-                        'amount'       : c.deduction,
                         'start_date'   : this.form.start_date,
                         'end_date'     : this.endDate,
-                        'businesses'   : c.registry_id
+                        'businesses'   : c.registry_id.split( ', ' )
                     }
                 });
 

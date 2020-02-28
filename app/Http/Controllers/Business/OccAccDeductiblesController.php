@@ -57,20 +57,16 @@ class OccAccDeductiblesController extends BaseController
         $data = $request->validated();
         $deduction = config( 'ally.occ_acc_deductible' );
 
-        \DB::beginTransaction();
+        DB::beginTransaction();
 
         foreach( $data as $deductible ) {
             $caregiver = Caregiver::findOrFail( $deductible[ 'caregiver_id' ] );
             $totalDeduction = (float) 0.00;
 
             // run this shift query to associate all shifts to this deductible
-            $shifts = Shift::forRequestedBusinesses([ $deductible[ 'businesses' ] ])
+            $shifts = Shift::forRequestedBusinesses( $deductible[ 'businesses' ] ) // this is actually necessary since it is nested, I tested it
                 ->whereConfirmed()
-                ->whereNotExists(function ($q) {
-                    $q->select(DB::raw(1))
-                        ->from('occ_acc_deductible_shifts')
-                        ->whereRaw('occ_acc_deductible_shifts.shift_id = shifts.id');
-                })
+                ->whereHasntBeenUsedForOccAccDeductible()
                 ->forCaregiver( $caregiver->id )
                 ->whereBetween( 'checked_in_time',[
 
@@ -79,10 +75,11 @@ class OccAccDeductiblesController extends BaseController
                 ])
                 ->whereNotNull( 'checked_out_time' )
                 ->get()
-                ->map(function (Shift $shift) use ($deduction, &$totalDeduction) {
+                ->map( function ( Shift $shift ) use ( $deduction, &$totalDeduction ){
+
                     $duration = $shift->duration();
                     $amount = min( 9.00, multiply( $duration, $deduction ) );
-                    $totalDeduction = add($totalDeduction, $amount);
+                    $totalDeduction = min( 9.00, add( $totalDeduction, $amount ) );
                     return [
                         'shift_id' => $shift->id,
                         'duration' => $duration,
@@ -90,12 +87,15 @@ class OccAccDeductiblesController extends BaseController
                     ];
                 });
 
+            $totalDeduction = multiply( $totalDeduction, -1 );
+
             $invoice = SingleDepositProcessor::generateCaregiverAdjustmentInvoice( $caregiver, $totalDeduction, 'OccAcc' );
 
             $occAccDeductible = OccAccDeductible::create([
+
                 'caregiver_id'         => $caregiver->id,
                 'caregiver_invoice_id' => $invoice->id,
-                'amount'               => multiply($totalDeduction, -1),
+                'amount'               => $totalDeduction,
                 'week_start'           => filter_date( $deductible[ 'start_date' ] ),
                 'week_end'             => filter_date( $deductible[ 'end_date' ] ),
             ]);
@@ -104,7 +104,7 @@ class OccAccDeductiblesController extends BaseController
         }
 
         // dd(OccAccDeductible::with('shifts')->get()->toArray());
-       \DB::commit();
+       DB::commit();
 
         return new CreatedResponse( count( $data ) . " deductible invoices created." );
     }

@@ -94,12 +94,8 @@ class OccAccDeductiblesReport extends BusinessResourceReport
         // grab all shifts with caregiver info and business info
         // scope to businesses and time frame and caregiver with occacc
         // go through each shift and calculate duration
-        return Shift::forRequestedBusinesses()
-            ->whereNotExists(function ($q) {
-                $q->select(DB::raw(1))
-                    ->from('occ_acc_deductible_shifts')
-                    ->whereRaw('occ_acc_deductible_shifts.shift_id = shifts.id');
-            })
+        $results = Shift::forRequestedBusinesses()
+            ->whereHasntBeenUsedForOccAccDeductible()
             ->whereConfirmed()
             ->whereBetween( 'checked_in_time', [ $this->start_date, $this->end_date ])
             ->whereNotNull( 'checked_out_time' )
@@ -107,32 +103,36 @@ class OccAccDeductiblesReport extends BusinessResourceReport
             ->whereHas( 'caregiver', function( $q ){
 
                 return $q->where( 'has_occ_acc', '1' );
-            })
-            ->get()
-            ->groupBy( 'caregiver_id', 'business_id' )
+            })->get()
+            ->groupBy( 'caregiver_id' )
             ->map( function( $shift_aggregate ) use ( $deduction ) {
 
-                $duration = 0;
+                $duration       = 0;
+                $registry_names = [];
+                $registry_ids   = [];
                 foreach( $shift_aggregate as $shift ){
 
                     $user_id        = $shift->caregiver_id;
                     $caregiver_name = $shift->caregiver->nameLastFirst;
-                    $registry_name  = $shift->business->name;
-                    $registry_id    = $shift->business->id;
+
+                    if( !in_array( $shift->business->name, $registry_names ) ) array_push( $registry_names, $shift->business->name );
+                    if( !in_array( $shift->business->id, $registry_ids ) ) array_push( $registry_ids, $shift->business->id );
 
                     // this will automatically take the rounding method and aggregate the durations properly
-                    $duration = add($duration, $shift->duration());
+                    $duration += $shift->duration();
                 }
 
                 return [
 
                     'user_id'        => $user_id,
                     'caregiver_name' => $caregiver_name,
-                    'registry'       => $registry_name,
-                    'registry_id'    => $registry_id,
+                    'registry'       => implode( ', ', $registry_names ),
+                    'registry_id'    => implode( ', ', $registry_ids ),
                     'duration'       => $duration,
                     'deduction'      => min( 9.00, multiply( $duration, $deduction ) )
                 ];
             });
+
+        return $results;
     }
 }
