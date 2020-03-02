@@ -129,6 +129,8 @@ class PrintableCalendarFactory
                         $html .= $filteredEvents[$monthIndex];
                     }
                     $html .= "</td>";
+                }else{
+                    $html .= "<td>&nbsp;</td>";
                 }
 
                 $counter++;
@@ -146,8 +148,8 @@ class PrintableCalendarFactory
     {
         $this->startDay = $startDay = $this->start;
         $this->endDay = $endDay = $this->end->subDay();
+        $period = CarbonPeriod::create($this->start, $this->end);
 
-        $period = CarbonPeriod::create($startDay, $endDay);
         $daysOfWeek = [];
 
         foreach ($period as $date) {
@@ -155,6 +157,7 @@ class PrintableCalendarFactory
         }
 
         $filteredEvents = $this->buildEventsMap();
+
 
         $html = $this->headerSpan() . "<h5>" . $startDay->format('F d, Y') . " - " . $endDay->format('F d, Y')  . "</h5>";
 
@@ -190,10 +193,12 @@ class PrintableCalendarFactory
     {
         $startDay = $this->start->copy();
         $this->startDay = $startDay;
-        $this->endDay = $endDay = $this->end;
+        $this->endDay = $endDay = $this->end->copy();
 
         $dayString = $this->start->format("l");
         $day = $this->start->format("j");
+
+
         $filteredEvents = $this->buildEventsMap();
 
         $html = $this->headerSpan() . "<h5>" . $startDay->format('F d, Y') . "</h5>";
@@ -232,7 +237,9 @@ class PrintableCalendarFactory
 
         foreach($this->filteredEvents as $event){
 
-            if($event['start'] > $this->startDay && $event['end'] < $this->endDay){
+            //Add a day back to the end date here because in the shedule controller, a day was
+            //lost to prevent printing shifts that ran from one day to the next.
+            if($event['start'] > $this->startDay && $event['end'] <= $this->endDay->addDay()){
 
                 $key = Carbon::parse($event['start'])->format('j');
 
@@ -275,7 +282,7 @@ class PrintableCalendarFactory
 
         $html = "<div><h4>$name</h4>";
         if (filled($this->business)) {
-            $html .= "<h6>" . $this->business->getPhoneNumber()->number . "</h6>";
+            $html .= "<h6>" . optional($this->business->getPhoneNumber())->number . "</h6>";
         }
 
         if(isset($this->clientId)){
