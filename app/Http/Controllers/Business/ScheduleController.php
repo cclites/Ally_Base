@@ -733,9 +733,9 @@ class ScheduleController extends BaseController
             $business
         );
 
-        if($diff == 1){ //daily
+        if($diff == 0){ //daily
             $html = $calendar->generateDailyCalendar();
-        }elseif($diff == 7){ //weekly
+        }elseif($diff == 6){ //weekly
             $html = $calendar->generateWeeklyCalendar();
         }else{
             $html = $calendar->generateMonthlyCalendar();
