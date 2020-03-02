@@ -97,6 +97,17 @@ export default {
              */
             FREE_FLOATING_NOTE_IDENTIFIER : 13377331, // totally arbitrary
 
+            CALENDAR_START_OF_WEEK : {
+
+                0 : 'sunday',
+                1 : 'monday',
+                2 : 'tuesday',
+                3 : 'wednesday',
+                4 : 'thursday',
+                5 : 'friday',
+                6 : 'saturday',
+            },
+
             /**
              * Schedule constants
              */

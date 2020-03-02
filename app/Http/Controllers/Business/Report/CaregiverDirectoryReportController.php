@@ -31,7 +31,7 @@ class CaregiverDirectoryReportController extends BaseController
                 ->setCustomFields($fields)
                 ->setActiveFilter($request->active)
                 ->setStatusAliasFilter($request->status_alias_id)
-                ->setPageCount(50)
+                ->setPageCount($request->perpage)
                 ->setCurrentPage($page)
                 ->setSort($sortBy, $sortOrder)
                 ->setForExport($request->export == '1');

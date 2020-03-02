@@ -4,11 +4,11 @@
             header-text-variant="white"
             header-bg-variant="info"
     >
-        <b-row>
+        <b-row v-if=" isAdmin ">
 
             <b-col>
 
-                <b-alert show variant="info">View Deductibles for every Caregiver, then select individual caregivers to generate their adjustments.</b-alert>
+                <b-alert show variant="info">View Deductibles for every Caregiver, then select individual caregivers to generate their adjustments. You are only seeing this because you are an admin</b-alert>
             </b-col>
         </b-row>
         <b-row>
@@ -30,19 +30,20 @@
 
                         <b-form-group label="Start Date">
 
-                            <date-picker v-model=" startDate " :disabled=" true " :readonly=" true " />
+                            <date-picker v-model=" form.start_date " :disabled=" form.busy " />
                         </b-form-group>
                     </b-col>
                     <b-col>
 
                         <b-form-group label="End Date">
 
-                            <date-picker v-model=" form.end_date " :disabled=" form.busy " />
+                            <date-picker v-model=" endDate " :disabled=" true " :readonly=" true " />
                         </b-form-group>
                     </b-col>
                 </b-row>
             </b-col>
         </b-row>
+
         <b-row>
 
             <b-col class="mb-3 d-flex justify-content-between">
@@ -50,12 +51,12 @@
                 <div>
                 <transition name="slide-fade" mode="out-in">
 
-                    <b-button @click="generateDeductibles()" variant="primary" :disabled=" form.busy || generating " v-if=" selectedCaregivers.length > 0 ">Create Deposit Adjustment</b-button>
+                    <b-button @click="generateDeductibles()" variant="primary" :disabled=" form.busy || generating " v-if=" isAdmin && selectedCaregivers.length > 0 ">Create Deposit Adjustments</b-button>
                 </transition>
                 </div>
                 <b-button-group>
 
-                    <b-button @click="print()" :disabled=" form.busy || generating "><i class="fa fa-print mr-2"></i>Print</b-button>
+                    <b-button @click="selectAll()" :disabled=" form.busy || generating ">Select All</b-button>
                     <b-button @click="fetch()" variant="info" :disabled=" form.busy || generating ">Generate Report</b-button>
                 </b-button-group>
             </b-col>
@@ -68,23 +69,24 @@
                 <loading-card v-if=" form.busy " text="Loading Report"></loading-card>
                 <b-table bordered striped hover show-empty
                     :items=" items "
-                    :fields=" fields "
+                    :fields=" computedFields "
                     :sort-by.sync=" sortBy "
                     :sort-desc.sync=" sortDesc "
                     v-else
                 >
 
-                <template slot="actions" scope="row">
+                    <template slot="actions" scope="row">
 
-                    <b-form-checkbox
-                        :id=" `cg-checkbox-${row.item.user_id}` "
-                        v-model=" row.item.selected "
-                        :name=" `cg-checkbox-${row.item.user_id}` "
-                        value="1"
-                        unchecked-value="0"
-                    ></b-form-checkbox>
-                </template>
-            </b-table>
+                        <b-form-checkbox
+                            :id=" `cg-checkbox-${row.item.user_id}` "
+                            v-model=" row.item.selected "
+                            @click.native=" selectCaregiver( row.item.user_id, row.item.selected ) "
+                            :name=" `cg-checkbox-${row.item.user_id}` "
+                            :value=" 1 "
+                            :unchecked-value=" 0 "
+                        ></b-form-checkbox>
+                    </template>
+                </b-table>
             </b-col>
         </b-row>
     </b-card>
@@ -94,10 +96,11 @@
 
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
     import FormatsNumbers from '../../../mixins/FormatsNumbers';
+    import Constants from '../../../mixins/Constants';
 
     export default {
 
-        mixins : [ FormatsNumbers ],
+        mixins : [ FormatsNumbers, Constants ],
 
         components: { BusinessLocationFormGroup },
 
@@ -105,21 +108,23 @@
 
             return {
 
-                generating : false,
-                items      : [],
-                sortBy     : 'name',
-                sortDesc   : true,
+                generating         : false,
+                items              : [],
+                sortBy             : 'name',
+                sortDesc           : true,
+                selectedCaregivers : [],
                 form: new Form({
 
-                    json        : 1,
-                    businesses  : '',
-                    end_date    : moment().startOf( 'week' ).format( 'MM/DD/YYYY' ),
+                    json       : 1,
+                    businesses : '',
+                    start_date : moment().startOf( 'week' ).format( 'MM/DD/YYYY' ),
+                    export     : 0,
                 }),
                 fields: [
 
                     {
                         key: 'caregiver_name',
-                        label: 'CG Name',
+                        label: 'Caregiver Name',
                     },
                     {
                         key: 'registry',
@@ -134,30 +139,73 @@
                         key: 'deduction',
                         label: 'OccAcc Deduction',
                         formatter: (val) => this.moneyFormat(val)
-                    },
-                    {
-                        key: 'actions',
-                        label: 'Select'
                     }
-                ],
+                ]
             }
+        },
+
+        mounted(){
+
+            // respect the registry's start of week, unless an admin
+            if( !this.isAdmin ) this.form.start_date = moment().day( this.officeUserSettings.calendar_week_start ).format( 'MM/DD/YYYY' );
         },
 
         computed : {
 
-            startDate(){
+            computedFields(){
 
-                return moment( this.form.end_date ).subtract( 7, 'day' ).format( 'MM/DD/YYYY' );
+                const fields = this.fields;
+                if( this.isAdmin ){
+
+                    fields.push({
+
+                        key   : 'actions',
+                        label : 'Select'
+                    });
+                }
+                return fields;
             },
-            selectedCaregivers(){
+            endDate(){
 
-                return this.items.filter( i => i.selected == "1" );
+                return moment( this.form.start_date ).add( 6, 'day' ).format( 'MM/DD/YYYY' );
             }
         },
 
         methods: {
 
+            selectAll(){
+
+                if( this.selectedCaregivers.length == this.items.length ){
+
+                    this.items.forEach( item => {
+
+                        item.selected = 0;
+                    });
+                } else {
+
+                    this.items.forEach( item => {
+
+                        item.selected = 1;
+                    });
+                }
+
+                this.selectedCaregivers = this.items.filter( i => i.selected == 1 );
+            },
+            selectCaregiver( user_id, value ){
+
+                this.items.find( i => i.user_id == user_id ).selected = value;
+                this.selectedCaregivers = this.items.filter( i => i.selected == 1 );
+            },
             async fetch() {
+
+                // console.log( moment( this.form.start_date ).format( 'd' ), this.officeUserSettings.calendar_week_start );
+                this.selectedCaregivers = [];
+
+                if( !this.isAdmin && moment( this.form.start_date ).format( 'd' ) != this.officeUserSettings.calendar_week_start ){
+
+                    alerts.addMessage( 'error', `You must select a week starting with ${this.CALENDAR_START_OF_WEEK[ this.officeUserSettings.calendar_week_start ]}` );
+                    return;
+                }
 
                 this.form.get( '/business/occ-acc-deductibles' )
                     .then( ({ data }) => {
@@ -181,7 +229,9 @@
                     return {
 
                         'caregiver_id' : c.user_id,
-                        'amount'       : c.deduction
+                        'start_date'   : this.form.start_date,
+                        'end_date'     : this.endDate,
+                        'businesses'   : c.registry_id.split( ', ' )
                     }
                 });
 
@@ -189,12 +239,8 @@
                 form.post( '/business/occ-acc-deductibles' )
                     .then( ( data ) => {
 
-                        // this.selectedCaregivers.forEach( c => {
-                        //     // this may not be necessaery.. leaving it here just in case
-
-                        //     const index = this.items.findIndex( i => i.user_id == c.user_id );
-                        //     this.items.splice( index, 1 );
-                        // });
+                        this.selectedCaregivers = [];
+                        this.fetch(); // this will automatically clear all the items that were just used
                     })
                     .catch( err => {})
                     .finally( () => this.generating = false );

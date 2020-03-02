@@ -49,6 +49,7 @@ class UpdateCaregiverRequest extends FormRequest
             'status_alias_id' => 'nullable|in:' . join(',', $aliases),
             'smoking_okay' => 'nullable|boolean',
             'has_occ_acc' => 'nullable|boolean',
+            'certificate_number' => 'nullable|string',
             'pets_dogs_okay' => 'nullable|boolean',
             'pets_cats_okay' => 'nullable|boolean',
             'pets_birds_okay' => 'nullable|boolean',

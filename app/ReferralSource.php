@@ -74,7 +74,9 @@ class ReferralSource extends AuditableModel implements BelongsToChainsInterface
         'source_type',
         'web_address',
         'work_phone',
-        'active'
+        'active',
+        'mobile_phone',
+        'title'
     ];
     
     /**

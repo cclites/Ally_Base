@@ -39,10 +39,8 @@ class ReportsTest extends TestCase {
         });
 
         $query_string = '?json=1';
-        // $query_string .= '&start_date=08/02/2019';
-        // $query_string .= '&end_date=08/10/2019';
         $query_string .= '&current_page=1';
-//        $query_string .= '&per_page=5';
+        $query_string .= '&perpage=15';
         $query_string .= '&active=true';
 
         $results = $this->get(route('business.reports.caregiver_directory') . $query_string)
@@ -64,10 +62,8 @@ class ReportsTest extends TestCase {
         ]);
 
         $query_string = '?json=1';
-        // $query_string .= '&start_date=08/02/2019';
-        // $query_string .= '&end_date=08/10/2019';
         $query_string .= '&current_page=1';
-//        $query_string .= '&per_page=5';
+        $query_string .= '&perpage=15';
         $query_string .= '&active=true';
 
         $results = $this->get(route('business.reports.client_directory') . $query_string)

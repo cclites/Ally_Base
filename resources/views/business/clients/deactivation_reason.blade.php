@@ -18,7 +18,7 @@
 @section('content')
     @include('layouts.partials.print_logo')
 
-    <div class="h4">Client Discharge</div>
+    <div class="h4">Client Discharge Summary: {{ $client->name }}</div>
 
     <div>
         <div class="row">

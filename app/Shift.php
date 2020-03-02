@@ -37,6 +37,7 @@ use App\Events\ShiftDeleted;
 use Illuminate\Support\Collection;
 use App\Data\ScheduledRates;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
@@ -1433,6 +1434,22 @@ class Shift extends InvoiceableModel implements HasAllyFeeInterface, BelongsToBu
     {
         $query->whereHas('shiftFlags', function ($q) use ($flags) {
             $q->whereIn('flag', $flags);
+        });
+    }
+
+    /**
+     * filter out shifts that have been used in occAcc deductions before
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param array $flags
+     */
+    public function scopeWhereHasntBeenUsedForOccAccDeductible( Builder $query )
+    {
+        $query->whereNotExists(function ($q) {
+
+            $q->select( DB::raw( 1 ) )
+                ->from( 'occ_acc_deductible_shifts' )
+                ->whereRaw( 'occ_acc_deductible_shifts.shift_id = shifts.id' );
         });
     }
 

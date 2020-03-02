@@ -103,6 +103,18 @@
                     <b-form-group>
                         <b-form-checkbox v-model="form.has_occ_acc" value="1" unchecked-value="0">Has Occupational Accident Insurance Deduction</b-form-checkbox>
                     </b-form-group>
+                    <transition mode="out-in" name="slide-fade">
+
+                        <b-form-group label="Certificate Number" label-for="certificate_number" v-if=" form.has_occ_acc == 1 ">
+                            <b-form-input
+                                id="certificate_number"
+                                type="text"
+                                v-model="form.certificate_number"
+                            >
+                            </b-form-input>
+                            <input-help :form="form" field="certificate_number"></input-help>
+                        </b-form-group>
+                    </transition>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
@@ -331,6 +343,7 @@
                     pets_birds_okay: this.caregiver.pets_birds_okay,
                     uses_ein_number: this.caregiver.uses_ein_number,
                     has_occ_acc: this.caregiver.has_occ_acc,
+                    certificate_number: this.caregiver.certificate_number,
                 }),
                 passwordModal: false,
                 active: this.caregiver.active,

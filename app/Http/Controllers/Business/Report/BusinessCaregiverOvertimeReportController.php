@@ -14,6 +14,12 @@ class BusinessCaregiverOvertimeReportController extends Controller
 
         if ($request->filled('json')) {
 
+            $request->validate([
+                'start' => 'required|date',
+                'end' => 'required|date',
+            ]);
+
+
             $timezone = auth()->user()->role->getTimezone();
 
             $report->setTimezone($timezone)
