@@ -288,7 +288,7 @@ class PrintableCalendarFactory
 
         if(isset($this->clientId)){
             $client = \App\Client::find($this->clientId);
-            $client =  $client->nameLastFirst() . ", " . $client->getPhoneNumber()->number;
+            $client =  $client->nameLastFirst() . " " . optional($client->getPhoneNumber())->number;
         }else{
             $client = "All Clients ";
         }
