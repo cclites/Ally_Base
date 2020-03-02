@@ -68,23 +68,40 @@ class ImportReferrals extends BaseImport
             return false;
         }
 
-        $first = $this->resolve('First Name', $row);
-        $last = $this->resolve('Last Name', $row);
-        $full_name = ( empty( $first ) && empty( $last ) ? 'Default' : $first . ' ' . $last );
+        $full_name = $this->resolve('Full Name', $row);
+        if (empty($full_name)) {
+            $first = $this->resolve('First Name', $row);
+            $last = $this->resolve('Last Name', $row);
+            $full_name = ( empty( $first ) && empty( $last ) ? 'Default' : $first . ' ' . $last );
+        }
 
-        $organization_name = $this->resolve('Company', $row) ?? $full_name;
+        $organization_name = $this->resolveOrganizationName($row);
+
+        $phone = $this->resolve('Home Phone', $row);
+        if (empty($phone)) {
+            $phone = $this->resolve('Mobile Phone', $row);
+        }
+
+        $isCompany = $this->resolve('Is Company?', $row);
 
         $data = [
             'type'         => 'client', // or caregiver?
             'chain_id'     => $this->chain()->id,
             'organization' => $organization_name,
             'contact_name' => $full_name,
-            'phone'        => $this->resolve('Home Phone', $row),
-            'is_company'   => $this->resolve('Is Company?', $row) == 'true' ? 1 : 0,
+            'phone'        => $phone,
+            'is_company'   => strtolower($isCompany) == 'true' ? 1 : 0,
             'source_owner' => $this->resolve('Referral Source Owner', $row),
             'source_type'  => $this->resolve('Referral Source Type', $row),
             'web_address'  => $this->resolve('Web Address', $row),
-            'work_phone'   => $this->resolve('Work Phone', $row)
+            'work_phone'   => $this->resolve('Work Phone', $row),
+            'contact_address_street'   => $this->resolve('Address', $row),
+            'contact_address_street2'   => $this->resolve('Address Line 2', $row),
+            'contact_address_city'   => $this->resolve('City', $row),
+            'contact_address_state'   => $this->resolve('State', $row),
+            'contact_address_zip'   => $this->resolve('Postal Code', $row),
+            'title' => $this->resolve('Title', $row),
+            'mobile_phone' => $this->resolve('Mobile Phone', $row),
         ];
 
         $referral = ReferralSource::create($data);
@@ -94,6 +111,25 @@ class ImportReferrals extends BaseImport
         }
 
         return false;
+    }
+
+    /**
+     * Get the company name.
+     *
+     * @param $row
+     * @return false|mixed|string|null
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     */
+    private function resolveOrganizationName($row)
+    {
+        $name = $this->resolve('Company', $row);
+        if (empty($name)) {
+            $name = $this->resolve('Company Name', $row);
+        }
+        if (empty($name)) {
+            $name = $this->resolve('Full Name', $row);
+        }
+        return $name;
     }
 
     /**
@@ -107,7 +143,7 @@ class ImportReferrals extends BaseImport
     {
         $parts = [
             $this->resolve('Full Name', $row),
-            $this->resolve('Company', $row),
+            $this->resolveOrganizationName($row),
             $this->resolve('Is Company?', $row)
         ];
 

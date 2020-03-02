@@ -72,13 +72,8 @@
                     </b-form-group>
                     <b-form-group label="Calendar Start of Week" label-for="calendar_week_start" label-class="required">
                         <b-form-select id="calendar_week_start" v-model="form.calendar_week_start">
-                            <option value="0">Sunday</option>
-                            <option value="1">Monday</option>
-                            <option value="2">Tuesday</option>
-                            <option value="3">Wednesday</option>
-                            <option value="4">Thursday</option>
-                            <option value="5">Friday</option>
-                            <option value="6">Saturday</option>
+
+                            <option v-for=" ( value, day ) in CALENDAR_START_OF_WEEK " :key=" value " :value=" value ">{{ day | lowercase }}</option>
                         </b-form-select>
                         <input-help :form="form"
                                     field="calendar_week_start"
@@ -96,7 +91,12 @@
 </template>
 
 <script>
+
+    import Constants from '../../mixins/Constants';
+
     export default {
+
+        mixins : [ Constants ],
         props: {
             chain: {},
         },

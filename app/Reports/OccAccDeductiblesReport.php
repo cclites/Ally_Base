@@ -2,11 +2,8 @@
 
 namespace App\Reports;
 
-use App\Caregiver;
 use App\Shift;
-use App\Shifts\DurationCalculator;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class OccAccDeductiblesReport extends BusinessResourceReport
 {
@@ -32,12 +29,6 @@ class OccAccDeductiblesReport extends BusinessResourceReport
     protected $businesses;
 
     /**
-     * The relevant caregivers
-     *
-     */
-    protected $caregivers;
-
-    /**
      * constructor.
      */
     public function __construct()
@@ -61,36 +52,11 @@ class OccAccDeductiblesReport extends BusinessResourceReport
      * @param string $start
      * @return $this
      */
-    public function forWeekEndingAt( $end )
+    public function forWeekStartingAt( $start )
     {
-        $this->start_date = Carbon::parse( $end )->subWeek()->format( 'Y-m-d 00:00:00' );
-        $this->end_date   = Carbon::parse( $end )->format( 'Y-m-d 23:59:59' );
+        $this->start_date = Carbon::parse( $start )->format( 'Y-m-d 00:00:00' );
+        $this->end_date   = Carbon::parse( $start )->addDays( 6 )->format( 'Y-m-d 23:59:59' );
 
-        return $this;
-    }
-
-    /**
-     * Set filter for caregiver.
-     *
-     * @param $id
-     * @return $this
-     */
-    public function forCaregiver($id)
-    {
-        $this->caregiverId = $id;
-
-        return $this;
-    }
-
-    /**
-     * Set filter for businesses.
-     *
-     * @param $id
-     * @return $this
-     */
-    public function forTheFollowingBusinesses( $ids )
-    {
-        $this->businesses = $ids ? [ $ids ] : auth()->user()->role->businesses->pluck( 'id' );
         return $this;
     }
 
@@ -107,6 +73,8 @@ class OccAccDeductiblesReport extends BusinessResourceReport
         // scope to businesses and time frame and caregiver with occacc
         // go through each shift and calculate duration
         $results = Shift::forRequestedBusinesses()
+            ->whereHasntBeenUsedForOccAccDeductible()
+            ->whereConfirmed()
             ->whereBetween( 'checked_in_time', [ $this->start_date, $this->end_date ])
             ->whereNotNull( 'checked_out_time' )
             ->with([ 'business', 'caregiver' ])
@@ -114,16 +82,19 @@ class OccAccDeductiblesReport extends BusinessResourceReport
 
                 return $q->where( 'has_occ_acc', '1' );
             })->get()
-            ->groupBy( 'caregiver_id', 'business_id' )
+            ->groupBy( 'caregiver_id' )
             ->map( function( $shift_aggregate ) use ( $deduction ) {
 
-                $duration = 0;
+                $duration       = 0;
+                $registry_names = [];
+                $registry_ids   = [];
                 foreach( $shift_aggregate as $shift ){
 
                     $user_id        = $shift->caregiver_id;
                     $caregiver_name = $shift->caregiver->nameLastFirst;
-                    $registry_name  = $shift->business->name;
-                    $registry_id    = $shift->business->id;
+
+                    if( !in_array( $shift->business->name, $registry_names ) ) array_push( $registry_names, $shift->business->name );
+                    if( !in_array( $shift->business->id, $registry_ids ) ) array_push( $registry_ids, $shift->business->id );
 
                     // this will automatically take the rounding method and aggregate the durations properly
                     $duration += $shift->duration();
@@ -133,8 +104,8 @@ class OccAccDeductiblesReport extends BusinessResourceReport
 
                     'user_id'        => $user_id,
                     'caregiver_name' => $caregiver_name,
-                    'registry'       => $registry_name,
-                    'registry_id'    => $registry_id,
+                    'registry'       => implode( ', ', $registry_names ),
+                    'registry_id'    => implode( ', ', $registry_ids ),
                     'duration'       => $duration,
                     'deduction'      => min( 9.00, multiply( $duration, $deduction ) )
                 ];

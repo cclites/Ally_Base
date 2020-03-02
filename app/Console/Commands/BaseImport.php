@@ -9,6 +9,7 @@ use DB;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
@@ -210,34 +211,19 @@ abstract class BaseImport extends Command
 
     /**
      * @param Spreadsheet $sheet
-     * @param $header
+     * @param string $header
      * @return bool|mixed
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
-    public function findColumn(Spreadsheet $sheet, $header)
+    public function findColumn(Spreadsheet $sheet, string $header)
     {
-        // Get range from A to BZ
-        $a_z = range('A', 'Z');
-        $range = array_merge(
-            $a_z,
-            array_map(function ($val) {
-                return 'A' . $val;
-            }, $a_z),
-            array_map(function ($val) {
-                return 'B' . $val;
-            }, $a_z),
-            array_map(function ($val) {
-                return 'C' . $val;
-            }, $a_z),
-            array_map(function ($val) {
-                return 'D' . $val;
-            }, $a_z)
-        );
-
-        foreach ($range as $column) {
-            $value = $sheet->getActiveSheet()->getCell($column . '1')->getValue();
+        $headerRow = 1;
+        $lastColumn = $sheet->getActiveSheet()->getHighestColumn();
+        $lastColumnIndex = Coordinate::columnIndexFromString($lastColumn);
+        for ($column = 1; $column <= $lastColumnIndex; ++$column) {
+            $value = $sheet->getActiveSheet()->getCellByColumnAndRow($column, $headerRow)->getValue();
             if (strcasecmp(trim($value), $header) === 0) {
-                return $column;
+                return Coordinate::stringFromColumnIndex($column);
             }
         }
 

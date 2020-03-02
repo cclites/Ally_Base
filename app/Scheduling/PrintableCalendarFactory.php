@@ -58,7 +58,7 @@ class PrintableCalendarFactory
         }
 
         $this->startDay = $startDay = $this->start->copy();
-        $this->endDay = $this->start->copy()->endOfMonth();
+        $this->endDay = $this->start->copy()->endOfMonth()->addDay();
 
         /**************************************************************************
          * The following are counters used to render the calendar, and
@@ -91,7 +91,7 @@ class PrintableCalendarFactory
         if($sDay < 0){
             $sDay = 7 - $this->chain->calendar_week_start;
         }
-        
+
         $monthName = $startDay->monthName;
 
         // represents an index to know to quit adding calendar days
@@ -294,7 +294,7 @@ class PrintableCalendarFactory
 
         if(isset($this->clientId)){
             $client = \App\Client::find($this->clientId);
-            $client =  $client->nameLastFirst() . ", " . $client->getPhoneNumber()->number;
+            $client =  $client->nameLastFirst() . " " . optional($client->getPhoneNumber())->number;
         }else{
             $client = "All Clients ";
         }

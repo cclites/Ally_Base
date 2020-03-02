@@ -154,7 +154,7 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('inactive_users', function (User $user) {
             // Office users should be restricted from accessing
             // the site if they are not active.
-            if ($user->role_type == 'office_user') {
+            if ($user->role_type == 'office_user' || $user->role_type == 'admin') {
                 return $user->active;
             }
 

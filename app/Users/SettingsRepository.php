@@ -31,7 +31,8 @@ class SettingsRepository
             $defaultBusiness->calendar_next_day_threshold ? new CalendarNextDayThreshold($defaultBusiness->calendar_next_day_threshold) : null,
             $defaultBusiness->id,
             $chain->open_shifts_setting,
-            $chain->id
+            $chain->id,
+            $chain->calendar_week_start
         );
     }
 }
