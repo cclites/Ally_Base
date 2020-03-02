@@ -147,7 +147,7 @@ class PrintableCalendarFactory
     public function generateWeeklyCalendar(): string
     {
         $this->startDay = $startDay = $this->start;
-        $this->endDay = $endDay = $this->end->subDay();
+        $this->endDay = $endDay = $this->end;
         $period = CarbonPeriod::create($this->start, $this->end);
 
         $daysOfWeek = [];
