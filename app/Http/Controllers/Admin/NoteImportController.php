@@ -171,8 +171,8 @@ class NoteImportController extends Controller
 
             'name'                 => 'required|string|max:16',
             'notes.*.business_id'  => 'required|exists:businesses,id',
-            'notes.*.caregiver_id' => 'required|exists:caregivers,id',
-            'notes.*.client_id'    => 'required|exists:clients,id',
+            'notes.*.caregiver_id' => 'nullable|exists:caregivers,id',
+            'notes.*.client_id'    => 'nullable|exists:clients,id',
             'notes.*.created_by'   => 'required|exists:users,id',
             'notes.*.body'         => 'required',
             'notes.*.title'        => 'nullable',
@@ -186,10 +186,6 @@ class NoteImportController extends Controller
         $notes = collect();
         foreach( $request->notes as $data ) {
 
-            $createdBy = User::find($data['created_by']); // unnecessary loading? maybe meant to do a findOrFail.. or $this->business->has() check??
-            $client    = Client::find($data['client_id']); // unnecessary loading? maybe meant to do a findOrFail.. or $this->business->has() check??
-            $caregiver = Caregiver::find($data['caregiver_id']); // unnecessary loading? maybe meant to do a findOrFail.. or $this->business->has() check??
-
             $note = Note::make([
 
                 'business_id'  => $data[ 'business_id' ],
@@ -198,7 +194,7 @@ class NoteImportController extends Controller
                 'body'         => $data[ 'body' ],
                 'title'        => $data[ 'title' ],
                 'tags'         => $data[ 'tags' ],
-                'created_by'   => $data[ 'created_by' ],
+                'created_by'   => $data[ 'created_by' ] ?? auth()->user()->id,
                 'type'         => $data[ 'type' ],
                 'created_at'   => $data[ 'created_at' ] ?? now(),
             ]);
