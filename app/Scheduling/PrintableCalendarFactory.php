@@ -82,7 +82,6 @@ class PrintableCalendarFactory
         // Represents the day of the week on which the month starts.
         // $sDay uses calendar_start_week as an offset for registries
         // that do no start their week on a Sunday
-
         $sDay = $startDay->dayOfWeek - ($this->chain->calendar_week_start);
 
         //If sunday is the start day (day 0) and the registry calendar starts on
@@ -137,6 +136,8 @@ class PrintableCalendarFactory
                         $html .= $filteredEvents[$monthIndex];
                     }
                     $html .= "</td>";
+                }else{
+                    $html .= "<td>&nbsp;</td>";
                 }
 
                 $counter++;
@@ -154,8 +155,8 @@ class PrintableCalendarFactory
     {
         $this->startDay = $startDay = $this->start;
         $this->endDay = $endDay = $this->end;
+        $period = CarbonPeriod::create($this->start, $this->end);
 
-        $period = CarbonPeriod::create($startDay, $endDay->copy()->subDay());
         $daysOfWeek = [];
 
         foreach ($period as $date) {
@@ -163,6 +164,7 @@ class PrintableCalendarFactory
         }
 
         $filteredEvents = $this->buildEventsMap();
+
 
         $html = $this->headerSpan() . "<h5>" . $startDay->format('F d, Y') . " - " . $endDay->format('F d, Y')  . "</h5>";
 
@@ -198,10 +200,12 @@ class PrintableCalendarFactory
     {
         $startDay = $this->start->copy();
         $this->startDay = $startDay;
-        $this->endDay = $endDay = $this->end;
+        $this->endDay = $endDay = $this->end->copy();
 
         $dayString = $this->start->format("l");
         $day = $this->start->format("j");
+
+
         $filteredEvents = $this->buildEventsMap();
 
         $html = $this->headerSpan() . "<h5>" . $startDay->format('F d, Y') . "</h5>";
@@ -228,6 +232,11 @@ class PrintableCalendarFactory
         return $html;
     }
 
+    /**
+     * Creates an associative array with the date as the key
+     *
+     * @return array
+     */
     public function buildEventsMap(): array
     {
         $eventMap = [];
@@ -240,7 +249,9 @@ class PrintableCalendarFactory
 
         foreach($this->filteredEvents as $event){
 
-            if($event['start'] > $this->startDay && $event['end'] < $this->endDay){
+            //Add a day back to the end date here because in the shedule controller, a day was
+            //lost to prevent printing shifts that ran from one day to the next.
+            if($event['start'] > $this->startDay && $event['end'] <= $this->endDay->addDay()){
 
                 $key = Carbon::parse($event['start'])->format('j');
 
@@ -255,6 +266,10 @@ class PrintableCalendarFactory
         return $eventMap;
     }
 
+    /**
+     * If the user has selected filters on the Schdeule page, this is where they
+     * are filtered. Not all filters have been implemented.
+     */
     public function filterEvents(){
 
         $filters = explode(",", $this->filters);
@@ -275,6 +290,11 @@ class PrintableCalendarFactory
         }
     }
 
+    /**
+     * Generate the Header
+     *
+     * @return string
+     */
     public function headerSpan(): string
     {
         $filters = explode(",", $this->filters);
@@ -283,7 +303,7 @@ class PrintableCalendarFactory
 
         $html = "<div><h4>$name</h4>";
         if (filled($this->business)) {
-            $html .= "<h6>" . $this->business->getPhoneNumber()->number . "</h6>";
+            $html .= "<h6>" . optional($this->business->getPhoneNumber())->number . "</h6>";
         }
 
         if(isset($this->clientId)){
@@ -308,16 +328,34 @@ class PrintableCalendarFactory
         return $html;
     }
 
+    /**
+     * Represents the dates on the calendar
+     *
+     * @param $day
+     * @return string
+     */
     public function dateSpan($day): string
     {
         return "<div class='day'>$day</div>";
     }
 
+    /**
+     * Represents the event
+     *
+     * @param $event
+     * @return string
+     */
     public function eventSpan($event): string
     {
         return "<div class='event'>" . $event['client'] . "<br>" . $event['caregiver']. "<br>" . $event['start_time'] . "<br>" . $event['end_time'] . "</div>";
     }
 
+    /**
+     * Since chains can select the start day of the week, this is a dynamic function
+     * to reorder the days in accordance with whichever day of the week is selected.
+     *
+     * @return array
+     */
     public function orderDaysOfWeek(): array
     {
 
