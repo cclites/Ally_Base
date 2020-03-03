@@ -95,7 +95,7 @@ class ScheduleEvents implements Responsable
                 'caregiver' => $schedule->caregiver ? $schedule->caregiver->nameLastFirst() : 'OPEN',
                 'caregiver_id' => $schedule->caregiver->id ?? 0,
                 'start_time' => $schedule->starts_at->format('g:i A'),
-                'end_time' => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A'),
+                'end_time' => $this->getEndTime($schedule),
                 'note' => empty($schedule->note) ? '' : $schedule->note->note,
 //                'unassigned' => empty($schedule->caregiver),
                 'status' => $schedule->status,
@@ -160,5 +160,27 @@ class ScheduleEvents implements Responsable
         if ($this->titleCallback) return call_user_func($this->titleCallback, $schedule);
 
         return $schedule->client->name();
+    }
+
+    /**
+     * Determine if schedule falls on Daylight Saving Time
+     * TODO - This will only work in 2020
+     * @param $schedule
+     *
+     * @return mixed
+     */
+    protected function getEndTime($schedule) {
+        $springDST = Carbon::create(2020, 3, 8, 2);
+        $fallDST = Carbon::create(2020, 11, 1, 2);
+        $end = $schedule->starts_at->copy()->addMinutes($schedule->duration);
+
+        if ($springDST->between($schedule->starts_at, $end)) {
+            $end->addHour();
+        }
+        if ($fallDST->between($schedule->starts_at, $end)) {
+            $end->subHour();
+        }
+
+        return $end->addSecond()->format('g:i A');
     }
 }
