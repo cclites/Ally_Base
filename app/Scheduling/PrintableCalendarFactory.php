@@ -232,6 +232,11 @@ class PrintableCalendarFactory
         return $html;
     }
 
+    /**
+     * Creates an associative array with the date as the key
+     *
+     * @return array
+     */
     public function buildEventsMap(): array
     {
         $eventMap = [];
@@ -261,6 +266,10 @@ class PrintableCalendarFactory
         return $eventMap;
     }
 
+    /**
+     * If the user has selected filters on the Schdeule page, this is where they
+     * are filtered. Not all filters have been implemented.
+     */
     public function filterEvents(){
 
         $filters = explode(",", $this->filters);
@@ -281,6 +290,11 @@ class PrintableCalendarFactory
         }
     }
 
+    /**
+     * Generate the Header
+     *
+     * @return string
+     */
     public function headerSpan(): string
     {
         $filters = explode(",", $this->filters);
@@ -314,16 +328,34 @@ class PrintableCalendarFactory
         return $html;
     }
 
+    /**
+     * Represents the dates on the calendar
+     *
+     * @param $day
+     * @return string
+     */
     public function dateSpan($day): string
     {
         return "<div class='day'>$day</div>";
     }
 
+    /**
+     * Represents the event
+     *
+     * @param $event
+     * @return string
+     */
     public function eventSpan($event): string
     {
         return "<div class='event'>" . $event['client'] . "<br>" . $event['caregiver']. "<br>" . $event['start_time'] . "<br>" . $event['end_time'] . "</div>";
     }
 
+    /**
+     * Since chains can select the start day of the week, this is a dynamic function
+     * to reorder the days in accordance with whichever day of the week is selected.
+     *
+     * @return array
+     */
     public function orderDaysOfWeek(): array
     {
 

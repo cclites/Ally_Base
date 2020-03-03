@@ -706,7 +706,8 @@ class ScheduleController extends BaseController
     }
 
     /**
-     * Generate Calendar PDF view of Schedule events.
+     * Generate Calendar PDF view of Schedule events. This is used by both for printing shcedules from the
+     * main schedule page, and the Printable Monthly Report.
      *
      * @param $events
      * @param Carbon $start
@@ -718,7 +719,7 @@ class ScheduleController extends BaseController
      * @param Business|null $business
      * @return Response
      */
-    public function generatePrintableSchedule($events, Carbon $start, Carbon $end, ?string $filters, ?int $clientId, ?int $caregiverId, BusinessChain $chain, ?Business $business)
+    public function generatePrintableSchedule($events, Carbon $start, Carbon $end, ?string $filters, ?int $clientId, ?int $caregiverId, BusinessChain $chain, ?Business $business): Response
     {
         $diff = $start->diffInDays($end);
 
