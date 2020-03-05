@@ -2,18 +2,14 @@
 
 namespace App\Http\Controllers\Business;
 
-use App\Billing\Service;
 use App\Http\Requests\TimesheetReportRequest;
-use App\ReferralSource;
 use App\Reports\PayrollReport;
-use App\Shifts\ShiftStatusManager;
 use Auth;
 use App\Billing\Payments\Methods\BankAccount;
 use App\Business;
 use App\Caregiver;
 use App\Prospect;
 use App\Client;
-use App\EmergencyContact;
 use App\Billing\Payments\Methods\CreditCard;
 use App\Billing\Deposit;
 use App\Billing\GatewayTransaction;
@@ -23,25 +19,18 @@ use App\Reports\ClientCaregiversReport;
 use App\Reports\ClientChargesReport;
 use App\Reports\ProviderReconciliationReport;
 use App\Reports\ScheduledPaymentsReport;
-use App\Reports\ScheduledVsActualReport;
 use App\Reports\ShiftsReport;
-use App\Reports\ClientDirectoryReport;
-use App\Reports\CaregiverDirectoryReport;
 use App\Reports\ProspectDirectoryReport;
 use App\Responses\ErrorResponse;
-use App\Schedule;
-use App\Scheduling\ScheduleAggregator;
 use App\Shift;
 use App\Shifts\AllyFeeCalculator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use App\Reports\EVVReport;
-use App\CustomField;
 use App\OfficeUser;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
-use Twilio\Rest\Taskrouter\V1\Workspace\TaskQueue\TaskQueuesStatisticsInstance;
 
 class ReportsController extends BaseController
 {
@@ -682,30 +671,6 @@ class ReportsController extends BaseController
     }
 
     /**
-     * Display a listing of the users and their birthdays.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\Response
-     */
-    public function userBirthday(Request $request)
-    {
-        $type = $request->type == 'clients' ? 'clients' : 'caregivers';
-        $type = ucfirst($type);
-        return view('business.reports.user_birthday', compact('type'));
-    }
-
-    public function userBirthdayData(Request $request)
-    {
-        $type = strtolower($request->type) == 'clients' ? 'clients' : 'caregivers';
-
-        if($type == 'clients') {
-            return Client::forRequestedBusinesses()->get();
-        }
-
-        return Caregiver::forRequestedBusinesses()->get();
-    }
-
-    /**
      * Shows the list of prospective clients
      *
      * @return Response
@@ -1073,11 +1038,11 @@ class ReportsController extends BaseController
 
         $prospects = Prospect::select([
                 'id',
-                'business_id', 
+                'business_id',
                 'firstname',
                 'lastname',
                 'closed_loss',
-                'closed_win', 
+                'closed_win',
                 'referred_by',
                 'referral_source_id',
                 'had_assessment_scheduled',
@@ -1101,6 +1066,7 @@ class ReportsController extends BaseController
      * @param Request $request
      *
      * @return array
+     * @throws \Exception
      */
     private function organizeRevenueReport(Request $request)
     {

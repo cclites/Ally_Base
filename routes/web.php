@@ -173,6 +173,7 @@ Route::group([
     Route::put('update-payroll-policy/{id}', 'Business\SettingController@updatePayrollPolicy')->name('settings.updatePayrollPolicy');
     Route::resource('status-aliases', 'Business\StatusAliasController');
     Route::get('search', 'Business\QuickSearchController@index')->name('quick-search');
+    Route::resource('chain-settings', 'Business\BusinessChainController' );
 
     Route::get('sales-people/{business}', 'Business\SalesPersonController@index')->name('sales-people.index');
     Route::get('sales-people', 'Business\SalesPersonController@index')->name('sales-people.index');
@@ -311,7 +312,8 @@ Route::group([
     Route::resource('rate-codes', 'Business\RateCodeController');
 
     Route::get('reports', 'Business\ReportsController@index')->name('reports.index');
-    Route::get('reports/birthdays', 'Business\ReportsController@userBirthday')->name('reports.user_birthday');
+    Route::get('reports/birthdays', 'Business\Report\BusinessBirthdayReportController@index')->name('reports.user_birthday');
+
     Route::get('reports/anniversary', 'Business\ReportsController@caregiverAnniversary')->name('reports.caregiver_anniversary');
     Route::get('reports/caregiver-expirations', 'Business\Report\BusinessCaregiverExpirationsReportController@index')->name('reports.caregiver-expirations');
     Route::get('reports/credit-card-expiration', 'Business\ReportsController@creditCardExpiration')->name('reports.cc_expiration');
@@ -343,6 +345,7 @@ Route::group([
     Route::get('reports/caregivers-missing-bank-accounts', 'Business\ReportsController@caregiversMissingBankAccounts')->name('reports.caregivers_missing_bank_accounts');
     Route::get('reports/clients-missing-payment-methods', 'Business\ReportsController@clientsMissingPaymentMethods')->name('reports.clients-missing-payment-methods');
     Route::get('reports/printable-schedule', 'Business\ReportsController@printableSchedule')->name('reports.printable_schedule');
+    Route::get('reports/available-shifts', 'Business\Report\AvailableShiftsReportController@index')->name('reports.available_shifts');
     Route::get('reports/export-timesheets', 'Business\ReportsController@exportTimesheets')->name('reports.export_timesheets');
     Route::post('reports/print/timesheet-data', 'Business\ReportsController@timesheetData')->name('reports.timesheet_data');
     Route::get('reports/caregivers/{caregiver_id}/payment-history/print/{year}', 'Business\ReportsController@printPaymentHistory')->name('reports.caregivers.reports.print_payment_history');
@@ -375,6 +378,9 @@ Route::group([
     Route::get('reports/prospect-directory', 'Business\ReportsController@prospectDirectory')->name('reports.prospect_directory');
     Route::get('reports/prospect-directory/download', 'Business\ReportsController@generateProspectDirectoryReport')->name('reports.prospect_directory.download');
 
+    Route::resource( 'occ-acc-deductibles', 'Business\OccAccDeductiblesController', [ 'only' => [ 'index', 'store' ] ] );
+    Route::resource( 'occ-acc-deductibles-history', 'Business\OccAccDeductiblesHistoryController', [ 'only' => [ 'index' ] ] );
+
     Route::get('reports/data/birthdays', 'Business\ReportsController@userBirthdayData')->name('reports.data.user_birthday');
     Route::get('reports/data/shift/{id}', 'Business\ReportsController@shift')->name('reports.data.shift');
     Route::get('reports/caregiver_payments', 'Business\ReportsController@caregiverPayments')->name('reports.data.caregiver_payments');
@@ -405,6 +411,9 @@ Route::group([
     Route::get('reports/invoice-summary-by-salesperson', 'Business\Report\InvoiceSummaryBySalespersonController@index')->name('reports.invoice-summary-by-salesperson');
     Route::get('reports/invoice-summary-by-client-type', 'Business\Report\InvoiceSummaryByClientTypeReportController@index')->name('reports.invoice-summary-by-client-type');
     Route::get('reports/invoice-summary-by-client', 'Business\Report\InvoiceSummaryByClientReportController@index')->name('reports.invoice-summary-by-client');
+    Route::get('reports/face-sheet', 'Business\Report\FaceSheetReportController@index')->name('reports.face-sheet');
+    Route::get('reports/face-sheet/clients/print/{client}', 'Business\Report\FaceSheetReportController@generateClientFaceSheet');
+    Route::get('reports/face-sheet/caregivers/print/{caregiver}/{business}', 'Business\Report\FaceSheetReportController@generateCaregiverFaceSheet');
 
     Route::get('reports/batch-invoice/print/', 'Business\Report\BatchInvoiceReportController@print')->name('reports.batch-invoice-report-print');
     Route::get('reports/client-referrals', 'Business\Report\ClientReferralsReportController@index')->name('reports.client-referral-report');
@@ -477,6 +486,7 @@ Route::group([
     Route::resource('questions', 'Business\QuestionController');
     Route::get('communication/text-caregivers', 'Business\CommunicationController@createText')->name('communication.text-caregivers');
     Route::post('communication/text-caregivers', 'Business\CommunicationController@sendText')->name('communication.text-caregivers.store');
+    Route::post('communication/reply-to-reply', 'Business\CommunicationController@sendReplyToReply')->name('communication.text-caregivers.reply-to-reply');
     Route::put('communication/text-caregivers', 'Business\CommunicationController@saveRecipients')->name('communication.text-caregivers.recipients');
     Route::get('communication/sms-threads', 'Business\CommunicationController@threadIndex')->name('communication.sms-threads');
     Route::get('communication/sms-threads/{thread}', 'Business\CommunicationController@threadShow')->name('communication.sms-threads.show');

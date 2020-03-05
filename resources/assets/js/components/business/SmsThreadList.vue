@@ -99,6 +99,16 @@
                     <b-btn size="sm" variant="secondary" @click.stop="openThread(row.item)" :disabled="busy">View Details</b-btn>
                 </template>
             </b-table>
+
+            <b-row>
+                <b-col lg="6" >
+                    <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
+                </b-col>
+                <b-col lg="6" class="text-right">
+                    Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
+                </b-col>
+            </b-row>
+
         </b-card>
     </div>
 </template>
@@ -119,6 +129,7 @@ export default {
         return {
             busy: false,
             items: [],
+            totalRows: 0,
             perPage: 25,
             currentPage: 1,
             sortBy: 'sent_at',
@@ -174,6 +185,7 @@ export default {
             axios.get(`/business/communication/sms-threads?json=1&start_date=${this.start_date}&end_date=${this.end_date}&reply_only=${this.repliesOnly}&businesses=${this.business_id}&keyword=${this.keyword}&json=1`)
                 .then( ({ data }) => {
                     this.items = data;
+                    this.totalRows = this.items.length;
                 })
                 .catch(e => {
                 })
@@ -191,7 +203,7 @@ export default {
         },
 
         openThread(thread) {
-            window.location = `/business/communication/sms-threads/${thread.id}`;
+            window.open( `/business/communication/sms-threads/${thread.id}`, '_blank' );
         }
     },
 }

@@ -203,4 +203,38 @@ class ShiftTest extends TestCase
         ]);
         $this->assertEquals(0, $shift->remaining());
     }
+
+    /** @test */
+    function shift_durations_should_consider_when_daylight_savings_time_starts()
+    {
+        $start = Carbon::parse('03/07/2020 21:00:00', 'America/New_York')->setTimezone('UTC');
+        $end = Carbon::parse('03/08/2020 09:00:00', 'America/New_York')->setTimezone('UTC');
+
+        $shift = factory(Shift::class)->make([
+            'client_id' => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
+            'business_id' => $this->business->id,
+            'checked_in_time' => $start->format('Y-m-d H:i:s'),
+            'checked_out_time' => $end->format('Y-m-d H:i:s'),
+        ]);
+
+        $this->assertEquals(11, $shift->duration());
+    }
+
+    /** @test */
+    function shift_durations_should_consider_when_daylight_savings_time_ends()
+    {
+        $start = Carbon::parse('10/31/2020 21:00:00', 'America/New_York')->setTimezone('UTC');
+        $end = Carbon::parse('11/01/2020 09:00:00', 'America/New_York')->setTimezone('UTC');
+
+        $shift = factory(Shift::class)->make([
+            'client_id' => $this->client->id,
+            'caregiver_id' => $this->caregiver->id,
+            'business_id' => $this->business->id,
+            'checked_in_time' => $start->format('Y-m-d H:i:s'),
+            'checked_out_time' => $end->format('Y-m-d H:i:s'),
+        ]);
+
+        $this->assertEquals(13, $shift->duration());
+    }
 }

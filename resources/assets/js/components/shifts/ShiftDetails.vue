@@ -140,7 +140,7 @@
                 <shift-evv-data-table v-if="isOfficeUserOrAdmin" :shift="shift"></shift-evv-data-table>
             </b-col>
         </b-row>
-        <b-row class="mb-2">
+        <b-row class="mb-2" v-if=" isOfficeUserOrAdmin ">
             <b-col sm="6" v-if=" shift.visit_edit_reason_id "><strong>Reason shift was edited:</strong> {{ mappedShiftEditReason( shift.visit_edit_reason_id ) }}</b-col>
             <b-col sm="6" v-if=" shift.visit_edit_action_id "><strong>Edit Action taken:</strong> {{ mappedShiftEditAction( shift.visit_edit_action_id ) }}</b-col>
         </b-row>
@@ -262,8 +262,8 @@
 
         mounted() {
 
-            this.$store.dispatch( 'claims/fetchVisitEditCodes' );
             if (this.isOfficeUserOrAdmin) {
+                this.$store.dispatch( 'claims/fetchVisitEditCodes' );
                 this.fetchServices();
             }
         },

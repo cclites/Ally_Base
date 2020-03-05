@@ -111,7 +111,7 @@ class ScheduleWarningAggregator
                 break;
             }
 
-            if( $target_start->lt( $start ) && $target_end->gt( $end ) ){
+            if( $target_start->lte( $start ) && $target_end->gte( $end ) ){
                 // if the shift being created is entirely within another shift, grab it and break the loop
 
                 $target_schedule = $schedule;

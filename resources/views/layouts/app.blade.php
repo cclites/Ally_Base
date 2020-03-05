@@ -164,9 +164,9 @@
     <!-- End Page wrapper  -->
     <!-- ============================================================== -->
 
-    @if( is_caregiver() && Gate::check( 'view-open-shifts', [ activeBusiness() ] ) )
+    @if( is_caregiver() && Auth::user()->can( 'view-open-shifts' ) )
 
-        <open-shifts role_type="{{ auth()->user()->role_type }}" businesses="{{ auth()->user()->role->businesses }}"></open-shifts>
+        <open-shifts role_type="{{ auth()->user()->role_type }}"></open-shifts>
     @endif
 
 </div>

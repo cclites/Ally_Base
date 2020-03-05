@@ -70,6 +70,7 @@ class BusinessController extends Controller
             'chain_id' => 'nullable|exists:business_chains,id',
         ]);
         $businessData['country'] = 'US';
+        $businessData['sce_shifts_in_progress'] = false;  // OVERRIDE TO ALWAYS DISABLE THIS OPTION
 
         $request->validate([
             'chain_id' => 'nullable|exists:business_chains,id',

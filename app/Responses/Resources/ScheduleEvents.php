@@ -89,14 +89,13 @@ class ScheduleEvents implements Responsable
                 // Needs to add 1 extra second to end time for FullCalendar support
                 'end' => $schedule->starts_at->copy()->addSeconds($schedule->duration * 60 + 1)->format(\DateTime::ISO8601),
                 'duration' => $schedule->duration,
-                'backgroundColor' => $this->getBackgroundColor($schedule),
                 'care_plan' => $schedule->carePlan,
                 'client' => $schedule->client->nameLastFirst(),
                 'client_id' => $schedule->client->id,
                 'caregiver' => $schedule->caregiver ? $schedule->caregiver->nameLastFirst() : 'OPEN',
                 'caregiver_id' => $schedule->caregiver->id ?? 0,
                 'start_time' => $schedule->starts_at->format('g:i A'),
-                'end_time' => $schedule->starts_at->copy()->addMinutes($schedule->duration)->addSecond()->format('g:i A'),
+                'end_time' => $this->getEndTime($schedule),
                 'note' => empty($schedule->note) ? '' : $schedule->note->note,
 //                'unassigned' => empty($schedule->caregiver),
                 'status' => $schedule->status,
@@ -143,69 +142,6 @@ class ScheduleEvents implements Responsable
     }
 
     /**
-     * Determine the background color of the event, this should be synced with the css colors of BusinessSchedule
-     *
-     * @param \App\Schedule $schedule
-     * @return string
-     */
-    protected function getBackgroundColor(Schedule $schedule)
-    {
-        $status = $schedule->status;
-        $shift = $schedule->shift_status;
-
-        if ($status === Schedule::ATTENTION_REQUIRED) {
-            return '#C30000';
-        }
-
-        if ($status === Schedule::HOSPITAL_HOLD) {
-            return '#9881e9';
-        }
-
-        if ($status === Schedule::CAREGIVER_CANCELED) {
-            return '#ff8c00';
-        }
-
-        if ($status === Schedule::CLIENT_CANCELED) {
-            return '#730073';
-        }
-
-        if ($status == Schedule::CAREGIVER_NOSHOW) {
-            return '#63cbc7';
-        }
-
-        if ($schedule->hasOvertime()) {
-            return '#fc4b6c';
-        }
-
-        if ($shift === Schedule::CLOCKED_IN) {
-            return '#27c11e';
-        }
-
-        if ($shift === Schedule::MISSED_CLOCK_IN) {
-            return '#E468B2';
-        }
-
-        if ($shift === Schedule::CONFIRMED) {
-            return '#849290';
-        }
-
-        if ($shift === Schedule::UNCONFIRMED) {
-            return '#ad92b0';
-        }
-
-        if (!$schedule->caregiver_id) {
-            // Open shift
-            return '#d9c01c';
-        }
-
-        if ($schedule->added_to_past) {
-            return '#124aa5';
-        }
-
-        return '#1c81d9';
-    }
-
-    /**
      * Define a closure to use for formatting an event title
      *
      * @param \Closure $callback
@@ -224,5 +160,27 @@ class ScheduleEvents implements Responsable
         if ($this->titleCallback) return call_user_func($this->titleCallback, $schedule);
 
         return $schedule->client->name();
+    }
+
+    /**
+     * Determine if schedule falls on Daylight Saving Time
+     * TODO - This will only work in 2020
+     * @param $schedule
+     *
+     * @return mixed
+     */
+    protected function getEndTime($schedule) {
+        $springDST = Carbon::create(2020, 3, 8, 2);
+        $fallDST = Carbon::create(2020, 11, 1, 2);
+        $end = $schedule->starts_at->copy()->addMinutes($schedule->duration);
+
+        if ($springDST->between($schedule->starts_at, $end)) {
+            $end->addHour();
+        }
+        if ($fallDST->between($schedule->starts_at, $end)) {
+            $end->subHour();
+        }
+
+        return $end->addSecond()->format('g:i A');
     }
 }

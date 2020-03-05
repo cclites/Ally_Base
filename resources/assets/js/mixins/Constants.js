@@ -92,6 +92,60 @@ export default {
                 UNINTERESTED : 'uninterested'
             },
 
+            /*
+             * Identifier for schedule free-floating notes.
+             */
+            FREE_FLOATING_NOTE_IDENTIFIER : 13377331, // totally arbitrary
+
+            CALENDAR_START_OF_WEEK : {
+
+                0 : 'sunday',
+                1 : 'monday',
+                2 : 'tuesday',
+                3 : 'wednesday',
+                4 : 'thursday',
+                5 : 'friday',
+                6 : 'saturday',
+            },
+
+            /**
+             * Schedule constants
+             */
+            SCHEDULE_STATUS : {
+
+                OK                 : 'OK',
+                ATTENTION_REQUIRED : 'ATTENTION_REQUIRED',
+                CAREGIVER_CANCELED : 'CAREGIVER_CANCELED',
+                CLIENT_CANCELED    : 'CLIENT_CANCELED',
+                CAREGIVER_NOSHOW   : 'CAREGIVER_NOSHOW',
+                OPEN_SHIFT         : 'OPEN_SHIFT', // is this right?
+                HOSPITAL_HOLD      : 'HOSPITAL_HOLD',
+
+                // related shift statuses:
+                SCHEDULED       : 'SCHEDULED',
+                MISSED_CLOCK_IN : 'MISSED_CLOCK_IN',
+                CLOCKED_IN      : 'CLOCKED_IN',
+                CONFIRMED       : 'CONFIRMED',
+                UNCONFIRMED     : 'UNCONFIRMED',
+            },
+
+            /**
+             * Schedule constants
+             */
+            SCHEDULE_STATUS : {
+
+                ATTENTION_REQUIRED : 'ATTENTION_REQUIRED',
+                HOSPITAL_HOLD      : 'HOSPITAL_HOLD',
+                CAREGIVER_CANCELED : 'CAREGIVER_CANCELED',
+                CLIENT_CANCELED    : 'CLIENT_CANCELED',
+                CAREGIVER_NOSHOW   : 'CAREGIVER_NOSHOW',
+                CLOCKED_IN         : 'CLOCKED_IN',
+                MISSED_CLOCK_IN    : 'MISSED_CLOCK_IN',
+                CONFIRMED          : 'CONFIRMED',
+                UNCONFIRMED        : 'UNCONFIRMED',
+                OPEN_SHIFT         : 'OPEN_SHIFT',
+            },
+
             /**
              * Claims
              */

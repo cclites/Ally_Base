@@ -14,6 +14,7 @@
                             :items="items[category.id]"
                             :fields="fields"
                             @filtered="onFiltered"
+                            sort-by="name"
                     >
                         <template slot="name" scope="row">
                             <a :href="row.item.url">{{ row.item.name }}</a>
@@ -203,6 +204,20 @@
                         allowed: ['admin'],
                     },
                     {
+                        name: 'Occupational Accident Insurance Deduction Report',
+                        url: '/business/occ-acc-deductibles',
+                        description: 'Allows you to select any 1-week time-frame and calculate OccAcc deductions for each eligible caregiver',
+                        category: 3,
+                        allowed: ['office_user', 'admin'],
+                    },
+                    {
+                        name: 'OccAcc History Report',
+                        url: '/business/occ-acc-deductibles-history',
+                        description: 'View and export a history of OccAcc Adjustments',
+                        category: 5,
+                        allowed: ['admin'],
+                    },
+                    {
                         name: 'Active Clients Report',
                         url: 'reports/active-clients',
                         description: '',
@@ -260,7 +275,6 @@
                     },
 
                     // Shared between admin and office users
-
                     {
                         name: 'Reconciliation Report',
                         url: 'reports/reconciliation',
@@ -447,12 +461,20 @@
                         allowed: ['office_user'],
                     },
                     {
-                        name: 'Printable Schedules',
+                        name: 'Open Shifts List',
+                        url: 'reports/available-shifts',
+                        description: 'Open shifts report in list view',
+                        category: 6,
+                        allowed: ['office_user'],
+                    },
+                    {
+                        name: 'Printable Schedules Calendar',
                         url: 'reports/printable-schedule',
                         description: 'Print schedules to PDF to be used for on call or offline purposes',
                         category: 6,
                         allowed: ['office_user'],
                     },
+
                     // { Removed as per ALLY-1394
                     //     name: 'Clients Missing Payment Methods',
                     //     url: 'reports/clients-missing-payment-methods',
@@ -606,12 +628,22 @@
                     },
 
                     {
-                        name: 'Caregiver Availability Conflict',
-                        url: 'reports/caregiver-availability-conflict',
-                        description: 'Caregiver availability conflict report',
+                        name: 'Client Face Sheet',
+                        url: 'reports/face-sheet?role=client',
+                        description: 'Generate Client Face Sheet',
+                        category: 2,
+                        allowed: ['office_user'],
+                    },
+
+                    {
+                        name: 'Caregiver Face Sheet',
+                        url: 'reports/face-sheet?role=caregiver',
+                        description: 'Generate Caregiver Face Sheet',
                         category: 3,
                         allowed: ['office_user'],
                     },
+
+
                     // {
                     //     name: 'Batch Invoice',
                     //     url: 'reports/batch-invoice',

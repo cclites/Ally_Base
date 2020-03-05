@@ -257,6 +257,8 @@ class Caregiver extends AuditableModel implements
         'pets_dogs_okay',
         'pets_cats_okay',
         'pets_birds_okay',
+        'has_occ_acc',
+        'certificate_number',
         'ethnicity',
         'uses_ein_number',
     ];
@@ -699,19 +701,10 @@ class Caregiver extends AuditableModel implements
 
     /**
      * first pass at the ability for features to be enabled/disabled based upon whether or not any of the associated businesses have the feature..
-     * 
-     * can be used in conjunction with the above relationship in code like " if( in_array( active_business() ) )
      */
-    public function businessesWithOpenShiftsFeature()
+    public function getHasAccessToOpenShiftsFeatureAttribute()
     {
-        $businesses = collect();
-
-        foreach( $this->businesses as $business ){
-
-            if( $business->has_open_shifts ) $businesses->push( $business );
-        }
-
-        return $businesses;
+        return $this->businessChains()->first()->has_access_to_open_shifts_feature;
     }
 
     /**

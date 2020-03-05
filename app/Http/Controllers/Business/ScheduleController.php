@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Business;
 
 use App\Billing\ClientRate;
 use App\Billing\ScheduleService;
-use App\Caregiver;
-use App\CaregiverAvailabilityConflict;
+use App\Business;
+use App\BusinessChain;
 use App\Exceptions\AutomaticCaregiverAssignmentException;
 use App\Exceptions\InvalidScheduleParameters;
 use App\Exceptions\MaximumWeeklyHoursExceeded;
@@ -17,6 +17,7 @@ use App\Http\Requests\UpdateScheduleRequest;
 use App\Responses\ConfirmationResponse;
 use App\Responses\CreatedResponse;
 use App\Responses\ErrorResponse;
+use App\Responses\Resources\ScheduleEvents;
 use App\Responses\Resources\ScheduleEvents as ScheduleEventsResponse;
 use App\Responses\Resources\Schedule as ScheduleResponse;
 use App\Responses\SuccessResponse;
@@ -32,6 +33,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Client;
 
+use Illuminate\Http\Response;
+
 class ScheduleController extends BaseController
 {
     public function index(Request $request)
@@ -44,7 +47,7 @@ class ScheduleController extends BaseController
     public function events(Request $request)
     {
         $query = Schedule::forRequestedBusinesses()
-            ->with(['client', 'caregiver', 'shifts', 'services', 'service', 'carePlan', 'services.service' ])
+            ->with(['client', 'caregiver', 'shifts', 'services', 'service', 'carePlan', 'services.service', 'scheduleRequests' ])
             ->ordered();
 
         // Filter by client or caregiver
@@ -59,11 +62,32 @@ class ScheduleController extends BaseController
         }
 
         $start = Carbon::parse($request->input('start', 'First day of this month'));
-        $end = Carbon::parse($request->input('end', 'First day of next month'));
+        $end = Carbon::parse($request->input('end', 'First day of next month'))->subSecond(1);
+
         $schedules = $query->whereBetween('starts_at', [$start, $end])->get();
 
-        $events = new ScheduleEventsResponse( $schedules );
-        $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
+        $events = new ScheduleEventsResponse($schedules);
+        $events->setTitleCallback(function (Schedule $schedule) {
+            return $this->businessScheduleTitle($schedule);
+        });
+
+        if ($request->filled('print')) {
+            $selectedBusiness = null;
+            if (filled($request->businesses)) {
+                $selectedBusiness = Business::findOrFail($request->businesses)->first();
+            }
+
+            return $this->generatePrintableSchedule(
+                $events->toArray(),
+                $start,
+                $end,
+                $request->status_filters,
+                $request->client_id,
+                $request->caregiver_id,
+                $this->businessChain(),
+                $selectedBusiness
+            );
+        }
 
         return [
             'kpis' => $events->kpis(),
@@ -271,13 +295,15 @@ class ScheduleController extends BaseController
         $services = $request->getServices();
 
         if (count($services)) {
-            foreach($services as $service) {
-                if ($service['client_rate'] === null) continue;
+            foreach ($services as $service) {
+                if ($service['client_rate'] === null) {
+                    continue;
+                }
                 if (app(RateFactory::class)->hasNegativeProviderFee($client, $service['client_rate'], $service['caregiver_rate'])) {
                     return false;
                 }
             }
-        } else if ($request->client_rate !== null) {
+        } elseif ($request->client_rate !== null) {
             if (app(RateFactory::class)->hasNegativeProviderFee($client, $request->client_rate, $request->caregiver_rate)) {
                 return false;
             }
@@ -321,7 +347,9 @@ class ScheduleController extends BaseController
         }
 
         $events = new ScheduleEventsResponse(collect([$schedule]));
-        $events->setTitleCallback(function (Schedule $schedule) { return $this->businessScheduleTitle($schedule); });
+        $events->setTitleCallback(function (Schedule $schedule) {
+            return $this->businessScheduleTitle($schedule);
+        });
         $data = $events->toArray()[0];
 
         return new SuccessResponse('The schedule has been updated.', $data);
@@ -598,7 +626,7 @@ class ScheduleController extends BaseController
         $schedule = Schedule::make([
             'caregiver_id' => $request->caregiver,
             'client_id' => $request->client,
-            'starts_at' => Carbon::parse($request->starts_at, auth()->user()->officeUser->getTimezone()),
+            'starts_at' => Carbon::parse($request->starts_at, auth()->user()->officeUser->getTimezone())->format( 'Y-m-d H:i:s' ),
             'duration' => $request->duration,
             'payer_id' => $request->payer_id,
             'service_id' => $request->service_id,
@@ -678,33 +706,52 @@ class ScheduleController extends BaseController
     }
 
     /**
-     * Allow office users to remove a caregiver from multiple visits and
-     * reopen the schedule.
+     * Generate Calendar PDF view of Schedule events. This is used by both for printing shcedules from the
+     * main schedule page, and the Printable Monthly Report.
      *
-     * @param Caregiver $caregiver
-     * @return SuccessResponse
+     * @param $events
+     * @param Carbon $start
+     * @param Carbon $end
+     * @param string|null $filters
+     * @param int|null $clientId
+     * @param int|null $caregiverId
+     * @param BusinessChain $chain
+     * @param Business|null $business
+     * @return Response
      */
-    public function reopenSchedules(Caregiver $caregiver)
+    public function generatePrintableSchedule($events, Carbon $start, Carbon $end, ?string $filters, ?int $clientId, ?int $caregiverId, BusinessChain $chain, ?Business $business): Response
     {
-        $scheduleIds = \DB::table('caregiver_availability_conflict')
-            ->where('caregiver_id', $caregiver->id)
-            ->pluck('schedule_id');
+        $diff = $start->diffInDays($end);
 
-        Schedule::whereIn('id', $scheduleIds)->update(['caregiver_id'=>null]);
+        $calendar = new \App\Scheduling\PrintableCalendarFactory(
+            $events,
+            $start,
+            $end,
+            $filters,
+            $clientId,
+            $caregiverId,
+            $chain,
+            $business
+        );
 
-        \DB::table('caregiver_availability_conflict')
-            ->where('caregiver_id', $caregiver->id)
-            ->delete();
+        if($diff == 0){ //daily
+            $html = $calendar->generateDailyCalendar();
+        }elseif($diff == 6){ //weekly
+            $html = $calendar->generateWeeklyCalendar();
+        }else{
+            $html = $calendar->generateMonthlyCalendar();
+        }
 
-        return new SuccessResponse('200', 'Schedules have been reopened.');
+        $html = response(view('print.business.calendar', ['html'=>$html]))->getContent();
 
+        $snappy = \App::make('snappy.pdf');
+        return new Response(
+            $snappy->getOutputFromHtml($html),
+            200,
+            array(
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . standard_filename('schedule', 'schedule', 'pdf') . '"'
+            )
+        );
     }
-
-    public function reopenSingleSchedule(Schedule $schedule)
-    {
-        $schedule->update(['caregiver_id'=>null]);
-        CaregiverAvailabilityConflict::where('schedule_id', $schedule->id)->delete();
-        return new SuccessResponse('Schedule has been reopened.', $schedule);
-    }
-
 }

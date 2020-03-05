@@ -127,8 +127,8 @@
 
                     caregiver  : request.caregiver_id,
                     client     : request.client_id,
-                    duration   : this.getDuration(),
-                    starts_at  : this.getStartsAt(),
+                    duration   : this.schedule.duration,
+                    starts_at  : moment( this.schedule.start ),
                     id         : this.schedule.id,
                     payer_id   : this.schedule.payer_id,
                     service_id : this.schedule.service_id,
@@ -155,7 +155,7 @@
                 axios.get( `/business/schedule/requests/${this.selectedScheduleId}` )
                     .then( response => {
 
-                        console.log( 'loaded: ', response );
+                        // console.log( 'loaded: ', response );
                         this.requests = response.data.data.requests;
                         this.schedule = response.data.data.schedule;
                     })

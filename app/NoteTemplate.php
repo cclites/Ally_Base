@@ -51,4 +51,8 @@ class NoteTemplate extends AuditableModel implements BelongsToBusinessesInterfac
     {
         return $this->belongsTo('App\User', 'created_by');
     }
+
+    public function notes(){
+        return $this->hasMany('App\Note');
+    }
 }

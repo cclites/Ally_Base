@@ -37,7 +37,6 @@ class PaymentSummaryReportController extends BaseController
                     ->download();
             }
             $report->rows();
-            \Log::info(\DB::getQueryLog());
 
             return response()->json([
                 'results' => $report->rows(),

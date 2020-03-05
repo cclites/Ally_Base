@@ -28,11 +28,11 @@
                 <!-- ============================================================== -->
                 <!-- Open Shifts Feature -->
                 <!-- ============================================================== -->
-                @if( is_office_user() && Auth::user()->can( 'view-open-shifts', [ $active_business ] ) )
+                @if( is_office_user() && Auth::user()->can( 'view-open-shifts' ) )
 
-                    <open-shifts role_type="{{ auth()->user()->role_type }}" businesses="{{ $active_business->id }}"></open-shifts>
+                    <open-shifts role_type="{{ auth()->user()->role_type }}"></open-shifts>
 
-                    <open-shifts-icon business="{{ $active_business ?? null }}"></open-shifts-icon>
+                    <open-shifts-icon></open-shifts-icon>
                 @endif
                 <!-- ============================================================== -->
                 <!-- Tasks -->

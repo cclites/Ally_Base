@@ -128,8 +128,6 @@
             <h6 class="print-date">Printed on <span>{{currentTime()}}</span></h6>
         </div>
 
-        <schedule-request-modal v-if="false" v-model=" requestsModal " :selected-schedule-id=" selectedScheduleId " @request-response=" calendarRequestResponded "></schedule-request-modal>
-
         <schedule-notes-modal v-model="notesModal"
                                 :event="selectedEvent"
                                 @updateEvent="updateEvent"
@@ -243,15 +241,17 @@
     import ManageCalendar from '../../../mixins/ManageCalendar';
     import LocalStorage from "../../../mixins/LocalStorage";
     import FormatsDates from "../../../mixins/FormatsDates";
+    import Constants from "../../../mixins/Constants";
     import FormatsNumbers from "../../../mixins/FormatsNumbers";
     import FormatsStrings from "../../../mixins/FormatsStrings";
     import BusinessLocationFormGroup from "../BusinessLocationFormGroup";
     import moment from 'moment';
-    import ScheduleRequestModal from "../../modals/ScheduleRequestModal";
     import HasOpenShiftsModal from '../../../mixins/HasOpenShiftsModal';
+    import { mapActions, mapGetters } from 'vuex';
 
     export default {
-        components: {BusinessLocationFormGroup, ScheduleRequestModal},
+        components: {BusinessLocationFormGroup },
+        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers, FormatsStrings, HasOpenShiftsModal, Constants],
         props: {
             'business': Object,
             'caregiver': Object,
@@ -318,11 +318,20 @@
 
         mounted() {
             // this.appendColorKey();
+            this.establishWeAreOnSchedulePage();
             this.loadFiltersData();
         },
 
         computed: {
 
+            ...mapGetters({
+
+                triggerBusinessScheduleToAct : 'openShifts/triggerBusinessScheduleToAct',
+                vuexSelectedScheduleId       : 'openShifts/selectedScheduleId',
+                vuexSelectedEvent            : 'openShifts/selectedEvent',
+                newCaregiverName             : 'openShifts/newCaregiverName',
+                newStatus                    : 'openShifts/newStatus',
+            }),
             requestEvents(){
 
                 return this.events.filter( e => e.requests_count > 0 );
@@ -454,11 +463,15 @@
 
         methods: {
 
-            calendarRequestResponded( data ){
+            ...mapActions({
 
-                this.requestResponded( data );
-                this.fetchEvents(); // this should take care of background color, icon
-            },
+                establishWeAreOnSchedulePage : 'openShifts/establishWeAreOnSchedulePage',
+                toggleTrigger : 'openShifts/toggleTrigger',
+                setNewStatus  : 'openShifts/setNewStatus',
+                setNewCaregiverName  : 'openShifts/setNewCaregiverName',
+                setSelectedEvent  : 'openShifts/setSelectedEvent',
+            }),
+
             getFilteredEvents() {
                 let events = this.events;
 
@@ -768,7 +781,7 @@
 
             setScrollPosition() {
                 if (this.scroll.top !== null) {
-                    console.log('setScrollPosition called');
+                    // console.log('setScrollPosition called');
                     this.scrollSelector().scrollTop(this.scroll.top);
                     this.scrollSelector().scrollLeft(this.scroll.left);
                 }
@@ -820,27 +833,82 @@
                     })
                     .catch(e => {
                         this.loading = false;
-                        console.log('error getting events:');
+                        // console.log('error getting events:');
                         console.log(e);
                     })
             },
 
-            updateEvent(id, data) {
+            updateEvent( id, data, status = null ) {
+
                 this.saveScrollPosition();
-                let event = this.events.find(item => {
+                let event = this.events.find( item => {
+
                     return item.id === id;
                 });
-                console.log( 'found event here:', event );
-                if (event) {
-                    event.backgroundColor = this.getEventBackground(data);
-                    event.note = data.note;
-                    event.requests_count = data.requests_count;
-                    event.status = data.status;
+
+                if( event ){
+
+                    if( status && status == this.OPEN_SHIFTS_STATUS.APPROVED ) event.caregiver = _.cloneDeep( this.newCaregiverName ); // populate the caregiver name when a request is approved
+
+                    event.note            = data.note;
+                    event.requests_count  = data.requests_count;
+                    event.status          = data.status;
+                    event.backgroundColor = this.getEventBackground(event, status);
                 }
             },
 
-            getEventBackground(event) {
-                return event.backgroundColor || '#1c81d9';
+            getEventBackground( event, status = null ){
+
+                if (event.status === this.SCHEDULE_STATUS.ATTENTION_REQUIRED) {
+                    return '#C30000';
+                }
+
+                if (event.status === this.SCHEDULE_STATUS.HOSPITAL_HOLD) {
+                    return '#9881e9';
+                }
+
+                if (event.status === this.SCHEDULE_STATUS.CAREGIVER_CANCELED) {
+                    return '#ff8c00';
+                }
+
+                if (event.status === this.SCHEDULE_STATUS.CLIENT_CANCELED) {
+                    return '#730073';
+                }
+
+                if (event.status == this.SCHEDULE_STATUS.CAREGIVER_NOSHOW) {
+                    return '#63cbc7';
+                }
+
+                if (event.has_overtime) {
+                    return '#fc4b6c';
+                }
+
+                if (event.shift_status === this.SCHEDULE_STATUS.CLOCKED_IN) {
+                    return '#27c11e';
+                }
+
+                if (event.shift_status === this.SCHEDULE_STATUS.MISSED_CLOCK_IN) {
+                    return '#E468B2';
+                }
+
+                if (event.shift_status === this.SCHEDULE_STATUS.CONFIRMED) {
+                    return '#849290';
+                }
+
+                if (event.shift_status === this.SCHEDULE_STATUS.UNCONFIRMED) {
+                    return '#ad92b0';
+                }
+
+                if ( status != this.OPEN_SHIFTS_STATUS.APPROVED && ( !event.caregiver_id || event.status === this.SCHEDULE_STATUS.OPEN_SHIFT ) ) {
+                    // Open shift
+                    return '#d9c01c';
+                }
+
+                if (event.added_to_past) {
+                    return '#124aa5';
+                }
+
+                return '#1c81d9';
             },
 
             loadFiltersData() {
@@ -919,10 +987,11 @@
 
                     let vm = this;
                     requests.click((e) => {
+
                         vm.selectedEvent = event;
                         vm.selectedScheduleId = event.id;
                         vm.hidePreview();
-                        vm.requestsModal = true;
+                        vm.$store.dispatch( 'openShifts/toggleOpenShiftsModal', event );
                         e.preventDefault();
                         e.stopPropagation();
                     });
@@ -1062,11 +1131,30 @@
             },
 
             printCalendar() {
-                window.print();
+                window.location = this.eventsUrl + "&print=1&status_filters=" + this.statusFilters ;
             },
         },
 
         watch: {
+
+            triggerBusinessScheduleToAct( newVal, oldVal ) {
+
+                if( newVal ){
+                    // i want to run updateEvent() with the current data from Vuex! YES
+                    // this is honestly a really convoluted solution that needs to immediately be replaced
+
+                    // console.log( 'vuex ID: ', _.cloneDeep( this.vuexSelectedScheduleId ) );
+                    // console.log( 'vuex Event: ', _.cloneDeep( this.vuexSelectedEvent ) );
+                    // console.log( 'new value: ', newVal );
+                    // console.log( 'old value: ', oldVal );
+                    this.selectedEvent = _.cloneDeep( this.vuexSelectedEvent );
+                    this.handleCalendarPropogation( _.cloneDeep( this.newStatus ) );
+                    this.setNewStatus( null );
+                    this.setSelectedEvent( null );
+                    this.setNewCaregiverName( null );
+                    this.toggleTrigger( false );
+                }
+            },
             calendarHeight(val) {
                 this.$refs.calendar.setOption('height', val);
             },
@@ -1104,8 +1192,6 @@
                 this.fetchEvents();
             },
         },
-
-        mixins: [ManageCalendar, LocalStorage, FormatsDates, FormatsNumbers, FormatsStrings, HasOpenShiftsModal],
     }
 </script>
 

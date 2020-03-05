@@ -8,6 +8,7 @@ use App\Claims\ClaimInvoice;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use mikehaertl\pdftk\Pdf;
 
 class PrintClaimInvoiceController extends BaseController

@@ -20,11 +20,6 @@
 
         props : {
 
-            business : {
-
-                type : String,
-                default : null
-            }
         },
         data() {
 
@@ -38,11 +33,7 @@
 
                 total     : 'openShiftRequests/count',
                 debounced : 'openShiftRequests/debounced'
-            }),
-            current_business(){
-
-                return this.business ? JSON.parse( this.business ) : null;
-            }
+            })
         },
         async mounted() {
 
@@ -62,8 +53,7 @@
                 this.debounce();
                 let form = new Form({
 
-                    business_id : this.current_business.id,
-                    count       : true
+                    count : true
                 });
 
                 form.get( '/business/schedule/requests' )

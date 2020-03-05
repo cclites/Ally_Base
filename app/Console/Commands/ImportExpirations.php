@@ -8,6 +8,7 @@ use App\BusinessChain;
 use App\Caregiver;
 use App\CaregiverLicense;
 use App\Client;
+use App\ExpirationType;
 use App\PhoneNumber;
 
 class ImportExpirations extends BaseImport
@@ -56,11 +57,15 @@ class ImportExpirations extends BaseImport
         return $this->businessChain()->businesses->first();
     }
 
-    protected function matchCaregiver(int $exportedId): ?Caregiver
+    protected function matchCaregiver(int $id, string $metaField = null): ?Caregiver
     {
-        return Caregiver::forChains([$this->businessChain()->id])
-            ->whereMeta('Exported_ID', $exportedId)
-            ->first();
+        $query = Caregiver::forChains([$this->businessChain()->id]);
+
+        if (empty($metaField)) {
+            return $query->where('id', $id)->first();
+        }
+
+        return $qyery->whereMeta($metaField, $id)->first();
     }
 
     /**
@@ -72,18 +77,47 @@ class ImportExpirations extends BaseImport
      */
     protected function importRow(int $row)
     {
-        $id = $this->resolve('Caregiver ID', $row);
-        if (!$caregiver = $this->matchCaregiver($id)) {
-            $this->output->writeln("No matches for exported caregiver ID $id");
+        $id = $this->resolve('Ally Caregiver ID', $row);
+        $metaIdField = null;
+        if (empty($id)) {
+            $id = $this->resolve('Caregiver ID', $row);
+            $metaIdField = 'Exported_ID';
+        }
+        if (! $caregiver = $this->matchCaregiver($id, $metaIdField)) {
+            $this->warn("No matches for exported caregiver ID: $id");
+            return false;
+        }
+
+        $date = filter_date($this->resolve('Expiration Date', $row));
+
+        if (empty($date)) {
+            $this->warn("No expiration date set on row $row");
             return false;
         }
 
         $license = new CaregiverLicense();
         $license->name = $this->resolve("Expiration Name", $row);
-        $license->expires_at = filter_date($this->resolve('Expiration Date', $row)) ?: '9999-12-31';
+        $license->expires_at = $date;
         $license->description = $this->resolve('Notes', $row) ?? $this->resolve("Description", $row);
 
+        if ($chainExpiration = $this->lookupChainExpiration($license->name)) {
+            $license->chain_expiration_type_id = $chainExpiration->id;
+        }
+
         return $caregiver->licenses()->save($license) ? $license : false;
+    }
+
+    private $chainExpirationTypes = null;
+    private function lookupChainExpiration($name) {
+        if (empty($this->chainExpirationTypes)) {
+            $this->chainExpirationTypes = $this->businessChain()->expirationTypes
+                ->map(function (ExpirationType $item) {
+                    $item->type = strtolower($item->type);
+                    return $item;
+                });
+        }
+
+        return $this->chainExpirationTypes->where('type', strtolower($name))->first();
     }
 
     /**
@@ -101,9 +135,14 @@ class ImportExpirations extends BaseImport
      *
      * @param int $row
      * @return bool
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     protected function emptyRow(int $row)
     {
-        return !$this->resolve('Expiration Name', $row);
+        $id = $this->resolve('Ally Caregiver ID', $row);
+        if (empty($id)) {
+            $id = $this->resolve('Caregiver ID', $row);
+        }
+        return empty($id);
     }
 }

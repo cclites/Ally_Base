@@ -62,11 +62,25 @@
                          :sort-by.sync="sortBy"
                          :sort-desc.sync="sortDesc"
                          @filtered="onFiltered"
+                         @row-clicked="selectRow"
                 >
                     <template scope="total">
 
                     </template>
+                    <template slot="worked" scope="data">
+                        <a href="javascript: void(0);">{{ data.item.worked }}</a>
+                    </template>
                 </b-table>
+                <b-modal :id="infoModal.id" size="lg" :title="infoModal.title" ok-only @hide="resetInfoModal">
+                    <b-table bordered striped
+                             :items="infoModal.clients"
+                             :fields="infoModal.fields"
+                             :sort-by.sync="infoModal.sortBy"
+                             :sort-desc.sync="infoModal.sortDesc"
+                    >
+
+                    </b-table>
+                </b-modal>
             </div>
 
             <b-row>
@@ -107,13 +121,13 @@
                 selectedItem: {},
                 fields: [
                     {
-                        key: 'firstname',
-                        label: 'First Name',
+                        key: 'lastname',
+                        label: 'Last Name',
                         sortable: true,
                     },
                     {
-                        key: 'lastname',
-                        label: 'Last Name',
+                        key: 'firstname',
+                        label: 'First Name',
                         sortable: true,
                     },
                     {
@@ -143,11 +157,47 @@
                     json: 1,
                 },
                 loading: false,
+                infoModal: {
+                    id: 'client-modal',
+                    title: 'Clients',
+                    clients: [],
+                    sortBy: 'total',
+                    sortDesc: true,
+                    fields: [
+                        {
+                            key: 'name',
+                            label: 'Client Name',
+                            sortable: true,
+                        },
+                        {
+                            key: 'worked',
+                            label: 'Worked Hours (In Shift History confirmed or unconfirmed)',
+                            sortable: true,
+                        },
+                        {
+                            key: 'future_scheduled',
+                            label: 'Future Scheduled Hours',
+                            sortable: true,
+                        },
+                        {
+                            key: 'total',
+                            label: 'Total Expected Hours',
+                            sortable: true,
+                        },
+                    ],
+                }
             }
         },
 
         methods: {
-
+            selectRow(item, index, event){
+                this.infoModal.clients = item.clients;
+                this.infoModal.title = item.firstname+' '+item.lastname+' Hours Detail';
+                this.$root.$emit('bv::show::modal', this.infoModal.id, event.target);
+            },
+            resetInfoModal(){
+                this.infoModal.clients = [];
+            },
             async loadCaregivers() {
                 const response = await axios.get('/business/caregivers?json=1');
                 this.caregivers = response.data;
@@ -160,14 +210,17 @@
 
                         this.items = response.data.map(function(item) {
                             item['_rowVariant'] = (item.total >= 36) ? (item.total > 40 ? 'danger' : 'warning') : '';
+                            for(let i = 0; i < item.clients.length; i++){
+                                item.clients[i]._rowVariant = (item.clients[i].total >= 36) ? (item.clients[i].total > 40 ? 'danger' : 'warning') : '';
+                            }
                             return item;
                         });
                         this.totalRows = this.items.length;
                         this.loading = false;
                     }).catch(error => {
-                        console.error(error);
-                        this.loading = false;
-                    });
+                    console.error(error);
+                    this.loading = false;
+                });
             },
 
             reset() {

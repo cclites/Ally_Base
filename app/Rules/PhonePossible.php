@@ -31,7 +31,7 @@ class PhonePossible implements Rule
     {
         try {
             $number = $this->phoneNumberUtil->parse($value, PhoneNumber::DEFAULT_REGION);
-            return $this->phoneNumberUtil->isPossibleNumber($number);
+            return $this->phoneNumberUtil->isPossibleNumber($number) && $number->getNationalNumber();
         } catch (\Exception $ex) {
             return false;
         }

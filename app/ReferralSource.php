@@ -62,6 +62,11 @@ class ReferralSource extends AuditableModel implements BelongsToChainsInterface
         'chain_id',
         'organization',
         'contact_name',
+        'contact_address_street',
+        'contact_address_street2',
+        'contact_address_city',
+        'contact_address_state',
+        'contact_address_zip',
         'phone',
         'type',
         'is_company',
@@ -69,7 +74,9 @@ class ReferralSource extends AuditableModel implements BelongsToChainsInterface
         'source_type',
         'web_address',
         'work_phone',
-        'active'
+        'active',
+        'mobile_phone',
+        'title'
     ];
     
     /**
@@ -159,7 +166,17 @@ class ReferralSource extends AuditableModel implements BelongsToChainsInterface
                 }else{
                     $set[$key]['contact_name'] = '';
                 }
-                $set[$key]['contacts'][] = ['contact_name'=>$item['contact_name'], 'id'=>$item['id'], 'phone'=>$item['phone'], 'active'=>$item['active']];
+                $set[$key]['contacts'][] = [
+                    'contact_name'=>$item['contact_name'],
+                    'contact_address_street' => $item['contact_address_street'],
+                    'contact_address_street2' => $item['contact_address_street2'],
+                    'contact_address_city' => $item['contact_address_city'],
+                    'contact_address_state' => $item['contact_address_state'],
+                    'contact_address_zip' => $item['contact_address_zip'],
+                    'id'=>$item['id'],
+                    'phone'=>$item['phone'],
+                    'active'=>$item['active']
+                ];
                 $set[$key]['phone'] = $item['phone'];
                 $set[$key]['id'] = $cnt++;
                 $set[$key]['source_id'] = $item[ 'id' ];
@@ -175,7 +192,17 @@ class ReferralSource extends AuditableModel implements BelongsToChainsInterface
                 if($item['active']){
                     $set[$key]['contact_name'] .= $item['contact_name'] . ", ";
                 }
-                $set[$key]['contacts'][] = ['contact_name'=>$item['contact_name'], 'id'=>$item['id'], 'phone'=>$item['phone'], 'active'=>$item['active']];
+                $set[$key]['contacts'][] = [
+                    'contact_name'=>$item['contact_name'],
+                    'contact_address_street' => $item['contact_address_street'],
+                    'contact_address_street2' => $item['contact_address_street2'],
+                    'contact_address_city' => $item['contact_address_city'],
+                    'contact_address_state' => $item['contact_address_state'],
+                    'contact_address_zip' => $item['contact_address_zip'],
+                    'id'=>$item['id'],
+                    'phone'=>$item['phone'],
+                    'active'=>$item['active']
+                ];
             }
         }
 

@@ -92,9 +92,29 @@
                         <date-picker id="application_date" v-model="form.application_date"></date-picker>
                     </b-form-group>
                     <b-form-group>
-                        <business-referral-source-select v-model="form.referral_source_id" source-type="caregiver" :caregiver="true" :show-active-only="1"></business-referral-source-select>
-                        <input-help :form="form" field="referred_by" text="Enter how the caregiver was referred." />
+                        <business-referral-source-select
+                            v-model="form.referral_source_id"
+                            source-type="caregiver"
+                            :caregiver="true"
+                            :show-active-only="1"
+                            help-text="Enter how the caregiver was referred."
+                        />
                     </b-form-group>
+                    <b-form-group>
+                        <b-form-checkbox v-model="form.has_occ_acc" value="1" unchecked-value="0">Has Occupational Accident Insurance Deduction</b-form-checkbox>
+                    </b-form-group>
+                    <transition mode="out-in" name="slide-fade">
+
+                        <b-form-group label="Certificate Number" label-for="certificate_number" v-if=" form.has_occ_acc == 1 ">
+                            <b-form-input
+                                id="certificate_number"
+                                type="text"
+                                v-model="form.certificate_number"
+                            >
+                            </b-form-input>
+                            <input-help :form="form" field="certificate_number"></input-help>
+                        </b-form-group>
+                    </transition>
                 </b-col>
                 <b-col lg="6">
                     <b-form-group label="Email Address" label-for="email">
@@ -322,6 +342,8 @@
                     pets_cats_okay: this.caregiver.pets_cats_okay,
                     pets_birds_okay: this.caregiver.pets_birds_okay,
                     uses_ein_number: this.caregiver.uses_ein_number,
+                    has_occ_acc: this.caregiver.has_occ_acc,
+                    certificate_number: this.caregiver.certificate_number,
                 }),
                 passwordModal: false,
                 active: this.caregiver.active,

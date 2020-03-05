@@ -31,12 +31,12 @@ class CaregiverScheduleRequestController extends BaseController
         if( $request->input( 'count', false ) ){
             // maybe this can be organized better.. this is for the top-notification-icon
 
-            $business = Business::findOrFail( $request->business_id );
+            $businesses = auth()->user()->role->businesses;
 
             $count = CaregiverScheduleRequest::forOpenSchedules()
-                ->whereActive()
-                ->forSchedulesInTheNextMonth( $business->timezone )
-                ->where( 'business_id', $business->id )
+                ->wherePending()
+                ->forSchedulesInTheNextMonth( $businesses->first()->timezone )
+                ->whereIn( 'business_id', $businesses->pluck( 'id' )->toArray() )
                 ->count();
 
             return response()->json( compact( 'count' ) );

@@ -213,7 +213,6 @@ class ClientSetupController extends Controller
 
         $client->load(['addresses', 'defaultPayment', 'backupPayment', 'phoneNumbers']);
 
-        \Log::info($client);
         $termsFile = 'terms-inc.html';
         $termsUrl = url($termsFile);
 

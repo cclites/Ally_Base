@@ -27,10 +27,18 @@
 
         <transition-group mode="out-in" name="slide-fade">
 
-            <schedule-requests :selected-schedule-id=" selectedScheduleId " v-if=" selectedScheduleId " @request-response=" requestResponded " class="mb-5" key="uno"></schedule-requests>
+            <schedule-requests :selected-schedule-id=" hasSelectedScheduleId " v-if=" hasSelectedScheduleId " @request-response=" openShiftsModalRequestResponded " class="mb-5" key="uno"></schedule-requests>
         </transition-group>
 
-        <ally-table id="open-shifts" :columns=" fields " :items=" aggEvents " sort-by="start" :perPage=" 1000 " :isBusy=" form.busy " v-show="! loading">
+        <ally-table id="open-shifts"
+            :columns=" fields "
+            :items=" aggEvents "
+            sort-by="start"
+            :perPage=" 1000 "
+            :isBusy=" form.busy "
+            v-show="! loading"
+            empty-text="There are no caregiver requests for open shifts."
+        >
 
             <template slot="start" scope="data">
 
@@ -47,13 +55,13 @@
 
                     <div v-if=" !hasRequest( data.item.request_status ) " class="d-flex" key="first-block">
 
-                        <b-button variant="success" size="sm" class="f-1 mr-1" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.UNINTERESTED ) " key="request">Not Interested</b-button>
-                        <b-button variant="primary" size="sm" class="f-1 ml-1" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.PENDING ) " key="request">Request Shift</b-button>
+                        <b-button variant="success" size="sm" class="f-1 mr-1" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.UNINTERESTED ) " key="request" :disabled=" form.busy ">Not Interested</b-button>
+                        <b-button variant="primary" size="sm" class="f-1 ml-1" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.PENDING ) " key="request" :disabled=" form.busy ">Request Shift</b-button>
                     </div>
 
                     <div v-if=" hasRequest( data.item.request_status ) " class="" key="second-block">
 
-                        <b-button variant="danger" size="sm" class="btn-block" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.CANCELLED ) " key="rescind">Cancel Request</b-button>
+                        <b-button variant="danger" size="sm" class="btn-block" @click=" requestShift( data.item, OPEN_SHIFTS_STATUS.CANCELLED ) " key="rescind" :disabled=" form.busy ">Cancel Request</b-button>
                     </div>
                 </transition>
             </template>
@@ -63,11 +71,11 @@
 
                     <div class="text-center" key="requestcontainerone" v-if=" !currentlySelected( data.item.id ) ">
 
-                        <a href="#" @click.prevent=" showRequestModal( data.item.id ) " class="w-100 text-center" key="showit">{{ data.item.requests_count + ", Click to View" }}</a>
+                        <a href="#" @click.prevent=" showRequestModal( data.item ) " class="w-100 text-center" key="showit">{{ data.item.requests_count + ", Click to View" }}</a>
                     </div>
                     <div class="text-center" key="requestcontainertwo" v-else>
 
-                        <a href="#" @click=" selectedScheduleId = null " class="w-100 text-center text-danger">{{ "Click to Hide" }}</a>
+                        <a href="#" @click=" nullifySelectedSchedule() " class="w-100 text-center text-danger">{{ "Click to Hide" }}</a>
                     </div>
                 </transition>
             </template>
@@ -98,7 +106,7 @@
 
     export default {
 
-        props: [ 'businesses', 'role_type' ],
+        props: [ 'role_type' ],
         data() {
 
             return {
@@ -142,12 +150,6 @@
 
         mounted() {
 
-
-
-            // this will be for when we allow caregivers to switch between businesses
-            if( !Array.isArray( this.businesses ) ) this.active_business = this.businesses;
-            else this.active_business = this.businesses[ 0 ].id || null;
-
             if( this.role_type == 'office_user' ){
 
                 this.fetchEvents();
@@ -158,8 +160,11 @@
 
             ...mapGetters({
 
-                openShifts : 'openShifts/mappedShifts',
-                cgRequests : 'openShifts/requests',
+                openShifts             : 'openShifts/mappedShifts',
+                cgRequests             : 'openShifts/requests',
+                onSchedulePage         : 'openShifts/onSchedulePage',
+                vuexSelectedScheduleId : 'openShifts/selectedScheduleId',
+                vuexSelectedEvent      : 'openShifts/selectedEvent',
             }),
             openShiftsModalActive : {
 
@@ -171,6 +176,10 @@
                     // only here to stop an innacurate error from occurring
 
                 }
+            },
+            hasSelectedScheduleId(){
+
+                return this.selectedScheduleId || this.vuexSelectedScheduleId;
             },
             aggEvents(){
 
@@ -200,8 +209,6 @@
 
                 url += '?json=1';
 
-                url += '&businesses=' + this.active_business;
-
                 return url;
             }
         },
@@ -210,12 +217,54 @@
 
             ...mapActions({
 
-                updateRequestStatus   : 'openShifts/updateRequestStatus',
-                toggleOpenShiftsModal : 'openShifts/toggleOpenShiftsModal',
+                updateRequestStatus    : 'openShifts/updateRequestStatus',
+                toggleOpenShiftsModal  : 'openShifts/toggleOpenShiftsModal',
+                emitToScheduleViaVuex  : 'openShifts/emitToScheduleViaVuex',
+                decrementScheduleEvent : 'openShifts/decrementScheduleEvent',
             }),
+            openShiftsModalRequestResponded( data ){
+
+                // failsafe to make sure the item is selected
+                if( this.vuexSelectedScheduleId ) this.selectedScheduleId = this.vuexSelectedScheduleId;
+
+                const status = data.status;
+                let schedule = this.events.find( e => e.id === data.request.schedule_id );
+
+                // 1. only applicable when on the schedule calendar page, set to true from the mounted() method on BusinessSchedule.. this is soooo ugly im so sorry
+                if( this.onSchedulePage ) this.emitToScheduleViaVuex({ status: status, schedule : _.cloneDeep( schedule ), caregiverName : data.request.nameLastFirst });
+
+                if( status == this.OPEN_SHIFTS_STATUS.DENIED ){
+
+                    // 2. decrement the # requests on the record
+                    schedule.requests_count--;
+                    // if( this.openShifts.length > 0 ) this.decrementScheduleEvent( scheduleIndex ); // this might be necessary for caregivers?
+
+                    // 3. decrement the side & top-header icon counts
+                    this.updateCount( -1 );
+
+                    if( schedule.requests_count == 0 ){
+                        // no more requests?
+
+                        // 4. remove the row from the table
+                        this.removeScheduleEvent( data.request.schedule_id );
+                        this.selectedScheduleId = null;
+                    }
+
+                    return;
+                } // else its an approval..
+
+                // 2. remove the row from the table
+                this.removeScheduleEvent( data.request.schedule_id );
+
+                // 3. update the icon count to reflect the entire requests_count
+                this.updateCount( -schedule.requests_count );
+
+                // 4. de-select the schedule
+                this.selectedScheduleId = null;
+            },
             currentlySelected( id ){
 
-                return this.selectedScheduleId == id;
+                return [ this.selectedScheduleId, this.vuexSelectedScheduleId ].includes( id );
             },
             hasRequest( status ){
 
@@ -285,6 +334,18 @@
 
                         this.loading = false;
                     });
+            },
+        },
+
+        watch : {
+
+            openShiftsModalActive( newVal, oldVal ) {
+
+                if( !newVal ) {
+
+                    this.selectedEvent = null;
+                    this.nullifySelectedSchedule();
+                }
             },
         },
 

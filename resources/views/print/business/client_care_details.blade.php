@@ -39,9 +39,18 @@
             border-radius: 2px;
         }
 
-        input[type=checkbox]:checked:before {
+        h3{
+            color: #fff;
+            background-color: #0b67cd;
+            padding: 4px;
+        }
 
+        input[type=checkbox]:checked:before {
             color: black !important;
+        }
+
+        div strong{
+            margin-top: 6px;
         }
 
     </style>
@@ -68,6 +77,12 @@
     </div>
 
     <h3>General</h3>
+
+    <div class="row">
+        <b-col lg="4">
+            Physician Name: {{ $physicianName ? $physicianName : "None Listed"}}
+        </b-col>
+    </div>
 
     <div class="row">
         Height: <span>{{ $client->careDetails['height'] }}</span><br>
@@ -181,11 +196,11 @@
     <div class="row mt-4 mb-2"><strong>Self-Administered Medications</strong></div>
 
     <div class="row can_provide_direction">
-        @php  $checked = ($client->careDetails['can_provide_direction'] == true) ? 'checked' : ''; @endphp
+        @php  $checked = ($client->careDetails['can_provide_direction'] == false) ? 'checked' : ''; @endphp
         <input type="checkbox" {{$checked}}>
         <span>Remind/Prompt</span>
 
-        @php  $checked = ( filled($client->careDetails['can_provide_direction']) && $client->careDetails['can_provide_direction'] == false) ? 'checked' : ''; @endphp
+        @php  $checked = ( filled($client->careDetails['can_provide_direction']) && $client->careDetails['can_provide_direction'] == true) ? 'checked' : ''; @endphp
         <input type="checkbox" {{$checked}}>
         <span>Assist</span>
     </div>
@@ -244,6 +259,12 @@
         @php  $checked = in_array('other', $client->careDetails['safety_measures']) ? 'checked' : ''; @endphp
         <input type="checkbox" {{$checked}}>
         <span>Other</span>
+
+        <div class="row mt-4 mb-2"><strong>Special Instructions</strong></div>
+
+        <div class="row safety_instructions">
+            <p>{{ $client->careDetails['safety_instructions'] }}</p>
+        </div>
     </div>
 
     <div class="row mt-4 mb-2"><strong>Toileting</strong></div>
@@ -728,4 +749,17 @@
     <div class="row instructions">
         <p>{{ $client->careDetails['instructions'] }}</p>
     </div>
+
+    <h3>Service Needs</h3>
+
+    <div class="row activities">
+    @foreach($businessActivities as $businessActivity)
+        <span style="display: inline-block; width: 30%; float: left;">
+            @php  $checked = in_array($businessActivity->id, $clientActivityIds) ? 'checked' : ''; @endphp
+            <input type="checkbox" {{$checked}}>
+            <span>{{ $businessActivity->code . " " .$businessActivity->name }}</span>
+        </span>
+    @endforeach
+    </div>
+
 @endsection

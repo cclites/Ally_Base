@@ -4,9 +4,9 @@
         <b-row>
             <b-col lg="12">
                 <b-card
-                    header="Select Filters"
-                    header-text-variant="white"
-                    header-bg-variant="info"
+                        header="Select Filters"
+                        header-text-variant="white"
+                        header-bg-variant="info"
                 >
                     <b-row>
                         <b-col sm="3">
@@ -49,7 +49,7 @@
 
                     <b-row>
                         <b-col lg="6">
-                            <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
+                            <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPageTemp""/>
                         </b-col>
                         <b-col lg="6" class="text-right">
                             Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
@@ -58,15 +58,15 @@
 
                     <div id="table" class="table-responsive">
                         <b-table
-                            bordered striped hover show-empty
-                            :items="items"
-                            :fields="fields"
-                            :current-page.sync="currentPage"
-                            :per-page="perPage"
-                            :sort-by.sync="sortBy"
-                            :sort-desc.sync="sortDesc"
-                            :busy="loading"
-                            ref="table"
+                                bordered striped hover show-empty
+                                :items="items"
+                                :fields="fields"
+                                :current-page.sync="currentPage"
+                                :per-page="perPage"
+                                :sort-by.sync="sortBy"
+                                :sort-desc.sync="sortDesc"
+                                :busy="loading"
+                                ref="table"
                         >
                             <template slot="id" scope="row">
                                 <a :href="`/business/caregivers/${row.item.id}`" target="_blank">{{ row.item.id }}</a>
@@ -79,7 +79,7 @@
 
                     <b-row>
                         <b-col lg="6">
-                            <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
+                            <b-pagination :total-rows="totalRows" :per-page="perPage" v-model="currentPageTemp"/>
                         </b-col>
                         <b-col lg="6" class="text-right">
                             Showing {{ perPage < totalRows ? perPage : totalRows }} of {{ totalRows }} results
@@ -119,8 +119,9 @@
                 busy: false,
                 statusAliases: [],
                 totalRows: 0,
-                perPage: 50,
+                perPage: 25,
                 currentPage: 1,
+                currentPageTemp: 1,
                 sortBy: 'lastname',
                 sortDesc: false,
                 columns: {
@@ -179,11 +180,17 @@
 
         methods: {
 
-            itemProvider() {
+            itemProvider(id) {
 
                 this.loading = true;
                 let sort = this.sortBy == null ? 'lastname' : this.sortBy;
-                return this.filters.get(`/business/reports/caregiver-directory?&page=${this.currentPage}&perpage=${this.perPage}&sort=${sort}&desc=${this.sortDesc}`)
+
+                let page = this.currentPage;
+                if(id){
+                    page = id;
+                }
+
+                return this.filters.get(`/business/reports/caregiver-directory?&page=${page}&perpage=${this.perPage}&sort=${sort}&desc=${this.sortDesc}`)
                     .then( ({ data }) => {
 
                         this.totalRows = data.total;
@@ -224,6 +231,14 @@
         async mounted() {
             await this.fetchStatusAliases();
         },
+
+        watch: {
+            currentPageTemp(newVal, oldVal){
+                if(newVal !== oldVal){
+                    this.itemProvider(newVal);
+                }
+            }
+        }
     }
 </script>
  

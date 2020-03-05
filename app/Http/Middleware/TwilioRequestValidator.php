@@ -30,7 +30,6 @@ class TwilioRequestValidator
         if ($isValid) {
             return $next($request);
         } else {
-            \Log::info(var_export($requestValidator));
             return new Response('Access denied', 403);
         }
     }

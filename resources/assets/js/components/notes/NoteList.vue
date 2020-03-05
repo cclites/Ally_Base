@@ -57,6 +57,12 @@
                     >
                     </b-form-input>
                 </b-col>
+                <b-col lg="3">
+                    <b-form-select v-model="searchForm.template_id" class="mb-2">
+                        <option :value="null">-- Template --</option>
+                        <option :value="template.id" v-for="template in templates" :key="template.id">{{ template.short_name }}</option>
+                    </b-form-select>
+                </b-col>
             </b-row>
             <div>
                 <b-btn @click="print" variant="primary" class="float-right"><i class="fa fa-print"></i> Print</b-btn>
@@ -138,6 +144,7 @@
                 note: {},
                 noteModal: false,
                 users: [],
+                templates: [],
                 caregivers: [],
                 clients: [],
                 prospects: [],
@@ -155,6 +162,7 @@
                     type: null,
                     tags: '',
                     free_form: '',
+                    template_id: null
                 }),
                 types: [
                     { text: 'Phone', value: 'phone' },
@@ -221,6 +229,7 @@
             this.loadProspects();
             this.loadReferralSources();
             this.loadUsers();
+            this.loadTemplates();
             this.filter();
         },
 
@@ -235,6 +244,10 @@
         },
 
         methods: {
+            async loadTemplates(){
+                const response = await axios.get('/note-templates?json=1');
+                this.templates = response.data;
+            },
             async loadClients() {
                 const response = await axios.get('/business/clients?json=1');
                 this.clients = response.data;
