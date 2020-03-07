@@ -61,13 +61,15 @@ class CaregiverAvailability extends AuditableModel
     protected $guarded = ['id'];
     public $incrementing = false;
 
-    const CONFLICT_REASON = 'Caregiver changed available days';
+    const CONFLICT_REASON = 'Caregiver changed days of availability';
 
     //Completely arbitrary threshold to limit number of retrieved shifts.
-    const THRESHOLD = 25;
+    const THRESHOLD = 14;
 
     public function updatedByUser()
     {
+        //This is a strange relationship. Why no caregiver_id? Not obvious as to
+        //why an office user would own a caregiver_availability record
         return $this->belongsTo(User::class, 'updated_by');
     }
 
@@ -87,6 +89,8 @@ class CaregiverAvailability extends AuditableModel
 
         $businessId = $caregiver->businesses->first()->id;
 
+        //NOTE: the threshold used here is to prevent grabbing every single caregiver
+        //for all of eternity. Not sure if that is the right choice.
         $schedules = Schedule::where('caregiver_id', $caregiver->id)
             ->where('starts_at', '>=', $today)
             ->where('business_id', $businessId)
@@ -144,4 +148,47 @@ class CaregiverAvailability extends AuditableModel
 
         return $arrayDiff;
     }
+
+    //TODO: Convert day/hour to magic numbers
+    /**
+     * What data gets here?
+     *   - array of day name literals as string. Can be converted
+     *     to day of week with Carbon.
+     *   - shift_start_time
+     *   - shift_start_end
+     *
+     * What gets returned?
+     *   - array of integers, ie. 'magic_numbers'
+     */
+
+    //TODO: Convert magic numbers to day/hr return as array
+    /**
+     * What data gets here?
+     *  - array of ints
+     *
+     */
+
+    //TODO: Make a migration to convert available_start_time, available_end_time, and day to magic_days
+
+    //TODO: convert day as string to day as an int to represent week as a list of indexes
+
+    /**
+     * @param array $days
+     * @return string
+     */
+    public function serializeDays(array $days): string
+    {
+        return serialize($days);
+    }
+
+    /**
+     * @param string $days
+     * @return array
+     */
+    public function unserializeDays(string $days): array
+    {
+        return unserialize($days);
+    }
+
+
 }

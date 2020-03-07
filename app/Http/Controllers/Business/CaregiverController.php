@@ -408,6 +408,7 @@ class CaregiverController extends BaseController
      * @throws \Illuminate\Auth\Access\AuthorizationException
      * @throws \Exception
      */
+    //TODO: inject CaregiverAvailability $availability
     public function preferences(UpdateCaregiverAvailabilityRequest $request, Caregiver $caregiver)
     {
         $this->authorize('update', $caregiver);

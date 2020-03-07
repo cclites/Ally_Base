@@ -170,6 +170,8 @@
                     { key: 'description', label: 'Description', sortable: true },
                     { key: 'actions', label: ' ', sortable: false },
                 ],
+                daysInWeekLimit: 7,
+                hoursPerDayLimit: 24,
             }
         },
 
