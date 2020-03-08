@@ -37,9 +37,28 @@ class ChadTest3 extends Command
      */
     public function handle()
     {
-        $days = ['tuesday', 'saturday'];
-        $shift_start_time = '08:00';
-        $shift_end_time = '14:00';
+        $days = ['sunday', 'saturday'];
+
+        //Edge case - shift is 12 hours.
+        //The care match page is unable to handle this.
+        $shift_start_time = '20:00'; //Simulate 8:00 AM start time
+        $shift_end_time = '20:00'; //simulate 8::00 AM end time
+
+        //Can we assume that if the shift start is equal to or less than,
+        //the shift spans a day?
+
+        
+        $daysArray = [];
+
+        foreach($days as $day){
+
+            echo "DAY is $day\n";
+
+
+            $daysArray[] = $this->convertToInt($day);
+        }
+
+        echo json_encode($daysArray) . "\n";
 
         //I don't need to worry about consecutive times, just start time and end time (for now)
 
@@ -48,6 +67,14 @@ class ChadTest3 extends Command
 
         echo "$shiftStart\n";
         echo "$shiftEnd\n";
+
+        foreach($daysArray as $day){
+            $magicStart = $this->createMagicNumber($day, $shiftStart);
+            $magicEnd = $this->createMagicNumber($day, $shiftEnd);
+
+            echo "Magic Start is $magicStart\n";
+            echo "Magic End is $magicEnd\n";
+        }
 
 
         return;
@@ -68,6 +95,15 @@ class ChadTest3 extends Command
     public function convertToDay($day){
         $days = ['sunday','monday','tuesday','wednesday','thursday','friday', 'saturday'];
         return $days[$day];
+    }
+
+    public function convertToInt($dayString){
+        $days = ['sunday','monday','tuesday','wednesday','thursday','friday', 'saturday'];
+        return array_search($dayString, $days);
+    }
+
+    public function createMagicNumber(int $day, $hr){
+        return ($day * 24) + $hr;
     }
 }
 
