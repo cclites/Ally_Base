@@ -149,11 +149,43 @@ class CaregiverAvailability extends AuditableModel
         return $arrayDiff;
     }
 
+    /**
+     *  Get day of the week as an int. Days of week are zero-based
+     * @param $day
+     * @return false|float
+     */
+    public function getStartDayAsInt($day){
+        return floor($day / 24);
+    }
+
+    /**
+     * get hour of day in 12 hour format
+     * @param $day
+     * @return int
+     */
+    public function getHourAs12($day){
+        return ($day % (12)) + 1;
+    }
+
+    /**
+     * Get label for the given time
+     *
+     * @param $day
+     * @return string
+     */
+    public function getAmPmLabel($day){
+        return $day % 24 > 12 ? " PM" : " AM";
+    }
+
+    public function convertToDay($day){
+        $days = ['sunday','monday','tuesday','wednesday','thursday','friday', 'saturday'];
+        return $days[$day];
+    }
+
     //TODO: Convert day/hour to magic numbers
     /**
      * What data gets here?
-     *   - array of day name literals as string. Can be converted
-     *     to day of week with Carbon.
+     *   - array of day name literals as string.
      *   - shift_start_time
      *   - shift_start_end
      *
@@ -170,7 +202,6 @@ class CaregiverAvailability extends AuditableModel
 
     //TODO: Make a migration to convert available_start_time, available_end_time, and day to magic_days
 
-    //TODO: convert day as string to day as an int to represent week as a list of indexes
 
     /**
      * @param array $days
