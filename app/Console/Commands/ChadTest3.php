@@ -83,11 +83,6 @@ class ChadTest3 extends Command
 
             //The delta test is correct, assuming no shifts are longer than 24 hours
             echo "Delta equals " . ($magicEnd - $magicStart) . "\n";
-
-            //what is start time?
-
-            //what is end time?
-
             //number of hours in period.
             $hoursInPeriod = ($magicEnd - $magicStart);
 
