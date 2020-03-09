@@ -84,8 +84,21 @@ class ChadTest3 extends Command
             //The delta test is correct, assuming no shifts are longer than 24 hours
             echo "Delta equals " . ($magicEnd - $magicStart) . "\n";
 
-            //All I really want to do is translate start time and end time to appropriate day,
-            //and then find all hours in between.
+            //what is start time?
+
+            //what is end time?
+
+            //number of hours in period.
+            $hoursInPeriod = ($magicEnd - $magicStart);
+
+            /**
+             * want to get an array of hours as ints between start time and end time.
+             */
+            for($i = $magicStart; $i < $magicEnd; $i += 1){
+                if($i > 23){
+                    //we are on to the next day
+                }
+            }
 
         }
 
@@ -117,6 +130,10 @@ class ChadTest3 extends Command
 
     public function createMagicNumber(int $day, $hr){
         return ($day * 24) + $hr;
+    }
+
+    public function catchOverflow(){
+
     }
 }
 
