@@ -38,6 +38,7 @@ class ChadTest3 extends Command
     public function handle()
     {
         $days = ['sunday', 'saturday'];
+        $overlapDayAdjustment = 0;
 
         //Edge case - shift is 12 hours.
         //The care match page is unable to handle this.
@@ -45,15 +46,17 @@ class ChadTest3 extends Command
         $shift_end_time = '20:00'; //simulate 8::00 AM end time
 
         //Can we assume that if the shift start is equal to or less than,
-        //the shift spans a day?
+        //the shift spans a day? Yes.
+        if($shift_end_time <= $shift_start_time){
+            $overlapDayAdjustment = 1;
+        }
 
-        
+
         $daysArray = [];
 
         foreach($days as $day){
 
             echo "DAY is $day\n";
-
 
             $daysArray[] = $this->convertToInt($day);
         }
@@ -70,10 +73,20 @@ class ChadTest3 extends Command
 
         foreach($daysArray as $day){
             $magicStart = $this->createMagicNumber($day, $shiftStart);
-            $magicEnd = $this->createMagicNumber($day, $shiftEnd);
+            $magicEnd = $this->createMagicNumber($day + $overlapDayAdjustment, $shiftEnd);
 
             echo "Magic Start is $magicStart\n";
             echo "Magic End is $magicEnd\n";
+
+            echo "Am Pm label for start " . $this->getAmPmLabel($magicStart) . "\n";
+            echo "Am Pm label for end " . $this->getAmPmLabel($magicEnd) . "\n";
+
+            //The delta test is correct, assuming no shifts are longer than 24 hours
+            echo "Delta equals " . ($magicEnd - $magicStart) . "\n";
+
+            //All I really want to do is translate start time and end time to appropriate day,
+            //and then find all hours in between.
+
         }
 
 

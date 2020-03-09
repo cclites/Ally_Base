@@ -706,7 +706,7 @@ class ScheduleController extends BaseController
     }
 
     /**
-     * Generate Calendar PDF view of Schedule events. This is used by both for printing shcedules from the
+     * Generate Calendar PDF view of Schedule events. This is used by both for printing schedules from the
      * main schedule page, and the Printable Monthly Report.
      *
      * @param $events
